@@ -1,0 +1,111 @@
+{
+	"name": "@parischap-dev/configs",
+	"type": "module",
+	"sideEffects": [],
+	"author": "Jérôme MARTIN",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/parischap/configs.git"
+	},
+	"bugs": {
+		"url": "https://github.com/parischap/configs/issues"
+	},
+	"homepage": "https://github.com/parischap/configs",
+	"scripts": {
+		"tscheck": "tsc -b tsconfig.check.json --force ",
+		"lint": "eslint .",
+		"update-config-files": "node dist/bin/update-config-files.js",
+		"clean-config-files": "shx rm -rf package.json && shx rm -rf tsconfig.json",
+		"circular": "madge --extensions ts --circular --no-color --no-spinner esm",
+		"checks": "pnpm circular && pnpm lint && pnpm tscheck && pnpm test",
+		"lint-fix": "pnpm lint --fix",
+		"lint-rules": "pnpx @eslint/config-inspector",
+		"test": "vitest run",
+		"generate-types": "tsc -b tsconfig.esm.json --emitDeclarationOnly",
+		"clean-prod": "shx rm -rf dist && shx rm -rf .tsbuildinfo && shx mkdir -p dist",
+		"prodify": "node ./dist/bin/prodify.js",
+		"publish-to-npm": "cd dist && npm publish --access=public && cd ..",
+		"install-prod": "cd dist && pnpm i && cd ..",
+		"docgen": "",
+		"build": "pnpm clean-prod && pnpm i && pnpm bundle && pnpm prodify && pnpm update-config-files && pnpm generate-types && pnpm install-prod",
+		"build-and-publish": "pnpm build && pnpm checks && pnpm publish-to-npm",
+		"bundle": "vite-node ./esm/bin/bundle-files.ts"
+	},
+	"module": "./esm/index.js",
+	"exports": {
+		".": {
+			"import": "./esm/index.ts"
+		}
+	},
+	"publishConfig": {
+		"main": "./cjs/index.js",
+		"types": "./dts/index.d.ts",
+		"scripts": {},
+		"exports": {
+			".": {
+				"types": "./dts/index.d.ts",
+				"import": "./esm/index.js",
+				"default": "./cjs/index.js"
+			}
+		},
+		"files": [
+			"*",
+			"!*.map"
+		]
+	},
+	"dependencies": {
+		"@effect/experimental": "^0.26.6",
+		"globals": "latest",
+		"minimatch": "latest",
+		"effect": "^3.8.3",
+		"@effect/platform": "^0.65.5",
+		"@effect/platform-node": "^0.60.5",
+		"@effect/schema": "^0.73.4"
+	},
+	"packageManager": "pnpm@9.9.0",
+	"devDependencies": {
+		"@tsconfig/node20": "latest",
+		"@tsconfig/strictest": "latest",
+		"shx": "latest",
+		"deepmerge": "latest",
+		"@eslint/eslintrc": "latest",
+		"@eslint/js": "latest",
+		"@html-eslint/eslint-plugin": "latest",
+		"@html-eslint/parser": "latest",
+		"@types/eslint": "latest",
+		"@types/eslint-config-prettier": "latest",
+		"@types/eslint__eslintrc": "latest",
+		"@types/eslint__js": "latest",
+		"@types/node": "latest",
+		"cross-env": "latest",
+		"eslint": "latest",
+		"eslint-config-prettier": "latest",
+		"eslint-plugin-functional": "latest",
+		"eslint-plugin-yml": "latest",
+		"prettier": "latest",
+		"typescript": "latest",
+		"typescript-eslint": "latest",
+		"vite": "latest",
+		"vite-node": "latest",
+		"vitest": "latest",
+		"madge": "latest",
+		"terser": "latest",
+		"@babel/core": "latest",
+		"@babel/plugin-transform-export-namespace-from": "latest",
+		"@babel/plugin-transform-modules-commonjs": "latest",
+		"babel-plugin-annotate-pure-calls": "latest",
+		"@babel/cli": "latest",
+		"@effect/docgen": "https://github.com/parischap/docgenbuilt",
+		"prettier-plugin-jsdoc": "latest",
+		"tsx": "latest",
+		"@parischap/configs": "link:dist"
+	},
+	"pnpm": {
+		"patchedDependencies": {},
+		"overrides": {
+			"tsconfig-paths": "^4.0.0"
+		}
+	},
+	"description": "Utility to generate configuration files in a repository"
+}
