@@ -4,8 +4,6 @@ export default `
 name: Pages
 on:
   workflow_dispatch:
-  release:
-    types: [created]
 
 concurrency:
   group: \${{ github.workflow }}-\${{ github.ref }}
