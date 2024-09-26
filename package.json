@@ -55,15 +55,15 @@
 		]
 	},
 	"dependencies": {
-		"@effect/experimental": "^0.26.6",
+		"@effect/experimental": "^0.27.3",
 		"globals": "latest",
 		"minimatch": "latest",
-		"effect": "^3.8.3",
-		"@effect/platform": "^0.65.5",
-		"@effect/platform-node": "^0.60.5",
-		"@effect/schema": "^0.73.4"
+		"effect": "^3.8.4",
+		"@effect/platform": "^0.66.2",
+		"@effect/platform-node": "^0.61.3",
+		"@effect/schema": "^0.74.1"
 	},
-	"packageManager": "pnpm@9.9.0",
+	"packageManager": "pnpm@9.11.0",
 	"devDependencies": {
 		"@tsconfig/node20": "latest",
 		"@tsconfig/strictest": "latest",
