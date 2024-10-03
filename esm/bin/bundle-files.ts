@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+/** If no target is passed, builds all ts files except those in the esm/shared directory */
+
 import * as constants from '../shared/constants.js';
 import * as Json from '../shared/Json.js';
 import * as PortError from '../shared/PortError.js';
