@@ -18,7 +18,7 @@ export default {
 		sourceMap: true,
 		declarationMap: true,
 		noEmitOnError: false,
-		noErrorTruncation: false,
+		noErrorTruncation: true,
 		target: 'ES2022',
 		module: 'NodeNext',
 		incremental: true,
