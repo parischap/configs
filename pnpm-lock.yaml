@@ -43,8 +43,8 @@ importers:
         specifier: latest
         version: 7.25.9(@babel/core@7.26.0)
       '@effect/docgen':
-        specifier: https://github.com/parischap/docgenbuilt
-        version: '@parischap/docgen@git+https://git@github.com:parischap/docgenbuilt.git#15a22fb02cad8d0ddf29282384ba8a4e444c91f7(tsx@4.19.2)(typescript@5.6.3)'
+        specifier: latest
+        version: 0.5.0(tsx@4.19.2)(typescript@5.6.3)
       '@eslint/eslintrc':
         specifier: latest
         version: 3.1.0
@@ -235,6 +235,14 @@ packages:
   '@dependents/detective-less@5.0.0':
     resolution: {integrity: sha512-D/9dozteKcutI5OdxJd8rU+fL6XgaaRg60sPPJWkT33OCiRfkCu5wO5B/yXTaaL2e6EB0lcCBGe5E0XscZCvvQ==}
     engines: {node: '>=18'}
+
+  '@effect/docgen@0.5.0':
+    resolution: {integrity: sha512-Gs6sJUnrPot8f4FBPQzUPXI4hc/Ng1maHhSqJ/fqG6lH2ubKltcOAZRbs7ZkB5mDr0aRNLt/QNhXSY8Bh3VDPw==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+    peerDependencies:
+      tsx: ^4.1.0
+      typescript: ^5.2.2
 
   '@effect/experimental@0.32.4':
     resolution: {integrity: sha512-2nO4pFH2ycIiowsnSE7ONaIlWdwapRAdNzq5U3hA8waSebt3mQv7JW3e/3NeFDFiw5T8CrIUjX1hGI+Avn0Qjg==}
@@ -766,15 +774,6 @@ packages:
   '@parcel/watcher@2.4.1':
     resolution: {integrity: sha512-HNjmfLQEVRZmHRET336f20H/8kOozUGwk7yajvsonjNxbj2wBTK1WsQuHkD5yYh9RxFGL2EyDHryOihOwUoKDA==}
     engines: {node: '>= 10.0.0'}
-
-  '@parischap/docgen@git+https://git@github.com:parischap/docgenbuilt.git#15a22fb02cad8d0ddf29282384ba8a4e444c91f7':
-    resolution: {commit: 15a22fb02cad8d0ddf29282384ba8a4e444c91f7, repo: git@github.com:parischap/docgenbuilt.git, type: git}
-    version: 0.0.1
-    engines: {node: '>=18.0.0'}
-    hasBin: true
-    peerDependencies:
-      tsx: ^4.1.0
-      typescript: ^5.2.2
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -2771,6 +2770,15 @@ snapshots:
       gonzales-pe: 4.3.0
       node-source-walk: 7.0.0
 
+  '@effect/docgen@0.5.0(tsx@4.19.2)(typescript@5.6.3)':
+    dependencies:
+      '@effect/markdown-toc': 0.1.0
+      doctrine: 3.0.0
+      glob: 10.4.5
+      prettier: 3.3.3
+      tsx: 4.19.2
+      typescript: 5.6.3
+
   '@effect/experimental@0.32.4(@effect/platform-node@0.64.22(@effect/platform@0.69.20(effect@3.10.13))(effect@3.10.13))(@effect/platform@0.69.20(effect@3.10.13))(effect@3.10.13)(ws@8.18.0)':
     dependencies:
       '@effect/platform': 0.69.20(effect@3.10.13)
@@ -3138,15 +3146,6 @@ snapshots:
       '@parcel/watcher-win32-arm64': 2.4.1
       '@parcel/watcher-win32-ia32': 2.4.1
       '@parcel/watcher-win32-x64': 2.4.1
-
-  '@parischap/docgen@git+https://git@github.com:parischap/docgenbuilt.git#15a22fb02cad8d0ddf29282384ba8a4e444c91f7(tsx@4.19.2)(typescript@5.6.3)':
-    dependencies:
-      '@effect/markdown-toc': 0.1.0
-      doctrine: 3.0.0
-      glob: 10.4.5
-      prettier: 3.3.3
-      tsx: 4.19.2
-      typescript: 5.6.3
 
   '@pkgjs/parseargs@0.11.0':
     optional: true

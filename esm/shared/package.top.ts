@@ -34,7 +34,8 @@ export default {
 		'@babel/plugin-transform-modules-commonjs': 'latest',
 		'babel-plugin-annotate-pure-calls': 'latest',
 		'@babel/cli': 'latest',
-		'@effect/docgen': 'https://github.com/parischap/docgenbuilt',
+		//'@effect/docgen': 'https://github.com/parischap/docgenbuilt',
+		'@effect/docgen': 'latest',
 		'prettier-plugin-jsdoc': 'latest',
 		tsx: 'latest'
 		//'eslint-plugin-import': 'latest',
