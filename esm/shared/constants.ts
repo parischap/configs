@@ -1,11 +1,10 @@
 import { join } from 'node:path';
-export const effectVersion = '^3.9.1';
-export const effectSchemaVersion = '^0.75.1';
-export const effectPlatformNodeVersion = '^0.62.1';
-export const effectPlatformVersion = '^0.67.1';
-export const effectExperimentalVersion = '^0.28.1';
-export const effectLanguageServiceVersion = '^0.1.0';
-export const effectTypeClassVersion = '^0.28.1';
+export const effectVersion = '^3.10.13';
+export const effectPlatformNodeVersion = '^0.64.22';
+export const effectPlatformVersion = '^0.69.20';
+export const effectExperimentalVersion = '^0.32.4';
+export const effectLanguageServiceVersion = '^0.2.0';
+export const effectTypeClassVersion = '^0.29.13';
 
 export const owner = 'parischap';
 export const scope = '@' + owner;
@@ -72,17 +71,16 @@ export const srcPath = join(projectFolderName, allSubFolders);
 export const prodPath = join(prodFolderName, allSubFolders);
 export const npmPath = join('**', npmFolderName, allSubFolders);
 
-// Linting md files does not work well with typescript linting
-// Linting js in md files reports error that the file is not included in the project even if it is...
 /*export const jsInMdExtensions = [
 	...mdExtensions.map((ext) => `${ext}/*.js`),
 	...mdExtensions.map((ext) => `${ext}/*.ts`)
 ];*/
 export const tsExtensions = ['.ts', '.mts', '.cts'];
-export const jsExtensions = [...tsExtensions /*, ...jsInMdExtensions*/, '.js', '.mjs', '.cjs'];
+export const jsExtensions = [...tsExtensions, '.js', '.mjs', '.cjs'];
 export const cjsExtensions = ['cts', '.cjs'];
 export const htmlExtensions = ['.html', '.htm'];
-
+//export const mdExtensions = ['.md'];
+//export const jsonExtensions = ['.json'];
 export const ymlExtensions = ['.yml', '.yaml'];
 
 export const allTsFiles = tsExtensions.map((ext) => allSubFolders + ext);
@@ -90,7 +88,7 @@ export const allJsFiles = jsExtensions.map((ext) => allSubFolders + ext);
 export const allCjsFiles = cjsExtensions.map((ext) => allSubFolders + ext);
 export const allHtmlFiles = htmlExtensions.map((ext) => allSubFolders + ext);
 //export const allMdFiles = mdExtensions.map((ext) => allSubFolders + ext);
-//export const allJsInMdFiles = jsInMdExtensions.map((ext) => allSubFolders + ext);
+//export const allJsonFiles = jsonExtensions.map((ext) => allSubFolders + ext);
 export const allYmlFiles = ymlExtensions.map((ext) => allSubFolders + ext);
 export const allProjectFiles = tsExtensions.map((ext) => srcPath + ext);
 export const allProdFiles = jsExtensions.map((ext) => prodPath + ext);

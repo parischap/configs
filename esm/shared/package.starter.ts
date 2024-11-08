@@ -22,8 +22,7 @@ export default merge.all([
 			minimatch: 'latest',
 			effect: constants.effectVersion,
 			'@effect/platform': constants.effectPlatformVersion,
-			'@effect/platform-node': constants.effectPlatformNodeVersion,
-			'@effect/schema': constants.effectSchemaVersion
+			'@effect/platform-node': constants.effectPlatformNodeVersion
 		},
 		devDependencies: {
 			// pnpm install does not error if the dist directory does not contain any package.json
