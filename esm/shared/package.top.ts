@@ -1,5 +1,5 @@
 export default {
-	packageManager: 'pnpm@9.11.0',
+	packageManager: 'pnpm@9.12.3',
 	devDependencies: {
 		'@tsconfig/node20': 'latest',
 		'@tsconfig/strictest': 'latest',
@@ -7,11 +7,12 @@ export default {
 		deepmerge: 'latest',
 		'@eslint/eslintrc': 'latest',
 		'@eslint/js': 'latest',
+		//'@eslint/json': 'latest',
+		//'@eslint/markdown': 'latest',
 		'@html-eslint/eslint-plugin': 'latest',
 		'@html-eslint/parser': 'latest',
 		'@types/eslint': 'latest',
 		'@types/eslint-config-prettier': 'latest',
-		//'@types/eslint-plugin-markdown': 'latest',
 		'@types/eslint__eslintrc': 'latest',
 		'@types/eslint__js': 'latest',
 		'@types/node': 'latest',
@@ -19,7 +20,6 @@ export default {
 		eslint: 'latest',
 		'eslint-config-prettier': 'latest',
 		'eslint-plugin-functional': 'latest',
-		//'eslint-plugin-markdown': 'latest',
 		'eslint-plugin-yml': 'latest',
 		prettier: 'latest',
 		typescript: 'latest',
