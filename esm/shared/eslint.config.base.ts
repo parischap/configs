@@ -36,6 +36,7 @@ const typescriptConfigs = tseslintConfig(
 		},
 		rules: {
 			'@typescript-eslint/no-namespace': 'off', // We want to be able to use namespaces
+			'@typescript-eslint/only-throw-error': 'off', // Effect has its own error management
 			'@typescript-eslint/no-empty-object-type': 'off', // We want to define empty interfaces for opacity
 			'@typescript-eslint/no-unused-vars': [
 				'error',
