@@ -1,11 +1,13 @@
-import * as constants from './constants.js';
-import * as utils from './utils.js';
-
 import eslint from '@eslint/js';
+// Awaiting improvement on ESLint side - Typescript not well supported
+//import json from '@eslint/json';
+//import markdown from '@eslint/markdown';
 import html from '@html-eslint/eslint-plugin';
 import { type Linter } from 'eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import functional from 'eslint-plugin-functional';
+import * as constants from './constants.js';
+import * as utils from './utils.js';
 //import markdown from 'eslint-plugin-markdown';
 import eslintPluginYml from 'eslint-plugin-yml';
 import globals from 'globals';
@@ -92,25 +94,6 @@ const htmlConfigs: FlatConfigArray = [
 	}
 ];
 
-/*const markdownConfigs: FlatConfigArray = [
-	{
-		plugins: {
-			markdown
-		},
-		processor: 'markdown/markdown'
-	}
-];*/
-
-// js code blocks in .md files.
-/*const jsInMarkdownConfigs: FlatConfigArray = [
-	{
-		rules: {
-			'no-console': 'off',
-			'import/no-unresolved': 'off'
-		}
-	}
-];*/
-
 const ymlConfigs = [
 	...eslintPluginYml.configs['flat/recommended'],
 	{
@@ -119,6 +102,16 @@ const ymlConfigs = [
 		}
 	}
 ];
+
+/*const markdownConfigs: FlatConfigArray = markdown.configs && 'recommended' in markdown.configs ? [...markdown.configs['recommended']]:[];
+
+const jsonConfigs: FlatConfigArray = [
+	{
+		ignores: ['package-lock.json'],
+		language: 'json/json',
+		...json.configs.recommended
+	}
+];*/
 
 const _default = [
 	{
@@ -173,9 +166,9 @@ const _default = [
 		...config,
 		files: constants.allMdFiles.map(utils.fromOsPathToPosixPath)
 	})),
-	...jsInMarkdownConfigs.map((config) => ({
+	...jsonConfigs.map((config) => ({
 		...config,
-		files: constants.allJsInMdFiles.map(utils.fromOsPathToPosixPath)
+		files: constants.allJsonFiles.map(utils.fromOsPathToPosixPath)
 	})),*/
 	{
 		...eslintConfigPrettier,
