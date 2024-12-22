@@ -1,10 +1,11 @@
 import { join } from 'node:path';
-export const effectVersion = '^3.10.13';
-export const effectPlatformNodeVersion = '^0.64.22';
-export const effectPlatformVersion = '^0.69.20';
-export const effectExperimentalVersion = '^0.32.4';
+export const effectVersion = '^3.11.9';
+export const effectPlatformNodeVersion = '^0.67.2';
+export const effectPlatformVersion = '^0.71.6';
+export const effectExperimentalVersion = '^0.35.2';
 export const effectLanguageServiceVersion = '^0.2.0';
-export const effectTypeClassVersion = '^0.29.13';
+export const effectTypeClassVersion = '^0.30.9';
+export const effectSchemaVersion = '^0.75.5';
 
 export const owner = 'parischap';
 export const scope = '@' + owner;

@@ -1,5 +1,5 @@
 export default {
-	packageManager: 'pnpm@9.14.2',
+	packageManager: 'pnpm@9.15.1',
 	devDependencies: {
 		'@tsconfig/node20': 'latest',
 		'@tsconfig/strictest': 'latest',
