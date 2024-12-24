@@ -1,5 +1,16 @@
 import * as constants from './constants.js';
 export default {
+	publishConfig: {
+		main: `./${constants.commonJsFolderName}/index.js`,
+		types: `./${constants.typesFolderName}/index.d.ts`,
+		exports: {
+			'.': {
+				types: `./${constants.typesFolderName}/index.d.ts`,
+				import: `./${constants.projectFolderName}/index.js`,
+				default: `./${constants.commonJsFolderName}/index.js`
+			}
+		}
+	},
 	scripts: {
 		'transpile-esm': `tsc -b ${constants.projectTsConfigFileName}`,
 		'transpile-cjs': `babel ${constants.prodFolderName}/${constants.projectFolderName} --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir ${constants.prodFolderName}/${constants.commonJsFolderName} --source-maps`,

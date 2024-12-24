@@ -8,16 +8,7 @@ export default {
 		}
 	},
 	publishConfig: {
-		main: `./${constants.commonJsFolderName}/index.js`,
-		types: `./${constants.typesFolderName}/index.d.ts`,
-		scripts: {},
-		exports: {
-			'.': {
-				types: `./${constants.typesFolderName}/index.d.ts`,
-				import: `./${constants.projectFolderName}/index.js`,
-				default: `./${constants.commonJsFolderName}/index.js`
-			}
-		}
+		scripts: {}
 	},
 	scripts: {
 		circular: `madge --extensions ts --circular --no-color --no-spinner ${constants.projectFolderName}`,
