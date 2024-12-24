@@ -6,7 +6,6 @@ export default {
 		exports: {
 			'.': {
 				types: `./${constants.typesFolderName}/index.d.ts`,
-				import: `./${constants.projectFolderName}/index.js`,
 				default: `./${constants.commonJsFolderName}/index.js`
 			}
 		}

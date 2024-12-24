@@ -8,7 +8,12 @@ export default {
 		}
 	},
 	publishConfig: {
-		scripts: {}
+		scripts: {},
+		exports: {
+			'.': {
+				import: `./${constants.projectFolderName}/index.js`
+			}
+		}
 	},
 	scripts: {
 		circular: `madge --extensions ts --circular --no-color --no-spinner ${constants.projectFolderName}`,
