@@ -1,5 +1,9 @@
 #!/usr/bin/env node
-/** If no target is passed, builds all ts files except those in the esm/shared directory */
+/**
+ * If no target is passed, builds all ts files except those in the esm/shared directory (these files
+ * will be bundled to the other ts files). If a bin directory is present under esm/, it will be
+ * built directly under dist and not under dist/esm
+ */
 
 import * as constants from '../shared/constants.js';
 import * as Json from '../shared/Json.js';
