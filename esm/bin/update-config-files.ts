@@ -35,6 +35,7 @@ const PlatformNodeFsLive = PlatformNodeFs.layer;
 
 const live = pipe(PlatformNodePathLive, Layer.merge(PlatformNodeFsLive));
 
+// List of configuration files for which an error must not be reported if they are present in the package and not overridden by project.config.js
 const patternsToIgnore = pipe(
 	Array.make(
 		constants.readMeFileName,
@@ -45,6 +46,7 @@ const patternsToIgnore = pipe(
 	)
 );
 
+// List of folders where configuration files might be found
 const foldersToInclude = pipe(Array.make(constants.githubFolderName));
 
 const program = Effect.gen(function* () {
@@ -82,7 +84,7 @@ const program = Effect.gen(function* () {
 	const configDefault = config['default'];
 	const filesToCreate = Record.keys(configDefault);
 
-	yield* Effect.log('Determine potential configuration files');
+	yield* Effect.log('Determine potential configuration files present in package');
 
 	const [rootFolders, rootFiles] = yield* pipe(
 		fs.readDirectory(rootPath),
@@ -132,8 +134,8 @@ const program = Effect.gen(function* () {
 		Effect.map(
 			flow(
 				Array.flatten,
-				Array.appendAll(rootFiles),
 				Array.filter(Predicate.struct({ info: flow(Struct.get('type'), Equal.equals('File')) })),
+				Array.appendAll(rootFiles),
 				// Paths in project.config.js are always posix style
 				Array.map(flow(Struct.get('name'), utils.fromOsPathToPosixPath))
 			)
@@ -182,10 +184,6 @@ const program = Effect.gen(function* () {
 					yield* fs.makeDirectory(path.join(rootPath, path.dirname(key)), { recursive: true });
 
 					const target = path.join(rootPath, key);
-
-					// Copy the existing file, don't move it: if a bug happens during generation, we still have the original version in place
-					/*if (currentContents !== undefined)
-						yield* fs.copy(target, target + constants.copiedFileSuffix);*/
 
 					return yield* prettier.save(target, data);
 				})
