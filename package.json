@@ -22,14 +22,17 @@
 		"lint-fix": "pnpm lint --fix",
 		"lint-rules": "pnpx @eslint/config-inspector",
 		"test": "vitest run",
-		"generate-types": "tsc -b tsconfig.esm.json --emitDeclarationOnly",
 		"clean-prod": "shx rm -rf dist && shx rm -rf .tsbuildinfo && shx mkdir -p dist",
 		"prodify": "node ./dist/bin/prodify.js",
 		"publish-to-npm": "cd dist && npm publish --access=public && cd ..",
 		"install-prod": "cd dist && pnpm i && cd ..",
-		"docgen": "",
+		"docgen": "pnpm --recursive --parallel docgen && compile-docs",
+		"transpile-esm": "tsc -b tsconfig.esm.json",
+		"transpile-cjs": "babel dist/esm --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir dist/cjs --source-maps",
+		"transpile-annotate": "babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
 		"build": "pnpm clean-prod && pnpm i && pnpm bundle && pnpm prodify && pnpm update-config-files && pnpm generate-types && pnpm install-prod",
 		"build-and-publish": "pnpm build && pnpm checks && pnpm publish-to-npm",
+		"generate-types": "tsc -b tsconfig.esm.json --emitDeclarationOnly",
 		"bundle": "vite-node ./esm/bin/bundle-files.ts"
 	},
 	"module": "./esm/index.js",
@@ -42,22 +45,23 @@
 		"scripts": {},
 		"exports": {
 			".": {
-				"import": "./esm/index.js"
+				"import": "./esm/index.js",
+				"types": "./dts/index.d.ts",
+				"default": "./cjs/index.js"
 			}
 		},
+		"main": "./cjs/index.js",
+		"types": "./dts/index.d.ts",
 		"files": [
 			"*",
 			"!*.map"
 		]
 	},
-	"dependencies": {
-		"@effect/experimental": "^0.35.2",
-		"globals": "latest",
-		"minimatch": "latest",
-		"effect": "^3.11.9",
-		"@effect/platform": "^0.71.6",
-		"@effect/platform-node": "^0.67.2"
-	},
+	"keywords": [
+		"effect",
+		"typescript",
+		"functional-programming"
+	],
 	"packageManager": "pnpm@9.15.1",
 	"devDependencies": {
 		"@tsconfig/node20": "latest",
@@ -102,5 +106,12 @@
 			"tsconfig-paths": "^4.0.0"
 		}
 	},
-	"description": "Utility to generate configuration files in a repository"
+	"description": "Utility to generate configuration files in a repository",
+	"dependencies": {
+		"globals": "latest",
+		"minimatch": "latest",
+		"effect": "^3.11.9",
+		"@effect/platform": "^0.71.6",
+		"@effect/platform-node": "^0.67.2"
+	}
 }

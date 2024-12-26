@@ -1,11 +1,14 @@
 import { writeFileSync } from 'node:fs';
+import configStarter from '../esm/shared/config.starter.js';
 import * as constants from '../esm/shared/constants.js';
 import gitIgnoreTemplate from '../esm/shared/gitignore.template.js';
-import packageStarter from '../esm/shared/package.starter.js';
 
 try {
 	// eslint-disable-next-line functional/no-expression-statements
-	writeFileSync(constants.packageJsonFileName, JSON.stringify(packageStarter));
+	writeFileSync(
+		constants.packageJsonFileName,
+		JSON.stringify(configStarter[constants.packageJsonFileName])
+	);
 	// eslint-disable-next-line functional/no-expression-statements
 	writeFileSync(constants.gitIgnoreFileName, gitIgnoreTemplate);
 } catch (e) {
