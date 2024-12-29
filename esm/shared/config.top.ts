@@ -8,12 +8,12 @@ export default {
 	[`${constants.githubFolderName}/${constants.workflowsFolderName}/pages.yml`]:
 		githubWorkflowsPagesTemplate,
 	[constants.packageJsonFileName]: {
-		packageManager: 'pnpm@9.15.1',
+		packageManager: `pnpm@${constants.pnpmVersion}`,
 		devDependencies: {
+			deepmerge: 'latest',
 			'@tsconfig/node20': 'latest',
 			'@tsconfig/strictest': 'latest',
 			shx: 'latest',
-			deepmerge: 'latest',
 			'@eslint/eslintrc': 'latest',
 			'@eslint/js': 'latest',
 			//'@eslint/json': 'latest',
@@ -56,9 +56,6 @@ export default {
 			overrides: {
 				'tsconfig-paths': '^4.0.0'
 			}
-		},
-		scripts: {
-			docgen: 'pnpm --recursive --parallel docgen && compile-docs'
 		}
 	}
 };

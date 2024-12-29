@@ -17,7 +17,7 @@ import { config as tseslintConfig, configs as tseslintConfigs } from 'typescript
 	baseDirectory: import.meta.dirname
 });*/
 
-type FlatConfigArray = ReadonlyArray<Linter.FlatConfig>;
+type FlatConfigArray = ReadonlyArray<Linter.Config>;
 
 const typescriptConfigs = tseslintConfig(
 	eslint.configs.recommended,

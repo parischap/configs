@@ -2,7 +2,7 @@ The configs package must be installed as devDependency of a package. In a monore
 
 When this package is installed, it installs four bins in the path:
 
-- update-config-files: this bin will read the keys and values of a default object exported by the file named project.config.js located at the root of the package. It creates a file for each key with the key as name. If the key ends with .json, the value is converted from an object to a json string with Json.stringfy. Otherwise, the value must be a string and it is written as is. This bin will also check that there are not unexpected config files present in the package.
+- update-config-files: this bin will read the keys and values of a default object exported by the file named project.config.js located at the root of the package. It creates a file for each key with the key as name. If the key ends with .json, the value is converted from an object to a json string with JSON.stringfy. Otherwise, the value must be a string and it is written as is. This bin will also check that there are not unexpected config files present in the package.
 
 Goal of this package is to allow simple and fast setup and modification of all other packages. To make a package work, we need:
 

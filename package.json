@@ -1,39 +1,30 @@
 {
 	"name": "@parischap-dev/configs",
 	"type": "module",
-	"sideEffects": [],
 	"author": "Jérôme MARTIN",
 	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/parischap/configs.git"
-	},
-	"bugs": {
-		"url": "https://github.com/parischap/configs/issues"
-	},
-	"homepage": "https://github.com/parischap/configs",
 	"scripts": {
 		"tscheck": "tsc -b tsconfig.check.json --force ",
 		"lint": "eslint .",
-		"update-config-files": "node dist/bin/update-config-files.js",
+		"lint-fix": "eslint . --fix",
+		"lint-rules": "pnpx @eslint/config-inspector",
+		"update-config-files": "node ./dist/bin/update-config-files.js",
 		"clean-config-files": "shx rm -rf package.json && shx rm -rf tsconfig.json",
 		"circular": "madge --extensions ts --circular --no-color --no-spinner esm",
 		"checks": "pnpm circular && pnpm lint && pnpm tscheck && pnpm test",
-		"lint-fix": "pnpm lint --fix",
-		"lint-rules": "pnpx @eslint/config-inspector",
 		"test": "vitest run",
 		"clean-prod": "shx rm -rf dist && shx rm -rf .tsbuildinfo && shx mkdir -p dist",
-		"prodify": "node ./dist/bin/prodify.js",
 		"publish-to-npm": "cd dist && npm publish --access=public && cd ..",
 		"install-prod": "cd dist && pnpm i && cd ..",
-		"docgen": "pnpm --recursive --parallel docgen && compile-docs",
-		"transpile-esm": "tsc -b tsconfig.esm.json",
-		"transpile-cjs": "babel dist/esm --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir dist/cjs --source-maps",
-		"transpile-annotate": "babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
-		"build": "pnpm clean-prod && pnpm i && pnpm bundle && pnpm prodify && pnpm update-config-files && pnpm generate-types && pnpm install-prod",
+		"build": "pnpm clean-prod && pnpm pre-build && pnpm compile && pnpm post-build && pnpm generate-types && pnpm install-prod",
 		"build-and-publish": "pnpm build && pnpm checks && pnpm publish-to-npm",
 		"generate-types": "tsc -b tsconfig.esm.json --emitDeclarationOnly",
-		"bundle": "vite-node ./esm/bin/bundle-files.ts"
+		"compile": "pnpm bundle && pnpm prodify",
+		"docgen": "",
+		"bundle": "vite-node ./esm/bin/bundle-files.ts",
+		"prodify": "node ./dist/bin/prodify.js",
+		"pre-build": "pnpm i",
+		"post-build": "pnpm update-config-files"
 	},
 	"module": "./esm/index.js",
 	"exports": {
@@ -43,31 +34,44 @@
 	},
 	"publishConfig": {
 		"scripts": {},
+		"devDependencies": {},
+		"publishConfig": {},
+		"packageManager": "",
+		"sideEffects": [],
+		"pnpm": {},
+		"type": "module",
 		"exports": {
 			".": {
 				"import": "./esm/index.js",
-				"types": "./dts/index.d.ts",
-				"default": "./cjs/index.js"
+				"types": "./dts/index.d.ts"
 			}
 		},
-		"main": "./cjs/index.js",
-		"types": "./dts/index.d.ts",
+		"dependencies": {},
 		"files": [
 			"*",
 			"!*.map"
 		]
 	},
-	"keywords": [
-		"effect",
-		"typescript",
-		"functional-programming"
-	],
+	"dependencies": {
+		"@effect/experimental": "^0.35.2",
+		"globals": "latest",
+		"minimatch": "latest",
+		"effect": "^3.11.9",
+		"@effect/platform": "^0.71.6",
+		"@effect/platform-node": "^0.67.2"
+	},
+	"sideEffects": false,
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/parischap/configs.git"
+	},
+	"homepage": "https://github.com/parischap/configs",
 	"packageManager": "pnpm@9.15.1",
 	"devDependencies": {
+		"deepmerge": "latest",
 		"@tsconfig/node20": "latest",
 		"@tsconfig/strictest": "latest",
 		"shx": "latest",
-		"deepmerge": "latest",
 		"@eslint/eslintrc": "latest",
 		"@eslint/js": "latest",
 		"@html-eslint/eslint-plugin": "latest",
@@ -106,12 +110,5 @@
 			"tsconfig-paths": "^4.0.0"
 		}
 	},
-	"description": "Utility to generate configuration files in a repository",
-	"dependencies": {
-		"globals": "latest",
-		"minimatch": "latest",
-		"effect": "^3.11.9",
-		"@effect/platform": "^0.71.6",
-		"@effect/platform-node": "^0.67.2"
-	}
+	"description": "Utility to generate configuration files in a repository"
 }

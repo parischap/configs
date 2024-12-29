@@ -1,4 +1,7 @@
 import * as constants from './constants.js';
+import eslintConfigBrowserTemplate from './eslint.config.browser.template.js';
+import eslintConfigLibraryTemplate from './eslint.config.library.template.js';
+import eslintConfigNodeTemplate from './eslint.config.node.template.js';
 import gitIgnoreTemplate from './gitignore.template.js';
 import licenseTemplate from './license.template.js';
 import prettierConfigTemplate from './prettier.config.template.js';
@@ -7,13 +10,43 @@ import tsConfigBase from './tsconfig.base.js';
 import tsConfigCheck from './tsconfig.check.js';
 import tsConfig from './tsconfig.js';
 import tsConfigOthers from './tsconfig.others.js';
+import tsConfigSrcBrowser from './tsconfig.src.browser.js';
+import tsConfigSrcLibrary from './tsconfig.src.library.js';
+import tsConfigSrcNode from './tsconfig.src.node.js';
 
-const gitRepo = (repoName: string) => ({
-	type: 'git',
-	url: `git+https://github.com/${constants.owner}/${repoName}.git`
-});
+export namespace Environment {
+	export enum Type {
+		Node = 0,
+		Library = 1,
+		Browser = 2
+	}
+}
 
-export default (packageName: string, repoName: string) => ({
+const environmentConfig = (environment: Environment.Type) =>
+	environment === Environment.Type.Browser ?
+		{
+			[constants.projectTsConfigFileName]: tsConfigSrcBrowser,
+			[constants.eslintConfigFileName]: eslintConfigBrowserTemplate
+		}
+	: environment === Environment.Type.Node ?
+		{
+			[constants.projectTsConfigFileName]: tsConfigSrcNode,
+			[constants.eslintConfigFileName]: eslintConfigNodeTemplate
+		}
+	: environment === Environment.Type.Library ?
+		{
+			[constants.projectTsConfigFileName]: tsConfigSrcLibrary,
+			[constants.eslintConfigFileName]: eslintConfigLibraryTemplate
+		}
+	:	{};
+
+export default ({
+	packageName,
+	environment
+}: {
+	readonly packageName: string;
+	readonly environment: Environment.Type;
+}) => ({
 	// Put prettier in first position so the next generated files will get formatted
 	[constants.prettierConfigFileName]: prettierConfigTemplate,
 	[constants.gitIgnoreFileName]: gitIgnoreTemplate,
@@ -27,27 +60,16 @@ export default (packageName: string, repoName: string) => ({
 	[constants.packageJsonFileName]: {
 		name: `${constants.devScope}/${packageName}`,
 		type: 'module',
-		sideEffects: [],
 		author: 'Jérôme MARTIN',
 		license: 'MIT',
-		repository:
-			packageName === repoName ?
-				gitRepo(repoName)
-			:	{
-					...gitRepo(repoName),
-					directory: `packages/${packageName}`
-				},
-		bugs: {
-			url: `https://github.com/${constants.owner}/${repoName}/issues`
-		},
-		homepage:
-			`https://github.com/${constants.owner}/${repoName}` +
-			(packageName === repoName ? '' : `/tree/master/packages/${packageName}`),
 		scripts: {
 			tscheck: `tsc -b ${constants.tscLintTsConfigFileName} --force `,
 			lint: 'eslint .',
+			'lint-fix': 'eslint . --fix',
+			'lint-rules': 'pnpx @eslint/config-inspector',
 			'update-config-files': 'update-config-files',
 			'clean-config-files': `shx rm -rf ${constants.packageJsonFileName} && shx rm -rf ${constants.tsConfigFileName}`
 		}
-	}
+	},
+	...environmentConfig(environment)
 });

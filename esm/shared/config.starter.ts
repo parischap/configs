@@ -1,19 +1,28 @@
 import merge from 'deepmerge';
 import { basename, resolve } from 'node:path';
-import configBase from './config.base.js';
-import configBaseNode from './config.base.node.js';
-import configCode from './config.code.js';
-import configCodeTranspiled from './config.code.transpiled.js';
+import configBase, { Environment } from './config.base.js';
+import configPackage, { Visibility } from './config.package.js';
 import configTop from './config.top.js';
 import * as constants from './constants.js';
 
 const packageName = basename(resolve());
+const executablesPath = `./${constants.projectFolderName}/${constants.executablesFolderName}/`;
+const prodExecutablesPath = `./${constants.prodFolderName}/${constants.executablesFolderName}/`;
 
 export default merge.all([
-	configBase(packageName, packageName),
-	configCode,
-	configCodeTranspiled,
-	configBaseNode,
+	configBase({
+		packageName,
+		environment: Environment.Type.Node
+	}),
+	configPackage({
+		packageName,
+		repoName: packageName,
+		bundled: true,
+		visibility: Visibility.Type.PublicByForce,
+		hasStaticFolder: false,
+		hasDocGen: false,
+		keywords: []
+	}),
 	configTop,
 	{
 		[constants.packageJsonFileName]: {
@@ -30,21 +39,15 @@ export default merge.all([
 				[`${constants.scope}/${packageName}`]: 'link:dist'
 			},
 			scripts: {
-				'generate-types': `tsc -b ${constants.projectTsConfigFileName} --emitDeclarationOnly`,
-				bundle: `vite-node ./${constants.projectFolderName}/${constants.executablesFolderName}/bundle-files.ts`,
-				prodify: `node ./${constants.prodFolderName}/${constants.executablesFolderName}/prodify.js`,
-				'update-config-files': `node ${constants.prodFolderName}/${constants.executablesFolderName}/update-config-files.js`,
-				build: `pnpm clean-prod && pnpm i && pnpm bundle && pnpm prodify && pnpm update-config-files && pnpm generate-types && pnpm install-prod`
+				bundle: `vite-node ${executablesPath}bundle-files.ts`,
+				prodify: `node ${prodExecutablesPath}prodify.js`,
+				'update-config-files': `node ${prodExecutablesPath}update-config-files.js`,
+				'pre-build': 'pnpm i',
+				'post-build': 'pnpm update-config-files'
 			},
 			publishConfig: {
-				// Do not publish maps of this package because it should be private
-				files: ['*', '!*.map'],
-				// Although this is a bundled package, it generates types in dist
-				exports: {
-					'.': {
-						types: `./${constants.typesFolderName}/index.d.ts`
-					}
-				}
+				// Add type field for configs package. Eslint plugins and prettier plugins need to be installed at the root of each monorepo for vscode intellicode. At the same time, eslint.config.base and prettier.config.base use recommended configs of eslint, prettier and their plugins. The configs and the plugins need to be in the same version. For this reason, we do not import the plugins as dependencies of this package as we should. But as dev dependencies. These devDependencies are removed in the prod version of the Configs package. But as they are also included at the root of the target package, everything will work. However, we need to add type module in the nearest package.json above node_modules.
+				type: 'module'
 			}
 		}
 	}

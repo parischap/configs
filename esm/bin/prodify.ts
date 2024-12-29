@@ -7,7 +7,6 @@ import {
 import {
 	Array,
 	Cause,
-	Config,
 	Effect,
 	Either,
 	Exit,
@@ -34,29 +33,6 @@ const PlatformNodeFsLive = PlatformNodeFs.layer;
 
 const live = pipe(PlatformNodePathLive, Layer.merge(PlatformNodeFsLive));
 
-const packageJsonKeysToKeepInProd = Array.make(
-	'name',
-	'version',
-	'description',
-	'author',
-	'license',
-	'sideEffects',
-	'repository',
-	'bugs',
-	'homepage',
-	'main',
-	'module',
-	'types',
-	'exports',
-	'imports',
-	'dependencies',
-	'peerDependencies',
-	'bin',
-	'files',
-	'funding',
-	'keywords'
-);
-
 const program = Effect.gen(function* () {
 	const path = yield* PlatformNodePathService;
 	const fs = yield* PlatformNodeFsService;
@@ -76,8 +52,6 @@ const program = Effect.gen(function* () {
 	);
 
 	const binPath = path.join(prodPath, constants.executablesFolderName);
-
-	const isLibrary = yield* pipe(Config.boolean('IS_LIBRARY'), Config.withDefault(false));
 
 	yield* Effect.log(`Copying ${constants.readMeFileName} to '${prodPath}'`);
 	const readMePath = path.join(rootPath, constants.readMeFileName);
@@ -160,52 +134,21 @@ const program = Effect.gen(function* () {
 	);
 
 	const prodPackageName = constants.scope + '/' + packageName;
-	const dependencies = pipe(
-		pkg,
-		Record.get('dependencies'),
-		Option.filter(Predicate.isRecord),
-		Option.getOrElse(() => Record.empty<string, unknown>())
-	);
-
-	// It does not really make sense to override dependencies in publishConfig...
-	const publishConfigDependencies = pipe(
-		publishConfig,
-		Record.get('dependencies'),
-		Option.filter(Predicate.isRecord),
-		Option.getOrElse(() => Record.empty<string, unknown>())
-	);
-
-	const peerDependencies = pipe(
-		pkg,
-		Record.get('peerDependencies'),
-		Option.filter(Predicate.isRecord),
-		Option.getOrElse(() => Record.empty<string, unknown>())
-	);
-
-	const publishConfigPeerDependencies = pipe(
-		publishConfig,
-		Record.get('peerDependencies'),
-		Option.filter(Predicate.isRecord),
-		Option.getOrElse(() => Record.empty<string, unknown>())
-	);
 
 	const prodPackageJson = yield* pipe(
 		{
 			...pkg,
-			...publishConfig,
-			dependencies:
-				isLibrary ? { ...dependencies, ...publishConfigDependencies } : publishConfigDependencies,
-			peerDependencies: {
-				...peerDependencies,
-				...publishConfigPeerDependencies
-			}
+			...publishConfig
 		},
 		Record.set('name', prodPackageName),
 		Record.isEmptyRecord(binFiles) ? Function.identity : Record.set('bin', binFiles),
-		Record.filter((_, key) => Array.contains(packageJsonKeysToKeepInProd, key)),
-		Record.filter((v) => !Predicate.isRecord(v) || !Record.isEmptyRecord(v)),
-		// Add type field for configs package because devDependencies inherited from package.top.ts are not bundled and have to be imported
-		packageName === 'configs' ? Record.set('type', 'module') : Function.identity,
+		//Record.filter((_, key) => Array.contains(packageJsonKeysToKeepInProd, key)),
+		Record.filter(
+			(v) =>
+				(!Predicate.isRecord(v) || !Record.isEmptyRecord(v)) &&
+				(!Array.isArray(v) || !Array.isEmptyArray(v)) &&
+				(!Predicate.isString(v) || !String.isEmpty(v))
+		),
 		Json.stringify
 	);
 
