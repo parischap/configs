@@ -1,6 +1,6 @@
 import configMonorepo from './shared/config.monorepo.js';
 import configStarter from './shared/config.starter.js';
-import configTop from './shared/config.top.js';
+import configSubRepo from './shared/config.subRepo.js';
 import * as constants from './shared/constants.js';
 import eslintConfigBase from './shared/eslint.config.base.js';
 import eslintConfigBrowser from './shared/eslint.config.browser.js';
@@ -13,7 +13,7 @@ import * as utils from './shared/utils.js';
 export {
 	configMonorepo,
 	configStarter,
-	configTop,
+	configSubRepo,
 	constants,
 	eslintConfigBase,
 	eslintConfigBrowser,

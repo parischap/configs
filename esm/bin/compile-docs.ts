@@ -1,4 +1,14 @@
 #!/usr/bin/env node
+/**
+ * See https://github.com/Effect-TS/docgen?tab=readme-ov-file This executable is run after docgen
+ * has been run in all subrepo at the root of which it has created a `docs/` directory. There is
+ * also a `docs/` directory at the root of the monorepo which contains an index.md file with general
+ * documentation on the whole repo and a _config.yml file that must be left as is. This executable:
+ *
+ * - Removes all directories under the top `docs/` directory because this is where the previous runs
+ *   have stpred their results.
+ */
+
 import * as constants from '../shared/constants.js';
 
 import {

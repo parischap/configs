@@ -3,7 +3,6 @@ import eslintConfigBrowserTemplate from './eslint.config.browser.template.js';
 import eslintConfigLibraryTemplate from './eslint.config.library.template.js';
 import eslintConfigNodeTemplate from './eslint.config.node.template.js';
 import gitIgnoreTemplate from './gitignore.template.js';
-import licenseTemplate from './license.template.js';
 import prettierConfigTemplate from './prettier.config.template.js';
 import prettierIgnore from './prettierignore.js';
 import tsConfigBase from './tsconfig.base.js';
@@ -56,7 +55,6 @@ export default ({
 	[constants.tsConfigFileName]: tsConfig,
 	[constants.tscLintTsConfigFileName]: tsConfigCheck,
 	[constants.viteConfigFileName]: 'export default {};',
-	[constants.licenseFileName]: licenseTemplate,
 	[constants.packageJsonFileName]: {
 		name: `${constants.devScope}/${packageName}`,
 		type: 'module',

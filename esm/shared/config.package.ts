@@ -60,7 +60,9 @@ const bundledConfig = {
 				}
 			},
 			// Remove dependencies in prod because they have been bundled
-			dependencies: {}
+			dependencies: {},
+			// Unset sideEffects in prod
+			sideEffects: []
 		}
 	}
 };
@@ -82,6 +84,7 @@ const transpiledConfig = {
 					default: `./${constants.commonJsFolderName}/index.js`
 				}
 			}
+			// Do not unset sideEffects for libraries as the consumers of these libraries might use WebPack
 		}
 	}
 };
@@ -122,8 +125,8 @@ const visibilityConfig = ({
 	: visibility === Visibility.Type.PublicByForce ?
 		{
 			[constants.packageJsonFileName]: {
-				repository: repository({ repoName, packageName }),
-				homepage: homepage({ repoName, packageName }),
+				//repository: repository({ repoName, packageName }),
+				//homepage: homepage({ repoName, packageName }),
 				publishConfig: {
 					// Do not publish maps of this package because it should be private
 					files: ['*', '!*.map']
@@ -205,8 +208,6 @@ export default ({
 					publishConfig: {},
 					// Unset packageManager in prod
 					packageManager: '',
-					// Unset sideEffects in prod
-					sideEffects: [],
 					// Remove pnpm in prod
 					pnpm: {},
 					// Unset type in prod

@@ -1,4 +1,13 @@
 #!/usr/bin/env node
+/**
+ * Copies `esm/README.md` if there is one to `dist` Generates the `LICENSE` file directly under
+ * `dist` Copies `esm/package.json` to `dist` but spreads the `publishConfig` key so that any key
+ * present in `publishConfig` will override the key with the same name. Also adds a `bin` key with
+ * all the bin executables present under `esm/bin/` and removes keys with empty objects, empty
+ * arrays or empty strings as value. Result is prettified using prettier. Creates a `package.json`
+ * file under `dist/esm/`. It is not necessary to create one under `dist/cjs/` for transpiled
+ * packages as `type: 'commonjs'` is the default.
+ */
 import { FileSystem as PlatformFs, Path as PlatformPath } from '@effect/platform';
 import {
 	NodeFileSystem as PlatformNodeFs,
@@ -135,32 +144,35 @@ const program = Effect.gen(function* () {
 
 	const prodPackageName = constants.scope + '/' + packageName;
 
-	const prodPackageJson = yield* pipe(
+	const prodPackageJson = pipe(
 		{
 			...pkg,
 			...publishConfig
 		},
 		Record.set('name', prodPackageName),
 		Record.isEmptyRecord(binFiles) ? Function.identity : Record.set('bin', binFiles),
-		//Record.filter((_, key) => Array.contains(packageJsonKeysToKeepInProd, key)),
 		Record.filter(
 			(v) =>
 				(!Predicate.isRecord(v) || !Record.isEmptyRecord(v)) &&
 				(!Array.isArray(v) || !Array.isEmptyArray(v)) &&
 				(!Predicate.isString(v) || !String.isEmpty(v))
-		),
-		Json.stringify
+		)
 	);
+
+	const stringifiedProdPackageJson = yield* Json.stringify(prodPackageJson);
 
 	yield* Effect.log(`Writing '${prodPackageJsonPath}'`);
 	//yield* fs.makeDirectory(prodPath, { recursive: true });
-	yield* prettier.save(prodPackageJsonPath, prodPackageJson);
+	yield* prettier.save(prodPackageJsonPath, stringifiedProdPackageJson);
 
 	yield* Effect.log(`Writing '${prodProjectPackageJsonPath}'`);
-	const prodProjectPackageJson = yield* Json.stringify({
-		type: 'module',
-		sideEffects: []
-	});
+	// We add a sideEffects key to the prodProjectPackageJson only if the prodPackageJson has one
+	const prodProjectPackageJson = yield* pipe(
+		prodPackageJson,
+		Record.filter((_, k) => k === 'sideEffects'),
+		Record.set('type', 'module'),
+		Json.stringify
+	);
 	return yield* prettier.save(prodProjectPackageJsonPath, prodProjectPackageJson);
 });
 
