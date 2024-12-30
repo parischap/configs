@@ -17,10 +17,10 @@ export default Configs.configMonorepo;
 In each subpackage, the `project.config.js` file to create will usually look loke this:
 
 ```ts
-import merge from "deepmerge";
+import { merge } from "ts-deepmerge";
 import * as Configs from "@parischap/configs";
 
-export default merge.all([
+export default merge(
 	Configs.configSubRepo({
 		environment: Environment.Type.Node,
 		bundled: true,
@@ -42,7 +42,7 @@ export default merge.all([
 			},
 		},
 	},
-]);
+);
 ```
 
 The `Configs.configSubRepo` function takes the following parameter:
@@ -56,7 +56,7 @@ The `Configs.configSubRepo` function takes the following parameter:
 
 The `configs` package uses itself to generate its configuration files. To that extent, the following procedure must be followed for that package only:
 
-- run `node init/main.mjs`
+- run `node esm/shared/init/main.mjs`
 - run `pnpm build`
 
 For other packages, the procedure to follow is:
@@ -130,7 +130,7 @@ Notes:
 
 # 3 - About npm:
 
-NPM is free for public packages. I did not find a way to publish to npm a package that is private under github. As a minor security measure, we can publish the code minified and bundled version without the source code or maps. But users can always see the code on github. So this solution can be used for non sensitive stuff.
+NPM is free for public packages. I did not find a way to publish to npm a package that is private under github. As a minor security measure, we can publish the code minified and bundled version without the source code or maps. But users can always see the code on github. So this solution can be used for non sensitive stuff. A solution could be to have a private github repo with the source code and a public github repo with the compiled code...
 NPM error messages are misleading. It can for instance indicate an authentification error when the issue is that the package is marked as private in package.json.
 To use granular tokens to publish to npm, the package to publish must already exist! So the first time, use vscode, cd to the dist folder of the package to publish and hit `npm publish --access=public`. If there is an authentification error, try hitting `npm adduser` first. Once the repo is created on npm, go to its settings and choose 'Require two-factor authentication or an automation or granular access token' for publishing access.
 

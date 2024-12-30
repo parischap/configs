@@ -1,5 +1,5 @@
-import merge from 'deepmerge';
 import { basename, resolve } from 'node:path';
+import { merge } from 'ts-deepmerge';
 import configBase, { Environment } from './config.base.js';
 import configPackage, { Visibility } from './config.package.js';
 import configTop from './config.top.js';
@@ -9,7 +9,7 @@ const packageName = basename(resolve());
 const executablesPath = `./${constants.projectFolderName}/${constants.executablesFolderName}/`;
 const prodExecutablesPath = `./${constants.prodFolderName}/${constants.executablesFolderName}/`;
 
-export default merge.all([
+export default merge(
 	configBase({
 		packageName,
 		environment: Environment.Type.Node
@@ -51,4 +51,4 @@ export default merge.all([
 			}
 		}
 	}
-]);
+);

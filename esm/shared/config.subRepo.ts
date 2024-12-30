@@ -1,5 +1,5 @@
-import merge from 'deepmerge';
 import { basename, dirname, resolve } from 'node:path';
+import { merge } from 'ts-deepmerge';
 import configBase, { Environment } from './config.base.js';
 import configPackage, { Visibility } from './config.package.js';
 import * as constants from './constants.js';
@@ -23,7 +23,7 @@ export default ({
 	readonly hasDocGen: boolean;
 	readonly keywords: ReadonlyArray<string>;
 }) =>
-	merge.all([
+	merge(
 		configBase({
 			packageName,
 			environment
@@ -51,4 +51,4 @@ export default ({
 				}
 			}
 		}
-	]);
+	);

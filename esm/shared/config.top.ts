@@ -10,7 +10,7 @@ export default {
 	[constants.packageJsonFileName]: {
 		packageManager: `pnpm@${constants.pnpmVersion}`,
 		devDependencies: {
-			deepmerge: 'latest',
+			'ts-deepmerge': 'latest',
 			'@tsconfig/node20': 'latest',
 			'@tsconfig/strictest': 'latest',
 			shx: 'latest',

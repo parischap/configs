@@ -2,14 +2,14 @@ import * as constants from './constants.js';
 import pnpmWorkspaceTemplate from './pnpm.workspace.template.js';
 import vitestWorkspaceTemplate from './vitest.workspace.template.js';
 
-import merge from 'deepmerge';
 import { basename, resolve } from 'node:path';
+import { merge } from 'ts-deepmerge';
 import configBase, { Environment } from './config.base.js';
 import configTop from './config.top.js';
 
 const packageName = basename(resolve());
 
-export default merge.all([
+export default merge(
 	configBase({
 		packageName,
 		environment: Environment.Type.Node
@@ -34,4 +34,4 @@ export default merge.all([
 			workspaces: [`${constants.packagesFolderName}/*`]
 		}
 	}
-]);
+);

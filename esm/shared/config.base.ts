@@ -7,11 +7,11 @@ import prettierConfigTemplate from './prettier.config.template.js';
 import prettierIgnore from './prettierignore.js';
 import tsConfigBase from './tsconfig.base.js';
 import tsConfigCheck from './tsconfig.check.js';
+import tsConfigEsmBrowser from './tsconfig.esm.browser.js';
+import tsConfigEsmLibrary from './tsconfig.esm.library.js';
+import tsConfigEsmNode from './tsconfig.esm.node.js';
 import tsConfig from './tsconfig.js';
 import tsConfigOthers from './tsconfig.others.js';
-import tsConfigSrcBrowser from './tsconfig.src.browser.js';
-import tsConfigSrcLibrary from './tsconfig.src.library.js';
-import tsConfigSrcNode from './tsconfig.src.node.js';
 
 export namespace Environment {
 	export enum Type {
@@ -24,17 +24,17 @@ export namespace Environment {
 const environmentConfig = (environment: Environment.Type) =>
 	environment === Environment.Type.Browser ?
 		{
-			[constants.projectTsConfigFileName]: tsConfigSrcBrowser,
+			[constants.projectTsConfigFileName]: tsConfigEsmBrowser,
 			[constants.eslintConfigFileName]: eslintConfigBrowserTemplate
 		}
 	: environment === Environment.Type.Node ?
 		{
-			[constants.projectTsConfigFileName]: tsConfigSrcNode,
+			[constants.projectTsConfigFileName]: tsConfigEsmNode,
 			[constants.eslintConfigFileName]: eslintConfigNodeTemplate
 		}
 	: environment === Environment.Type.Library ?
 		{
-			[constants.projectTsConfigFileName]: tsConfigSrcLibrary,
+			[constants.projectTsConfigFileName]: tsConfigEsmLibrary,
 			[constants.eslintConfigFileName]: eslintConfigLibraryTemplate
 		}
 	:	{};

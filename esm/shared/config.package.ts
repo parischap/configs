@@ -1,4 +1,4 @@
-import merge from 'deepmerge';
+import { merge } from 'ts-deepmerge';
 import * as constants from './constants.js';
 import docgenConfig from './docgenConfig.js';
 import madgercTemplate from './madge.template.js';
@@ -173,7 +173,7 @@ export default ({
 	readonly hasDocGen: boolean;
 	readonly keywords: ReadonlyArray<string>;
 }) =>
-	merge.all([
+	merge(
 		{
 			[constants.madgeConfigFileName]: madgercTemplate,
 			[constants.packageJsonFileName]: {
@@ -233,4 +233,4 @@ export default ({
 		visibilityConfig({ repoName, visibility, keywords }),
 		hasDocGen ? docGenConfig : withoutDocGenConfig,
 		hasStaticFolder ? staticFolderConfig : withoutStaticFolderConfig
-	]);
+	);

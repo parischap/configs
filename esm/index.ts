@@ -7,7 +7,6 @@ import eslintConfigBrowser from './shared/eslint.config.browser.js';
 import eslintConfigLibrary from './shared/eslint.config.library.js';
 import eslintConfigNode from './shared/eslint.config.node.js';
 import prettierConfigBase from './shared/prettier.config.base.js';
-import tsConfigTop from './shared/tsconfig.top.js';
 import * as utils from './shared/utils.js';
 
 export {
@@ -20,6 +19,5 @@ export {
 	eslintConfigLibrary,
 	eslintConfigNode,
 	prettierConfigBase,
-	tsConfigTop,
 	utils
 };

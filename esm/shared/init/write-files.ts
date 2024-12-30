@@ -1,6 +1,6 @@
 import { writeFileSync } from 'node:fs';
-import configStarter from '../esm/shared/config.starter.js';
-import * as constants from '../esm/shared/constants.js';
+import configStarter from '../config.starter.js';
+import * as constants from '../constants.js';
 
 try {
 	// eslint-disable-next-line functional/no-expression-statements
