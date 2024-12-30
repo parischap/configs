@@ -1,4 +1,6 @@
+import { Environment } from './shared/config.base.js';
 import configMonorepo from './shared/config.monorepo.js';
+import { Visibility } from './shared/config.package.js';
 import configStarter from './shared/config.starter.js';
 import configSubRepo from './shared/config.subRepo.js';
 import * as constants from './shared/constants.js';
@@ -14,10 +16,12 @@ export {
 	configStarter,
 	configSubRepo,
 	constants,
+	Environment,
 	eslintConfigBase,
 	eslintConfigBrowser,
 	eslintConfigLibrary,
 	eslintConfigNode,
 	prettierConfigBase,
-	utils
+	utils,
+	Visibility
 };
