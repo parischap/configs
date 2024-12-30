@@ -116,6 +116,12 @@ When a package is built, you can push it to github. Upon creating a new release,
 - to add the NPM_PUBLISH_TOKEN under Repository secrets in Settings/Secrets and variables/Actions
 - to have Github Actions for Build And Deployment in Settings/Pages.
 
+Notes:
+
+- there is no reason to create releases for a privaye package. So normally the `publish.yml` action should not get launched. However, in case it does, the package will not get published because there is the `private` key in package.json and the `build-and-publish` script has been deactivated.
+- `publish.yml` can be started manually. In that case, it uses has release number the last issued release. It can be useful if the publish action has failed and no modification to the code is necessary. If a modification to the code is necessary, a new release will have to be issued.
+- `pages.yml` can be started manually. This can in particular be useful for private packages for which no release is issued.
+
 # 2 - About tsconfig:
 
 - if the include directive does not match any ts file, it is considered that there is no include directive. It then falls back to the default which is all files in all subdirectories. In particular, if it finds only .js files and even if allowJs and checkJs are activated, it will revert to the default.

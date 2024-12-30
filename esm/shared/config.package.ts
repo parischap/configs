@@ -18,30 +18,6 @@ const gitRepo = (repoName: string) => ({
 	url: `git+https://github.com/${constants.owner}/${repoName}.git`
 });
 
-const repository = ({
-	repoName,
-	packageName
-}: {
-	readonly repoName: string;
-	readonly packageName: string;
-}) =>
-	packageName === repoName ?
-		gitRepo(repoName)
-	:	{
-			...gitRepo(repoName),
-			directory: `packages/${packageName}`
-		};
-
-const homepage = ({
-	repoName,
-	packageName
-}: {
-	readonly repoName: string;
-	readonly packageName: string;
-}) =>
-	`https://github.com/${constants.owner}/${repoName}` +
-	(packageName === repoName ? '' : `/tree/master/packages/${packageName}`);
-
 const bundledConfig = {
 	[constants.packageJsonFileName]: {
 		dependencies: {
@@ -102,7 +78,13 @@ const visibilityConfig = ({
 }) =>
 	visibility === Visibility.Type.Private ?
 		{
-			[constants.packageJsonFileName]: { private: true }
+			[constants.packageJsonFileName]: {
+				private: true,
+				scripts: {
+					// Do not use an empty string because it gets wiped out by prodify
+					'build-and-publish': 'echo "private package cannot be published"'
+				}
+			}
 		}
 	: visibility === Visibility.Type.Public ?
 		{
@@ -110,8 +92,6 @@ const visibilityConfig = ({
 				bugs: {
 					url: `https://github.com/${constants.owner}/${repoName}/issues`
 				},
-				repository: repository({ repoName, packageName }),
-				homepage: homepage({ repoName, packageName }),
 				funding: [
 					{
 						type: 'ko-fi',
@@ -119,17 +99,23 @@ const visibilityConfig = ({
 					}
 				],
 				// Put specific keywords in first position so important keywords come out first
-				keywords: [...keywords, 'effect', 'typescript', 'functional-programming']
+				keywords: [...keywords, 'effect', 'typescript', 'functional-programming'],
+				scripts: {
+					// Checks have to be carried out after build for the configs repo
+					'build-and-publish': 'pnpm build && pnpm checks && pnpm publish-to-npm'
+				}
 			}
 		}
 	: visibility === Visibility.Type.PublicByForce ?
 		{
 			[constants.packageJsonFileName]: {
-				//repository: repository({ repoName, packageName }),
-				//homepage: homepage({ repoName, packageName }),
 				publishConfig: {
 					// Do not publish maps of this package because it should be private
 					files: ['*', '!*.map']
+				},
+				scripts: {
+					// Checks have to be carried out after build for the configs repo
+					'build-and-publish': 'pnpm build && pnpm checks && pnpm publish-to-npm'
 				}
 			}
 		}
@@ -167,7 +153,7 @@ const docGenConfig = {
 const withoutDocGenConfig = {
 	[constants.packageJsonFileName]: {
 		scripts: {
-			docgen: ''
+			docgen: 'echo "docgen not activated for this package"'
 		}
 	}
 };
@@ -229,8 +215,19 @@ export default ({
 					'install-prod': `cd ${constants.prodFolderName} && pnpm i && cd ..`,
 					build:
 						'pnpm clean-prod && pnpm pre-build && pnpm compile && pnpm post-build && pnpm generate-types && pnpm install-prod',
-					// Checks have to be carried out after build for the configs repo
-					'build-and-publish': 'pnpm build && pnpm checks && pnpm publish-to-npm'
+
+					// Must be present even for private packages as it can be used for other purposes
+					repository:
+						packageName === repoName ?
+							gitRepo(repoName)
+						:	{
+								...gitRepo(repoName),
+								directory: `packages/${packageName}`
+							},
+					// Must be present even for private packages as it can be used for instance by docgen
+					homepage:
+						`https://github.com/${constants.owner}/${repoName}` +
+						(packageName === repoName ? '' : `/tree/master/packages/${packageName}`)
 				}
 			}
 		},

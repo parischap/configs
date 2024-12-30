@@ -3,6 +3,7 @@ export default {
 	parseCompilerOptions: `./${constants.docgenTsConfigFileName}`,
 	examplesCompilerOptions: `./${constants.docgenTsConfigFileName}`,
 	srcDir: `./${constants.projectFolderName}`,
-	outDir: 'docs',
-	exclude: [`${constants.projectFolderName}/index.ts`]
+	outDir: constants.docsFolderName,
+	exclude: [`${constants.projectFolderName}/index.ts`],
+	enforceDescriptions: true
 };

@@ -1,12 +1,20 @@
 #!/usr/bin/env node
 /**
- * See https://github.com/Effect-TS/docgen?tab=readme-ov-file This executable is run after docgen
- * has been run in all subrepo at the root of which it has created a `docs/` directory. There is
- * also a `docs/` directory at the root of the monorepo which contains an index.md file with general
- * documentation on the whole repo and a _config.yml file that must be left as is. This executable:
+ * See https://github.com/Effect-TS/docgen?tab=readme-ov-file
+ *
+ * This executable is run after docgen has been run in all subrepos at the root of which it has
+ * created a `docs/modules/` directory. There is also a `docs/` directory at the root of the
+ * monorepo which contains an index.md file with general documentation related to the whole repo and
+ * a _config.yml file which contains several configuration parameters such as the theme. This
+ * executable:
  *
  * - Removes all directories under the top `docs/` directory because this is where the previous runs
- *   have stpred their results.
+ *   have stored their results.
+ * - For each package of the monorepo in which there is a `docs/modules/` directory, copies the
+ *   contents of that directory under a `docs/packagename/` directory at the root of the
+ *   monorepo(during this copy, the string `parent: Modules` in each copied file is replaced by
+ *   parent: "${name}" where name is the name of the package) and adds into that `docs/packagename/`
+ *   directory an `index.md` file.
  */
 
 import * as constants from '../shared/constants.js';
@@ -21,7 +29,19 @@ import {
 	NodePath as PlatformNodePath
 } from '@effect/platform-node';
 
-import { Array, Cause, Effect, Exit, flow, Layer, pipe, String, Struct, Tuple } from 'effect';
+import {
+	Array,
+	Cause,
+	Effect,
+	Exit,
+	flow,
+	Layer,
+	Option,
+	pipe,
+	String,
+	Struct,
+	Tuple
+} from 'effect';
 
 const parentRegExp = /^parent: Modules$/m;
 const PlatformNodePathService = PlatformPath.Path;
@@ -95,17 +115,25 @@ const program = Effect.gen(function* () {
 		),
 		Effect.flatMap(
 			flow(
-				Array.filter(({ stat: { type } }) => type === 'Directory'),
-				Array.map(({ name, path: folderPath }) =>
-					Effect.gen(function* () {
-						const p = path.join(folderPath, constants.docsFolderName, constants.docgenFolderName);
-						const exists = yield* fs.exists(p);
-						return {
-							name: name,
-							path: p,
-							exists
-						};
-					})
+				Array.filterMap(
+					flow(
+						Option.liftPredicate(({ stat: { type } }) => type === 'Directory'),
+						Option.map(({ name, path: folderPath }) =>
+							Effect.gen(function* () {
+								const p = path.join(
+									folderPath,
+									constants.docsFolderName,
+									constants.docgenFolderName
+								);
+								const exists = yield* fs.exists(p);
+								return {
+									name: name,
+									path: p,
+									exists
+								};
+							})
+						)
+					)
 				),
 				Effect.all
 			)
@@ -119,6 +147,7 @@ const program = Effect.gen(function* () {
 						yield* Effect.log(`name: ${name}`);
 
 						const targetPath = path.join(docsPath, name);
+
 						const copy = (
 							p: string
 						): Effect.Effect<[void[], void[]], PlatformError.PlatformError, never> =>
