@@ -1,5 +1,5 @@
 export default `
-# This workflow is triggered by a new release. It will create the documentation and push it to github pages
+# This workflow is triggered manually. It will create the documentation and push it to github pages
 
 name: Pages
 on:

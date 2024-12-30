@@ -110,7 +110,7 @@ For `pnpm update-config-files` to work, there needs to be a `package.json` file 
 
 `pnpm i` must be run first to install the `configs` package.
 
-When a package is built, you can push it to github. Upon creating a new release, two github workflows will automatically publish the package to npm if this is a public package (see github.workflows.publish.template.ts) and generate the documentation (see github.workflows.pages.template.ts). For this to work, make sure in github:
+When a package is built, you can push it to github. Upon creating a new release, two github workflows will automatically publish the package to npm if this is a public package (see github.workflows.publish.template.ts). For this to work, make sure in github:
 
 - to have read and write permissions under workflow in Settings/Actions/General.
 - to add the NPM_PUBLISH_TOKEN under Repository secrets in Settings/Secrets and variables/Actions
@@ -120,7 +120,7 @@ Notes:
 
 - there is no reason to create releases for a privaye package. So normally the `publish.yml` action should not get launched. However, in case it does, the package will not get published because there is the `private` key in package.json and the `build-and-publish` script has been deactivated.
 - `publish.yml` can be started manually. In that case, it uses has release number the last issued release. It can be useful if the publish action has failed and no modification to the code is necessary. If a modification to the code is necessary, a new release will have to be issued.
-- `pages.yml` can be started manually. This can in particular be useful for private packages for which no release is issued.
+- `pages.yml` creates the documentation for the package. In all cases, it must be started manually.
 
 # 2 - About tsconfig:
 
@@ -130,7 +130,7 @@ Notes:
 
 # 3 - About npm:
 
-NPM is free for public packages. But a package can be private in github (so source code is unavailable) and we we can publish on npm a minified bundled version of it without the source code or maps.
+NPM is free for public packages. I did not find a way to publish to npm a package that is private under github. As a minor security measure, we can publish the code minified and bundled version without the source code or maps. But users can always see the code on github. So this solution can be used for non sensitive stuff.
 NPM error messages are misleading. It can for instance indicate an authentification error when the issue is that the package is marked as private in package.json.
 To use granular tokens to publish to npm, the package to publish must already exist! So the first time, use vscode, cd to the dist folder of the package to publish and hit `npm publish --access=public`. If there is an authentification error, try hitting `npm adduser` first. Once the repo is created on npm, go to its settings and choose 'Require two-factor authentication or an automation or granular access token' for publishing access.
 

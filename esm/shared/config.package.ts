@@ -67,12 +67,10 @@ const transpiledConfig = {
 
 const visibilityConfig = ({
 	repoName,
-	packageName,
 	visibility,
 	keywords
 }: {
 	readonly repoName: string;
-	readonly packageName: string;
 	readonly visibility: Visibility.Type;
 	readonly keywords: ReadonlyArray<string>;
 }) =>
@@ -232,7 +230,7 @@ export default ({
 			}
 		},
 		bundled ? bundledConfig : transpiledConfig,
-		visibilityConfig({ repoName, packageName, visibility, keywords }),
+		visibilityConfig({ repoName, visibility, keywords }),
 		hasDocGen ? docGenConfig : withoutDocGenConfig,
 		hasStaticFolder ? staticFolderConfig : withoutStaticFolderConfig
 	]);
