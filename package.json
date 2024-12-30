@@ -89,7 +89,7 @@
 		"prettier": "latest",
 		"typescript": "latest",
 		"typescript-eslint": "latest",
-		"vite": "latest",
+		"vite": "^5.0.0",
 		"vite-node": "latest",
 		"vitest": "latest",
 		"madge": "latest",
@@ -106,9 +106,7 @@
 	},
 	"pnpm": {
 		"patchedDependencies": {},
-		"overrides": {
-			"tsconfig-paths": "^4.0.0"
-		}
+		"overrides": {}
 	},
 	"description": "Utility to generate configuration files in a repository"
 }

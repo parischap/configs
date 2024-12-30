@@ -33,7 +33,8 @@ export default {
 			prettier: 'latest',
 			typescript: 'latest',
 			'typescript-eslint': 'latest',
-			vite: 'latest',
+			// vite-node and vitest load vite with restriction ^5.0.0. So, if we don't add this restriction to vite we have two different versions of vite running, which causes compatibility issues. Upgrade when new version of vite-node and vitest comes out.
+			vite: '^5.0.0',
 			'vite-node': 'latest',
 			vitest: 'latest',
 			madge: 'latest',
@@ -54,7 +55,7 @@ export default {
 		pnpm: {
 			patchedDependencies: {},
 			overrides: {
-				'tsconfig-paths': '^4.0.0'
+				//'tsconfig-paths': '^4.0.0'
 			}
 		}
 	}
