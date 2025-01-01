@@ -6,7 +6,7 @@ export const effectExperimentalVersion = '^0.35.2';
 export const effectLanguageServiceVersion = '^0.2.0';
 export const effectTypeClassVersion = '^0.30.9';
 export const effectSchemaVersion = '^0.75.5';
-export const pnpmVersion = '9.15.1';
+export const pnpmVersion = '9.15.2';
 
 export const owner = 'parischap';
 export const scope = '@' + owner;
