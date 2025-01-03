@@ -101,10 +101,7 @@ For `pnpm update-config-files` to work, there needs to be a `package.json` file 
 {
 	"scripts": {
 		"update-config-files": "update-config-files",
-	},
-	"devDependencies": {
-		"@parischap/configs": "latest",
-	},
+	}
 }
 ```
 
