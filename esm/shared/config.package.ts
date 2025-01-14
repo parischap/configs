@@ -211,21 +211,20 @@ export default ({
 					'publish-to-npm': `cd ${constants.prodFolderName} && npm publish --access=public && cd ..`,
 					'install-prod': `cd ${constants.prodFolderName} && pnpm i && cd ..`,
 					build:
-						'pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm --if-present generate-types && pnpm install-prod',
-
-					// Must be present even for private packages as it can be used for other purposes
-					repository:
-						packageName === repoName ?
-							gitRepo(repoName)
-						:	{
-								...gitRepo(repoName),
-								directory: `packages/${packageName}`
-							},
-					// Must be present even for private packages as it can be used for instance by docgen
-					homepage:
-						`https://github.com/${constants.owner}/${repoName}` +
-						(packageName === repoName ? '' : `/tree/master/packages/${packageName}`)
-				}
+						'pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm --if-present generate-types && pnpm install-prod'
+				},
+				// Must be present even for private packages as it can be used for other purposes
+				repository:
+					packageName === repoName ?
+						gitRepo(repoName)
+					:	{
+							...gitRepo(repoName),
+							directory: `packages/${packageName}`
+						},
+				// Must be present even for private packages as it can be used for instance by docgen
+				homepage:
+					`https://github.com/${constants.owner}/${repoName}` +
+					(packageName === repoName ? '' : `/tree/master/packages/${packageName}`)
 			}
 		},
 		bundled ? bundledConfig : transpiledConfig,

@@ -17,11 +17,6 @@
 		"publish-to-npm": "cd dist && npm publish --access=public && cd ..",
 		"install-prod": "cd dist && pnpm i && cd ..",
 		"build": "pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm --if-present generate-types && pnpm install-prod",
-		"repository": {
-			"type": "git",
-			"url": "git+https://github.com/parischap/configs.git"
-		},
-		"homepage": "https://github.com/parischap/configs",
 		"generate-types": "tsc -b tsconfig.esm.json --emitDeclarationOnly",
 		"compile": "pnpm bundle && pnpm prodify",
 		"build-and-publish": "pnpm build && pnpm checks && pnpm publish-to-npm",
@@ -57,6 +52,11 @@
 			"!*.map"
 		]
 	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/parischap/configs.git"
+	},
+	"homepage": "https://github.com/parischap/configs",
 	"dependencies": {
 		"@effect/experimental": "^0.36.2",
 		"globals": "latest",
