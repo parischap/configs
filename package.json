@@ -16,7 +16,7 @@
 		"clean-prod": "shx rm -rf dist && shx rm -rf .tsbuildinfo && shx mkdir -p dist",
 		"publish-to-npm": "cd dist && npm publish --access=public && cd ..",
 		"install-prod": "cd dist && pnpm i && cd ..",
-		"build": "pnpm clean-prod && pnpm pre-build && pnpm compile && pnpm post-build && pnpm generate-types && pnpm install-prod",
+		"build": "pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm generate-types && pnpm install-prod",
 		"repository": {
 			"type": "git",
 			"url": "git+https://github.com/parischap/configs.git"
@@ -66,7 +66,7 @@
 		"@effect/platform-node": "^0.67.2"
 	},
 	"sideEffects": false,
-	"packageManager": "pnpm@9.15.1",
+	"packageManager": "pnpm@9.15.2",
 	"devDependencies": {
 		"ts-deepmerge": "latest",
 		"@tsconfig/node20": "latest",
