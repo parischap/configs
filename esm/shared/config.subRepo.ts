@@ -44,8 +44,6 @@ export default ({
 					[`${constants.scope}/${packageName}`]: 'link:.'
 				},
 				scripts: {
-					'pre-build': '',
-					'post-build': '',
 					prodify: 'prodify',
 					bundle: 'bundle-files'
 				}

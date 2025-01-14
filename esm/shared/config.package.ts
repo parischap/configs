@@ -212,7 +212,7 @@ export default ({
 					'publish-to-npm': `cd ${constants.prodFolderName} && npm publish --access=public && cd ..`,
 					'install-prod': `cd ${constants.prodFolderName} && pnpm i && cd ..`,
 					build:
-						'pnpm clean-prod && pnpm pre-build && pnpm compile && pnpm post-build && pnpm generate-types && pnpm install-prod',
+						'pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm generate-types && pnpm install-prod',
 
 					// Must be present even for private packages as it can be used for other purposes
 					repository:
