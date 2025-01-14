@@ -16,7 +16,7 @@
 		"clean-prod": "shx rm -rf dist && shx rm -rf .tsbuildinfo && shx mkdir -p dist",
 		"publish-to-npm": "cd dist && npm publish --access=public && cd ..",
 		"install-prod": "cd dist && pnpm i && cd ..",
-		"build": "pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm generate-types && pnpm install-prod",
+		"build": "pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm --if-present generate-types && pnpm install-prod",
 		"repository": {
 			"type": "git",
 			"url": "git+https://github.com/parischap/configs.git"

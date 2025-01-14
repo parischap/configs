@@ -49,7 +49,6 @@ const transpiledConfig = {
 			'transpile-esm': `tsc -b ${constants.projectTsConfigFileName}`,
 			'transpile-cjs': `babel ${constants.prodFolderName}/${constants.projectFolderName} --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir ${constants.prodFolderName}/${constants.commonJsFolderName} --source-maps`,
 			'transpile-annotate': `babel ${constants.prodFolderName} --plugins annotate-pure-calls --out-dir ${constants.prodFolderName} --source-maps`,
-			'generate-types': '',
 			compile: 'pnpm transpile-esm && pnpm transpile-cjs && pnpm transpile-annotate'
 		},
 		publishConfig: {
@@ -212,7 +211,7 @@ export default ({
 					'publish-to-npm': `cd ${constants.prodFolderName} && npm publish --access=public && cd ..`,
 					'install-prod': `cd ${constants.prodFolderName} && pnpm i && cd ..`,
 					build:
-						'pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm generate-types && pnpm install-prod',
+						'pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm --if-present generate-types && pnpm install-prod',
 
 					// Must be present even for private packages as it can be used for other purposes
 					repository:
