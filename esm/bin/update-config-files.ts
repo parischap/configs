@@ -115,7 +115,11 @@ const program = Effect.gen(function* () {
 			)
 		),
 		Effect.map(
-			Array.partition(Predicate.struct({ info: flow(Struct.get('type'), Equal.equals('File')) }))
+			Array.partition(
+				Predicate.struct({
+					info: flow(Struct.get('type')<PlatformFs.File.Info>, Equal.equals('File'))
+				})
+			)
 		)
 	);
 
@@ -144,7 +148,11 @@ const program = Effect.gen(function* () {
 		Effect.map(
 			flow(
 				Array.flatten,
-				Array.filter(Predicate.struct({ info: flow(Struct.get('type'), Equal.equals('File')) })),
+				Array.filter(
+					Predicate.struct({
+						info: flow(Struct.get('type')<PlatformFs.File.Info>, Equal.equals('File'))
+					})
+				),
 				Array.appendAll(rootFiles),
 				// Paths in project.config.js are always posix style
 				Array.map(flow(Struct.get('name'), utils.fromOsPathToPosixPath))
