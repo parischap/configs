@@ -9,17 +9,17 @@ importers:
   .:
     dependencies:
       '@effect/experimental':
-        specifier: ^0.36.2
-        version: 0.36.2(@effect/platform-node@0.68.2(@effect/platform@0.72.2(effect@3.12.2))(effect@3.12.2))(@effect/platform@0.72.2(effect@3.12.2))(effect@3.12.2)(ws@8.18.0)
+        specifier: ^0.38.0
+        version: 0.38.0(@effect/platform-node@0.70.0(@effect/platform@0.74.0(effect@3.12.5))(effect@3.12.5))(@effect/platform@0.74.0(effect@3.12.5))(effect@3.12.5)(ws@8.18.0)
       '@effect/platform':
-        specifier: ^0.72.2
-        version: 0.72.2(effect@3.12.2)
+        specifier: ^0.74.0
+        version: 0.74.0(effect@3.12.5)
       '@effect/platform-node':
-        specifier: ^0.68.2
-        version: 0.68.2(@effect/platform@0.72.2(effect@3.12.2))(effect@3.12.2)
+        specifier: ^0.70.0
+        version: 0.70.0(@effect/platform@0.74.0(effect@3.12.5))(effect@3.12.5)
       effect:
-        specifier: ^3.12.2
-        version: 3.12.2
+        specifier: ^3.12.5
+        version: 3.12.5
       globals:
         specifier: latest
         version: 15.8.0
@@ -128,7 +128,7 @@ importers:
         version: 5.4.11(@types/node@22.9.0)(terser@5.36.0)
       vite-node:
         specifier: latest
-        version: 2.1.8(@types/node@22.9.0)(terser@5.36.0)
+        version: 3.0.2(@types/node@22.9.0)(terser@5.36.0)
       vitest:
         specifier: latest
         version: 2.1.8(@types/node@22.9.0)(terser@5.36.0)
@@ -241,12 +241,12 @@ packages:
       tsx: ^4.1.0
       typescript: ^5.2.2
 
-  '@effect/experimental@0.36.2':
-    resolution: {integrity: sha512-dW5mQxprG3l/0cgObRUbBikpFffKge5wugJglvvh4rKTpqsZwlGjzwAyoicgx3AUwpi41MpX2p3y9gfhHjStIg==}
+  '@effect/experimental@0.38.0':
+    resolution: {integrity: sha512-SyFugerAkM+V4fF6OvVQFetfFooAZA0zsOE5nBEwp2+zC6VBfNq+mWrLnOd3JwMLIrLpvIYAFs/+8FrYBdM49w==}
     peerDependencies:
-      '@effect/platform': ^0.72.2
-      '@effect/platform-node': ^0.68.2
-      effect: ^3.12.2
+      '@effect/platform': ^0.74.0
+      '@effect/platform-node': ^0.70.0
+      effect: ^3.12.5
       ioredis: ^5
       lmdb: ^3
       ws: ^8
@@ -265,22 +265,22 @@ packages:
     engines: {node: '>=0.10.0'}
     hasBin: true
 
-  '@effect/platform-node-shared@0.22.2':
-    resolution: {integrity: sha512-LRmcC2NSzxdJLXc22tHuTau63Mn/TjOz5UKEAcVCOrNTnDx1zXTP4UwDTkvlko6P8PEUElMqjcUOr2jwR19/UQ==}
+  '@effect/platform-node-shared@0.24.0':
+    resolution: {integrity: sha512-kgvA2MhpGX2ubwzr5JexoyucKPvy6arCqJjpENX8SWz5eJ8UqtH2LUX3hDwjDQOkOTu37i0zLUi5FeogtXj85A==}
     peerDependencies:
-      '@effect/platform': ^0.72.2
-      effect: ^3.12.2
+      '@effect/platform': ^0.74.0
+      effect: ^3.12.5
 
-  '@effect/platform-node@0.68.2':
-    resolution: {integrity: sha512-+eufA82A1ObZWrWDPPcCCRpo+WZ5J32oeA3VDSiznqKcd97FxlHMf4M8WoHt/sx4zxpKrGPwTlnKXCTENiXU0Q==}
+  '@effect/platform-node@0.70.0':
+    resolution: {integrity: sha512-ID8TAU3Eqign7cByYu9dau5Q+10fN5C/9AJ+MxzxUaGb2s0hddTO4lpyCSzyHnk3m8uAVsDyAJG555NfRtHrug==}
     peerDependencies:
-      '@effect/platform': ^0.72.2
-      effect: ^3.12.2
+      '@effect/platform': ^0.74.0
+      effect: ^3.12.5
 
-  '@effect/platform@0.72.2':
-    resolution: {integrity: sha512-7oWNTyrlkDoopA2kEm2s3M1VAJETnIK/bVlW4qqEVbKLern8znPotIx1fRNtTIUANPKhUMclC3Jt+R+3UEUdUw==}
+  '@effect/platform@0.74.0':
+    resolution: {integrity: sha512-WTniLZ9j5+sLZWKIEwJIUBvA5xKKG/xiLbgApTotc24ohjBZTldcMRNG/a+nAtKuFUSFn88DYY3iReW790xPFw==}
     peerDependencies:
-      effect: ^3.12.2
+      effect: ^3.12.5
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -1251,6 +1251,15 @@ packages:
       supports-color:
         optional: true
 
+  debug@4.4.0:
+    resolution: {integrity: sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==}
+    engines: {node: '>=6.0'}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+
   decode-named-character-reference@1.0.2:
     resolution: {integrity: sha512-O8x12RzrUF8xyVcY0KJowWsmaJxQbmy0/EtnNtHRpsOcT7dFk5W598coHqBVpmWo1oQQfsCqfCmkZN5DJrZVdg==}
 
@@ -1351,8 +1360,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  effect@3.12.2:
-    resolution: {integrity: sha512-PslVtcxwapLj95icHZJ/ribCS4O26I4o8ga9zzSdLqRTPRBobwbLTJ2E/Bzim5knJjTutfNdVHOGzl8FW03K5Q==}
+  effect@3.12.5:
+    resolution: {integrity: sha512-hP+ev9NTjYcvySbPOOgrYiwCYxiIcjuvtR8WXMoSZEZEshOyQlDwgo1Z56kVezv1rTxz20PEGVqZGlXwxe6Ofw==}
 
   electron-to-chromium@1.5.55:
     resolution: {integrity: sha512-6maZ2ASDOTBtjt9FhqYPRnbvKU5tjG0IN9SztUOWYw2AzNDNpKJYLJmlK0/En4Hs/aiWnB+JZ+gW19PIGszgKg==}
@@ -2100,6 +2109,9 @@ packages:
   pathe@1.1.2:
     resolution: {integrity: sha512-whLdWMYL2TwI08hn8/ZqAbrVemu0LNaNNJZX73O6qaIdCTfXutsLhMkjdENX0qhsQ9uIimo4/aQOmXkoon2nDQ==}
 
+  pathe@2.0.2:
+    resolution: {integrity: sha512-15Ztpk+nov8DR524R4BF7uEuzESgzUEAV4Ah7CUMNGXdE5ELuvxElxGXndBl32vMSsWa1jpNf22Z+Er3sKwq+w==}
+
   pathval@2.0.0:
     resolution: {integrity: sha512-vE7JKRyES09KiunauX7nd2Q9/L7lhok4smP9RZTDeD4MVs72Dp2qNFVz39Nz5a0FVEW0BJR6C0DYrq6unoziZA==}
     engines: {node: '>= 14.16'}
@@ -2503,9 +2515,18 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
+  uuid@11.0.5:
+    resolution: {integrity: sha512-508e6IcKLrhxKdBbcA2b4KQZlLVp2+J5UwQ6F7Drckkc5N9ZJwFa4TgWtsww9UG8fGHbm6gbV19TdM5pQ4GaIA==}
+    hasBin: true
+
   vite-node@2.1.8:
     resolution: {integrity: sha512-uPAwSr57kYjAUux+8E2j0q0Fxpn8M9VoyfGiRI8Kfktz9NcYMCenwY5RnZxnF1WTu3TGiYipirIzacLL3VVGFg==}
     engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+
+  vite-node@3.0.2:
+    resolution: {integrity: sha512-hsEQerBAHvVAbv40m3TFQe/lTEbOp7yDpyqMJqr2Tnd+W58+DEYOt+fluQgekOePcsNBmR77lpVAnIU2Xu4SvQ==}
+    engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
 
   vite@5.4.11:
@@ -2784,13 +2805,14 @@ snapshots:
       tsx: 4.19.2
       typescript: 5.6.3
 
-  '@effect/experimental@0.36.2(@effect/platform-node@0.68.2(@effect/platform@0.72.2(effect@3.12.2))(effect@3.12.2))(@effect/platform@0.72.2(effect@3.12.2))(effect@3.12.2)(ws@8.18.0)':
+  '@effect/experimental@0.38.0(@effect/platform-node@0.70.0(@effect/platform@0.74.0(effect@3.12.5))(effect@3.12.5))(@effect/platform@0.74.0(effect@3.12.5))(effect@3.12.5)(ws@8.18.0)':
     dependencies:
-      '@effect/platform': 0.72.2(effect@3.12.2)
-      effect: 3.12.2
+      '@effect/platform': 0.74.0(effect@3.12.5)
+      effect: 3.12.5
       msgpackr: 1.11.2
+      uuid: 11.0.5
     optionalDependencies:
-      '@effect/platform-node': 0.68.2(@effect/platform@0.72.2(effect@3.12.2))(effect@3.12.2)
+      '@effect/platform-node': 0.70.0(@effect/platform@0.74.0(effect@3.12.5))(effect@3.12.5)
       ws: 8.18.0
 
   '@effect/markdown-toc@0.1.0':
@@ -2808,18 +2830,18 @@ snapshots:
       repeat-string: 1.6.1
       strip-color: 0.1.0
 
-  '@effect/platform-node-shared@0.22.2(@effect/platform@0.72.2(effect@3.12.2))(effect@3.12.2)':
+  '@effect/platform-node-shared@0.24.0(@effect/platform@0.74.0(effect@3.12.5))(effect@3.12.5)':
     dependencies:
-      '@effect/platform': 0.72.2(effect@3.12.2)
+      '@effect/platform': 0.74.0(effect@3.12.5)
       '@parcel/watcher': 2.4.1
-      effect: 3.12.2
+      effect: 3.12.5
       multipasta: 0.2.5
 
-  '@effect/platform-node@0.68.2(@effect/platform@0.72.2(effect@3.12.2))(effect@3.12.2)':
+  '@effect/platform-node@0.70.0(@effect/platform@0.74.0(effect@3.12.5))(effect@3.12.5)':
     dependencies:
-      '@effect/platform': 0.72.2(effect@3.12.2)
-      '@effect/platform-node-shared': 0.22.2(@effect/platform@0.72.2(effect@3.12.2))(effect@3.12.2)
-      effect: 3.12.2
+      '@effect/platform': 0.74.0(effect@3.12.5)
+      '@effect/platform-node-shared': 0.24.0(@effect/platform@0.74.0(effect@3.12.5))(effect@3.12.5)
+      effect: 3.12.5
       mime: 3.0.0
       undici: 7.2.0
       ws: 8.18.0
@@ -2827,9 +2849,9 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform@0.72.2(effect@3.12.2)':
+  '@effect/platform@0.74.0(effect@3.12.5)':
     dependencies:
-      effect: 3.12.2
+      effect: 3.12.5
       find-my-way-ts: 0.1.5
       multipasta: 0.2.5
 
@@ -3629,6 +3651,10 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
+  debug@4.4.0:
+    dependencies:
+      ms: 2.1.3
+
   decode-named-character-reference@1.0.2:
     dependencies:
       character-entities: 2.0.2
@@ -3733,7 +3759,7 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  effect@3.12.2:
+  effect@3.12.5:
     dependencies:
       fast-check: 3.23.2
 
@@ -4617,6 +4643,8 @@ snapshots:
 
   pathe@1.1.2: {}
 
+  pathe@2.0.2: {}
+
   pathval@2.0.0: {}
 
   picocolors@1.1.1: {}
@@ -5011,12 +5039,32 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
+  uuid@11.0.5: {}
+
   vite-node@2.1.8(@types/node@22.9.0)(terser@5.36.0):
     dependencies:
       cac: 6.7.14
       debug: 4.3.7
       es-module-lexer: 1.6.0
       pathe: 1.1.2
+      vite: 5.4.11(@types/node@22.9.0)(terser@5.36.0)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vite-node@3.0.2(@types/node@22.9.0)(terser@5.36.0):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.4.0
+      es-module-lexer: 1.6.0
+      pathe: 2.0.2
       vite: 5.4.11(@types/node@22.9.0)(terser@5.36.0)
     transitivePeerDependencies:
       - '@types/node'

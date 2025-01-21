@@ -5,5 +5,6 @@ export default {
 	srcDir: `./${constants.projectFolderName}`,
 	outDir: constants.docsFolderName,
 	exclude: [`${constants.projectFolderName}/index.ts`],
-	enforceDescriptions: true
+	enforceDescriptions: true,
+	enforceVersion: false
 };

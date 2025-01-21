@@ -1,10 +1,9 @@
 import { join } from 'node:path';
-export const effectVersion = '^3.12.2';
-export const effectPlatformNodeVersion = '^0.68.2';
-export const effectPlatformVersion = '^0.72.2';
-export const effectExperimentalVersion = '^0.36.2';
+export const effectVersion = '^3.12.5';
+export const effectPlatformNodeVersion = '^0.70.0';
+export const effectPlatformVersion = '^0.74.0';
+export const effectExperimentalVersion = '^0.38.0';
 export const effectLanguageServiceVersion = '^0.2.0';
-export const effectTypeClassVersion = '^0.31.2';
 export const pnpmVersion = '9.15.2';
 
 export const owner = 'parischap';
