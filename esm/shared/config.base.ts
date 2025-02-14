@@ -12,6 +12,7 @@ import tsConfigEsmLibrary from './tsconfig.esm.library.js';
 import tsConfigEsmNode from './tsconfig.esm.node.js';
 import tsConfig from './tsconfig.js';
 import tsConfigOthers from './tsconfig.others.js';
+import viteConfigTemplate from './vite.config.template.js';
 
 export namespace Environment {
 	export enum Type {
@@ -54,7 +55,7 @@ export default ({
 	[constants.nonProjectTsConfigFileName]: tsConfigOthers,
 	[constants.tsConfigFileName]: tsConfig,
 	[constants.tscLintTsConfigFileName]: tsConfigCheck,
-	[constants.viteConfigFileName]: 'export default {};',
+	[constants.viteConfigFileName]: viteConfigTemplate,
 	[constants.packageJsonFileName]: {
 		name: `${constants.devScope}/${packageName}`,
 		type: 'module',
