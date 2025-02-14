@@ -58,15 +58,15 @@
 	},
 	"homepage": "https://github.com/parischap/configs",
 	"dependencies": {
-		"@effect/experimental": "^0.38.0",
+		"@effect/experimental": "^0.41.0",
 		"globals": "latest",
 		"minimatch": "latest",
-		"effect": "^3.12.5",
-		"@effect/platform": "^0.74.0",
-		"@effect/platform-node": "^0.70.0"
+		"effect": "^3.13.0",
+		"@effect/platform": "^0.77.0",
+		"@effect/platform-node": "^0.73.0"
 	},
 	"sideEffects": false,
-	"packageManager": "pnpm@9.15.2",
+	"packageManager": "pnpm@9.15.4",
 	"devDependencies": {
 		"ts-deepmerge": "latest",
 		"@tsconfig/node20": "latest",
