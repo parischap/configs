@@ -58,12 +58,12 @@
 	},
 	"homepage": "https://github.com/parischap/configs",
 	"dependencies": {
-		"@effect/experimental": "^0.41.0",
+		"@effect/experimental": "^0.41.2",
 		"globals": "latest",
 		"minimatch": "latest",
-		"effect": "^3.13.0",
-		"@effect/platform": "^0.77.0",
-		"@effect/platform-node": "^0.73.0"
+		"effect": "^3.13.2",
+		"@effect/platform": "^0.77.2",
+		"@effect/platform-node": "^0.73.2"
 	},
 	"sideEffects": false,
 	"packageManager": "pnpm@9.15.4",
@@ -89,7 +89,7 @@
 		"prettier": "latest",
 		"typescript": "latest",
 		"typescript-eslint": "latest",
-		"vite": "^5.0.0",
+		"vite": "latest",
 		"vite-node": "latest",
 		"vitest": "latest",
 		"madge": "latest",

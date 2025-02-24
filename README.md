@@ -134,3 +134,7 @@ To use granular tokens to publish to npm, the package to publish must already ex
 # 4 - About package.json:
 
 Dependencies imported at the top of a monorepo and bin executables defined there are available in all sub packages. Only devDependencies and bin executables should be added in that manner as each package must have the list of its real dependencies.
+
+# 5 - About vitest:
+
+Creating a workspace is useful if we need to run all test files with the vitest cli from the monorepo level. But we run tests in each package seperately. So do not use this feature. In settings.json, add `"vitest.maximumConfigs": 15` so the vitest vscode extension can load all extensions.

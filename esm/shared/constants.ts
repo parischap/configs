@@ -1,8 +1,8 @@
 import { join } from 'node:path';
-export const effectVersion = '^3.13.0';
-export const effectPlatformNodeVersion = '^0.73.0';
-export const effectPlatformVersion = '^0.77.0';
-export const effectExperimentalVersion = '^0.41.0';
+export const effectVersion = '^3.13.2';
+export const effectPlatformNodeVersion = '^0.73.2';
+export const effectPlatformVersion = '^0.77.2';
+export const effectExperimentalVersion = '^0.41.2';
 export const effectLanguageServiceVersion = '^0.2.0';
 export const pnpmVersion = '9.15.4';
 
@@ -35,7 +35,6 @@ export const viteConfigFileName = 'vite.config.ts';
 export const viteTimeStampFileNamePattern = 'vite.config.ts.timestamp-*.mjs';
 export const readMeFileName = 'README.md';
 export const licenseFileName = 'LICENSE';
-export const vitestWorkspaceFileName = 'vitest.workspace.ts';
 export const configsManagerInitFileName = 'init.mjs';
 export const pnpmWorkspaceFileName = 'pnpm-workspace.yaml';
 export const pnpmLockFileName = 'pnpm-lock.yaml';

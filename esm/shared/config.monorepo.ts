@@ -1,6 +1,5 @@
 import * as constants from './constants.js';
 import pnpmWorkspaceTemplate from './pnpm.workspace.template.js';
-import vitestWorkspaceTemplate from './vitest.workspace.template.js';
 
 import { basename, resolve } from 'node:path';
 import { merge } from 'ts-deepmerge';
@@ -17,7 +16,6 @@ export default merge(
 	configTop,
 	{
 		[constants.pnpmWorkspaceFileName]: pnpmWorkspaceTemplate,
-		[constants.vitestWorkspaceFileName]: vitestWorkspaceTemplate,
 		[constants.packageJsonFileName]: {
 			description: 'Top repository of monorepo',
 			devDependencies: {
