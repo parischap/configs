@@ -23,7 +23,6 @@ export default {
 			'@types/eslint': 'latest',
 			'@types/eslint-config-prettier': 'latest',
 			'@types/eslint__eslintrc': 'latest',
-			'@types/eslint__js': 'latest',
 			'@types/node': 'latest',
 			'cross-env': 'latest',
 			eslint: 'latest',
