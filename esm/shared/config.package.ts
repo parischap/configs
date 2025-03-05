@@ -49,7 +49,7 @@ const transpiledConfig = {
 			'transpile-esm': `tsc -b ${constants.projectTsConfigFileName}`,
 			'transpile-cjs': `babel ${constants.prodFolderName}/${constants.projectFolderName} --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir ${constants.prodFolderName}/${constants.commonJsFolderName} --source-maps`,
 			'transpile-annotate': `babel ${constants.prodFolderName} --plugins annotate-pure-calls --out-dir ${constants.prodFolderName} --source-maps`,
-			compile: 'pnpm transpile-esm && pnpm transpile-cjs && pnpm transpile-annotate'
+			compile: 'pnpm transpile-esm && pnpm transpile-cjs && pnpm transpile-annotate && pnpm prodify'
 		},
 		publishConfig: {
 			main: `./${constants.commonJsFolderName}/index.js`,
