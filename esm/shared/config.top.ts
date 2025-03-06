@@ -22,7 +22,6 @@ export default {
 			'@html-eslint/parser': 'latest',
 			'@types/eslint': 'latest',
 			'@types/eslint-config-prettier': 'latest',
-			'@types/eslint__eslintrc': 'latest',
 			'@types/node': 'latest',
 			'cross-env': 'latest',
 			eslint: 'latest',
