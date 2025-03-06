@@ -121,13 +121,13 @@ importers:
         specifier: latest
         version: 8.13.0(eslint@9.14.0)(typescript@5.6.3)
       vite:
-        specifier: ^6.2.0
+        specifier: latest
         version: 6.2.0(@types/node@22.9.0)(terser@5.36.0)(tsx@4.19.2)(yaml@2.6.0)
       vite-node:
-        specifier: ^3.0.7
+        specifier: latest
         version: 3.0.7(@types/node@22.9.0)(terser@5.36.0)(tsx@4.19.2)(yaml@2.6.0)
       vitest:
-        specifier: ^3.0.7
+        specifier: latest
         version: 3.0.7(@types/debug@4.1.12)(@types/node@22.9.0)(terser@5.36.0)(tsx@4.19.2)(yaml@2.6.0)
 
 packages:
@@ -1882,9 +1882,6 @@ packages:
       typescript:
         optional: true
 
-  magic-string@0.30.12:
-    resolution: {integrity: sha512-Ea8I3sQMVXr8JhN4z+H/d8zwo+tYDgHE9+5G4Wnrwhs0gaK9fXTKx0Tw5Xwsd/bCPTTZNRAdpyzvoeORe9LYpw==}
-
   magic-string@0.30.17:
     resolution: {integrity: sha512-sNPKHvyjVf7gyjwS4xGTaW/mCnF8wnjtifKBEhxfZ7E/S8tQ0rssrwGNn6q8JH/ohItJfSQp9mBtQYuTlH5QnA==}
 
@@ -3472,7 +3469,7 @@ snapshots:
       '@vue/compiler-ssr': 3.5.12
       '@vue/shared': 3.5.12
       estree-walker: 2.0.2
-      magic-string: 0.30.12
+      magic-string: 0.30.17
       postcss: 8.5.3
       source-map-js: 1.2.1
 
@@ -4348,10 +4345,6 @@ snapshots:
       typescript: 5.6.3
     transitivePeerDependencies:
       - supports-color
-
-  magic-string@0.30.12:
-    dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.0
 
   magic-string@0.30.17:
     dependencies:
