@@ -1,3 +1,7 @@
+/**
+ * This config implements what is necessary for the configs package. It must be used by this package
+ * only.
+ */
 import { basename, resolve } from 'node:path';
 import { merge } from 'ts-deepmerge';
 import configBase, { Environment } from './config.base.js';

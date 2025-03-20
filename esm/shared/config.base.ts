@@ -1,3 +1,8 @@
+/**
+ * This config implements what is necessary in all situations. It should not be used directly. It is
+ * included by config.monorepo.ts, config.starter.ts, config.subrepo.ts and config.onepackagerepo.ts
+ * configs.
+ */
 import * as constants from './constants.js';
 import eslintConfigBrowserTemplate from './eslint.config.browser.template.js';
 import eslintConfigLibraryTemplate from './eslint.config.library.template.js';

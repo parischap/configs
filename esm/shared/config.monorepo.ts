@@ -1,3 +1,4 @@
+/** This config is the one to be used at the root (top) of a monorepo. */
 import * as constants from './constants.js';
 import pnpmWorkspaceTemplate from './pnpm.workspace.template.js';
 

@@ -1,3 +1,8 @@
+/**
+ * This config implements what is necessary at the root of a repo. It should not be used directly.
+ * It is included by config.monorepo.ts, config.starter.ts and config.onepackagerepo.ts configs.
+ */
+
 import * as constants from './constants.js';
 import githubWorkflowsPagesTemplate from './github.workflows.pages.template.js';
 import githubWorkflowsPublishTemplate from './github.workflows.publish.template.js';

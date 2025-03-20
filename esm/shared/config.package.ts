@@ -1,3 +1,8 @@
+/**
+ * This config implements what is necessary in a package that needs building. It should not be used
+ * directly. It is included by config.starter.ts, config.subrepo.ts and config.onepackagerepo.ts
+ * configs.
+ */
 import { merge } from 'ts-deepmerge';
 import * as constants from './constants.js';
 import docgenConfig from './docgenConfig.js';

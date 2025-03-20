@@ -1,3 +1,4 @@
+/** This config is the one to be used in the sub-package of a monorepo. */
 import { basename, dirname, resolve } from 'node:path';
 import { merge } from 'ts-deepmerge';
 import configBase, { Environment } from './config.base.js';

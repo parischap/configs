@@ -1,6 +1,6 @@
 # 1 - Doc
 
-Goal of this package is to install all the necessary configuration files of a package (eslint.config.js, prettier.config.js,...). If a configuration files needs changing, we only need to modify it in this package and all the packages that use the `configs` packages will be updated automatically.
+Goal of this package is to install all the necessary configuration files of a package (eslint.config.js, prettier.config.js,...). If a configuration file needs changing, we only need to modify it in this package and all the packages that use the `configs` packages will be updated automatically.
 
 The `configs` package must be installed as devDependency of the target package. In a monorepo, it must be installed as devDependency at the root.
 

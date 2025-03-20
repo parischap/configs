@@ -1,5 +1,6 @@
 import { Environment } from './shared/config.base.js';
 import configMonorepo from './shared/config.monorepo.js';
+import configOnePackageRepo from './shared/config.onepackagerepo.js';
 import { Visibility } from './shared/config.package.js';
 import configStarter from './shared/config.starter.js';
 import configSubRepo from './shared/config.subRepo.js';
@@ -13,6 +14,7 @@ import * as utils from './shared/utils.js';
 
 export {
 	configMonorepo,
+	configOnePackageRepo,
 	configStarter,
 	configSubRepo,
 	constants,
