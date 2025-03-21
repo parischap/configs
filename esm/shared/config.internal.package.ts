@@ -29,6 +29,7 @@ const bundledConfig = {
 			'@effect/experimental': constants.effectExperimentalVersion
 		},
 		scripts: {
+			bundle: 'bundle-files',
 			// generate types even when bundling because they can be useful as in the Configs package
 			'generate-types': `tsc -b ${constants.projectTsConfigFileName} --emitDeclarationOnly`,
 			compile: 'pnpm bundle && pnpm prodify'
@@ -163,6 +164,7 @@ const withoutDocGenConfig = {
 export default ({
 	repoName,
 	packageName,
+	description,
 	bundled,
 	visibility,
 	hasStaticFolder,
@@ -171,6 +173,7 @@ export default ({
 }: {
 	readonly repoName: string;
 	readonly packageName: string;
+	readonly description: string;
 	readonly bundled: boolean;
 	readonly visibility: Visibility.Type;
 	readonly hasStaticFolder: boolean;
@@ -181,11 +184,16 @@ export default ({
 		{
 			[constants.madgeConfigFileName]: madgercTemplate,
 			[constants.packageJsonFileName]: {
+				description,
 				module: `./${constants.projectFolderName}/index.js`,
 				exports: {
 					'.': {
 						import: `./${constants.projectFolderName}/index.ts`
 					}
+				},
+				devDependencies: {
+					// Include self for tests
+					[`${constants.scope}/${packageName}`]: 'link:.'
 				},
 				publishConfig: {
 					// Remove scripts in prod
@@ -216,7 +224,8 @@ export default ({
 					'publish-to-npm': `cd ${constants.prodFolderName} && npm publish --access=public && cd ..`,
 					'install-prod': `cd ${constants.prodFolderName} && pnpm i && cd ..`,
 					build:
-						'pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm --if-present generate-types && pnpm install-prod'
+						'pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm --if-present generate-types && pnpm install-prod',
+					prodify: 'prodify'
 				},
 				// Must be present even for private packages as it can be used for other purposes
 				repository:

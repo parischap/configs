@@ -8,6 +8,7 @@ import configInternalTop from './config.internal.top.js';
 const packageName = basename(resolve());
 
 export default ({
+	description,
 	environment,
 	bundled,
 	visibility,
@@ -15,6 +16,7 @@ export default ({
 	hasDocGen,
 	keywords
 }: {
+	readonly description: string;
 	readonly environment: Environment.Type;
 	readonly bundled: boolean;
 	readonly visibility: Visibility.Type;
@@ -30,6 +32,7 @@ export default ({
 		configInternalPackage({
 			packageName,
 			repoName: packageName,
+			description,
 			bundled,
 			visibility,
 			hasStaticFolder,

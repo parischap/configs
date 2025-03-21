@@ -3,13 +3,13 @@ import { basename, dirname, resolve } from 'node:path';
 import { merge } from 'ts-deepmerge';
 import configInternalBase, { Environment } from './config.internal.base.js';
 import configInternalPackage, { Visibility } from './config.internal.package.js';
-import * as constants from './constants.js';
 
 const rootPath = resolve();
 const packageName = basename(rootPath);
 const repoName = basename(dirname(dirname(rootPath)));
 
 export default ({
+	description,
 	environment,
 	bundled,
 	visibility,
@@ -17,6 +17,7 @@ export default ({
 	hasDocGen,
 	keywords
 }: {
+	readonly description: string;
 	readonly environment: Environment.Type;
 	readonly bundled: boolean;
 	readonly visibility: Visibility.Type;
@@ -32,22 +33,11 @@ export default ({
 		configInternalPackage({
 			packageName,
 			repoName,
+			description,
 			bundled,
 			visibility,
 			hasStaticFolder,
 			hasDocGen,
 			keywords
-		}),
-		{
-			[constants.packageJsonFileName]: {
-				devDependencies: {
-					// Include self for tests
-					[`${constants.scope}/${packageName}`]: 'link:.'
-				},
-				scripts: {
-					prodify: 'prodify',
-					bundle: 'bundle-files'
-				}
-			}
-		}
+		})
 	);

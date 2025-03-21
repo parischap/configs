@@ -21,6 +21,7 @@ export default merge(
 	configInternalPackage({
 		packageName,
 		repoName: packageName,
+		description: 'Utility to generate configuration files in a repository',
 		bundled: true,
 		visibility: Visibility.Type.PublicByForce,
 		hasStaticFolder: false,
@@ -30,7 +31,6 @@ export default merge(
 	configInternalTop,
 	{
 		[constants.packageJsonFileName]: {
-			description: 'Utility to generate configuration files in a repository',
 			dependencies: {
 				globals: 'latest',
 				minimatch: 'latest',
