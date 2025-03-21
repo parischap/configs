@@ -21,10 +21,9 @@ export default {
 			shx: 'latest',
 			'@eslint/eslintrc': 'latest',
 			'@eslint/js': 'latest',
-			//'@eslint/json': 'latest',
-			//'@eslint/markdown': 'latest',
 			'@html-eslint/eslint-plugin': 'latest',
 			'@html-eslint/parser': 'latest',
+			'@parischap/configs': 'latest',
 			'@types/eslint': 'latest',
 			'@types/eslint-config-prettier': 'latest',
 			'@types/node': 'latest',
@@ -53,7 +52,9 @@ export default {
 			tsx: 'latest'
 			//'eslint-plugin-import': 'latest',
 			//'@typescript-eslint/parser': 'latest',
-			//'eslint-import-resolver-typescript': 'latest'
+			//'eslint-import-resolver-typescript': 'latest',
+			//'@eslint/json': 'latest',
+			//'@eslint/markdown': 'latest',
 		},
 		pnpm: {
 			patchedDependencies: {},

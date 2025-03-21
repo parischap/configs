@@ -19,9 +19,6 @@ export default merge(
 		[constants.pnpmWorkspaceFileName]: pnpmWorkspaceTemplate,
 		[constants.packageJsonFileName]: {
 			description: 'Top repository of monorepo',
-			devDependencies: {
-				'@parischap/configs': 'latest'
-			},
 			scripts: {
 				'update-all-config-files':
 					'pnpm -r -include-workspace-root=true --workspace-concurrency=1 update-config-files',
