@@ -1,8 +1,8 @@
 /** This config is the one to be used in the sub-package of a monorepo. */
 import { basename, dirname, resolve } from 'node:path';
 import { merge } from 'ts-deepmerge';
-import configBase, { Environment } from './config.base.js';
-import configPackage, { Visibility } from './config.package.js';
+import configInternalBase, { Environment } from './config.internal.base.js';
+import configInternalPackage, { Visibility } from './config.internal.package.js';
 import * as constants from './constants.js';
 
 const rootPath = resolve();
@@ -25,11 +25,11 @@ export default ({
 	readonly keywords: ReadonlyArray<string>;
 }) =>
 	merge(
-		configBase({
+		configInternalBase({
 			packageName,
 			environment
 		}),
-		configPackage({
+		configInternalPackage({
 			packageName,
 			repoName,
 			bundled,

@@ -4,9 +4,9 @@
  */
 import { basename, resolve } from 'node:path';
 import { merge } from 'ts-deepmerge';
-import configBase, { Environment } from './config.base.js';
-import configPackage, { Visibility } from './config.package.js';
-import configTop from './config.top.js';
+import configInternalBase, { Environment } from './config.internal.base.js';
+import configInternalPackage, { Visibility } from './config.internal.package.js';
+import configInternalTop from './config.internal.top.js';
 import * as constants from './constants.js';
 
 const packageName = basename(resolve());
@@ -14,11 +14,11 @@ const executablesPath = `./${constants.projectFolderName}/${constants.executable
 const prodExecutablesPath = `./${constants.prodFolderName}/${constants.executablesFolderName}/`;
 
 export default merge(
-	configBase({
+	configInternalBase({
 		packageName,
 		environment: Environment.Type.Node
 	}),
-	configPackage({
+	configInternalPackage({
 		packageName,
 		repoName: packageName,
 		bundled: true,
@@ -27,7 +27,7 @@ export default merge(
 		hasDocGen: false,
 		keywords: []
 	}),
-	configTop,
+	configInternalTop,
 	{
 		[constants.packageJsonFileName]: {
 			description: 'Utility to generate configuration files in a repository',

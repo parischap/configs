@@ -4,17 +4,17 @@ import pnpmWorkspaceTemplate from './pnpm.workspace.template.js';
 
 import { basename, resolve } from 'node:path';
 import { merge } from 'ts-deepmerge';
-import configBase, { Environment } from './config.base.js';
-import configTop from './config.top.js';
+import configInternalBase, { Environment } from './config.internal.base.js';
+import configInternalTop from './config.internal.top.js';
 
 const packageName = basename(resolve());
 
 export default merge(
-	configBase({
+	configInternalBase({
 		packageName,
 		environment: Environment.Type.Node
 	}),
-	configTop,
+	configInternalTop,
 	{
 		[constants.pnpmWorkspaceFileName]: pnpmWorkspaceTemplate,
 		[constants.packageJsonFileName]: {

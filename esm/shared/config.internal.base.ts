@@ -10,7 +10,7 @@ import eslintConfigNodeTemplate from './eslint.config.node.template.js';
 import gitIgnoreTemplate from './gitignore.template.js';
 import prettierConfigTemplate from './prettier.config.template.js';
 import prettierIgnore from './prettierignore.js';
-import tsConfigBase from './tsconfig.base.js';
+import tsconfigInternalBase from './tsconfig.base.js';
 import tsConfigCheck from './tsconfig.check.js';
 import tsConfigEsmBrowser from './tsconfig.esm.browser.js';
 import tsConfigEsmLibrary from './tsconfig.esm.library.js';
@@ -56,7 +56,7 @@ export default ({
 	[constants.prettierConfigFileName]: prettierConfigTemplate,
 	[constants.gitIgnoreFileName]: gitIgnoreTemplate,
 	[constants.prettierIgnoreFileName]: prettierIgnore,
-	[constants.baseTsConfigFileName]: tsConfigBase,
+	[constants.baseTsConfigFileName]: tsconfigInternalBase,
 	[constants.nonProjectTsConfigFileName]: tsConfigOthers,
 	[constants.tsConfigFileName]: tsConfig,
 	[constants.tscLintTsConfigFileName]: tsConfigCheck,
