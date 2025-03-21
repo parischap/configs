@@ -1,4 +1,5 @@
 /** This config is the one to be used in the sub-package of a monorepo. */
+import { Record } from 'effect';
 import { basename, dirname, resolve } from 'node:path';
 import { merge } from 'ts-deepmerge';
 import configInternalBase, { Environment } from './config.internal.base.js';
@@ -10,6 +11,8 @@ const repoName = basename(dirname(dirname(rootPath)));
 
 export default ({
 	description,
+	internalPeerDependencies,
+	externalPeerDependencies,
 	environment,
 	bundled,
 	visibility,
@@ -18,6 +21,8 @@ export default ({
 	keywords
 }: {
 	readonly description: string;
+	readonly internalPeerDependencies: Record.ReadonlyRecord<string, string>;
+	readonly externalPeerDependencies: Record.ReadonlyRecord<string, string>;
 	readonly environment: Environment.Type;
 	readonly bundled: boolean;
 	readonly visibility: Visibility.Type;
@@ -34,6 +39,8 @@ export default ({
 			packageName,
 			repoName,
 			description,
+			internalPeerDependencies,
+			externalPeerDependencies,
 			bundled,
 			visibility,
 			hasStaticFolder,

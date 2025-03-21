@@ -68,9 +68,11 @@
 		"prettier-plugin-jsdoc": "latest",
 		"tsx": "latest"
 	},
+	"peerDependencies": {},
 	"publishConfig": {
 		"scripts": {},
 		"devDependencies": {},
+		"peerDependencies": {},
 		"publishConfig": {},
 		"packageManager": "",
 		"pnpm": {},
@@ -102,7 +104,7 @@
 		"@effect/platform-node": "^0.76.1"
 	},
 	"sideEffects": false,
-	"packageManager": "pnpm@10.6.3",
+	"packageManager": "pnpm@10.6.5",
 	"pnpm": {
 		"patchedDependencies": {},
 		"overrides": {}

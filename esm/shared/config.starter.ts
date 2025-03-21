@@ -22,6 +22,8 @@ export default merge(
 		packageName,
 		repoName: packageName,
 		description: 'Utility to generate configuration files in a repository',
+		internalPeerDependencies: {},
+		externalPeerDependencies: {},
 		bundled: true,
 		visibility: Visibility.Type.PublicByForce,
 		hasStaticFolder: false,

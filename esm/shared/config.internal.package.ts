@@ -3,11 +3,13 @@
  * directly. It is included by config.starter.ts, config.subrepo.ts and config.onepackagerepo.ts
  * configs.
  */
+import { Array, pipe, Record, Tuple } from 'effect';
 import { merge } from 'ts-deepmerge';
 import * as constants from './constants.js';
 import docgenConfig from './docgenConfig.js';
 import madgercTemplate from './madge.template.js';
 import tsconfigDocgen from './tsconfig.docgen.js';
+import { devWorkspaceLink } from './utils.js';
 
 export namespace Visibility {
 	export enum Type {
@@ -165,6 +167,8 @@ export default ({
 	repoName,
 	packageName,
 	description,
+	internalPeerDependencies,
+	externalPeerDependencies,
 	bundled,
 	visibility,
 	hasStaticFolder,
@@ -174,6 +178,8 @@ export default ({
 	readonly repoName: string;
 	readonly packageName: string;
 	readonly description: string;
+	readonly internalPeerDependencies: Record.ReadonlyRecord<string, string>;
+	readonly externalPeerDependencies: Record.ReadonlyRecord<string, string>;
 	readonly bundled: boolean;
 	readonly visibility: Visibility.Type;
 	readonly hasStaticFolder: boolean;
@@ -195,11 +201,22 @@ export default ({
 					// Include self for tests
 					[`${constants.scope}/${packageName}`]: 'link:.'
 				},
+				peerDependencies: {
+					...Record.map(internalPeerDependencies, (_, depName) => devWorkspaceLink(depName)),
+					...externalPeerDependencies
+				},
 				publishConfig: {
 					// Remove scripts in prod
 					scripts: {},
 					// Remove devDependencies in prod
 					devDependencies: {},
+					// Put version number of internal dependencies
+					peerDependencies: pipe(
+						internalPeerDependencies,
+						Record.toEntries,
+						Array.map(Tuple.mapFirst((depName) => constants.scope + '/' + depName)),
+						Record.fromEntries
+					),
 					// Remove publishConfig in prod
 					publishConfig: {},
 					// Unset packageManager in prod

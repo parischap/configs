@@ -4,7 +4,7 @@ export const effectPlatformNodeVersion = '^0.76.1';
 export const effectPlatformVersion = '^0.80.1';
 export const effectExperimentalVersion = '^0.44.1';
 export const effectLanguageServiceVersion = '^0.4.0';
-export const pnpmVersion = '10.6.3';
+export const pnpmVersion = '10.6.5';
 
 export const owner = 'parischap';
 export const scope = '@' + owner;
