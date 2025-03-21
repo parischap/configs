@@ -1,8 +1,7 @@
-import configExecutableRepo from './shared/config.executable.repo.js';
 import { Environment } from './shared/config.internal.base.js';
 import { Visibility } from './shared/config.internal.package.js';
-import configLibRepo from './shared/config.lib.repo.js';
 import configMonorepo from './shared/config.monorepo.js';
+import configOnePackageRepo from './shared/config.one.package.repo.js';
 import configStarter from './shared/config.starter.js';
 import configSubRepo from './shared/config.subRepo.js';
 import * as constants from './shared/constants.js';
@@ -14,9 +13,8 @@ import prettierconfigInternalBase from './shared/prettier.config.base.js';
 import * as utils from './shared/utils.js';
 
 export {
-	configExecutableRepo,
-	configLibRepo,
 	configMonorepo,
+	configOnePackageRepo,
 	configStarter,
 	configSubRepo,
 	constants,
