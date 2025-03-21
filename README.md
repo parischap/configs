@@ -74,7 +74,7 @@ For `pnpm update-config-files` to work, there needs to be a `package.json` file 
 		"update-config-files": "update-config-files",
 	},
 	"devDependencies": {
-		"@parischap/configs": "latest"
+		... copy all the devDependencies from effect/libs/package.json
 	}
 }
 ```
@@ -90,7 +90,7 @@ For `pnpm update-config-files` to work, there needs to be a `package.json` file 
 		"update-all-config-files": "pnpm -r -include-workspace-root=true --workspace-concurrency=1 update-config-files",
 	},
 	"devDependencies": {
-		"@parischap/configs": "latest",
+		... copy all the devDependencies from effect/libs/package.json
 	},
 }
 ```
@@ -134,6 +134,7 @@ To use granular tokens to publish to npm, the package to publish must already ex
 # 4 - About package.json:
 
 Dependencies imported at the top of a monorepo and bin executables defined there are available in all sub packages. Only devDependencies and bin executables should be added in that manner as each package must have the list of its real dependencies.
+DevDependencies defined with 'latest' don't update to latest systematically. From time to time, cut the devDependencies key in package.json, run `pnpm i` to uninstall, reput the devDependencies, and run `pnpm i`.
 
 # 5 - About vitest:
 
