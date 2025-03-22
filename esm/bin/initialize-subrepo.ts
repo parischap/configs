@@ -50,10 +50,8 @@ const program = Effect.gen(function* () {
 	return yield* fs.writeFileString(
 		targetConfigFilePath,
 		`import * as Configs from '@parischap/configs';
-import { merge } from 'ts-deepmerge';
 
-export default merge(
-	Configs.configSubRepo({
+export default Configs.configSubRepo({
 		description: 'An extension to the official Effect library',
 		internalPeerDependencies: {},
 		externalPeerDependencies: { effect: Configs.constants.effectVersion },
@@ -63,8 +61,7 @@ export default merge(
 		hasStaticFolder: false,
 		hasDocGen: true,
 		keywords: []
-	})
-);`
+	});`
 	);
 });
 
