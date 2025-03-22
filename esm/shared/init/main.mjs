@@ -11,7 +11,7 @@ try {
 	}
 
 	execSync(
-		`pnpm add -D ts-deepmerge@latest && pnpm add -D vite@latest && pnpm add -D vite-node@latest && pnpm add -D shx && pnpm i`
+		`pnpm add -D effect@latest && pnpm add -D ts-deepmerge@latest && pnpm add -D vite@latest && pnpm add -D vite-node@latest && pnpm add -D shx && pnpm i`
 	);
 
 	const { createServer } = await import('vite');

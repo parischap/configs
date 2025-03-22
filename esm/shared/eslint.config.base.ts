@@ -2,7 +2,7 @@ import eslint from '@eslint/js';
 // Awaiting improvement on ESLint side - Typescript not well supported
 //import json from '@eslint/json';
 //import markdown from '@eslint/markdown';
-import html from '@html-eslint/eslint-plugin';
+//import html from '@html-eslint/eslint-plugin';
 import { type Linter } from 'eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import functional from 'eslint-plugin-functional';
@@ -84,7 +84,7 @@ const typescriptConfigs = tseslintConfig(
 	}
 );
 
-const htmlConfigs: FlatConfigArray = [
+/*const htmlConfigs: FlatConfigArray = [
 	{
 		// recommended configuration included in the plugin
 		...html.configs['flat/recommended'],
@@ -93,7 +93,7 @@ const htmlConfigs: FlatConfigArray = [
 			'@html-eslint/indent': 'error'
 		}
 	}
-];
+];*/
 
 const ymlConfigs = [
 	...eslintPluginYml.configs['flat/recommended'],
@@ -155,10 +155,10 @@ const _default = [
 			}
 		}
 	},
-	...htmlConfigs.map((config) => ({
+	/*.map((config) => ({
 		...config,
 		files: constants.allHtmlFiles.map(utils.fromOsPathToPosixPath)
-	})),
+	})),*/
 	...ymlConfigs.map((config) => ({
 		...config,
 		files: constants.allYmlFiles.map(utils.fromOsPathToPosixPath)

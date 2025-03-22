@@ -62,7 +62,7 @@ export default ({
 	[constants.tscLintTsConfigFileName]: tsConfigCheck,
 	[constants.viteConfigFileName]: viteConfigTemplate,
 	[constants.packageJsonFileName]: {
-		name: `${constants.devScope}/${packageName}`,
+		name: `${constants.slashedDevScope}${packageName}`,
 		type: 'module',
 		author: 'Jérôme MARTIN',
 		license: 'MIT',

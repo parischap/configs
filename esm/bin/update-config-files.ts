@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * This bin reads the keys and values of a default object exported by the file named
- * project.config.js located at the root of the target package. It creates a file for each key of
- * that object with the key as name. If the key ends with .json, the value is converted from an
+ * project.config.js located at the root of the target repo/package. It creates a file for each key
+ * of that object with the key as name. If the key ends with .json, the value is converted from an
  * object to a json string with JSON.stringfy. Otherwise, the value must be a string and it is
  * written as is. This bin will also check that there are not unexpected config files present in the
  * package, i.e config files which are not created by this bin (there are a few exceptions: the

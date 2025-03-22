@@ -40,8 +40,8 @@ export const replaceExtensionWith = (oldExtension: string, newExtension: string)
 };*/
 
 export const prodWorkspaceLink = (packageName: string) => ({
-	[`${constants.scope}/${packageName}`]: `workspace:*`
+	[`${constants.slashedScope}${packageName}`]: `workspace:*`
 });
 export const devWorkspaceLink = (packageName: string) => ({
-	[`${constants.scope}/${packageName}`]: `workspace:${constants.devScope}/${packageName}@*`
+	[`${constants.slashedScope}${packageName}`]: `workspace:${constants.slashedDevScope}${packageName}@*`
 });

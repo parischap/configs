@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
- * If no target is passed, builds all ts files except those in the `esm/shared/` directory (these
- * files will be bundled to the other ts files). If a `esm/bin/` directory exists, it will be built
- * directly under `dist` and not under `dist/esm`
+ * If no target is passed, builds all ts files in the esm directory except those in the
+ * `esm/shared/` directory (these files, and all packages included as dependencies (not those
+ * included as devDependencies or peerDependencies), will be bundled). If a target is passed with
+ * `TARGET=`, it must be expressed relative to the `esm` directory. If an `esm/bin/` directory
+ * exists, it will be built directly under `dist` and not under `dist/esm`
  */
 
 import * as constants from '../shared/constants.js';

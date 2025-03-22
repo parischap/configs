@@ -4,11 +4,18 @@ export const effectPlatformNodeVersion = '^0.76.1';
 export const effectPlatformVersion = '^0.80.1';
 export const effectExperimentalVersion = '^0.44.1';
 export const effectLanguageServiceVersion = '^0.4.0';
+
+export const effectLibVersion = '^0.4.0';
+export const ansiStylesVersion = '^0.2.1';
+export const prettyPrintVersion = '^0.3.2';
+
 export const pnpmVersion = '10.6.5';
 
 export const owner = 'parischap';
 export const scope = '@' + owner;
 export const devScope = scope + '-dev';
+export const slashedScope = scope + '/';
+export const slashedDevScope = devScope + '/';
 
 export const tscLintMark = 'check';
 //export const eslintMark = 'eslint';

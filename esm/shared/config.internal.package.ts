@@ -199,7 +199,7 @@ export default ({
 				},
 				devDependencies: {
 					// Include self for tests
-					[`${constants.scope}/${packageName}`]: 'link:.'
+					[`${constants.slashedScope}${packageName}`]: 'link:.'
 				},
 				peerDependencies: {
 					...Record.map(internalPeerDependencies, (_, depName) => devWorkspaceLink(depName)),
@@ -211,12 +211,15 @@ export default ({
 					// Remove devDependencies in prod
 					devDependencies: {},
 					// Put version number of internal dependencies
-					peerDependencies: pipe(
-						internalPeerDependencies,
-						Record.toEntries,
-						Array.map(Tuple.mapFirst((depName) => constants.scope + '/' + depName)),
-						Record.fromEntries
-					),
+					peerDependencies: {
+						...pipe(
+							internalPeerDependencies,
+							Record.toEntries,
+							Array.map(Tuple.mapFirst((depName) => constants.slashedScope + depName)),
+							Record.fromEntries
+						),
+						...externalPeerDependencies
+					},
 					// Remove publishConfig in prod
 					publishConfig: {},
 					// Unset packageManager in prod

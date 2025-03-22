@@ -1,51 +1,32 @@
 # 1 - Doc
 
-Goal of this package is to install all the necessary configuration files of a package (eslint.config.js, prettier.config.js,...). If a configuration file needs changing, we only need to modify it in this package and all the packages that use the `configs` packages will be updated automatically.
+Goal of this package is to install all the necessary configuration files of a repo or package (eslint.config.js, prettier.config.js,...). If a configuration file needs changing, we only need to modify it in this package and all the repos/packages that use the `configs` package will be updated automatically.
 
 The `configs` package must be installed as devDependency of the target package. In a monorepo, it must be installed as devDependency at the root.
 
-Each target package must contain a `project.config.js `file that exports an object whose keys are the names of the configuration files to create for that package and values the contents of these files.
+Each target repo/package must contain a `project.config.js `file that exports an object whose keys are the names of the configuration files to create for that package and values the contents of these files.
 
-In a monorepo, the `project.config.js` file to create at the root will usually look loke this:
+To create a starter `package.json` and `project.config.js` file in a monorepo, you can type:
 
-```ts
-import * as Configs from "@parischap/configs";
-
-export default Configs.configMonorepo;
+```sh
+initialize-monorepo
 ```
 
-In each subpackage, the `project.config.js` file to create will usually look loke this:
+in your favorite shell or:
 
-```ts
-import { merge } from "ts-deepmerge";
-import * as Configs from "@parischap/configs";
-
-export default merge(
-	Configs.configSubRepo({
-		environment: Environment.Type.Node,
-		bundled: true,
-		visibility: Visibility.Type.Private,
-		hasStaticFolder: false,
-		hasDocGen: false,
-		keywords: [],
-	}),
-	{
-		[constants.packageJsonFileName]: {
-			description: "Whatever it is",
-			dependencies: {
-				effect: constants.effectVersion,
-				"@effect/platform": constants.effectPlatformVersion,
-				"@effect/platform-node": constants.effectPlatformNodeVersion,
-			},
-			scripts: {
-				whatever: `whatever`,
-			},
-		},
-	},
-);
+```sh
+.\node_modules\.bin\initialize-monorepo
 ```
 
-The `Configs.configSubRepo` function takes the following parameter:
+if .\node_modules\.bin\ has not been added to the path.
+
+Likewise, to create a starter `package.json` and `project.config.js` file in a subrepo, you can type:
+
+```sh
+initialize-subrepo
+```
+
+Following is a list of some parameters to provide to the `configSubRepo` and `configOnePackageRepo` functions:
 
 - **environment**: specifies where the package will run: `Environment.Type.Node` for execution under node context, `Environment.Type.Browser` for execution in a browser and `Environment.Type.Library` for a library that may run both in node and a browser.
 - **bundled**: if set to true, all ts files under `esm/` (except those under the `shared/` directory) become standalone executables in which are bundled all used files in the `shared/` directory and all dependencies (but not the peerDependencies). Type files are created for each executable. If a bin directory is present under esm/, it will be built directly under dist and not under dist/esm. If bundled is set to false, all files under `esm/` are simply transpiled in js, cjs and d.ts files.
@@ -64,49 +45,6 @@ For other packages, the procedure to follow is:
 - run `pnpm update-config-files` at the target package root. Alternatively, in a monorepo, you can run `pnpm update-all-config-files` at the root of the monorepo.
 - run `pnpm build`
 
-For `pnpm update-config-files` to work, there needs to be a `package.json` file at the root of the target package and, if in a monerepo, at the root of the monorepo. If this is not the case, you can simply create the following `package.json` files:
-
-## 1.1 - In a standalone package
-
-```ts
-{
-	"scripts": {
-		"update-config-files": "update-config-files",
-	},
-	"devDependencies": {
-		... copy all the devDependencies from effect/libs/package.json
-	}
-}
-```
-
-## 1.2 - In a monorepo
-
-### 1.2.1 - At the root of the monorepo
-
-```ts
-{
-	"scripts": {
-		"update-config-files": "update-config-files",
-		"update-all-config-files": "pnpm -r -include-workspace-root=true --workspace-concurrency=1 update-config-files",
-	},
-	"devDependencies": {
-		... copy all the devDependencies from effect/libs/package.json
-	},
-}
-```
-
-### 1.2.2 - At the root of each subrepo
-
-```ts
-{
-	"scripts": {
-		"update-config-files": "update-config-files",
-	}
-}
-```
-
-`pnpm i` must be run first to install the `configs` package.
-
 When a package is built, you can push it to github. Upon creating a new release, two github workflows will automatically publish the package to npm if this is a public package (see github.workflows.publish.template.ts). For this to work, make sure in github:
 
 - to have read and write permissions under workflow in Settings/Actions/General.
@@ -115,7 +53,7 @@ When a package is built, you can push it to github. Upon creating a new release,
 
 Notes:
 
-- there is no reason to create releases for a privaye package. So normally the `publish.yml` action should not get launched. However, in case it does, the package will not get published because there is the `private` key in package.json and the `build-and-publish` script has been deactivated.
+- there is no reason to create releases for a private package. So normally the `publish.yml` action should not get launched. However, in case it does, the package will not get published because there is the `private` key in package.json and the `build-and-publish` script has been deactivated.
 - `publish.yml` can be started manually. In that case, it uses has release number the last issued release. It can be useful if the publish action has failed and no modification to the code is necessary. If a modification to the code is necessary, a new release will have to be issued.
 - `pages.yml` creates the documentation for the package. In all cases, it must be started manually.
 
@@ -134,7 +72,7 @@ To use granular tokens to publish to npm, the package to publish must already ex
 # 4 - About package.json:
 
 Dependencies imported at the top of a monorepo and bin executables defined there are available in all sub packages. Only devDependencies and bin executables should be added in that manner as each package must have the list of its real dependencies.
-DevDependencies defined with 'latest' don't update to latest systematically. From time to time, cut the devDependencies key in package.json, run `pnpm i` to uninstall, reput the devDependencies, and run `pnpm i`.
+DevDependencies defined with 'latest' don't update to latest systematically. From time to time, cut the devDependencies key in package.json, run `pnpm i` to uninstall, paste the devDependencies, and run `pnpm i`.
 
 # 5 - About vitest:
 

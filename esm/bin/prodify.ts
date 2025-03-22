@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Copies `esm/README.md` if there is one to `dist` Generates the `LICENSE` file directly under
- * `dist` Copies `esm/package.json` to `dist` but spreads the `publishConfig` key so that any key
+ * `dist`. Copies `esm/package.json` to `dist` but spreads the `publishConfig` key so that any key
  * present in `publishConfig` will override the key with the same name. Also adds a `bin` key with
  * all the bin executables present under `esm/bin/` and removes keys with empty objects, empty
  * arrays or empty strings as value. Result is prettified using prettier. Creates a `package.json`
@@ -132,17 +132,17 @@ const program = Effect.gen(function* () {
 		pkg,
 		Record.get('name'),
 		Option.filter(Predicate.isString),
-		Option.filter(String.startsWith(constants.devScope + '/')),
-		Option.map(String.substring(constants.devScope.length + 1)),
+		Option.filter(String.startsWith(constants.slashedDevScope)),
+		Option.map(String.substring(constants.slashedDevScope.length)),
 		Either.fromOption(
 			() =>
 				new Error(
-					`Field 'name' of ${srcPackageJsonPath} must be a string starting with '${constants.devScope}/'`
+					`Field 'name' of ${srcPackageJsonPath} must be a string starting with '${constants.slashedDevScope}'`
 				)
 		)
 	);
 
-	const prodPackageName = constants.scope + '/' + packageName;
+	const prodPackageName = constants.slashedScope + packageName;
 
 	const prodPackageJson = pipe(
 		{

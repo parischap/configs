@@ -42,7 +42,7 @@ export default merge(
 			},
 			devDependencies: {
 				// In this package only, we link to the prod version of the package. pnpm install does not error if the dist directory does not contain any package.json
-				[`${constants.scope}/${packageName}`]: 'link:dist'
+				[`${constants.slashedScope}${packageName}`]: 'link:dist'
 			},
 			scripts: {
 				bundle: `vite-node ${executablesPath}bundle-files.ts`,
