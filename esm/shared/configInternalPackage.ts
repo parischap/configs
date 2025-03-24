@@ -195,6 +195,10 @@ export default ({
 	readonly keywords: ReadonlyArray<string>;
 }) =>
 	merge(
+		bundled ? bundledConfig : transpiledConfig,
+		visibilityConfig({ repoName, visibility, keywords }),
+		hasDocGen ? docGenConfig : withoutDocGenConfig,
+		hasStaticFolder ? staticFolderConfig : withoutStaticFolderConfig,
 		{
 			[constants.madgeConfigFileName]: madgercTemplate,
 			[constants.packageJsonFileName]: {
@@ -207,15 +211,14 @@ export default ({
 				},
 				dependencies,
 				devDependencies: {
+					...devDependencies,
 					// Include self for tests
-					[`${constants.slashedScope}${packageName}`]: 'link:.',
-					...devDependencies
+					[`${constants.slashedScope}${packageName}`]: 'link:.'
 				},
 				peerDependencies: {
 					...Record.mapEntries(internalPeerDependencies, (_, depName) =>
 						Tuple.make(constants.slashedScope + depName, devWorkspaceLink(depName))
 					),
-
 					...externalPeerDependencies
 				},
 				publishConfig: {
@@ -281,9 +284,5 @@ export default ({
 					`https://github.com/${constants.owner}/${repoName}` +
 					(packageName === repoName ? '' : `/tree/master/packages/${packageName}`)
 			}
-		},
-		bundled ? bundledConfig : transpiledConfig,
-		visibilityConfig({ repoName, visibility, keywords }),
-		hasDocGen ? docGenConfig : withoutDocGenConfig,
-		hasStaticFolder ? staticFolderConfig : withoutStaticFolderConfig
+		}
 	);

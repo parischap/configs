@@ -10,6 +10,11 @@
 		"lint-rules": "pnpx @eslint/config-inspector",
 		"update-config-files": "node ./dist/bin/update-config-files.js",
 		"clean-config-files": "shx rm -rf package.json && shx rm -rf tsconfig.json",
+		"bundle": "vite-node ./esm/bin/bundle-files.ts",
+		"generate-types": "tsc -b tsconfig.esm.json --emitDeclarationOnly",
+		"compile": "pnpm bundle && pnpm prodify",
+		"build-and-publish": "pnpm build && pnpm checks && pnpm publish-to-npm",
+		"docgen": "echo \"docgen not activated for this package\"",
 		"circular": "madge --extensions ts --circular --no-color --no-spinner esm",
 		"checks": "pnpm circular && pnpm lint && pnpm tscheck && pnpm test",
 		"test": "vitest run",
@@ -19,13 +24,38 @@
 		"build": "pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm --if-present generate-types && pnpm install-prod",
 		"prodify": "node ./dist/bin/prodify.js",
 		"examples": "",
-		"bundle": "bundle-files",
 		"pre-build": "pnpm i",
-		"post-build": "pnpm update-config-files",
-		"generate-types": "tsc -b tsconfig.esm.json --emitDeclarationOnly",
-		"compile": "pnpm bundle && pnpm prodify",
-		"build-and-publish": "pnpm build && pnpm checks && pnpm publish-to-npm",
-		"docgen": "echo \"docgen not activated for this package\""
+		"post-build": "pnpm update-config-files"
+	},
+	"dependencies": {
+		"@effect/experimental": "^0.44.1",
+		"minimatch": "latest",
+		"effect": "^3.14.1",
+		"@effect/platform": "^0.80.1",
+		"@effect/platform-node": "^0.76.1",
+		"ts-deepmerge": "latest"
+	},
+	"sideEffects": false,
+	"publishConfig": {
+		"exports": {
+			".": {
+				"types": "./dts/index.d.ts",
+				"import": "./esm/index.js"
+			}
+		},
+		"dependencies": {},
+		"sideEffects": [],
+		"files": [
+			"*",
+			"!*.map"
+		],
+		"scripts": {},
+		"devDependencies": {},
+		"peerDependencies": {},
+		"publishConfig": {},
+		"packageManager": "",
+		"pnpm": {},
+		"type": "module"
 	},
 	"description": "Utility to generate configuration files in a repository",
 	"module": "./esm/index.js",
@@ -34,22 +64,16 @@
 			"import": "./esm/index.ts"
 		}
 	},
-	"dependencies": {
-		"minimatch": "latest",
-		"effect": "^3.14.1",
-		"@effect/platform": "^0.80.1",
-		"@effect/platform-node": "^0.76.1",
-		"ts-deepmerge": "latest",
-		"@effect/experimental": "^0.44.1"
-	},
 	"devDependencies": {
-		"@parischap/configs": "latest",
+		"@parischap/configs": "link:dist",
 		"globals": "latest",
+		"ts-deepmerge": "latest",
 		"@tsconfig/node20": "latest",
 		"@tsconfig/strictest": "latest",
 		"shx": "latest",
 		"@eslint/eslintrc": "latest",
 		"@eslint/js": "latest",
+		"@parischap/test-utils": "latest",
 		"@types/eslint": "latest",
 		"@types/eslint-config-prettier": "latest",
 		"@types/node": "latest",
@@ -73,33 +97,11 @@
 		"prettier-plugin-jsdoc": "latest"
 	},
 	"peerDependencies": {},
-	"publishConfig": {
-		"scripts": {},
-		"devDependencies": {},
-		"peerDependencies": {},
-		"publishConfig": {},
-		"packageManager": "",
-		"pnpm": {},
-		"type": "module",
-		"exports": {
-			".": {
-				"import": "./esm/index.js",
-				"types": "./dts/index.d.ts"
-			}
-		},
-		"dependencies": {},
-		"sideEffects": [],
-		"files": [
-			"*",
-			"!*.map"
-		]
-	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/parischap/configs.git"
 	},
 	"homepage": "https://github.com/parischap/configs",
-	"sideEffects": false,
 	"packageManager": "pnpm@10.6.5",
 	"pnpm": {
 		"patchedDependencies": {},
