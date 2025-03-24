@@ -32,6 +32,7 @@ export default merge(
 		devDependencies: {
 			// In this package only, we link to the prod version of the package. pnpm install does not error if the dist directory does not contain any package.json
 			[`${constants.slashedScope}${packageName}`]: 'link:dist'
+			// We also remove @parischap/test-utils as we don't need it
 		},
 		internalPeerDependencies: {},
 		externalPeerDependencies: {},

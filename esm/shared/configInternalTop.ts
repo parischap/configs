@@ -27,6 +27,7 @@ export default {
 			//'@html-eslint/eslint-plugin': 'latest',
 			//'@html-eslint/parser': 'latest',
 			'@parischap/configs': 'latest',
+			'@parischap/test-utils': 'latest',
 			'@types/eslint': 'latest',
 			'@types/eslint-config-prettier': 'latest',
 			'@types/node': 'latest',
