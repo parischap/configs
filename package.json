@@ -34,41 +34,40 @@
 		}
 	},
 	"devDependencies": {
-		"@parischap/configs": "link:dist",
-		"ts-deepmerge": "latest",
-		"@tsconfig/node20": "latest",
-		"@tsconfig/strictest": "latest",
-		"shx": "latest",
+		"@babel/cli": "latest",
+		"@babel/core": "latest",
+		"@babel/plugin-transform-export-namespace-from": "latest",
+		"@babel/plugin-transform-modules-commonjs": "latest",
+		"@effect/docgen": "latest",
 		"@eslint/eslintrc": "latest",
 		"@eslint/js": "latest",
 		"@html-eslint/eslint-plugin": "latest",
 		"@html-eslint/parser": "latest",
+		"@parischap/configs": "link:dist",
+		"@tsconfig/node20": "latest",
+		"@tsconfig/strictest": "latest",
 		"@types/eslint": "latest",
 		"@types/eslint-config-prettier": "latest",
 		"@types/node": "latest",
+		"babel-plugin-annotate-pure-calls": "latest",
 		"cross-env": "latest",
 		"eslint": "latest",
 		"eslint-config-prettier": "latest",
 		"eslint-plugin-functional": "latest",
 		"eslint-plugin-yml": "latest",
+		"madge": "latest",
 		"prettier": "latest",
+		"prettier-plugin-jsdoc": "latest",
+		"shx": "latest",
+		"terser": "latest",
+		"ts-deepmerge": "latest",
+		"tsx": "latest",
 		"typescript": "latest",
 		"typescript-eslint": "latest",
 		"vite": "latest",
 		"vite-node": "latest",
-		"vitest": "latest",
-		"madge": "latest",
-		"terser": "latest",
-		"@babel/core": "latest",
-		"@babel/plugin-transform-export-namespace-from": "latest",
-		"@babel/plugin-transform-modules-commonjs": "latest",
-		"babel-plugin-annotate-pure-calls": "latest",
-		"@babel/cli": "latest",
-		"@effect/docgen": "latest",
-		"prettier-plugin-jsdoc": "latest",
-		"tsx": "latest"
+		"vitest": "latest"
 	},
-	"peerDependencies": {},
 	"publishConfig": {
 		"scripts": {},
 		"devDependencies": {},
@@ -97,16 +96,20 @@
 	"homepage": "https://github.com/parischap/configs",
 	"dependencies": {
 		"@effect/experimental": "^0.44.1",
-		"globals": "latest",
-		"minimatch": "latest",
-		"effect": "^3.14.1",
 		"@effect/platform": "^0.80.1",
-		"@effect/platform-node": "^0.76.1"
+		"@effect/platform-node": "^0.76.1",
+		"effect": "^3.14.1",
+		"globals": "latest",
+		"minimatch": "latest"
 	},
 	"sideEffects": false,
 	"packageManager": "pnpm@10.6.5",
 	"pnpm": {
 		"patchedDependencies": {},
-		"overrides": {}
+		"overrides": {},
+		"onlyBuiltDependencies": [
+			"@parcel/watcher",
+			"msgpackr-extract"
+		]
 	}
 }
