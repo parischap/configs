@@ -167,8 +167,12 @@ export default ({
 	repoName,
 	packageName,
 	description,
+	dependencies,
+	devDependencies,
 	internalPeerDependencies,
 	externalPeerDependencies,
+	examples,
+	scripts,
 	bundled,
 	visibility,
 	hasStaticFolder,
@@ -178,8 +182,12 @@ export default ({
 	readonly repoName: string;
 	readonly packageName: string;
 	readonly description: string;
+	readonly dependencies: Record.ReadonlyRecord<string, string>;
+	readonly devDependencies: Record.ReadonlyRecord<string, string>;
 	readonly internalPeerDependencies: Record.ReadonlyRecord<string, string>;
 	readonly externalPeerDependencies: Record.ReadonlyRecord<string, string>;
+	readonly examples: ReadonlyArray<string>;
+	readonly scripts: Record.ReadonlyRecord<string, string>;
 	readonly bundled: boolean;
 	readonly visibility: Visibility.Type;
 	readonly hasStaticFolder: boolean;
@@ -197,12 +205,17 @@ export default ({
 						import: `./${constants.projectFolderName}/index.ts`
 					}
 				},
+				dependencies,
 				devDependencies: {
 					// Include self for tests
-					[`${constants.slashedScope}${packageName}`]: 'link:.'
+					[`${constants.slashedScope}${packageName}`]: 'link:.',
+					...devDependencies
 				},
 				peerDependencies: {
-					...Record.map(internalPeerDependencies, (_, depName) => devWorkspaceLink(depName)),
+					...Record.mapEntries(internalPeerDependencies, (_, depName) =>
+						Tuple.make(constants.slashedScope + depName, devWorkspaceLink(depName))
+					),
+
 					...externalPeerDependencies
 				},
 				publishConfig: {
@@ -212,12 +225,11 @@ export default ({
 					devDependencies: {},
 					// Put version number of internal dependencies
 					peerDependencies: {
-						...pipe(
+						...Record.mapKeys(
 							internalPeerDependencies,
-							Record.toEntries,
-							Array.map(Tuple.mapFirst((depName) => constants.slashedScope + depName)),
-							Record.fromEntries
+							(depName) => constants.slashedScope + depName
 						),
+
 						...externalPeerDependencies
 					},
 					// Remove publishConfig in prod
@@ -245,7 +257,16 @@ export default ({
 					'install-prod': `cd ${constants.prodFolderName} && pnpm i && cd ..`,
 					build:
 						'pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm --if-present generate-types && pnpm install-prod',
-					prodify: 'prodify'
+					prodify: 'prodify',
+					examples: pipe(
+						examples,
+						Array.map(
+							(exampleName) =>
+								`${constants.tsExecuter} ${constants.examplesFolderName}/${exampleName}`
+						),
+						Array.join('&&')
+					),
+					...scripts
 				},
 				// Must be present even for private packages as it can be used for other purposes
 				repository:

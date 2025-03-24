@@ -15,19 +15,19 @@ export default {
 	[constants.packageJsonFileName]: {
 		packageManager: `pnpm@${constants.pnpmVersion}`,
 		devDependencies: {
-			'ts-deepmerge': 'latest',
+			globals: 'latest',
 			'@tsconfig/node20': 'latest',
 			'@tsconfig/strictest': 'latest',
 			shx: 'latest',
 			'@eslint/eslintrc': 'latest',
 			'@eslint/js': 'latest',
-			'@html-eslint/eslint-plugin': 'latest',
-			'@html-eslint/parser': 'latest',
+			/* I do not parse any HTML for the moment and the plugin seems bugged */
+			//'@html-eslint/eslint-plugin': 'latest',
+			//'@html-eslint/parser': 'latest',
 			'@parischap/configs': 'latest',
 			'@types/eslint': 'latest',
 			'@types/eslint-config-prettier': 'latest',
 			'@types/node': 'latest',
-			'cross-env': 'latest',
 			eslint: 'latest',
 			'eslint-config-prettier': 'latest',
 			'eslint-plugin-functional': 'latest',
@@ -40,7 +40,6 @@ export default {
 			'vite-node': 'latest',
 			vitest: 'latest',
 			madge: 'latest',
-			terser: 'latest',
 			'@babel/core': 'latest',
 			'@babel/plugin-transform-export-namespace-from': 'latest',
 			'@babel/plugin-transform-modules-commonjs': 'latest',
@@ -48,8 +47,7 @@ export default {
 			'@babel/cli': 'latest',
 			//'@effect/docgen': 'https://github.com/parischap/docgenbuilt',
 			'@effect/docgen': 'latest',
-			'prettier-plugin-jsdoc': 'latest',
-			tsx: 'latest'
+			'prettier-plugin-jsdoc': 'latest'
 			//'eslint-plugin-import': 'latest',
 			//'@typescript-eslint/parser': 'latest',
 			//'eslint-import-resolver-typescript': 'latest',

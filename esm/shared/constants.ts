@@ -23,6 +23,8 @@ export const nonProjectMark = 'others';
 export const projectMark = 'esm';
 export const docgenMark = 'docgen';
 
+export const tsExecuter = 'vite-node';
+
 export const docgenConfigFileName = 'docgen.json';
 export const gitIgnoreFileName = '.gitignore';
 export const prettierIgnoreFileName = '.prettierignore';

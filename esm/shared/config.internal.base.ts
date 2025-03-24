@@ -10,7 +10,7 @@ import eslintConfigNodeTemplate from './eslint.config.node.template.js';
 import gitIgnoreTemplate from './gitignore.template.js';
 import prettierConfigTemplate from './prettier.config.template.js';
 import prettierIgnore from './prettierignore.js';
-import tsconfigInternalBase from './tsconfig.base.js';
+import tsconfigBase from './tsconfig.base.js';
 import tsConfigCheck from './tsconfig.check.js';
 import tsConfigEsmBrowser from './tsconfig.esm.browser.js';
 import tsConfigEsmLibrary from './tsconfig.esm.library.js';
@@ -56,7 +56,7 @@ export default ({
 	[constants.prettierConfigFileName]: prettierConfigTemplate,
 	[constants.gitIgnoreFileName]: gitIgnoreTemplate,
 	[constants.prettierIgnoreFileName]: prettierIgnore,
-	[constants.baseTsConfigFileName]: tsconfigInternalBase,
+	[constants.baseTsConfigFileName]: tsconfigBase,
 	[constants.nonProjectTsConfigFileName]: tsConfigOthers,
 	[constants.tsConfigFileName]: tsConfig,
 	[constants.tscLintTsConfigFileName]: tsConfigCheck,
@@ -67,7 +67,7 @@ export default ({
 		author: 'Jérôme MARTIN',
 		license: 'MIT',
 		scripts: {
-			tscheck: `tsc -b ${constants.tscLintTsConfigFileName} --force `,
+			tscheck: `tsc -b ${constants.tscLintTsConfigFileName} --force`,
 			lint: 'eslint .',
 			'lint-fix': 'eslint . --fix',
 			'lint-rules': 'pnpx @eslint/config-inspector',

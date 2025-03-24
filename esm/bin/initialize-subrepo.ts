@@ -30,18 +30,23 @@ const program = Effect.gen(function* () {
 
 	yield* Effect.log(`Writing ${constants.packageJsonFileName} to '${rootPath}'`);
 	const targetPackageJsonPath = path.join(rootPath, constants.packageJsonFileName);
+	const params = {
+		description: 'Your description',
+		dependencies: {},
+		devDependencies: {},
+		internalPeerDependencies: {},
+		externalPeerDependencies: {},
+		examples: [],
+		scripts: {},
+		environment: Environment.Type.Library,
+		bundled: false,
+		visibility: Visibility.Type.Public,
+		hasStaticFolder: false,
+		hasDocGen: false,
+		keywords: []
+	};
 	const stringifiedtargetPackageJson = yield* Json.stringify(
-		configSubRepo({
-			description: 'Your description',
-			internalPeerDependencies: {},
-			externalPeerDependencies: {},
-			environment: Environment.Type.Library,
-			bundled: false,
-			visibility: Visibility.Type.Public,
-			hasStaticFolder: false,
-			hasDocGen: false,
-			keywords: []
-		})[constants.packageJsonFileName]
+		configSubRepo(params)[constants.packageJsonFileName]
 	);
 	yield* prettier.save(targetPackageJsonPath, stringifiedtargetPackageJson);
 
@@ -51,17 +56,7 @@ const program = Effect.gen(function* () {
 		targetConfigFilePath,
 		`import * as Configs from '@parischap/configs';
 
-export default Configs.configSubRepo({
-		description: 'An extension to the official Effect library',
-		internalPeerDependencies: {},
-		externalPeerDependencies: { effect: Configs.constants.effectVersion },
-		environment: Configs.Environment.Type.Library,
-		bundled: false,
-		visibility: Configs.Visibility.Type.Public,
-		hasStaticFolder: false,
-		hasDocGen: true,
-		keywords: []
-	});`
+export default Configs.configSubRepo(${JSON.stringify(params)});`
 	);
 });
 

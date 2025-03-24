@@ -11,8 +11,12 @@ const repoName = basename(dirname(dirname(rootPath)));
 
 export default ({
 	description,
+	dependencies,
+	devDependencies,
 	internalPeerDependencies,
 	externalPeerDependencies,
+	examples,
+	scripts,
 	environment,
 	bundled,
 	visibility,
@@ -21,8 +25,12 @@ export default ({
 	keywords
 }: {
 	readonly description: string;
+	readonly dependencies: Record.ReadonlyRecord<string, string>;
+	readonly devDependencies: Record.ReadonlyRecord<string, string>;
 	readonly internalPeerDependencies: Record.ReadonlyRecord<string, string>;
 	readonly externalPeerDependencies: Record.ReadonlyRecord<string, string>;
+	readonly examples: ReadonlyArray<string>;
+	readonly scripts: Record.ReadonlyRecord<string, string>;
 	readonly environment: Environment.Type;
 	readonly bundled: boolean;
 	readonly visibility: Visibility.Type;
@@ -39,8 +47,12 @@ export default ({
 			packageName,
 			repoName,
 			description,
+			dependencies,
+			devDependencies,
 			internalPeerDependencies,
 			externalPeerDependencies,
+			examples,
+			scripts,
 			bundled,
 			visibility,
 			hasStaticFolder,

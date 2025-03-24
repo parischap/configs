@@ -39,9 +39,6 @@ export const replaceExtensionWith = (oldExtension: string, newExtension: string)
 	return p.substring(0, pos) + newExtension;
 };*/
 
-export const prodWorkspaceLink = (packageName: string) => ({
-	[`${constants.slashedScope}${packageName}`]: `workspace:*`
-});
-export const devWorkspaceLink = (packageName: string) => ({
-	[`${constants.slashedScope}${packageName}`]: `workspace:${constants.slashedDevScope}${packageName}@*`
-});
+export const prodWorkspaceLink = 'workspace:*';
+export const devWorkspaceLink = (packageName: string): string =>
+	`workspace:${constants.slashedDevScope}${packageName}@*`;

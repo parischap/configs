@@ -24,6 +24,7 @@ export default {
 		incremental: true,
 		removeComments: false,
 		lib: [],
+		// Do not use types (in particular node types) unless included explicitely
 		types: [],
 		plugins: [
 			{
