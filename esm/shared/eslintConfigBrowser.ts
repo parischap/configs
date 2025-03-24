@@ -1,15 +1,15 @@
 import globals from 'globals';
 import * as constants from './constants.js';
-import eslintconfigBase from './eslint.config.base.js';
+import eslintInternalConfigBase from './eslintInternalConfigBase.js';
 import * as utils from './utils.js';
 
 export default [
-	...eslintconfigBase,
+	...eslintInternalConfigBase,
 	{
 		files: constants.allProjectFiles.map(utils.fromOsPathToPosixPath),
 		languageOptions: {
 			globals: {
-				...globals.nodeBuiltin
+				...globals.browser
 			}
 		}
 	}

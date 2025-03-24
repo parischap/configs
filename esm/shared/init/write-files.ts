@@ -1,5 +1,5 @@
 import { writeFileSync } from 'node:fs';
-import configStarter from '../config.starter.js';
+import configStarter from '../configStarter.js';
 import * as constants from '../constants.js';
 
 try {

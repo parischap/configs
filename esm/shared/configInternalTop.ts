@@ -4,8 +4,8 @@
  */
 
 import * as constants from './constants.js';
-import githubWorkflowsPagesTemplate from './github.workflows.pages.template.js';
-import githubWorkflowsPublishTemplate from './github.workflows.publish.template.js';
+import githubWorkflowsPagesTemplate from './githubWorkflowsPagesTemplate.js';
+import githubWorkflowsPublishTemplate from './githubWorkflowsPublishTemplate.js';
 
 export default {
 	[`${constants.githubFolderName}/${constants.workflowsFolderName}/publish.yml`]:
@@ -16,6 +16,8 @@ export default {
 		packageManager: `pnpm@${constants.pnpmVersion}`,
 		devDependencies: {
 			globals: 'latest',
+			// Needs to be included as devDependency because imported by index which is used by prettier.config
+			'ts-deepmerge': 'latest',
 			'@tsconfig/node20': 'latest',
 			'@tsconfig/strictest': 'latest',
 			shx: 'latest',

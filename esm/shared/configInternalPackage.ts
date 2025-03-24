@@ -7,8 +7,8 @@ import { Array, pipe, Record, Tuple } from 'effect';
 import { merge } from 'ts-deepmerge';
 import * as constants from './constants.js';
 import docgenConfig from './docgenConfig.js';
-import madgercTemplate from './madge.template.js';
-import tsconfigDocgen from './tsconfig.docgen.js';
+import madgercTemplate from './madgeTemplate.js';
+import tsconfigDocgen from './tsconfigDocgen.js';
 import { devWorkspaceLink } from './utils.js';
 
 export namespace Visibility {

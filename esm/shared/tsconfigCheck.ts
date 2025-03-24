@@ -3,7 +3,7 @@ import * as constants from './constants.js';
 import * as utils from './utils.js';
 
 export default {
-	extends: './tsconfig.esm.json',
+	extends: './tsconfigEsm.json',
 	compilerOptions: {
 		noEmit: true,
 		tsBuildInfoFile: utils.fromOsPathToPosixPath(

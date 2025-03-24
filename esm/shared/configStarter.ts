@@ -4,9 +4,9 @@
  */
 import { basename, resolve } from 'node:path';
 import { merge } from 'ts-deepmerge';
-import configInternalBase, { Environment } from './config.internal.base.js';
-import configInternalPackage, { Visibility } from './config.internal.package.js';
-import configInternalTop from './config.internal.top.js';
+import configInternalBase, { Environment } from './configInternalBase.js';
+import configInternalPackage, { Visibility } from './configInternalPackage.js';
+import configInternalTop from './configInternalTop.js';
 import * as constants from './constants.js';
 
 const packageName = basename(resolve());

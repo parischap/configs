@@ -2,8 +2,8 @@
 import { Record } from 'effect';
 import { basename, dirname, resolve } from 'node:path';
 import { merge } from 'ts-deepmerge';
-import configInternalBase, { Environment } from './config.internal.base.js';
-import configInternalPackage, { Visibility } from './config.internal.package.js';
+import configInternalBase, { Environment } from './configInternalBase.js';
+import configInternalPackage, { Visibility } from './configInternalPackage.js';
 
 const rootPath = resolve();
 const packageName = basename(rootPath);

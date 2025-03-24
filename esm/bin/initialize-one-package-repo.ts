@@ -8,9 +8,9 @@ import {
 import { Cause, Effect, Exit, Layer, pipe } from 'effect';
 import * as Json from '../shared/Json.js';
 import * as Prettier from '../shared/Prettier.js';
-import { Environment } from '../shared/config.internal.base.js';
-import { Visibility } from '../shared/config.internal.package.js';
-import configOnePackageRepo from '../shared/config.one.package.repo.js';
+import { Environment } from '../shared/configInternalBase.js';
+import { Visibility } from '../shared/configInternalPackage.js';
+import configOnePackageRepo from '../shared/configOnePackageRepo.js';
 import * as constants from '../shared/constants.js';
 
 const PlatformNodePathService = PlatformPath.Path;

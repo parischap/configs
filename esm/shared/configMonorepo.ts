@@ -1,11 +1,11 @@
 /** This config is the one to be used at the root (top) of a monorepo. */
 import * as constants from './constants.js';
-import pnpmWorkspaceTemplate from './pnpm.workspace.template.js';
+import pnpmWorkspaceTemplate from './pnpmWorkspaceTemplate.js';
 
 import { basename, resolve } from 'node:path';
 import { merge } from 'ts-deepmerge';
-import configInternalBase, { Environment } from './config.internal.base.js';
-import configInternalTop from './config.internal.top.js';
+import configInternalBase, { Environment } from './configInternalBase.js';
+import configInternalTop from './configInternalTop.js';
 
 const packageName = basename(resolve());
 

@@ -20,12 +20,12 @@ importers:
       effect:
         specifier: ^3.14.1
         version: 3.14.1
-      globals:
-        specifier: latest
-        version: 16.0.0
       minimatch:
         specifier: latest
         version: 10.0.1
+      ts-deepmerge:
+        specifier: latest
+        version: 7.0.2
     devDependencies:
       '@babel/cli':
         specifier: latest
@@ -48,15 +48,9 @@ importers:
       '@eslint/js':
         specifier: latest
         version: 9.23.0
-      '@html-eslint/eslint-plugin':
-        specifier: latest
-        version: 0.36.0
-      '@html-eslint/parser':
-        specifier: latest
-        version: 0.36.0
       '@parischap/configs':
-        specifier: link:dist
-        version: link:dist
+        specifier: latest
+        version: 1.16.0
       '@tsconfig/node20':
         specifier: latest
         version: 20.1.5
@@ -75,9 +69,6 @@ importers:
       babel-plugin-annotate-pure-calls:
         specifier: latest
         version: 0.5.0(@babel/core@7.26.10)
-      cross-env:
-        specifier: latest
-        version: 7.0.3
       eslint:
         specifier: latest
         version: 9.23.0
@@ -90,6 +81,9 @@ importers:
       eslint-plugin-yml:
         specifier: latest
         version: 1.17.0(eslint@9.23.0)
+      globals:
+        specifier: latest
+        version: 16.0.0
       madge:
         specifier: latest
         version: 8.0.0(typescript@5.8.2)
@@ -102,15 +96,6 @@ importers:
       shx:
         specifier: latest
         version: 0.4.0
-      terser:
-        specifier: latest
-        version: 5.39.0
-      ts-deepmerge:
-        specifier: latest
-        version: 7.0.2
-      tsx:
-        specifier: latest
-        version: 4.19.3
       typescript:
         specifier: latest
         version: 5.8.2
@@ -481,18 +466,6 @@ packages:
     resolution: {integrity: sha512-JubJ5B2pJ4k4yGxaNLdbjrnk9d/iDz6/q8wOilpIowd6PJPgaxCuHBnBszq7Ce2TyMrywm5r4PnKm6V3iiZF+g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@html-eslint/eslint-plugin@0.36.0':
-    resolution: {integrity: sha512-j0jj+mWy1TVZXmbCX2Di7sZtgqEHs8QvKVF6MM1uULGwYQmGYNrSe3AzkHPU5NxzpJNO1yrL7VLbO7OL6mLr8g==}
-
-  '@html-eslint/parser@0.36.0':
-    resolution: {integrity: sha512-MFA2M1WIMHTAwS+ibPvKTCYCPL/geLtO3GlQoee3q3GWG17QtDMDKxse8/HaLoHn9u0ehtGDAGo+uAX5nehKJw==}
-
-  '@html-eslint/template-parser@0.36.0':
-    resolution: {integrity: sha512-4CoQQhRaj7NK1Vfxw5m+y5ty+rClRr3pqe6LrsedHib8G8FPSwiYyNW2hAri09Sq/MeM1tHHezLgak+IN5TXSA==}
-
-  '@html-eslint/template-syntax-parser@0.36.0':
-    resolution: {integrity: sha512-lBjcbATQ4Q1hLDtedyunPtbRCkiR5NdOu1l5PrcO2Zr+7cKLBWniR3Eo1txBXMbp5MB4X06f7ppqtTn93MEHDA==}
-
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
     engines: {node: '>=18.18.0'}
@@ -668,6 +641,10 @@ packages:
   '@parcel/watcher@2.5.1':
     resolution: {integrity: sha512-dfUnCxiN9H4ap84DvD2ubjw+3vUNpstxa0TneY/Paat8a3R4uQZDLSvWjmznAY/DoahqTHl9V46HF/Zs3F29pg==}
     engines: {node: '>= 10.0.0'}
+
+  '@parischap/configs@1.16.0':
+    resolution: {integrity: sha512-4BQG5NWgccHHj+Wq6+9MWacvzy/+4YM6KYq7KHU66wyGa3Ae+dfwrYkLvFETk6dmU43ppep+gUZjMbLTXXDCrg==}
+    hasBin: true
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -1102,11 +1079,6 @@ packages:
   core-util-is@1.0.3:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
 
-  cross-env@7.0.3:
-    resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
-    engines: {node: '>=10.14', npm: '>=6', yarn: '>=1'}
-    hasBin: true
-
   cross-spawn@6.0.6:
     resolution: {integrity: sha512-VqCUuhcd1iB+dsv8gxPttb5iZh/D0iubSP21g36KXdEuf6I5JiioesUVjpCdHV9MZRUfVFlvwtIUyPfxo5trtw==}
     engines: {node: '>=4.8'}
@@ -1242,9 +1214,6 @@ packages:
   entities@4.5.0:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
     engines: {node: '>=0.12'}
-
-  es-html-parser@0.1.1:
-    resolution: {integrity: sha512-SNHdEpKkN4nWZ3sFq9AxPlaUzPKJewGh59JrVS2355vELTOFygyf/lbfDDIONuGvYrhvAHoaUd+sK9UGaGrKUg==}
 
   es-module-lexer@1.6.0:
     resolution: {integrity: sha512-qqnD1yMU6tk/jnaMosogGySTZP8YtUgAffA9nMN+E/rjxcfRQ6IEk7IiozUjgxKoFHBGjTLnrHB/YC45r/59EQ==}
@@ -2886,22 +2855,6 @@ snapshots:
       '@eslint/core': 0.12.0
       levn: 0.4.1
 
-  '@html-eslint/eslint-plugin@0.36.0':
-    dependencies:
-      '@html-eslint/template-parser': 0.36.0
-      '@html-eslint/template-syntax-parser': 0.36.0
-
-  '@html-eslint/parser@0.36.0':
-    dependencies:
-      '@html-eslint/template-syntax-parser': 0.36.0
-      es-html-parser: 0.1.1
-
-  '@html-eslint/template-parser@0.36.0':
-    dependencies:
-      es-html-parser: 0.1.1
-
-  '@html-eslint/template-syntax-parser@0.36.0': {}
-
   '@humanfs/core@0.19.1': {}
 
   '@humanfs/node@0.16.6':
@@ -2938,6 +2891,7 @@ snapshots:
     dependencies:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
+    optional: true
 
   '@jridgewell/sourcemap-codec@1.5.0': {}
 
@@ -3040,6 +2994,8 @@ snapshots:
       '@parcel/watcher-win32-arm64': 2.5.1
       '@parcel/watcher-win32-ia32': 2.5.1
       '@parcel/watcher-win32-x64': 2.5.1
+
+  '@parischap/configs@1.16.0': {}
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -3446,7 +3402,8 @@ snapshots:
 
   commander@12.1.0: {}
 
-  commander@2.20.3: {}
+  commander@2.20.3:
+    optional: true
 
   commander@6.2.1: {}
 
@@ -3472,10 +3429,6 @@ snapshots:
   convert-source-map@2.0.0: {}
 
   core-util-is@1.0.3: {}
-
-  cross-env@7.0.3:
-    dependencies:
-      cross-spawn: 7.0.6
 
   cross-spawn@6.0.6:
     dependencies:
@@ -3616,8 +3569,6 @@ snapshots:
       tapable: 2.2.1
 
   entities@4.5.0: {}
-
-  es-html-parser@0.1.1: {}
 
   es-module-lexer@1.6.0: {}
 
@@ -4709,6 +4660,7 @@ snapshots:
     dependencies:
       buffer-from: 1.1.2
       source-map: 0.6.1
+    optional: true
 
   source-map@0.6.1: {}
 
@@ -4786,6 +4738,7 @@ snapshots:
       acorn: 8.14.1
       commander: 2.20.3
       source-map-support: 0.5.21
+    optional: true
 
   through2@2.0.5:
     dependencies:

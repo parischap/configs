@@ -4,7 +4,7 @@
 	"author": "Jérôme MARTIN",
 	"license": "MIT",
 	"scripts": {
-		"tscheck": "tsc -b tsconfig.check.json --force ",
+		"tscheck": "tsc -b tsconfig.check.json --force",
 		"lint": "eslint .",
 		"lint-fix": "eslint . --fix",
 		"lint-rules": "pnpx @eslint/config-inspector",
@@ -18,13 +18,14 @@
 		"install-prod": "cd dist && pnpm i && cd ..",
 		"build": "pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm --if-present generate-types && pnpm install-prod",
 		"prodify": "node ./dist/bin/prodify.js",
-		"bundle": "vite-node ./esm/bin/bundle-files.ts",
+		"examples": "",
+		"bundle": "bundle-files",
+		"pre-build": "pnpm i",
+		"post-build": "pnpm update-config-files",
 		"generate-types": "tsc -b tsconfig.esm.json --emitDeclarationOnly",
 		"compile": "pnpm bundle && pnpm prodify",
 		"build-and-publish": "pnpm build && pnpm checks && pnpm publish-to-npm",
-		"docgen": "echo \"docgen not activated for this package\"",
-		"pre-build": "pnpm i",
-		"post-build": "pnpm update-config-files"
+		"docgen": "echo \"docgen not activated for this package\""
 	},
 	"description": "Utility to generate configuration files in a repository",
 	"module": "./esm/index.js",
@@ -33,41 +34,45 @@
 			"import": "./esm/index.ts"
 		}
 	},
+	"dependencies": {
+		"minimatch": "latest",
+		"effect": "^3.14.1",
+		"@effect/platform": "^0.80.1",
+		"@effect/platform-node": "^0.76.1",
+		"ts-deepmerge": "latest",
+		"@effect/experimental": "^0.44.1"
+	},
 	"devDependencies": {
-		"@babel/cli": "latest",
-		"@babel/core": "latest",
-		"@babel/plugin-transform-export-namespace-from": "latest",
-		"@babel/plugin-transform-modules-commonjs": "latest",
-		"@effect/docgen": "latest",
-		"@eslint/eslintrc": "latest",
-		"@eslint/js": "latest",
-		"@html-eslint/eslint-plugin": "latest",
-		"@html-eslint/parser": "latest",
-		"@parischap/configs": "link:dist",
+		"@parischap/configs": "latest",
+		"globals": "latest",
 		"@tsconfig/node20": "latest",
 		"@tsconfig/strictest": "latest",
+		"shx": "latest",
+		"@eslint/eslintrc": "latest",
+		"@eslint/js": "latest",
 		"@types/eslint": "latest",
 		"@types/eslint-config-prettier": "latest",
 		"@types/node": "latest",
-		"babel-plugin-annotate-pure-calls": "latest",
-		"cross-env": "latest",
 		"eslint": "latest",
 		"eslint-config-prettier": "latest",
 		"eslint-plugin-functional": "latest",
 		"eslint-plugin-yml": "latest",
-		"madge": "latest",
 		"prettier": "latest",
-		"prettier-plugin-jsdoc": "latest",
-		"shx": "latest",
-		"terser": "latest",
-		"ts-deepmerge": "latest",
-		"tsx": "latest",
 		"typescript": "latest",
 		"typescript-eslint": "latest",
 		"vite": "latest",
 		"vite-node": "latest",
-		"vitest": "latest"
+		"vitest": "latest",
+		"madge": "latest",
+		"@babel/core": "latest",
+		"@babel/plugin-transform-export-namespace-from": "latest",
+		"@babel/plugin-transform-modules-commonjs": "latest",
+		"babel-plugin-annotate-pure-calls": "latest",
+		"@babel/cli": "latest",
+		"@effect/docgen": "latest",
+		"prettier-plugin-jsdoc": "latest"
 	},
+	"peerDependencies": {},
 	"publishConfig": {
 		"scripts": {},
 		"devDependencies": {},
@@ -94,22 +99,10 @@
 		"url": "git+https://github.com/parischap/configs.git"
 	},
 	"homepage": "https://github.com/parischap/configs",
-	"dependencies": {
-		"@effect/experimental": "^0.44.1",
-		"@effect/platform": "^0.80.1",
-		"@effect/platform-node": "^0.76.1",
-		"effect": "^3.14.1",
-		"globals": "latest",
-		"minimatch": "latest"
-	},
 	"sideEffects": false,
 	"packageManager": "pnpm@10.6.5",
 	"pnpm": {
 		"patchedDependencies": {},
-		"overrides": {},
-		"onlyBuiltDependencies": [
-			"@parcel/watcher",
-			"msgpackr-extract"
-		]
+		"overrides": {}
 	}
 }

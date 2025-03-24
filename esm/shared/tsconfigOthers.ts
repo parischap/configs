@@ -3,7 +3,7 @@ import * as constants from './constants.js';
 import * as utils from './utils.js';
 
 export default {
-	extends: './tsconfig.base.json',
+	extends: './tsconfigInternalBase.json',
 	include: constants.allJsFiles.map(utils.fromOsPathToPosixPath),
 	exclude: [
 		...constants.allProjectFiles.map(utils.fromOsPathToPosixPath),

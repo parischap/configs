@@ -1,4 +1,4 @@
-import tsConfigEsm from './tsconfig.esm.js';
+import tsConfigEsm from './tsconfigEsm.js';
 
 export default {
 	...tsConfigEsm,

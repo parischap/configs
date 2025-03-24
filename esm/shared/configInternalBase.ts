@@ -4,20 +4,20 @@
  * configs.
  */
 import * as constants from './constants.js';
-import eslintConfigBrowserTemplate from './eslint.config.browser.template.js';
-import eslintConfigLibraryTemplate from './eslint.config.library.template.js';
-import eslintConfigNodeTemplate from './eslint.config.node.template.js';
-import gitIgnoreTemplate from './gitignore.template.js';
-import prettierConfigTemplate from './prettier.config.template.js';
-import prettierIgnore from './prettierignore.js';
-import tsconfigBase from './tsconfig.base.js';
-import tsConfigCheck from './tsconfig.check.js';
-import tsConfigEsmBrowser from './tsconfig.esm.browser.js';
-import tsConfigEsmLibrary from './tsconfig.esm.library.js';
-import tsConfigEsmNode from './tsconfig.esm.node.js';
+import eslintConfigBrowserTemplate from './eslintConfigBrowserTemplate.js';
+import eslintConfigLibraryTemplate from './EslintConfigLibraryTemplate.js';
+import eslintConfigNodeTemplate from './eslintConfigNodeTemplate.js';
+import gitIgnoreTemplate from './gitignoreTemplate.js';
+import prettierConfigTemplate from './prettierConfigTemplate.js';
+import prettierIgnore from './prettierIgnore.js';
 import tsConfig from './tsconfig.js';
-import tsConfigOthers from './tsconfig.others.js';
-import viteConfigTemplate from './vite.config.template.js';
+import tsConfigCheck from './tsconfigCheck.js';
+import tsConfigEsmBrowser from './tsconfigEsmBrowser.js';
+import tsConfigEsmLibrary from './tsconfigEsmLibrary.js';
+import tsConfigEsmNode from './tsconfigEsmNode.js';
+import tsconfigBase from './tsconfigInternalBase.js';
+import tsConfigOthers from './tsconfigOthers.js';
+import viteConfigTemplate from './viteConfigTemplate.js';
 
 export namespace Environment {
 	export enum Type {

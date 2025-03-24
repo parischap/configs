@@ -8,7 +8,7 @@ import {
 import { Cause, Effect, Exit, Layer, pipe } from 'effect';
 import * as Json from '../shared/Json.js';
 import * as Prettier from '../shared/Prettier.js';
-import configMonorepo from '../shared/config.monorepo.js';
+import configMonorepo from '../shared/configMonorepo.js';
 import * as constants from '../shared/constants.js';
 
 const PlatformNodePathService = PlatformPath.Path;
