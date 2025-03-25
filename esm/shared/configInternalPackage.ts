@@ -211,9 +211,9 @@ export default ({
 				},
 				dependencies,
 				devDependencies: {
-					...devDependencies,
 					// Include self for tests
-					[`${constants.slashedScope}${packageName}`]: 'link:.'
+					[`${constants.slashedScope}${packageName}`]: 'link:.',
+					...devDependencies
 				},
 				peerDependencies: {
 					...Record.mapEntries(internalPeerDependencies, (_, depName) =>

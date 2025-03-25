@@ -18,6 +18,7 @@ export default merge(
 		packageName,
 		environment: Environment.Type.Node
 	}),
+	configInternalTop,
 	configInternalPackage({
 		packageName,
 		repoName: packageName,
@@ -29,7 +30,10 @@ export default merge(
 			'@effect/platform-node': constants.effectPlatformNodeVersion,
 			'ts-deepmerge': 'latest'
 		},
-		devDependencies: {},
+		devDependencies: {
+			// In this package only, we link to the prod version of the package. pnpm install does not error if the dist directory does not contain any package.json.
+			[`${constants.slashedScope}${packageName}`]: 'link:dist'
+		},
 		internalPeerDependencies: {},
 		externalPeerDependencies: {},
 		examples: [],
@@ -46,14 +50,8 @@ export default merge(
 		hasDocGen: false,
 		keywords: []
 	}),
-	configInternalTop,
 	{
 		[constants.packageJsonFileName]: {
-			devDependencies: {
-				// In this package only, we link to the prod version of the package. pnpm install does not error if the dist directory does not contain any package.json Don't do it in the devDependency parameter of the configInternalPackage function because we need to overwrite the default value.
-				[`${constants.slashedScope}${packageName}`]: 'link:dist'
-			},
-
 			publishConfig: {
 				// Add type field for configs package. Eslint plugins and prettier plugins need to be installed at the root of each monorepo for vscode intellicode. At the same time, eslint.config.base and prettier.config.base use recommended configs of eslint, prettier and their plugins. The configs and the plugins need to be in the same version. For this reason, we do not import the plugins as dependencies of this package as we should. But as dev dependencies. These devDependencies are removed in the prod version of the Configs package. But as they are also included at the root of the target package, everything will work. However, we need to add type module in the nearest package.json above node_modules.
 				type: 'module'

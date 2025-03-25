@@ -27,6 +27,43 @@
 		"pre-build": "pnpm i",
 		"post-build": "pnpm update-config-files"
 	},
+	"packageManager": "pnpm@10.6.5",
+	"devDependencies": {
+		"globals": "latest",
+		"ts-deepmerge": "latest",
+		"@tsconfig/node20": "latest",
+		"@tsconfig/strictest": "latest",
+		"shx": "latest",
+		"@eslint/eslintrc": "latest",
+		"@eslint/js": "latest",
+		"@parischap/configs": "link:dist",
+		"@parischap/test-utils": "latest",
+		"@types/eslint": "latest",
+		"@types/eslint-config-prettier": "latest",
+		"@types/node": "latest",
+		"eslint": "latest",
+		"eslint-config-prettier": "latest",
+		"eslint-plugin-functional": "latest",
+		"eslint-plugin-yml": "latest",
+		"prettier": "latest",
+		"typescript": "latest",
+		"typescript-eslint": "latest",
+		"vite": "latest",
+		"vite-node": "latest",
+		"vitest": "latest",
+		"madge": "latest",
+		"@babel/core": "latest",
+		"@babel/plugin-transform-export-namespace-from": "latest",
+		"@babel/plugin-transform-modules-commonjs": "latest",
+		"babel-plugin-annotate-pure-calls": "latest",
+		"@babel/cli": "latest",
+		"@effect/docgen": "latest",
+		"prettier-plugin-jsdoc": "latest"
+	},
+	"pnpm": {
+		"patchedDependencies": {},
+		"overrides": {}
+	},
 	"dependencies": {
 		"@effect/experimental": "^0.44.1",
 		"minimatch": "latest",
@@ -64,47 +101,10 @@
 			"import": "./esm/index.ts"
 		}
 	},
-	"devDependencies": {
-		"@parischap/configs": "link:dist",
-		"globals": "latest",
-		"ts-deepmerge": "latest",
-		"@tsconfig/node20": "latest",
-		"@tsconfig/strictest": "latest",
-		"shx": "latest",
-		"@eslint/eslintrc": "latest",
-		"@eslint/js": "latest",
-		"@parischap/test-utils": "latest",
-		"@types/eslint": "latest",
-		"@types/eslint-config-prettier": "latest",
-		"@types/node": "latest",
-		"eslint": "latest",
-		"eslint-config-prettier": "latest",
-		"eslint-plugin-functional": "latest",
-		"eslint-plugin-yml": "latest",
-		"prettier": "latest",
-		"typescript": "latest",
-		"typescript-eslint": "latest",
-		"vite": "latest",
-		"vite-node": "latest",
-		"vitest": "latest",
-		"madge": "latest",
-		"@babel/core": "latest",
-		"@babel/plugin-transform-export-namespace-from": "latest",
-		"@babel/plugin-transform-modules-commonjs": "latest",
-		"babel-plugin-annotate-pure-calls": "latest",
-		"@babel/cli": "latest",
-		"@effect/docgen": "latest",
-		"prettier-plugin-jsdoc": "latest"
-	},
 	"peerDependencies": {},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/parischap/configs.git"
 	},
-	"homepage": "https://github.com/parischap/configs",
-	"packageManager": "pnpm@10.6.5",
-	"pnpm": {
-		"patchedDependencies": {},
-		"overrides": {}
-	}
+	"homepage": "https://github.com/parischap/configs"
 }

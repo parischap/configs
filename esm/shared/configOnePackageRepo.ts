@@ -42,6 +42,7 @@ export default ({
 			packageName,
 			environment
 		}),
+		configInternalTop,
 		configInternalPackage({
 			packageName,
 			repoName: packageName,
@@ -57,6 +58,5 @@ export default ({
 			hasStaticFolder,
 			hasDocGen,
 			keywords
-		}),
-		configInternalTop
+		})
 	);
