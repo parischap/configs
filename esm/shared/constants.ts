@@ -5,7 +5,7 @@ export const effectPlatformVersion = '^0.80.1';
 export const effectExperimentalVersion = '^0.44.1';
 export const effectLanguageServiceVersion = '^0.4.0';
 
-export const effectLibVersion = '^0.4.0';
+export const effectLibVersion = '^0.5.0';
 export const ansiStylesVersion = '^0.2.1';
 export const prettyPrintVersion = '^0.3.2';
 
