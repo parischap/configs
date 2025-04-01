@@ -52,7 +52,7 @@ export const vscodeWorkspaceFileNamePattern = '*.code-workspace';
 
 export const tsBuildInfoFolderName = '.tsbuildinfo';
 export const projectFolderName = projectMark;
-export const examplesFolderName = 'example';
+export const examplesFolderName = 'examples';
 export const testsFolderName = 'test';
 export const prodFolderName = 'dist';
 export const typesFolderName = 'dts';
