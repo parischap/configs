@@ -27,7 +27,7 @@
 		"pre-build": "pnpm i",
 		"post-build": "pnpm update-config-files"
 	},
-	"packageManager": "pnpm@10.6.5",
+	"packageManager": "pnpm@10.7.1",
 	"devDependencies": {
 		"globals": "latest",
 		"ts-deepmerge": "latest",
@@ -65,11 +65,11 @@
 		"overrides": {}
 	},
 	"dependencies": {
-		"@effect/experimental": "^0.44.1",
+		"@effect/experimental": "^0.44.5",
 		"minimatch": "latest",
-		"effect": "^3.14.1",
-		"@effect/platform": "^0.80.1",
-		"@effect/platform-node": "^0.76.1",
+		"effect": "^3.14.5",
+		"@effect/platform": "^0.80.5",
+		"@effect/platform-node": "^0.76.8",
 		"ts-deepmerge": "latest"
 	},
 	"sideEffects": false,
