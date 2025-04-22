@@ -65,11 +65,11 @@
 		"overrides": {}
 	},
 	"dependencies": {
-		"@effect/experimental": "^0.44.5",
+		"@effect/experimental": "^0.44.11",
 		"minimatch": "latest",
-		"effect": "^3.14.5",
-		"@effect/platform": "^0.80.5",
-		"@effect/platform-node": "^0.76.8",
+		"effect": "^3.14.11",
+		"@effect/platform": "^0.80.11",
+		"@effect/platform-node": "^0.76.21",
 		"ts-deepmerge": "latest"
 	},
 	"sideEffects": false,
