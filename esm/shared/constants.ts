@@ -1,9 +1,9 @@
 import { join } from 'node:path';
-export const effectVersion = '^3.14.11';
-export const effectPlatformNodeVersion = '^0.76.21';
-export const effectPlatformVersion = '^0.80.11';
+export const effectVersion = '^3.14.19';
+export const effectPlatformNodeVersion = '^0.77.8';
+export const effectPlatformVersion = '^0.80.19';
 export const effectExperimentalVersion = '^0.44.11';
-export const effectLanguageServiceVersion = '^0.7.1';
+export const effectLanguageServiceVersion = '^0.9.1';
 
 export const effectLibVersion = '^0.5.0';
 export const ansiStylesVersion = '^0.2.1';
