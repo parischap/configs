@@ -1,15 +1,15 @@
 import { join } from 'node:path';
-export const effectVersion = '^3.17.3';
-export const effectPlatformNodeVersion = '^0.94.0';
-export const effectPlatformVersion = '^0.90.0';
-export const effectExperimentalVersion = '^0.54.2';
-export const effectLanguageServiceVersion = '^0.32.0';
+export const effectVersion = '^3.17.9';
+export const effectPlatformNodeVersion = '^0.96.0';
+export const effectPlatformVersion = '^0.90.6';
+export const effectExperimentalVersion = '^0.54.6';
+export const effectLanguageServiceVersion = '^0.36.0';
 
 export const effectLibVersion = '^0.5.0';
 export const ansiStylesVersion = '^0.2.1';
 export const prettyPrintVersion = '^0.3.2';
 
-export const pnpmVersion = '10.11.0';
+export const pnpmVersion = '10.15pnpm .0';
 
 export const owner = 'parischap';
 export const scope = '@' + owner;
