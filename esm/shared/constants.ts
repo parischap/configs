@@ -1,9 +1,9 @@
 import { join } from 'node:path';
-export const effectVersion = '^3.17.10';
+export const effectVersion = '^3.17.13';
 export const effectPlatformNodeVersion = '^0.96.1';
-export const effectPlatformVersion = '^0.90.6';
+export const effectPlatformVersion = '^0.90.7';
 export const effectExperimentalVersion = '^0.54.6';
-export const effectLanguageServiceVersion = '^0.37.0';
+export const effectLanguageServiceVersion = '^0.38.1';
 
 export const effectLibVersion = '^0.5.0';
 export const ansiStylesVersion = '^0.2.1';
@@ -50,6 +50,7 @@ export const pnpmLockFileName = 'pnpm-lock.yaml';
 export const actionFileName = 'action.yml';
 export const vscodeWorkspaceFileNamePattern = '*.code-workspace';
 
+export const internalFolderName = 'internal';
 export const tsBuildInfoFolderName = '.tsbuildinfo';
 export const projectFolderName = projectMark;
 export const examplesFolderName = 'examples';
@@ -78,6 +79,7 @@ export const allSubFolders = join('**', '*');
 export const srcPath = join(projectFolderName, allSubFolders);
 export const prodPath = join(prodFolderName, allSubFolders);
 export const npmPath = join('**', npmFolderName, allSubFolders);
+export const internalPath = join(projectFolderName, internalFolderName);
 
 /*export const jsInMdExtensions = [
 	...mdExtensions.map((ext) => `${ext}/*.js`),

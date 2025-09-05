@@ -4,7 +4,10 @@ export default {
 	examplesCompilerOptions: `./${constants.docgenTsConfigFileName}`,
 	srcDir: `./${constants.projectFolderName}`,
 	outDir: constants.docsFolderName,
-	exclude: [`${constants.projectFolderName}/index.ts`],
+	exclude: [
+		...constants.allTsFiles.map((ext) => `${constants.internalPath}/${ext}`),
+		`${constants.projectFolderName}/index.ts`
+	],
 	enforceDescriptions: true,
 	enforceVersion: false
 };

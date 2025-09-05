@@ -23,6 +23,7 @@ export default {
 		module: 'NodeNext',
 		incremental: true,
 		removeComments: false,
+		stripInternal: true,
 		lib: [],
 		// Do not use types (in particular node types) unless included explicitely
 		types: [],
