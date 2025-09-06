@@ -6,12 +6,12 @@ import {
 	NodePath as PlatformNodePath
 } from '@effect/platform-node';
 import { Cause, Effect, Exit, Layer, pipe } from 'effect';
-import * as Json from '../shared/Json.js';
-import * as Prettier from '../shared/Prettier.js';
-import { Environment } from '../shared/configInternalBase.js';
-import { Visibility } from '../shared/configInternalPackage.js';
-import configOnePackageRepo from '../shared/configOnePackageRepo.js';
-import * as constants from '../shared/constants.js';
+import * as Json from '../internal/Json.js';
+import * as Prettier from '../internal/Prettier.js';
+import { Environment } from '../internal/configInternalBase.js';
+import { Visibility } from '../internal/configInternalPackage.js';
+import configOnePackageRepo from '../internal/configOnePackageRepo.js';
+import * as constants from '../internal/constants.js';
 
 const PlatformNodePathService = PlatformPath.Path;
 

@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /**
  * If no target is passed, builds all ts files in the esm directory except those in the
- * `esm/shared/` directory (these files, and all packages included as dependencies (not those
+ * `esm/internal/` directory (these files, and all packages included as dependencies (not those
  * included as devDependencies or peerDependencies), will be bundled). If a target is passed with
  * `TARGET=`, it must be expressed relative to the `esm` directory. If an `esm/bin/` directory
  * exists, it will be built directly under `dist` and not under `dist/esm`
  */
 
-import * as constants from '../shared/constants.js';
-import * as Json from '../shared/Json.js';
-import * as PortError from '../shared/PortError.js';
-import * as utils from '../shared/utils.js';
+import * as constants from '../internal/constants.js';
+import * as Json from '../internal/Json.js';
+import * as PortError from '../internal/PortError.js';
+import * as utils from '../internal/utils.js';
 
 import { FileSystem as PlatformFs, Path as PlatformPath } from '@effect/platform';
 import {
@@ -58,8 +58,8 @@ const program = Effect.gen(function* () {
 	const packageJsonPath = path.join(rootPath, constants.packageJsonFileName);
 	const projectPath = path.join(rootPath, constants.projectFolderName);
 	const prodPath = path.join(rootPath, constants.prodFolderName);
-	const sharedImportsGlob = constants.allTsFiles.map((p) =>
-		path.join(projectPath, constants.sharedFilesFolderName, p)
+	const internalImportsGlob = constants.allTsFiles.map((p) =>
+		path.join(projectPath, constants.internalFolderName, p)
 	);
 	const esmOutDir = path.join(constants.prodFolderName, constants.projectFolderName);
 
@@ -85,7 +85,7 @@ const program = Effect.gen(function* () {
 
 	const dependencies = dependencyKeys(pkg, 'dependencies');
 
-	const toBeBundled = pipe(sharedImportsGlob, Array.appendAll(dependencies));
+	const toBeBundled = pipe(internalImportsGlob, Array.appendAll(dependencies));
 
 	yield* Effect.log('Bundle files');
 	const target = yield* pipe(Config.string('TARGET'), Config.withDefault(''));
@@ -102,7 +102,7 @@ const program = Effect.gen(function* () {
 				Array.make(
 					String.endsWith('.ts'),
 					Predicate.not(String.endsWith('.d.ts')),
-					Predicate.not(utils.isSubPathOf(constants.sharedFilesFolderName))
+					Predicate.not(utils.isSubPathOf(constants.internalFolderName))
 				)
 			)
 		),

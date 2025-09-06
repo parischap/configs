@@ -6,10 +6,10 @@ import {
 	NodePath as PlatformNodePath
 } from '@effect/platform-node';
 import { Cause, Effect, Exit, Layer, pipe } from 'effect';
-import * as Json from '../shared/Json.js';
-import * as Prettier from '../shared/Prettier.js';
-import configMonorepo from '../shared/configMonorepo.js';
-import * as constants from '../shared/constants.js';
+import * as Json from '../internal/Json.js';
+import * as Prettier from '../internal/Prettier.js';
+import configMonorepo from '../internal/configMonorepo.js';
+import * as constants from '../internal/constants.js';
 
 const PlatformNodePathService = PlatformPath.Path;
 

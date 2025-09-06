@@ -1,16 +1,16 @@
-import { Environment } from './shared/configInternalBase.js';
-import { Visibility } from './shared/configInternalPackage.js';
-import configMonorepo from './shared/configMonorepo.js';
-import configOnePackageRepo from './shared/configOnePackageRepo.js';
-import configStarter from './shared/configStarter.js';
-import configSubRepo from './shared/configSubRepo.js';
-import * as constants from './shared/constants.js';
-import eslintConfigBrowser from './shared/eslintConfigBrowser.js';
-import eslintConfigLibrary from './shared/eslintConfigLibrary.js';
-import eslintConfigNode from './shared/eslintConfigNode.js';
-import eslintInternalConfigBase from './shared/eslintInternalConfigBase.js';
-import prettierconfigBase from './shared/prettierConfig.js';
-import * as utils from './shared/utils.js';
+import { Environment } from './internal/configInternalBase.js';
+import { Visibility } from './internal/configInternalPackage.js';
+import configMonorepo from './internal/configMonorepo.js';
+import configOnePackageRepo from './internal/configOnePackageRepo.js';
+import configStarter from './internal/configStarter.js';
+import configSubRepo from './internal/configSubRepo.js';
+import * as constants from './internal/constants.js';
+import eslintConfigBrowser from './internal/eslintConfigBrowser.js';
+import eslintConfigLibrary from './internal/eslintConfigLibrary.js';
+import eslintConfigNode from './internal/eslintConfigNode.js';
+import eslintInternalConfigBase from './internal/eslintInternalConfigBase.js';
+import prettierconfigBase from './internal/prettierConfig.js';
+import * as utils from './internal/utils.js';
 
 export {
 	configMonorepo,

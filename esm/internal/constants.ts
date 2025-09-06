@@ -58,7 +58,6 @@ export const testsFolderName = 'test';
 export const prodFolderName = 'dist';
 export const typesFolderName = 'dts';
 export const commonJsFolderName = 'cjs';
-export const sharedFilesFolderName = 'shared';
 export const executablesFolderName = 'bin';
 export const npmFolderName = 'node_modules';
 export const staticFolderName = 'public';

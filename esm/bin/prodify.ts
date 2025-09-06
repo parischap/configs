@@ -28,11 +28,11 @@ import {
 	Tuple,
 	pipe
 } from 'effect';
-import * as Json from '../shared/Json.js';
-import * as Prettier from '../shared/Prettier.js';
-import * as constants from '../shared/constants.js';
-import licenseTemplate from '../shared/licenseTemplate.js';
-import * as utils from '../shared/utils.js';
+import * as Json from '../internal/Json.js';
+import * as Prettier from '../internal/Prettier.js';
+import * as constants from '../internal/constants.js';
+import licenseTemplate from '../internal/licenseTemplate.js';
+import * as utils from '../internal/utils.js';
 
 const PlatformNodePathService = PlatformPath.Path;
 

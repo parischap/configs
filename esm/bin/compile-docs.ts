@@ -17,7 +17,7 @@
  *   directory an `index.md` file.
  */
 
-import * as constants from '../shared/constants.js';
+import * as constants from '../internal/constants.js';
 
 import {
 	Error as PlatformError,

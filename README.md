@@ -29,7 +29,7 @@ initialize-subrepo
 Following is a list of some parameters to provide to the `configSubRepo` and `configOnePackageRepo` functions:
 
 - **environment**: specifies where the package will run: `Environment.Type.Node` for execution under node context, `Environment.Type.Browser` for execution in a browser and `Environment.Type.Library` for a library that may run both in node and a browser.
-- **bundled**: if set to true, all ts files under `esm/` (except those under the `shared/` directory) become standalone executables in which are bundled all used files in the `shared/` directory and all dependencies (but not the peerDependencies). Type files are created for each executable. If a bin directory is present under esm/, it will be built directly under dist and not under dist/esm. If bundled is set to false, all files under `esm/` are simply transpiled in js, cjs and d.ts files.
+- **bundled**: if set to true, all ts files under `esm/` (except those under the `internal/` directory) become standalone executables in which are bundled all used files in the `internal/` directory and all dependencies (but not the peerDependencies). Type files are created for each executable. If a bin directory is present under esm/, it will be built directly under dist and not under dist/esm. If bundled is set to false, all files under `esm/`and subfolders are simply transpiled in js, cjs and d.ts files. We can also create an `internal/` directory in that case: files in this directory will not be documented.
 - **visibility**: `Visibility.Type.Public` if the package is to be published to the NPM registry, `Visibility.Type.PublicByForce` if the package should be private but is published to NPM out of technical reasons and `Visibility.Type.Private` is the package is not to be published.
 - **hasStaticFolder**: specifies if the package has a static folder which is to be copied unchanged under `dist/` (usually for websites) - Works only for bundled packages.
 - **hasDocGen**: specifies if doc must be generated and published to github for this package.
@@ -37,7 +37,7 @@ Following is a list of some parameters to provide to the `configSubRepo` and `co
 
 The `configs` package uses itself to generate its configuration files. To that extent, the following procedure must be followed for that package only:
 
-- run `node esm/shared/init/main.mjs`
+- run `node esm/internal/init/main.mjs`
 - run `pnpm build`
 
 For other packages, the procedure to follow is:

@@ -32,11 +32,11 @@ import {
 	pipe
 } from 'effect';
 import { minimatch } from 'minimatch';
-import * as Json from '../shared/Json.js';
-import * as PortError from '../shared/PortError.js';
-import * as Prettier from '../shared/Prettier.js';
-import * as constants from '../shared/constants.js';
-import * as utils from '../shared/utils.js';
+import * as Json from '../internal/Json.js';
+import * as PortError from '../internal/PortError.js';
+import * as Prettier from '../internal/Prettier.js';
+import * as constants from '../internal/constants.js';
+import * as utils from '../internal/utils.js';
 
 const PlatformNodePathService = PlatformPath.Path;
 const PlatformNodePathLive = PlatformNodePath.layer;
