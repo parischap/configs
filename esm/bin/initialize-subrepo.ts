@@ -15,7 +15,7 @@ import * as constants from '../internal/constants.js';
 
 const PlatformNodePathService = PlatformPath.Path;
 
-const PlatformNodePathLive = PlatformNodePath.layer;
+const PlatformNodePathLive = PlatformNodePath.layerPosix;
 const PlatformNodeFsService = PlatformFs.FileSystem;
 const PlatformNodeFsLive = PlatformNodeFs.layer;
 

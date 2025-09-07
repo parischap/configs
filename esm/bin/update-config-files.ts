@@ -39,7 +39,7 @@ import * as constants from '../internal/constants.js';
 import * as utils from '../internal/utils.js';
 
 const PlatformNodePathService = PlatformPath.Path;
-const PlatformNodePathLive = PlatformNodePath.layer;
+const PlatformNodePathLive = PlatformNodePath.layerPosix;
 const PlatformNodeFsService = PlatformFs.FileSystem;
 const PlatformNodeFsLive = PlatformNodeFs.layer;
 
@@ -100,17 +100,22 @@ const program = Effect.gen(function* () {
 		fs.readDirectory(rootPath),
 		Effect.flatMap(
 			flow(
-				Array.filter(
-					(filename) => !Array.some(patternsToIgnore, (pattern) => minimatch(filename, pattern))
+				Array.filterMap(
+					flow(
+						Option.liftPredicate(
+							(filename) => !Array.some(patternsToIgnore, (pattern) => minimatch(filename, pattern))
+						),
+						Option.map((name) => {
+							const posixName = utils.fromOsPathToPosixPath(name);
+							const fullPath = path.join(rootPath, posixName);
+							return Effect.all({
+								name: Effect.succeed(posixName),
+								fullPath: Effect.succeed(fullPath),
+								info: fs.stat(fullPath)
+							});
+						})
+					)
 				),
-				Array.map((name) => {
-					const fullPath = path.join(rootPath, name);
-					return Effect.all({
-						name: Effect.succeed(name),
-						fullPath: Effect.succeed(fullPath),
-						info: fs.stat(fullPath)
-					});
-				}),
 				Effect.all
 			)
 		),
@@ -132,9 +137,10 @@ const program = Effect.gen(function* () {
 				Effect.flatMap(
 					flow(
 						Array.map((name) => {
-							const fullPath = path.join(folder.fullPath, name);
+							const posixName = utils.fromOsPathToPosixPath(name);
+							const fullPath = path.join(folder.fullPath, posixName);
 							return Effect.all({
-								name: Effect.succeed(path.join(folder.name, name)),
+								name: Effect.succeed(path.join(folder.name, posixName)),
 								fullPath: Effect.succeed(fullPath),
 								info: fs.stat(fullPath)
 							});
@@ -155,7 +161,7 @@ const program = Effect.gen(function* () {
 				),
 				Array.appendAll(rootFiles),
 				// Paths in project.config.js are always posix style
-				Array.map(flow(Struct.get('name'), utils.fromOsPathToPosixPath))
+				Array.map(Struct.get('name'))
 			)
 		)
 	);

@@ -7,7 +7,6 @@ import { type Linter } from 'eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import functional from 'eslint-plugin-functional';
 import * as constants from './constants.js';
-import * as utils from './utils.js';
 //import markdown from 'eslint-plugin-markdown';
 import eslintPluginYml from 'eslint-plugin-yml';
 import globals from 'globals';
@@ -116,23 +115,20 @@ const jsonConfigs: FlatConfigArray = [
 
 const _default = [
 	{
-		ignores: [
-			...constants.allProdFiles.map(utils.fromOsPathToPosixPath),
-			constants.viteTimeStampFileNamePattern
-		]
+		ignores: [...constants.allProdFiles, constants.viteTimeStampFileNamePattern]
 	},
 	...typescriptConfigs.map((config) => ({
 		...config,
-		files: constants.allJsFiles.map(utils.fromOsPathToPosixPath)
+		files: constants.allJsFiles
 	})),
 	{
-		files: constants.allCjsFiles.map(utils.fromOsPathToPosixPath),
+		files: constants.allCjsFiles,
 		// No need to set module for other js files, this is the default
 		languageOptions: { sourceType: 'commonjs' }
 	},
 	{
-		files: constants.allJsFiles.map(utils.fromOsPathToPosixPath),
-		ignores: constants.allProjectFiles.map(utils.fromOsPathToPosixPath),
+		files: constants.allJsFiles,
+		ignores: constants.allProjectFiles,
 		languageOptions: {
 			globals: {
 				...globals.nodeBuiltin
@@ -147,7 +143,7 @@ const _default = [
 		}*/
 	},
 	{
-		files: constants.allProjectFiles.map(utils.fromOsPathToPosixPath),
+		files: constants.allProjectFiles,
 		languageOptions: {
 			parserOptions: {
 				// here . represents the directory containing the nearest eslint.config.js
@@ -157,23 +153,23 @@ const _default = [
 	},
 	/*.map((config) => ({
 		...config,
-		files: constants.allHtmlFiles.map(utils.fromOsPathToPosixPath)
+		files: constants.allHtmlFiles
 	})),*/
 	...ymlConfigs.map((config) => ({
 		...config,
-		files: constants.allYmlFiles.map(utils.fromOsPathToPosixPath)
+		files: constants.allYmlFiles
 	})),
 	/*...markdownConfigs.map((config) => ({
 		...config,
-		files: constants.allMdFiles.map(utils.fromOsPathToPosixPath)
+		files: constants.allMdFiles
 	})),
 	...jsonConfigs.map((config) => ({
 		...config,
-		files: constants.allJsonFiles.map(utils.fromOsPathToPosixPath)
+		files: constants.allJsonFiles
 	})),*/
 	{
 		...eslintConfigPrettier,
-		files: constants.allJsFiles.map(utils.fromOsPathToPosixPath)
+		files: constants.allJsFiles
 	}
 ] as FlatConfigArray;
 

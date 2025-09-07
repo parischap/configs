@@ -21,11 +21,11 @@ describe('utils', () => {
 		);
 	});
 
-	it('fromPosixPathToOsPath', () => {
+	/*it('fromPosixPathToOsPath', () => {
 		expect(Configs.utils.fromPosixPathToOsPath('foo/bar/baz')).toBe(
 			`foo${path.sep}bar${path.sep}baz`
 		);
-	});
+	});*/
 
 	it('expandify', () => {
 		expect(Configs.utils.expandify(['.js', '.ts'])).toBe('{.js,.ts}');

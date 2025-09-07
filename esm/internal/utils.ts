@@ -16,9 +16,11 @@ export const extension = (filename: string) =>
 		Option.getOrElse(() => '')
 	);
 
-export const fromOsPathToPosixPath = (p: string): string => p.replaceAll(path.sep, path.posix.sep);
+export const fromOsPathToPosixPath: (p: string) => string =
+	path.sep === path.posix.sep ? Function.identity : String.replaceAll(path.sep, path.posix.sep);
 
-export const fromPosixPathToOsPath = (p: string): string => p.replaceAll(path.posix.sep, path.sep);
+/*export const fromPosixPathToOsPath: (p: string) => string =
+	path.sep === path.posix.sep ? Function.identity : String.replaceAll(path.posix.sep, path.sep);*/
 
 export const expandify = (arr: ReadonlyArray<string>) => `{${arr.join(',')}}`;
 

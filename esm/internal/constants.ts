@@ -1,4 +1,3 @@
-import { join } from 'node:path';
 export const effectVersion = '^3.17.13';
 export const effectPlatformNodeVersion = '^0.96.1';
 export const effectPlatformVersion = '^0.90.7';
@@ -7,7 +6,7 @@ export const effectLanguageServiceVersion = '^0.38.1';
 
 export const effectLibVersion = '^0.6.0';
 export const ansiStylesVersion = '^0.2.2';
-export const prettyPrintVersion = '^0.3.2';
+export const prettyPrintVersion = '^0.3.3';
 
 export const pnpmVersion = '10.15.0';
 
@@ -72,13 +71,13 @@ export const docsFolderName = 'docs';
 export const docgenFolderName = 'modules';
 export const readmeAssetsFolderName = 'readme-assets';
 
-export const allSubFolders = join('**', '*');
-//export const subRepoPath = join('**', packagesFolderName, '*');
+export const allSubFolders = '**/*';
+//export const subRepoPath = `**/${packagesFolderName}/*`;
 
-export const srcPath = join(projectFolderName, allSubFolders);
-export const prodPath = join(prodFolderName, allSubFolders);
-export const npmPath = join('**', npmFolderName, allSubFolders);
-export const internalPath = join(projectFolderName, internalFolderName);
+export const srcPath = `${projectFolderName}/${allSubFolders}`;
+export const prodPath = `${prodFolderName}/${allSubFolders}`;
+export const npmPath = `**/${npmFolderName}/${allSubFolders}`;
+export const internalPath = `${projectFolderName}/${internalFolderName}`;
 
 /*export const jsInMdExtensions = [
 	...mdExtensions.map((ext) => `${ext}/*.js`),
@@ -105,4 +104,4 @@ export const allNpmFiles = jsExtensions.map((ext) => npmPath + ext);
 
 export const topJsFiles = jsExtensions.map((ext) => '*' + ext);
 
-//export const topRootPath = join('C:', 'Users', 'JEROME', 'Documents', 'MesDeveloppements', 'effect');
+//export const topRootPath = 'C:/Users/JEROME/Documents/MesDeveloppements/effect';

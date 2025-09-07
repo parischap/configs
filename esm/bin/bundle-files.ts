@@ -3,8 +3,8 @@
  * If no target is passed, builds all ts files in the esm directory except those in the
  * `esm/internal/` directory (these files, and all packages included as dependencies (not those
  * included as devDependencies or peerDependencies), will be bundled). If a target is passed with
- * `TARGET=`, it must be expressed relative to the `esm` directory. If an `esm/bin/` directory
- * exists, it will be built directly under `dist` and not under `dist/esm`
+ * `TARGET=`, it must be expressed relative to the `esm` directory and must use the OS separator. If
+ * an `esm/bin/` directory exists, it will be built directly under `dist` and not under `dist/esm`
  */
 
 import * as constants from '../internal/constants.js';
@@ -24,6 +24,7 @@ import {
 	Config,
 	Effect,
 	Exit,
+	flow,
 	Layer,
 	Option,
 	pipe,
@@ -35,7 +36,7 @@ import { dirname } from 'node:path';
 import { build } from 'vite';
 
 const PlatformNodePathService = PlatformPath.Path;
-const PlatformNodePathLive = PlatformNodePath.layer;
+const PlatformNodePathLive = PlatformNodePath.layerPosix;
 const PlatformNodeFsService = PlatformFs.FileSystem;
 const PlatformNodeFsLive = PlatformNodeFs.layer;
 
@@ -91,19 +92,22 @@ const program = Effect.gen(function* () {
 	const target = yield* pipe(Config.string('TARGET'), Config.withDefault(''));
 
 	const dirContents =
-		target === '' ?
-			yield* fs.readDirectory(projectPath, { recursive: true })
-		:	pipe(target, utils.fromPosixPathToOsPath, Array.of);
+		target === '' ? yield* fs.readDirectory(projectPath, { recursive: true }) : Array.of(target);
 
 	yield* pipe(
 		dirContents,
-		Array.filter(
-			Predicate.every(
-				Array.make(
-					String.endsWith('.ts'),
-					Predicate.not(String.endsWith('.d.ts')),
-					Predicate.not(utils.isSubPathOf(constants.internalFolderName))
-				)
+		Array.filterMap(
+			flow(
+				Option.liftPredicate(
+					Predicate.every(
+						Array.make(
+							String.endsWith('.ts'),
+							Predicate.not(String.endsWith('.d.ts')),
+							Predicate.not(utils.isSubPathOf(constants.internalFolderName))
+						)
+					)
+				),
+				Option.map(utils.fromOsPathToPosixPath)
 			)
 		),
 		Array.map((fileName) => {

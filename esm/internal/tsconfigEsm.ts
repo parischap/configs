@@ -1,22 +1,13 @@
-import { join } from 'node:path';
 import * as constants from './constants.js';
-import * as utils from './utils.js';
 
 export default {
 	extends: './tsconfig.base.json',
-	include: constants.allProjectFiles.map(utils.fromOsPathToPosixPath),
+	include: constants.allProjectFiles,
 	compilerOptions: {
-		rootDir: utils.fromOsPathToPosixPath(constants.projectFolderName),
-		tsBuildInfoFile: utils.fromOsPathToPosixPath(
-			join(
-				constants.tsBuildInfoFolderName,
-				`${constants.projectMark}${constants.tsBuildInfoFolderName}`
-			)
-		),
-		declarationDir: utils.fromOsPathToPosixPath(
-			join(constants.prodFolderName, constants.typesFolderName)
-		),
+		rootDir: constants.projectFolderName,
+		tsBuildInfoFile: `${constants.tsBuildInfoFolderName}/${constants.projectMark}${constants.tsBuildInfoFolderName}`,
+		declarationDir: `${constants.prodFolderName}/${constants.typesFolderName}`,
 		declarationMap: true,
-		outDir: utils.fromOsPathToPosixPath(join(constants.prodFolderName, constants.projectFolderName))
+		outDir: `${constants.prodFolderName}/${constants.projectFolderName}`
 	}
 };

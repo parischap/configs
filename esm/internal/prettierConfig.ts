@@ -1,11 +1,10 @@
 import * as constants from './constants.js';
-import * as utils from './utils.js';
 
 export default {
 	useTabs: true,
 	overrides: [
 		{
-			files: constants.allJsFiles.map(utils.fromOsPathToPosixPath),
+			files: constants.allJsFiles,
 			options: {
 				semi: true,
 				singleQuote: true,

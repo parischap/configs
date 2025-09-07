@@ -26,6 +26,7 @@ import {
 	Record,
 	String,
 	Tuple,
+	flow,
 	pipe
 } from 'effect';
 import * as Json from '../internal/Json.js';
@@ -36,7 +37,7 @@ import * as utils from '../internal/utils.js';
 
 const PlatformNodePathService = PlatformPath.Path;
 
-const PlatformNodePathLive = PlatformNodePath.layer;
+const PlatformNodePathLive = PlatformNodePath.layerPosix;
 const PlatformNodeFsService = PlatformFs.FileSystem;
 const PlatformNodeFsLive = PlatformNodeFs.layer;
 
@@ -99,15 +100,9 @@ const program = Effect.gen(function* () {
 	const binFiles = pipe(
 		binContents,
 		Array.filter(String.endsWith('.js')),
-		Array.map(String.slice(0, -3)),
+		Array.map(flow(utils.fromOsPathToPosixPath, String.slice(0, -3))),
 		Record.fromIterableWith((fileName) =>
-			Tuple.make(
-				fileName,
-				pipe(
-					path.join(constants.executablesFolderName, fileName + '.js'),
-					utils.fromOsPathToPosixPath
-				)
-			)
+			Tuple.make(fileName, path.join(constants.executablesFolderName, fileName + '.js'))
 		)
 	);
 
