@@ -7,6 +7,7 @@ export const effectLanguageServiceVersion = '^0.38.1';
 export const effectLibVersion = '^0.7.0';
 export const ansiStylesVersion = '^0.2.3';
 export const prettyPrintVersion = '^0.3.4';
+export const conversionsVersion = '^0.2.0';
 
 export const pnpmVersion = '10.15.0';
 

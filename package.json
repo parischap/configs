@@ -47,6 +47,7 @@
 		"eslint-plugin-yml": "latest",
 		"prettier": "latest",
 		"typescript": "latest",
+		"tsx": "latest",
 		"typescript-eslint": "latest",
 		"vite": "latest",
 		"vite-node": "latest",
