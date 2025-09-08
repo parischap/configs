@@ -37,8 +37,10 @@ export default {
 			'eslint-plugin-yml': 'latest',
 			prettier: 'latest',
 			typescript: 'latest',
+			// tsx must be installed because it is used by docgen and not requested as a dev-dependency
+			tsx: 'latest',
 			'typescript-eslint': 'latest',
-			// Make sure vite-node and vitest use latest vite version. Otherwise, we have severalt versions of vite running, which causes compatibility issues. If this happens, restrict vite to specific version like vite: '^5.0.0',
+			// Make sure vite-node and vitest use latest vite version. Otherwise, we have several versions of vite running, which causes compatibility issues. If this happens, restrict vite to specific version like vite: '^5.0.0',
 			vite: 'latest',
 			'vite-node': 'latest',
 			vitest: 'latest',

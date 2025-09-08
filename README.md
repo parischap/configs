@@ -45,7 +45,10 @@ For other packages, the procedure to follow is:
 - run `pnpm update-config-files` at the target package root. Alternatively, in a monorepo, you can run `pnpm update-all-config-files` at the root of the monorepo.
 - run `pnpm build`
 
-When a package is built, you can push it to github. Upon creating a new release, two github workflows will automatically publish the package to npm if this is a public package (see github.workflows.publish.template.ts). For this to work, make sure in github:
+When a package is built, you can push it to github. Upon creating a new release, the `publish` github workflow will automatically publish the package to npm if this is a public package (see github.workflows.publish.template.ts).
+
+To make the documentation of the package available, manually run the `Pages` github workflow.
+For this to work, make sure in github:
 
 - to have read and write permissions under workflow in Settings/Actions/General.
 - to add the NPM_PUBLISH_TOKEN under Repository secrets in Settings/Secrets and variables/Actions
@@ -67,7 +70,7 @@ Notes:
 
 NPM is free for public packages. I did not find a way to publish to npm a package that is private under github. As a minor security measure, we can publish the code minified and bundled without the source code or maps. But users can always see the code on github. So this solution can be used for non sensitive stuff. A solution could be to have a private github repo with the source code and a public github repo with the compiled code...Maybe by using git submodules (see https://git-scm.com/book/en/v2/Git-Tools-Submodules)
 NPM error messages are misleading. It can for instance indicate an authentification error when the issue is that the package is marked as private in package.json.
-To use granular tokens to publish to npm, the package to publish must already exist! So the first time, use vscode, cd to the dist folder of the package to publish and hit `npm publish --access=public`. If there is an authentification error, try hitting `npm adduser` first. Once the repo is created on npm, go to its settings and choose 'Require two-factor authentication or an automation or granular access token' for publishing access.
+To publish a package for the first time, just proceed as usual by publishing a new release in GitHub (This needs no longer be done: cd to the dist folder of the package to publish and hit `npm publish --access=public`. If there is an authentification error, try hitting `npm adduser` first). Once the repo is created on npm, go to its settings and choose 'Require two-factor authentication or an automation or granular access token' for publishing access.
 
 # 4 - About package.json:
 
