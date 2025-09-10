@@ -5,7 +5,9 @@ export default {
 	srcDir: `./${constants.projectFolderName}`,
 	outDir: constants.docsFolderName,
 	exclude: [
-		...constants.allTsFiles.map((ext) => `${constants.internalPath}/${ext}`),
+		...constants.allTsFiles.map(
+			(ext) => `${constants.projectFolderName}/${constants.internalFolderName}/${ext}`
+		),
 		`${constants.projectFolderName}/index.ts`
 	],
 	enforceDescriptions: true,

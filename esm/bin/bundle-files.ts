@@ -99,12 +99,9 @@ const program = Effect.gen(function* () {
 		Array.filterMap(
 			flow(
 				Option.liftPredicate(
-					Predicate.every(
-						Array.make(
-							String.endsWith('.ts'),
-							Predicate.not(String.endsWith('.d.ts')),
-							Predicate.not(utils.isSubPathOf(constants.internalFolderName))
-						)
+					Predicate.and(
+						String.endsWith('.ts'),
+						Predicate.not(utils.isSubPathOf(constants.internalFolderName))
 					)
 				),
 				Option.map(utils.fromOsPathToPosixPath)
@@ -149,14 +146,10 @@ const program = Effect.gen(function* () {
 		Effect.allWith({ concurrency: 1 })
 	);
 
-	yield* Effect.log(`Moving ${constants.executablesFolderName} files`);
-	const srcBinPath = path.join(
-		prodPath,
-		constants.projectFolderName,
-		constants.executablesFolderName
-	);
+	yield* Effect.log(`Moving ${constants.binariesFolderName} files`);
+	const srcBinPath = path.join(prodPath, constants.projectFolderName, constants.binariesFolderName);
 	const binExists = yield* fs.exists(srcBinPath);
-	if (binExists) yield* fs.rename(srcBinPath, path.join(prodPath, constants.executablesFolderName));
+	if (binExists) yield* fs.rename(srcBinPath, path.join(prodPath, constants.binariesFolderName));
 });
 
 const result = await Effect.runPromiseExit(pipe(program, Effect.provide(live)));

@@ -58,7 +58,7 @@ export const testsFolderName = 'test';
 export const prodFolderName = 'dist';
 export const typesFolderName = 'dts';
 export const commonJsFolderName = 'cjs';
-export const executablesFolderName = 'bin';
+export const binariesFolderName = 'bin';
 export const npmFolderName = 'node_modules';
 export const staticFolderName = 'public';
 export const vscodeFolderName = '.vscode';
@@ -74,11 +74,6 @@ export const readmeAssetsFolderName = 'readme-assets';
 
 export const allSubFolders = '**/*';
 //export const subRepoPath = `**/${packagesFolderName}/*`;
-
-export const srcPath = `${projectFolderName}/${allSubFolders}`;
-export const prodPath = `${prodFolderName}/${allSubFolders}`;
-export const npmPath = `**/${npmFolderName}/${allSubFolders}`;
-export const internalPath = `${projectFolderName}/${internalFolderName}`;
 
 /*export const jsInMdExtensions = [
 	...mdExtensions.map((ext) => `${ext}/*.js`),
@@ -99,9 +94,11 @@ export const allHtmlFiles = htmlExtensions.map((ext) => allSubFolders + ext);
 //export const allMdFiles = mdExtensions.map((ext) => allSubFolders + ext);
 //export const allJsonFiles = jsonExtensions.map((ext) => allSubFolders + ext);
 export const allYmlFiles = ymlExtensions.map((ext) => allSubFolders + ext);
-export const allProjectFiles = tsExtensions.map((ext) => srcPath + ext);
-export const allProdFiles = jsExtensions.map((ext) => prodPath + ext);
-export const allNpmFiles = jsExtensions.map((ext) => npmPath + ext);
+export const allProjectFiles = tsExtensions.map(
+	(ext) => `${projectFolderName}/${allSubFolders}${ext}`
+);
+export const allProdFiles = jsExtensions.map((ext) => `${prodFolderName}/${allSubFolders}${ext}`);
+export const allNpmFiles = jsExtensions.map((ext) => `**/${npmFolderName}/${allSubFolders}${ext}`);
 
 export const topJsFiles = jsExtensions.map((ext) => '*' + ext);
 

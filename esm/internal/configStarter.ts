@@ -10,8 +10,8 @@ import configInternalTop from './configInternalTop.js';
 import * as constants from './constants.js';
 
 const packageName = basename(resolve());
-const executablesPath = `./${constants.projectFolderName}/${constants.executablesFolderName}/`;
-const prodExecutablesPath = `./${constants.prodFolderName}/${constants.executablesFolderName}/`;
+const binPath = `./${constants.projectFolderName}/${constants.binariesFolderName}/`;
+const prodBinPath = `./${constants.prodFolderName}/${constants.binariesFolderName}/`;
 
 export default merge(
 	configInternalBase({
@@ -38,9 +38,9 @@ export default merge(
 		externalPeerDependencies: {},
 		examples: [],
 		scripts: {
-			bundle: `vite-node ${executablesPath}bundle-files.ts`,
-			prodify: `node ${prodExecutablesPath}prodify.js`,
-			'update-config-files': `node ${prodExecutablesPath}update-config-files.js`,
+			bundle: `vite-node ${binPath}bundle-files.ts`,
+			prodify: `node ${prodBinPath}prodify.js`,
+			'update-config-files': `node ${prodBinPath}update-config-files.js`,
 			'pre-build': 'pnpm i',
 			'post-build': 'pnpm update-config-files'
 		},

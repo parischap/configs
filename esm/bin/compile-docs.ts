@@ -18,7 +18,6 @@
  */
 
 import * as constants from '../internal/constants.js';
-import * as utils from '../internal/utils.js';
 
 import {
 	Error as PlatformError,
@@ -69,7 +68,7 @@ const program = Effect.gen(function* () {
 			flow(
 				Array.map((name) =>
 					Effect.gen(function* () {
-						const p = path.join(docsPath, utils.fromOsPathToPosixPath(name));
+						const p = path.join(docsPath, name);
 						const stat = yield* fs.stat(p);
 						return {
 							path: p,
@@ -102,11 +101,10 @@ const program = Effect.gen(function* () {
 			flow(
 				Array.map((name) =>
 					Effect.gen(function* () {
-						const posixName = utils.fromOsPathToPosixPath(name);
-						const p = path.join(packagesPath, posixName);
+						const p = path.join(packagesPath, name);
 						const stat = yield* fs.stat(p);
 						return {
-							name: posixName,
+							name,
 							path: p,
 							stat
 						};
@@ -160,7 +158,7 @@ const program = Effect.gen(function* () {
 									flow(
 										Array.map((name) =>
 											Effect.gen(function* () {
-												const relPath = path.join(p, utils.fromOsPathToPosixPath(name));
+												const relPath = path.join(p, name);
 												const destPath = path.join(targetPath, relPath);
 												const srcPath = path.join(docgenPath, relPath);
 												const stat = yield* fs.stat(srcPath);

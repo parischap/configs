@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 /**
- * Copies `esm/README.md` if there is one to `dist` Generates the `LICENSE` file directly under
+ * Copies `esm/README.md` if there is one to `dist`. Generates the `LICENSE` file directly under
  * `dist`. Copies `esm/package.json` to `dist` but spreads the `publishConfig` key so that any key
  * present in `publishConfig` will override the key with the same name. Also adds a `bin` key with
  * all the bin executables present under `esm/bin/` and removes keys with empty objects, empty
  * arrays or empty strings as value. Result is prettified using prettier. Creates a `package.json`
- * file under `dist/esm/`. It is not necessary to create one under `dist/cjs/` for transpiled
- * packages as `type: 'commonjs'` is the default.
+ * file under `dist/esm/` so that files in this directory can import one another. It is not
+ * necessary to create one under `dist/cjs/` for transpiled packages as `type: 'commonjs'` is the
+ * default. Creates a directory with a `package.json` in `dist/` for each file directly under `esm/`
+ * except `index.ts`.
  */
 import { FileSystem as PlatformFs, Path as PlatformPath } from '@effect/platform';
 import {
@@ -18,6 +20,7 @@ import {
 	Cause,
 	Effect,
 	Either,
+	Equal,
 	Exit,
 	Function,
 	Layer,
@@ -43,6 +46,9 @@ const PlatformNodeFsLive = PlatformNodeFs.layer;
 
 const live = pipe(PlatformNodePathLive, Layer.merge(PlatformNodeFsLive));
 
+const importRegExp = /import\s*{([^}]*)}\s*from\s*["']([^"']+)["']((?:\s*;)?)/g;
+const asRegExp = /\s+as\s+/;
+
 const program = Effect.gen(function* () {
 	const path = yield* PlatformNodePathService;
 	const fs = yield* PlatformNodeFsService;
@@ -52,16 +58,13 @@ const program = Effect.gen(function* () {
 
 	const srcPackageJsonPath = path.join(rootPath, constants.packageJsonFileName);
 	const prodPath = path.join(rootPath, constants.prodFolderName);
+	const prodProjectPath = path.join(prodPath, constants.projectFolderName);
 
 	const prodPackageJsonPath = path.join(prodPath, constants.packageJsonFileName);
 
-	const prodProjectPackageJsonPath = path.join(
-		prodPath,
-		constants.projectFolderName,
-		constants.packageJsonFileName
-	);
+	const prodProjectPackageJsonPath = path.join(prodProjectPath, constants.packageJsonFileName);
 
-	const binPath = path.join(prodPath, constants.executablesFolderName);
+	const binPath = path.join(prodPath, constants.binariesFolderName);
 
 	yield* Effect.log(`Copying ${constants.readMeFileName} to '${prodPath}'`);
 	const readMePath = path.join(rootPath, constants.readMeFileName);
@@ -102,7 +105,7 @@ const program = Effect.gen(function* () {
 		Array.filter(String.endsWith('.js')),
 		Array.map(flow(utils.fromOsPathToPosixPath, String.slice(0, -3))),
 		Record.fromIterableWith((fileName) =>
-			Tuple.make(fileName, path.join(constants.executablesFolderName, fileName + '.js'))
+			Tuple.make(fileName, path.join(constants.binariesFolderName, fileName + '.js'))
 		)
 	);
 
@@ -162,13 +165,107 @@ const program = Effect.gen(function* () {
 
 	yield* Effect.log(`Writing '${prodProjectPackageJsonPath}'`);
 	// We add a sideEffects key to the prodProjectPackageJson only if the prodPackageJson has one
+	const baseProdPackageJson = Record.filter(prodPackageJson, (_, k) => k === 'sideEffects');
 	const prodProjectPackageJson = yield* pipe(
-		prodPackageJson,
-		Record.filter((_, k) => k === 'sideEffects'),
+		baseProdPackageJson,
 		Record.set('type', 'module'),
 		Json.stringify
 	);
-	return yield* prettier.save(prodProjectPackageJsonPath, prodProjectPackageJson);
+	yield* prettier.save(prodProjectPackageJsonPath, prodProjectPackageJson);
+
+	yield* Effect.log('Creating default export directories for exported files');
+	const topProjectContents = yield* fs.readDirectory(prodProjectPath);
+	const projectVisibleFiles = Array.filterMap(
+		topProjectContents,
+		flow(
+			Option.liftPredicate(
+				Predicate.and(String.endsWith('.js'), Predicate.not(Equal.equals('index.js')))
+			),
+			Option.map((name) => String.takeLeft(name.length - 3)(name))
+		)
+	);
+	const directoriesToCreate = Array.map(projectVisibleFiles, (name) => path.join(prodPath, name));
+	yield* pipe(
+		directoriesToCreate,
+		Array.map((dirPath) => fs.makeDirectory(dirPath)),
+		Effect.all
+	);
+	const directoriesToCreateContent = yield* pipe(
+		projectVisibleFiles,
+		Array.map((name) =>
+			pipe(
+				baseProdPackageJson,
+				Record.set('main', `../${constants.commonJsFolderName}/${name}.js`),
+				Record.set('module', `../${constants.projectFolderName}/${name}.js`),
+				Record.set('types', `../${constants.typesFolderName}/${name}.d.ts`),
+				Json.stringify
+			)
+		),
+		Effect.all
+	);
+
+	yield* pipe(
+		Array.zip(directoriesToCreate, directoriesToCreateContent),
+		Array.map(([dirPath, content]) =>
+			prettier.save(path.join(dirPath, constants.packageJsonFileName), content)
+		),
+		Effect.all
+	);
+
+	yield* Effect.log('Transforming named imports to default imports');
+	const projectContents = yield* fs.readDirectory(prodProjectPath, { recursive: true });
+	yield* pipe(
+		projectContents,
+		Array.filterMap(
+			flow(
+				Option.liftPredicate(
+					Predicate.every(
+						Array.make(
+							String.endsWith('.js'),
+							Predicate.not(Equal.equals('index.js')),
+							Predicate.not(utils.isSubPathOf(constants.internalFolderName)),
+							Predicate.not(utils.isSubPathOf(constants.binariesFolderName))
+						)
+					)
+				),
+				Option.map((filename) => {
+					const filePath = path.join(prodProjectPath, utils.fromOsPathToPosixPath(filename));
+					return Effect.flatMap(fs.readFileString(filePath, 'utf-8'), (content) =>
+						pipe(
+							content.replace(
+								importRegExp,
+								(_, namedImports: string, importFilename: string, eol: string) =>
+									pipe(
+										namedImports,
+										String.split(','),
+										Array.map(
+											flow(
+												String.trim,
+												Either.liftPredicate(
+													Predicate.or(Equal.equals('pipe'), Equal.equals('flow')),
+													flow(
+														String.split(asRegExp),
+														([importName, asImportName]) =>
+															`import * as ${asImportName ?? importName} from '${importFilename}/${importName}'${eol}`
+													)
+												),
+												Either.map((fName) => `import {${fName}} from 'effect'${eol}`),
+												Either.merge
+											)
+										),
+										Array.join('\n')
+									)
+							),
+							(content) => fs.writeFileString(filePath, content)
+						)
+					);
+				})
+			)
+		),
+		Effect.all
+	);
+
+	return 0 as never;
 });
 
 const result = await Effect.runPromiseExit(

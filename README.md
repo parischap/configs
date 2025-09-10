@@ -1,6 +1,14 @@
 # 1 - Doc
 
-Goal of this package is to install all the necessary configuration files of a repo or package (eslint.config.js, prettier.config.js,...). If a configuration file needs changing, we only need to modify it in this package and all the repos/packages that use the `configs` package will be updated automatically.
+This package is meant to be used in the following situations:
+
+- creation of a library (as a single package or as a monorepo): in that configuration, the exported files constituting the library are under `esm/` and files used internally are under `esm/internal/`. An `index.ts` file in `esm/` must reexport all visible exports (so as to enable named imports for users). All files are transpiled by tsc for ESM output and by Babel for cjs output. In the `dist/` directory, a directory is created for each exported file (so as to enable default imports for users). During the build, imports of all files (exported or not) are automatically changed from named imports to default imports (for tree-shaking). Functions of files under the `esm/internal/` directory should be tagged with `@internal` so no types and no doc get generated for them. Moreover, doc is alltogether skipped for files in `esm/internal`.
+- creation of development tools (as a package): in that configuration, the binaries that will be installed by npm need to be under `esm/bin/`. The package must also export an `index.ts` files whose exports can be imported by users. All files necessary for the binaries and the exports must be under the `esm/internal/` directory. The binaries and `index.ts` get bundled during the build. The binaries are moved directly under the `dist/` directory during the build and types get generated for all internal files (this is important because some of them may get reexported by `index.ts` and `index.dts` only contains a rexport of the types) but not for the binaries. The `configs` package is an example of this configuration.
+- creation of a standalone executable: the executable must be located under the `esm/` directory and be called `index.ts`. It will get bundled during the build and types will be generated for them (although this is not necessary). All files necessary for the executable must be under the `esm/internal/` directory.
+
+In all three cases, the `README.md` file present at the top of the package is copied to the `dist/` directory a license file gets automatically generated in the `dist/` directory.
+
+Goal of this package is to install all the necessary configuration files of a monorepo or package (eslint.config.js, prettier.config.js,...). If a configuration file needs changing, we only need to modify it in this package and all the repos/packages that use the `configs` package will be updated automatically.
 
 The `configs` package must be installed as devDependency of the target package. In a monorepo, it must be installed as devDependency at the root.
 
@@ -80,3 +88,7 @@ DevDependencies defined with 'latest' don't update to latest systematically. Fro
 # 5 - About vitest:
 
 Creating a workspace is useful if we need to run all test files with the vitest cli from the monorepo level. But we run tests in each package seperately. So do not use this feature. In settings.json, add `"vitest.maximumConfigs": 15` so the vitest vscode extension can load all extensions.
+
+# 6 - About paths
+
+Posix paths are understood in all environments (including Windows). And configuration files (like package.json, tsconfig.json,...) only understand Posix paths. For that reason, this package works only with Posix paths. Only issue is when reading a directory with the `{recursive:true}` option, we get some local-system paths that we must therefore convert with the `utils.fromOsPathToPosixPath` function

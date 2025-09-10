@@ -106,10 +106,9 @@ const program = Effect.gen(function* () {
 							(filename) => !Array.some(patternsToIgnore, (pattern) => minimatch(filename, pattern))
 						),
 						Option.map((name) => {
-							const posixName = utils.fromOsPathToPosixPath(name);
-							const fullPath = path.join(rootPath, posixName);
+							const fullPath = path.join(rootPath, name);
 							return Effect.all({
-								name: Effect.succeed(posixName),
+								name: Effect.succeed(name),
 								fullPath: Effect.succeed(fullPath),
 								info: fs.stat(fullPath)
 							});
