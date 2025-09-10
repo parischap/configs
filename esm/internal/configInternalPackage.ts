@@ -36,7 +36,6 @@ const bundledConfig = {
 			'generate-types': `tsc -b ${constants.projectTsConfigFileName} --emitDeclarationOnly`,
 			compile: 'pnpm bundle && pnpm prodify'
 		},
-		sideEffects: false,
 		publishConfig: {
 			exports: {
 				'.': {
@@ -67,7 +66,7 @@ const transpiledConfig = {
 					default: `./${constants.commonJsFolderName}/index.js`
 				}
 			}
-			// Do not unset sideEffects for libraries as the consumers of these libraries might use WebPack
+			// Do not unset sideEffects for libraries as the consumers of these libraries might bundle
 		}
 	}
 };
@@ -209,6 +208,7 @@ export default ({
 						import: `./${constants.projectFolderName}/index.ts`
 					}
 				},
+				sideEffects: false,
 				dependencies,
 				devDependencies: {
 					// Include self for tests

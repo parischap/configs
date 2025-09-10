@@ -1,4 +1,4 @@
-/** This config is the one to be used in a standalone reponwhich is either a library or an executable */
+/** This config is the one to be used in a standalone repo which is either a library or an executable */
 import { Record } from 'effect';
 import { basename, resolve } from 'node:path';
 import { merge } from 'ts-deepmerge';

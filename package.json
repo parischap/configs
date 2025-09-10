@@ -27,7 +27,7 @@
 		"pre-build": "pnpm i",
 		"post-build": "pnpm update-config-files"
 	},
-	"packageManager": "pnpm@10.15.0",
+	"packageManager": "pnpm@10.15.1",
 	"devDependencies": {
 		"globals": "latest",
 		"ts-deepmerge": "latest",
@@ -73,7 +73,6 @@
 		"@effect/platform-node": "^0.96.1",
 		"ts-deepmerge": "latest"
 	},
-	"sideEffects": false,
 	"publishConfig": {
 		"exports": {
 			".": {
@@ -102,6 +101,7 @@
 			"import": "./esm/index.ts"
 		}
 	},
+	"sideEffects": false,
 	"peerDependencies": {},
 	"repository": {
 		"type": "git",
