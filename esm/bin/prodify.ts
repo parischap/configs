@@ -297,7 +297,7 @@ const program = Effect.gen(function* () {
 													cleanName === 'unsafeCoerce') &&
 												importFilename === 'effect'
 											)
-												return `import {${cleanName}} from 'effect'${eol}`;
+												return `import {${cleanName}} from 'effect/Function'${eol}`;
 											const [importName, asImportName] = String.split(asRegExp)(cleanName);
 											return `import * as ${asImportName ?? importName} from '${importFilename}/${importName}'${eol}`;
 										}),
