@@ -5,9 +5,9 @@ export const effectExperimentalVersion = '^0.54.6';
 export const effectLanguageServiceVersion = '^0.39.0';
 
 export const effectLibVersion = '^0.11.0';
-export const ansiStylesVersion = '^0.2.4';
-export const prettyPrintVersion = '^0.3.5';
-export const conversionsVersion = '^0.6.0';
+export const ansiStylesVersion = '^0.2.6';
+export const prettyPrintVersion = '^0.3.7';
+export const conversionsVersion = '^0.8.0';
 
 export const pnpmVersion = '10.15.1';
 
