@@ -81,7 +81,6 @@
 			}
 		},
 		"dependencies": {},
-		"sideEffects": [],
 		"files": [
 			"*",
 			"!*.map"
@@ -101,7 +100,7 @@
 			"import": "./esm/index.ts"
 		}
 	},
-	"sideEffects": false,
+	"sideEffects": [],
 	"peerDependencies": {},
 	"repository": {
 		"type": "git",

@@ -45,7 +45,7 @@ const bundledConfig = {
 			// Remove dependencies in prod because they have been bundled
 			dependencies: {},
 			// Unset sideEffects in prod
-			sideEffects: []
+			sideEffects: undefined
 		}
 	}
 };
@@ -208,7 +208,7 @@ export default ({
 						import: `./${constants.projectFolderName}/index.ts`
 					}
 				},
-				sideEffects: false,
+				sideEffects: [],
 				dependencies,
 				devDependencies: {
 					// Include self for tests

@@ -47,6 +47,7 @@ const PlatformNodeFsLive = PlatformNodeFs.layer;
 const live = pipe(PlatformNodePathLive, Layer.merge(PlatformNodeFsLive));
 
 const importRegExp = /import\s*{([^}]*)}\s*from\s*["']([^"']+)["']((?:\s*;)?)/g;
+const exportRegExp = /export\s+\*\s+as\s+([^\s]+)\s+from\s*["']\.\/(.+)\.js["']/g;
 const asRegExp = /\s+as\s+/;
 
 const program = Effect.gen(function* () {
@@ -58,6 +59,7 @@ const program = Effect.gen(function* () {
 
 	const srcPackageJsonPath = path.join(rootPath, constants.packageJsonFileName);
 	const prodPath = path.join(rootPath, constants.prodFolderName);
+	const projectPath = path.join(rootPath, constants.projectFolderName);
 	const prodProjectPath = path.join(prodPath, constants.projectFolderName);
 
 	const prodPackageJsonPath = path.join(prodPath, constants.packageJsonFileName);
@@ -116,7 +118,7 @@ const program = Effect.gen(function* () {
 	const pkg = yield* Json.parse(pkgContents);
 
 	if (!Predicate.isRecord(pkg)) {
-		return yield* Effect.fail(new Error(`File '${constants.packageJsonFileName}' is invalid`));
+		return yield* Effect.fail(new Error(`File '${srcPackageJsonPath}' is invalid`));
 	}
 
 	const publishConfig = pipe(
@@ -149,55 +151,49 @@ const program = Effect.gen(function* () {
 		},
 		Record.set('name', prodPackageName),
 		Record.isEmptyRecord(binFiles) ? Function.identity : Record.set('bin', binFiles),
+		// Remove empty arrays, records and strings and undefined values
+		// Except sideEffects for which an empty array is a meaningful value
 		Record.filter(
-			(v) =>
+			(v, key) =>
+				v !== undefined &&
 				(!Predicate.isRecord(v) || !Record.isEmptyRecord(v)) &&
-				(!Array.isArray(v) || !Array.isEmptyArray(v)) &&
+				(!Array.isArray(v) || !Array.isEmptyArray(v) || key === 'sideEffect') &&
 				(!Predicate.isString(v) || !String.isEmpty(v))
 		)
 	);
 
-	const stringifiedProdPackageJson = yield* Json.stringify(prodPackageJson);
-
-	yield* Effect.log(`Writing '${prodPackageJsonPath}'`);
-	//yield* fs.makeDirectory(prodPath, { recursive: true });
-	yield* prettier.save(prodPackageJsonPath, stringifiedProdPackageJson);
-
-	yield* Effect.log(`Writing '${prodProjectPackageJsonPath}'`);
 	// We add a sideEffects key to the prodProjectPackageJson only if the prodPackageJson has one
 	const baseProdPackageJson = Record.filter(prodPackageJson, (_, k) => k === 'sideEffects');
-	const prodProjectPackageJson = yield* pipe(
-		baseProdPackageJson,
-		Record.set('type', 'module'),
-		Json.stringify
-	);
-	yield* prettier.save(prodProjectPackageJsonPath, prodProjectPackageJson);
 
-	yield* Effect.log('Creating default export directories for exported files');
-	const topProjectContents = yield* fs.readDirectory(prodProjectPath);
-	const projectVisibleFiles = Array.filterMap(
-		topProjectContents,
+	yield* Effect.log('Determining list of exported files');
+	const indexContents = yield* fs.readFileString(path.join(projectPath, 'index.ts'), 'utf-8');
+
+	const exports = Array.unfold(
+		indexContents,
 		flow(
-			Option.liftPredicate(
-				Predicate.and(String.endsWith('.js'), Predicate.not(Equal.equals('index.js')))
-			),
-			Option.map((name) => String.takeLeft(name.length - 3)(name))
+			RegExp.prototype.exec.bind(exportRegExp),
+			Option.fromNullable,
+			Option.map(flow(Array.take(3), Array.drop(1), Tuple.make, Tuple.appendElement(indexContents)))
 		)
+	) as unknown as ReadonlyArray<readonly [namedExport: string, exportFileName: string]>;
+
+	yield* Effect.log('Creating a directory for each exported files');
+	const directoriesToCreate = Array.map(exports, ([namedExport]) =>
+		path.join(prodPath, namedExport)
 	);
-	const directoriesToCreate = Array.map(projectVisibleFiles, (name) => path.join(prodPath, name));
 	yield* pipe(
 		directoriesToCreate,
 		Array.map((dirPath) => fs.makeDirectory(dirPath)),
 		Effect.all
 	);
 	const directoriesToCreateContent = yield* pipe(
-		projectVisibleFiles,
-		Array.map((name) =>
+		exports,
+		Array.map(([_, exportFileName]) =>
 			pipe(
 				baseProdPackageJson,
-				Record.set('main', `../${constants.commonJsFolderName}/${name}.js`),
-				Record.set('module', `../${constants.projectFolderName}/${name}.js`),
-				Record.set('types', `../${constants.typesFolderName}/${name}.d.ts`),
+				Record.set('main', `../${constants.commonJsFolderName}/${exportFileName}.js`),
+				Record.set('module', `../${constants.projectFolderName}/${exportFileName}.js`),
+				Record.set('types', `../${constants.typesFolderName}/${exportFileName}.d.ts`),
 				Json.stringify
 			)
 		),
@@ -211,6 +207,52 @@ const program = Effect.gen(function* () {
 		),
 		Effect.all
 	);
+
+	yield* Effect.log(`Writing '${prodPackageJsonPath}'`);
+
+	const newExports = yield* pipe(
+		prodPackageJson,
+		Record.get('exports'),
+		Option.filter(Predicate.isRecord),
+		Option.map(
+			flow(
+				Record.toEntries,
+				Array.appendAll(
+					Array.map(
+						exports,
+						Tuple.mapBoth({
+							onFirst: (namedExport) => `./${namedExport}`,
+							onSecond: (exportFileName) => ({
+								types: `./dts/${exportFileName}.d.ts`,
+								import: `./esm/${exportFileName}.js`,
+								default: `./cjs/${exportFileName}.js`
+							})
+						})
+					)
+				),
+				Record.fromEntries
+			)
+		),
+		Either.fromOption(
+			() => new Error(`File '${srcPackageJsonPath}' should contain a record 'exports' key`)
+		)
+	);
+
+	const stringifiedProdPackageJsonWithExports = yield* pipe(
+		prodPackageJson,
+		Record.set('exports', newExports),
+		Json.stringify
+	);
+
+	yield* prettier.save(prodPackageJsonPath, stringifiedProdPackageJsonWithExports);
+
+	yield* Effect.log(`Writing '${prodProjectPackageJsonPath}'`);
+	const prodProjectPackageJson = yield* pipe(
+		baseProdPackageJson,
+		Record.set('type', 'module'),
+		Json.stringify
+	);
+	yield* prettier.save(prodProjectPackageJsonPath, prodProjectPackageJson);
 
 	yield* Effect.log('Transforming named imports to default imports');
 	const projectContents = yield* fs.readDirectory(prodProjectPath, { recursive: true });
@@ -234,27 +276,34 @@ const program = Effect.gen(function* () {
 						pipe(
 							content.replace(
 								importRegExp,
-								(_, namedImports: string, importFilename: string, eol: string) =>
-									pipe(
+								(match, namedImports: string, importFilename: string, eol: string) => {
+									if (
+										importFilename !== 'effect' &&
+										!String.startsWith('@effect/')(importFilename) &&
+										!String.startsWith(constants.slashedScope)(importFilename)
+									)
+										return match;
+									return pipe(
 										namedImports,
 										String.split(','),
-										Array.map(
-											flow(
-												String.trim,
-												Either.liftPredicate(
-													Predicate.or(Equal.equals('pipe'), Equal.equals('flow')),
-													flow(
-														String.split(asRegExp),
-														([importName, asImportName]) =>
-															`import * as ${asImportName ?? importName} from '${importFilename}/${importName}'${eol}`
-													)
-												),
-												Either.map((fName) => `import {${fName}} from 'effect'${eol}`),
-												Either.merge
+										Array.map((namedImport) => {
+											const cleanName = String.trim(namedImport);
+											if (
+												(cleanName === 'absurd' ||
+													cleanName === 'flow' ||
+													cleanName === 'hole' ||
+													cleanName === 'identity' ||
+													cleanName === 'pipe' ||
+													cleanName === 'unsafeCoerce') &&
+												importFilename === 'effect'
 											)
-										),
+												return `import {${cleanName}} from 'effect'${eol}`;
+											const [importName, asImportName] = String.split(asRegExp)(cleanName);
+											return `import * as ${asImportName ?? importName} from '${importFilename}/${importName}'${eol}`;
+										}),
 										Array.join('\n')
-									)
+									);
+								}
 							),
 							(content) => fs.writeFileString(filePath, content)
 						)
