@@ -27,6 +27,7 @@ import {
 	Option,
 	Predicate,
 	Record,
+	Stream,
 	String,
 	Tuple,
 	flow,
@@ -256,7 +257,7 @@ const program = Effect.gen(function* () {
 
 	yield* Effect.log('Transforming named imports to default imports');
 	const projectContents = yield* fs.readDirectory(prodProjectPath, { recursive: true });
-	yield* pipe(
+	return yield* pipe(
 		projectContents,
 		Array.filterMap(
 			flow(
@@ -270,51 +271,49 @@ const program = Effect.gen(function* () {
 						)
 					)
 				),
-				Option.map((filename) => {
-					const filePath = path.join(prodProjectPath, utils.fromOsPathToPosixPath(filename));
-					return Effect.flatMap(fs.readFileString(filePath, 'utf-8'), (content) =>
-						pipe(
-							content.replace(
-								importRegExp,
-								(match, namedImports: string, importFilename: string, eol: string) => {
-									if (
-										importFilename !== 'effect' &&
-										!String.startsWith('@effect/')(importFilename) &&
-										!String.startsWith(constants.slashedScope)(importFilename)
-									)
-										return match;
-									return pipe(
-										namedImports,
-										String.split(','),
-										Array.map((namedImport) => {
-											const cleanName = String.trim(namedImport);
-											if (
-												(cleanName === 'absurd' ||
-													cleanName === 'flow' ||
-													cleanName === 'hole' ||
-													cleanName === 'identity' ||
-													cleanName === 'pipe' ||
-													cleanName === 'unsafeCoerce') &&
-												importFilename === 'effect'
-											)
-												return `import {${cleanName}} from 'effect/Function'${eol}`;
-											const [importName, asImportName] = String.split(asRegExp)(cleanName);
-											return `import * as ${asImportName ?? importName} from '${importFilename}/${importName}'${eol}`;
-										}),
-										Array.join('\n')
-									);
-								}
-							),
-							(content) => fs.writeFileString(filePath, content)
-						)
-					);
-				})
+				Option.map((filename) => path.join(prodProjectPath, utils.fromOsPathToPosixPath(filename)))
 			)
 		),
-		Effect.all
+		Stream.fromIterable,
+		Stream.mapEffect((filePath) =>
+			Effect.gen(function* () {
+				const content = yield* fs.readFileString(filePath, 'utf-8');
+				const newContent = content.replace(
+					importRegExp,
+					(match, namedImports: string, importFilename: string, eol: string) => {
+						if (
+							importFilename !== 'effect' &&
+							!String.startsWith('@effect/')(importFilename) &&
+							!String.startsWith(constants.slashedScope)(importFilename)
+						)
+							return match;
+						return pipe(
+							namedImports,
+							String.split(','),
+							Array.map((namedImport) => {
+								const cleanName = String.trim(namedImport);
+								if (
+									(cleanName === 'absurd' ||
+										cleanName === 'flow' ||
+										cleanName === 'hole' ||
+										cleanName === 'identity' ||
+										cleanName === 'pipe' ||
+										cleanName === 'unsafeCoerce') &&
+									importFilename === 'effect'
+								)
+									return `import {${cleanName}} from 'effect/Function'${eol}`;
+								const [importName, asImportName] = String.split(asRegExp)(cleanName);
+								return `import * as ${asImportName ?? importName} from '${importFilename}/${importName}'${eol}`;
+							}),
+							Array.join('\n')
+						);
+					}
+				);
+				return yield* fs.writeFileString(filePath, newContent);
+			})
+		),
+		Stream.runCollect
 	);
-
-	return 0 as never;
 });
 
 const result = await Effect.runPromiseExit(
