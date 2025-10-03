@@ -1,7 +1,7 @@
 export default {
 	$schema: 'https://json.schemastore.org/tsconfig',
 	_version: '20.1.0',
-	extends: ['@tsconfig/strictest/tsconfig.json', '@tsconfig/node20/tsconfig.json'],
+	extends: ['@tsconfig/strictest/tsconfig.json'],
 	compilerOptions: {
 		allowJs: false,
 		checkJs: false,
