@@ -9,7 +9,7 @@ export const ansiStylesVersion = '^0.2.6';
 export const prettyPrintVersion = '^0.3.7';
 export const conversionsVersion = '^0.8.0';
 
-export const pnpmVersion = '10.15.1';
+export const pnpmVersion = '10.18.0';
 
 export const owner = 'parischap';
 export const scope = '@' + owner;
