@@ -1,10 +1,10 @@
+import * as constants from './constants.js';
+
 export default {
 	$schema: 'https://json.schemastore.org/tsconfig',
 	_version: '20.1.0',
 	extends: ['@tsconfig/strictest/tsconfig.json'],
 	compilerOptions: {
-		allowJs: false,
-		checkJs: false,
 		moduleDetection: 'force',
 		composite: true,
 		resolveJsonModule: true,
@@ -31,6 +31,7 @@ export default {
 			{
 				name: '@effect/language-service'
 			}
-		]
+		],
+		tsBuildInfoFile: `${constants.tsBuildInfoFolderName}/project.tsbuildinfo`,
 	}
 };

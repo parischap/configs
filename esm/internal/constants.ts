@@ -1,8 +1,8 @@
-export const effectVersion = '^3.17.14';
-export const effectPlatformNodeVersion = '^0.97.1';
-export const effectPlatformVersion = '^0.91.1';
-export const effectExperimentalVersion = '^0.55.0';
-export const effectLanguageServiceVersion = '^0.40.1';
+export const effectVersion = '^3.18.1';
+export const effectPlatformNodeVersion = '^0.98.3';
+export const effectPlatformVersion = '^0.92.1';
+export const effectExperimentalVersion = '^0.56.0';
+export const effectLanguageServiceVersion = '^0.41.1';
 
 export const effectLibVersion = '^0.11.0';
 export const ansiStylesVersion = '^0.2.6';
@@ -17,8 +17,6 @@ export const devScope = scope + '-dev';
 export const slashedScope = scope + '/';
 export const slashedDevScope = devScope + '/';
 
-export const tscLintMark = 'check';
-//export const eslintMark = 'eslint';
 export const nonProjectMark = 'others';
 export const projectMark = 'esm';
 export const docgenMark = 'docgen';
@@ -34,8 +32,6 @@ export const baseTsConfigFileName = `tsconfig.base.json`;
 export const docgenTsConfigFileName = `tsconfig.${docgenMark}.json`;
 export const projectTsConfigFileName = `tsconfig.${projectMark}.json`;
 export const nonProjectTsConfigFileName = `tsconfig.${nonProjectMark}.json`;
-//export const eslintTsConfigFileName = `tsconfig.${eslintMark}.json`;
-export const tscLintTsConfigFileName = `tsconfig.${tscLintMark}.json`;
 export const configFileName = 'project.config.js';
 export const prettierConfigFileName = 'prettier.config.js';
 export const eslintConfigFileName = 'eslint.config.js';
@@ -94,11 +90,9 @@ export const allHtmlFiles = htmlExtensions.map((ext) => allSubFolders + ext);
 //export const allMdFiles = mdExtensions.map((ext) => allSubFolders + ext);
 //export const allJsonFiles = jsonExtensions.map((ext) => allSubFolders + ext);
 export const allYmlFiles = ymlExtensions.map((ext) => allSubFolders + ext);
-export const allProjectFiles = tsExtensions.map(
+export const allProjectJsFiles = jsExtensions.map(
 	(ext) => `${projectFolderName}/${allSubFolders}${ext}`
 );
-export const allProdFiles = jsExtensions.map((ext) => `${prodFolderName}/${allSubFolders}${ext}`);
-export const allNpmFiles = jsExtensions.map((ext) => `**/${npmFolderName}/${allSubFolders}${ext}`);
 
 export const topJsFiles = jsExtensions.map((ext) => '*' + ext);
 

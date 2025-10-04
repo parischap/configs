@@ -3,31 +3,30 @@ import eslint from '@eslint/js';
 //import json from '@eslint/json';
 //import markdown from '@eslint/markdown';
 //import html from '@html-eslint/eslint-plugin';
-import { type Linter } from 'eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import functional from 'eslint-plugin-functional';
 import * as constants from './constants.js';
 //import markdown from 'eslint-plugin-markdown';
 import eslintPluginYml from 'eslint-plugin-yml';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
-import { config as tseslintConfig, configs as tseslintConfigs } from 'typescript-eslint';
+import tseslint, { type ConfigArray } from 'typescript-eslint';
 
 /*const compat = new FlatCompat({
 	baseDirectory: import.meta.dirname
 });*/
 
-type FlatConfigArray = ReadonlyArray<Linter.Config>;
-
-const typescriptConfigs = tseslintConfig(
+const typescriptConfigs = defineConfig(
 	eslint.configs.recommended,
 	// typescript-eslint-parser is included in all typescript-eslint configs
-	...tseslintConfigs.recommendedTypeChecked,
+	tseslint.configs.recommendedTypeChecked,
 	{
-		plugins: { functional },
+		name: 'typescriptConfig',
+		plugins: { functional: functional as never },
 		languageOptions: {
-			//ecmaVersion: "latest", useless, this is the default
 			parserOptions: {
-				ecmaFeatures: { impliedStrict: true }
+				ecmaFeatures: { impliedStrict: true },
+				projectService: true
 			}
 		},
 		linterOptions: {
@@ -94,14 +93,12 @@ const typescriptConfigs = tseslintConfig(
 	}
 ];*/
 
-const ymlConfigs = [
-	...eslintPluginYml.configs['flat/recommended'],
-	{
-		rules: {
-			'yml/no-empty-mapping-value': 'off'
-		}
+const ymlConfigs = defineConfig(eslintPluginYml.configs['flat/recommended'] as never, {
+	name: 'ymlConfig',
+	rules: {
+		'yml/no-empty-mapping-value': 'off'
 	}
-];
+});
 
 /*const markdownConfigs: FlatConfigArray = markdown.configs && 'recommended' in markdown.configs ? [...markdown.configs['recommended']]:[];
 
@@ -113,43 +110,35 @@ const jsonConfigs: FlatConfigArray = [
 	}
 ];*/
 
-const _default = [
-	{
-		ignores: [...constants.allProdFiles, constants.viteTimeStampFileNamePattern]
-	},
-	...typescriptConfigs.map((config) => ({
+/**
+ * See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-objects Each
+ * object applies to the files specified in its files property. If several objects apply to a file,
+ * properties of all applicable objects are merged. If the same property appears in several objects,
+ * the latest one prevails.
+ */
+
+const _default: ConfigArray = defineConfig([
+	// This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
+	globalIgnores(
+		[constants.prodFolderName + '/', constants.viteTimeStampFileNamePattern],
+		'ignoreConfig'
+	),
+	typescriptConfigs.map((config) => ({
 		...config,
 		files: constants.allJsFiles
 	})),
 	{
-		files: constants.allCjsFiles,
-		// No need to set module for other js files, this is the default
-		languageOptions: { sourceType: 'commonjs' }
-	},
-	{
+		name: 'typescriptConfigForOtherFiles',
 		files: constants.allJsFiles,
-		ignores: constants.allProjectFiles,
+		ignores: [constants.projectFolderName + '/**'],
 		languageOptions: {
 			globals: {
 				...globals.nodeBuiltin
-			},
-			parserOptions: {
-				// here . represents the directory containing the nearest eslint.config.js
-				project: `./tsconfig.${constants.nonProjectMark}.json`
 			}
 		}
 		/*rules: {
 			'import/no-extraneous-dependencies': 'off'
 		}*/
-	},
-	{
-		files: constants.allProjectFiles,
-		languageOptions: {
-			parserOptions: {
-				// here . represents the directory containing the nearest eslint.config.js
-				project: `./tsconfig.${constants.projectMark}.json`
-			}
-		}
 	},
 	/*.map((config) => ({
 		...config,
@@ -171,6 +160,6 @@ const _default = [
 		...eslintConfigPrettier,
 		files: constants.allJsFiles
 	}
-] as FlatConfigArray;
+]);
 
 export default _default;

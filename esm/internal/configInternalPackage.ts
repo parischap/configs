@@ -33,7 +33,7 @@ const bundledConfig = {
 		scripts: {
 			bundle: 'bundle-files',
 			// generate types even when bundling because they can be useful as in the Configs package
-			'generate-types': `tsc -b ${constants.projectTsConfigFileName} --emitDeclarationOnly`,
+			'generate-types': `tsc -b ${constants.projectTsConfigFileName} --emitDeclarationOnly --force`,
 			compile: 'pnpm bundle && pnpm prodify'
 		},
 		publishConfig: {
@@ -53,7 +53,7 @@ const bundledConfig = {
 const transpiledConfig = {
 	[constants.packageJsonFileName]: {
 		scripts: {
-			'transpile-esm': `tsc -b ${constants.projectTsConfigFileName}`,
+			'transpile-esm': `tsc -b ${constants.projectTsConfigFileName} --force`,
 			'transpile-cjs': `babel ${constants.prodFolderName}/${constants.projectFolderName} --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir ${constants.prodFolderName}/${constants.commonJsFolderName} --source-maps`,
 			'transpile-annotate': `babel ${constants.prodFolderName} --plugins annotate-pure-calls --out-dir ${constants.prodFolderName} --source-maps`,
 			compile: 'pnpm transpile-esm && pnpm transpile-cjs && pnpm transpile-annotate && pnpm prodify'
@@ -254,7 +254,7 @@ export default ({
 					circular: `madge --extensions ts --circular --no-color --no-spinner ${constants.projectFolderName}`,
 					checks: 'pnpm circular && pnpm lint && pnpm tscheck && pnpm test',
 					test: 'vitest run',
-					'clean-prod': `shx rm -rf dist && shx rm -rf ${constants.tsBuildInfoFolderName} && shx mkdir -p ${constants.prodFolderName}`,
+					'clean-prod': `shx rm -rf ${constants.prodFolderName} && shx mkdir -p ${constants.prodFolderName}`,
 					// npm publish ./dist --access=public does not work
 					'publish-to-npm': `cd ${constants.prodFolderName} && npm publish --access=public && cd ..`,
 					'install-prod': `cd ${constants.prodFolderName} && pnpm i && cd ..`,

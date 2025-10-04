@@ -70,9 +70,19 @@ Notes:
 
 # 2 - About tsconfig:
 
-- if the include directive does not match any ts file, it is considered that there is no include directive. It then falls back to the default which is all files in all subdirectories. In particular, if it finds only .js files and even if allowJs and checkJs are activated, it will revert to the default.
-- typescript looks for the nearest tsconfig. If the file is not covered by that tsconfig, it does not look any further. It considers this files is not covered by a tsconfig. It will not try to see if there is another tsconfig up the directory tree that covers this file.
-- the eslint tsconfig.json does not need to include any library because eslint as its own library management. So it can be put at monorepo level.
+`tsconfig.json` is used by several tools with diverse purposes:
+- it is used by Visual Studio Code to report type errors while editing or by tsc used with the noEmit flag to report type errors in the build phase
+- it is used by tsc to transform Typescript code into Javascript code or to emit type declaration files. Some `tsconfig.json` options are specific to that use like the target, rootDir, outDir, declarationDir options. However, even for a package bundled with Vite that defines its own target and ignores the `tsconfig.json` target option, it can make sense to set that option because it changes the default value of other options that are not specific to transpiling.
+- it can be used by Eslint to report type errors.
+- it can be partially used by some bundlers like vite.
+
+When typechecking a file, Typescript looks for the nearest `tsconfig.json` file going up in the directory tree. If the file is not covered by that tsconfig, it does not look any further. It considers this files is not covered by a `tsconfig.json` file. It will not try to see if there is another `tsconfig.json` file upper in the directory tree that covers this file.
+
+If the include directive of a `tsconfig.json` does not match any ts file, it is considered that there is no include directive. It then falls back to the default which is all files with supported extensions in all subdirectories. In particular, if it finds only .js files and even if allowJs and checkJs are activated, it will revert to the default.
+
+In each package,  the `tsconfig.json` calls two sub projects: the `tsconfig.others.json`, that covers the whole directory except `node_modules`, `dist` and `esm`, allows js files and defines the node library, and the `tsconfig.esm.json` that covers only the `esm` subdirectory, does not allow js files, defines a library according to the parameters in `project.config.js` and defines the output files and directories for the build phase.
+
+There is also a `tsconfig.docgen.json` project, that is used during doc generation by docgen, which covers only the `esm` subdirectory, does not allow js files and defines the node library (because examples are written in nodejs).
 
 # 3 - About npm:
 
@@ -91,4 +101,4 @@ Creating a workspace is useful if we need to run all test files with the vitest 
 
 # 6 - About paths
 
-Posix paths are understood in all environments (including Windows). And configuration files (like package.json, tsconfig.json,...) only understand Posix paths. For that reason, this package works only with Posix paths. Only issue is when reading a directory with the `{recursive:true}` option, we get some local-system paths that we must therefore convert with the `utils.fromOsPathToPosixPath` function
+Posix paths are understood in all environments (including Windows). And configuration files (like package.json, `tsconfig.json`,...) only understand Posix paths. For that reason, this package works only with Posix paths. Only issue is when reading a directory with the `{recursive:true}` option, we get some local-system paths that we must therefore convert with the `utils.fromOsPathToPosixPath` function

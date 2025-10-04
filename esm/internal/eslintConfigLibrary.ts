@@ -1,11 +1,12 @@
 import globals from 'globals';
+import { type ConfigArray } from 'typescript-eslint';
 import * as constants from './constants.js';
 import eslintInternalConfigBase from './eslintInternalConfigBase.js';
 
-export default [
+const _default:ConfigArray= [
 	...eslintInternalConfigBase,
 	{
-		files: constants.allProjectFiles,
+		files: constants.allProjectJsFiles,
 		languageOptions: {
 			globals: {
 				...globals['shared-node-browser']
@@ -13,3 +14,5 @@ export default [
 		}
 	}
 ];
+
+export default _default;
