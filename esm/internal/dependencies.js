@@ -1,6 +1,7 @@
 // This file must not use any typescript specific grammar bacause it needs to be executed by node
 
 export const devDependencies = {
+	'ts-deepmerge': '^7.0.3',
 	globals: '^16.4.0',
 	'@tsconfig/strictest': '^2.0.6',
 	shx: '^0.4.0',
@@ -41,7 +42,6 @@ export const devDependencies = {
 
 export const configStarterDevDependencies = {
 	'@eslint/core': '^0.16.0',
-	'ts-deepmerge': '^7.0.3',
 	'@types/eslint': '^9.6.1',
 	'@types/eslint-config-prettier': '^6.11.3'
 };
