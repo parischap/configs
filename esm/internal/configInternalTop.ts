@@ -14,7 +14,7 @@ export default {
 	[`${constants.githubFolderName}/${constants.workflowsFolderName}/pages.yml`]:
 		githubWorkflowsPagesTemplate,
 	[constants.packageJsonFileName]: {
-		//packageManager: `pnpm@15.0.1`,
+		packageManager: `pnpm@10.18.1`,
 		devDependencies,
 		pnpm: {
 			patchedDependencies: {},

@@ -27,6 +27,7 @@
 		"pre-build": "pnpm i",
 		"post-build": "pnpm update-config-files"
 	},
+	"packageManager": "pnpm@10.18.1",
 	"devDependencies": {
 		"globals": "^16.4.0",
 		"@tsconfig/strictest": "^2.0.6",
@@ -92,6 +93,7 @@
 		"devDependencies": {},
 		"peerDependencies": {},
 		"publishConfig": {},
+		"packageManager": "",
 		"pnpm": {},
 		"type": "module"
 	},
