@@ -92,7 +92,6 @@
 		"devDependencies": {},
 		"peerDependencies": {},
 		"publishConfig": {},
-		"packageManager": "",
 		"pnpm": {},
 		"type": "module"
 	},

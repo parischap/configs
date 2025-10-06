@@ -238,7 +238,7 @@ export default ({
 					// Remove publishConfig in prod
 					publishConfig: {},
 					// Unset packageManager in prod
-					packageManager: '',
+					//packageManager: '',
 					// Remove pnpm in prod
 					pnpm: {},
 					// Unset type in prod
