@@ -1,6 +1,7 @@
 // This file must not use any typescript specific grammar bacause it needs to be executed by node
 
 export const devDependencies = {
+	//ts-deepmerge is used when updating config files so it needs to be imported by target packages.
 	'ts-deepmerge': '^7.0.3',
 	globals: '^16.4.0',
 	'@tsconfig/strictest': '^2.0.6',
