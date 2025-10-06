@@ -5,7 +5,7 @@
  */
 import * as constants from './constants.js';
 import eslintConfigBrowserTemplate from './eslintConfigBrowserTemplate.js';
-import eslintConfigLibraryTemplate from './EslintConfigLibraryTemplate.js';
+import eslintConfigLibraryTemplate from './eslintConfigLibraryTemplate.js';
 import eslintConfigNodeTemplate from './eslintConfigNodeTemplate.js';
 import gitIgnoreTemplate from './gitignoreTemplate.js';
 import prettierConfigTemplate from './prettierConfigTemplate.js';

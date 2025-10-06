@@ -1,28 +1,26 @@
+import { type ConfigObject } from '@eslint/core';
 import eslint from '@eslint/js';
-// Awaiting improvement on ESLint side - Typescript not well supported
-//import json from '@eslint/json';
-//import markdown from '@eslint/markdown';
-//import html from '@html-eslint/eslint-plugin';
+import json from '@eslint/json';
+import markdown from '@eslint/markdown';
+import html from '@html-eslint/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import functional from 'eslint-plugin-functional';
-import * as constants from './constants.js';
-//import markdown from 'eslint-plugin-markdown';
 import eslintPluginYml from 'eslint-plugin-yml';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
-import tseslint, { type ConfigArray } from 'typescript-eslint';
+import tseslint from 'typescript-eslint';
+import * as constants from './constants.js';
 
-/*const compat = new FlatCompat({
-	baseDirectory: import.meta.dirname
-});*/
+interface ConfigArray extends ReadonlyArray<ConfigObject> {}
 
-const typescriptConfigs = defineConfig(
+const typescriptConfigs: ConfigArray = defineConfig(
 	eslint.configs.recommended,
 	// typescript-eslint-parser is included in all typescript-eslint configs
 	tseslint.configs.recommendedTypeChecked,
 	{
 		name: 'typescriptConfig',
-		plugins: { functional: functional as never },
+		// Add html plugin so we can lint template literals inside javascript code
+		plugins: { functional: functional as never, html },
 		languageOptions: {
 			parserOptions: {
 				ecmaFeatures: { impliedStrict: true },
@@ -77,38 +75,59 @@ const typescriptConfigs = defineConfig(
 			],
 			'functional/no-loop-statements': 'off',
 			'functional/prefer-property-signatures': 'error',
-			'functional/prefer-tacit': 'error'
+			'functional/prefer-tacit': 'error',
+			// Add html rules so we can lint template literals inside javascript code
+			...html.configs.recommended.rules
 		}
 	}
 );
 
-/*const htmlConfigs: FlatConfigArray = [
-	{
-		// recommended configuration included in the plugin
-		...html.configs['flat/recommended'],
-		rules: {
-			...html.configs['flat/recommended'].rules, // Must be defined. If not, all recommended rules will be lost
-			'@html-eslint/indent': 'error'
-		}
-	}
-];*/
+const htmlConfigs: ConfigArray = defineConfig({
+	name: 'htmlConfig',
+	plugins: {
+		html
+	},
+	extends: ['html/recommended'],
+	language: 'html/html',
+	rules: {}
+});
 
-const ymlConfigs = defineConfig(eslintPluginYml.configs['flat/recommended'] as never, {
+const ymlConfigs: ConfigArray = defineConfig(eslintPluginYml.configs['flat/recommended'] as never, {
 	name: 'ymlConfig',
 	rules: {
 		'yml/no-empty-mapping-value': 'off'
 	}
 });
 
-/*const markdownConfigs: FlatConfigArray = markdown.configs && 'recommended' in markdown.configs ? [...markdown.configs['recommended']]:[];
-
-const jsonConfigs: FlatConfigArray = [
+const markdownConfigs: ConfigArray = defineConfig([
 	{
-		ignores: ['package-lock.json'],
-		language: 'json/json',
-		...json.configs.recommended
+		name: 'mdConfig',
+		plugins: {
+			markdown
+		},
+		extends: ['markdown/recommended', 'markdown/processor'],
+		rules: {}
 	}
-];*/
+]);
+
+const jsonConfigs: ConfigArray = defineConfig({
+	ignores: ['package-lock.json'],
+	plugins: { json },
+	language: 'json/json',
+	extends: ['json/recommended']
+});
+
+const jsoncConfigs: ConfigArray = defineConfig({
+	plugins: { json },
+	language: 'json/jsonc',
+	extends: ['json/recommended']
+});
+
+const json5Configs: ConfigArray = defineConfig({
+	plugins: { json },
+	language: 'json/json5',
+	extends: ['json/recommended']
+});
 
 /**
  * See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-objects Each
@@ -117,16 +136,25 @@ const jsonConfigs: FlatConfigArray = [
  * the latest one prevails.
  */
 
+const scopeConfig = ({
+	configs,
+	files
+}: {
+	readonly configs: ConfigArray;
+	readonly files: ReadonlyArray<string>;
+}) =>
+	configs.map((config) => ({
+		...config,
+		files: [...files]
+	}));
+
 const _default: ConfigArray = defineConfig([
 	// This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
 	globalIgnores(
 		[constants.prodFolderName + '/', constants.viteTimeStampFileNamePattern],
 		'ignoreConfig'
 	),
-	typescriptConfigs.map((config) => ({
-		...config,
-		files: constants.allJsFiles
-	})),
+	scopeConfig({ configs: typescriptConfigs, files: constants.allJsFiles }),
 	{
 		name: 'typescriptConfigForOtherFiles',
 		files: constants.allJsFiles,
@@ -140,22 +168,12 @@ const _default: ConfigArray = defineConfig([
 			'import/no-extraneous-dependencies': 'off'
 		}*/
 	},
-	/*.map((config) => ({
-		...config,
-		files: constants.allHtmlFiles
-	})),*/
-	...ymlConfigs.map((config) => ({
-		...config,
-		files: constants.allYmlFiles
-	})),
-	/*...markdownConfigs.map((config) => ({
-		...config,
-		files: constants.allMdFiles
-	})),
-	...jsonConfigs.map((config) => ({
-		...config,
-		files: constants.allJsonFiles
-	})),*/
+	scopeConfig({ configs: htmlConfigs, files: constants.allHtmlFiles }),
+	scopeConfig({ configs: ymlConfigs, files: constants.allYmlFiles }),
+	scopeConfig({ configs: markdownConfigs, files: constants.allMdFiles }),
+	scopeConfig({ configs: jsonConfigs, files: constants.allJsonFiles }),
+	scopeConfig({ configs: jsoncConfigs, files: constants.allJsoncFiles }),
+	scopeConfig({ configs: json5Configs, files: constants.allJson5Files }),
 	{
 		...eslintConfigPrettier,
 		files: constants.allJsFiles

@@ -1,9 +1,9 @@
+import { type ConfigObject } from '@eslint/core';
 import globals from 'globals';
-import { type ConfigArray } from 'typescript-eslint';
 import * as constants from './constants.js';
 import eslintInternalConfigBase from './eslintInternalConfigBase.js';
 
-const _default:ConfigArray = [
+const _default: ReadonlyArray<ConfigObject> = [
 	...eslintInternalConfigBase,
 	{
 		files: constants.allProjectJsFiles,
@@ -13,5 +13,5 @@ const _default:ConfigArray = [
 			}
 		}
 	}
-]
+];
 export default _default;

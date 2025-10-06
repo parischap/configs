@@ -1,16 +1,3 @@
-export const effectVersion = '^3.18.1';
-export const effectPlatformNodeVersion = '^0.98.3';
-export const effectPlatformVersion = '^0.92.1';
-export const effectExperimentalVersion = '^0.56.0';
-export const effectLanguageServiceVersion = '^0.41.1';
-
-export const effectLibVersion = '^0.11.0';
-export const ansiStylesVersion = '^0.2.6';
-export const prettyPrintVersion = '^0.3.7';
-export const conversionsVersion = '^0.8.0';
-
-export const pnpmVersion = '10.18.0';
-
 export const owner = 'parischap';
 export const scope = '@' + owner;
 export const devScope = scope + '-dev';
@@ -69,26 +56,25 @@ export const docgenFolderName = 'modules';
 export const readmeAssetsFolderName = 'readme-assets';
 
 export const allSubFolders = '**/*';
-//export const subRepoPath = `**/${packagesFolderName}/*`;
 
-/*export const jsInMdExtensions = [
-	...mdExtensions.map((ext) => `${ext}/*.js`),
-	...mdExtensions.map((ext) => `${ext}/*.ts`)
-];*/
 export const tsExtensions = ['.ts', '.mts', '.cts'];
 export const jsExtensions = [...tsExtensions, '.js', '.mjs', '.cjs'];
 export const cjsExtensions = ['cts', '.cjs'];
 export const htmlExtensions = ['.html', '.htm'];
-//export const mdExtensions = ['.md'];
-//export const jsonExtensions = ['.json'];
+export const mdExtensions = ['.md'];
+export const jsonExtensions = ['.json'];
+export const jsoncExtensions = ['.jsonc'];
+export const json5Extensions = ['.json5'];
 export const ymlExtensions = ['.yml', '.yaml'];
 
 export const allTsFiles = tsExtensions.map((ext) => allSubFolders + ext);
 export const allJsFiles = jsExtensions.map((ext) => allSubFolders + ext);
 export const allCjsFiles = cjsExtensions.map((ext) => allSubFolders + ext);
 export const allHtmlFiles = htmlExtensions.map((ext) => allSubFolders + ext);
-//export const allMdFiles = mdExtensions.map((ext) => allSubFolders + ext);
-//export const allJsonFiles = jsonExtensions.map((ext) => allSubFolders + ext);
+export const allMdFiles = mdExtensions.map((ext) => allSubFolders + ext);
+export const allJsonFiles = jsonExtensions.map((ext) => allSubFolders + ext);
+export const allJsoncFiles = jsoncExtensions.map((ext) => allSubFolders + ext);
+export const allJson5Files = json5Extensions.map((ext) => allSubFolders + ext);
 export const allYmlFiles = ymlExtensions.map((ext) => allSubFolders + ext);
 export const allProjectJsFiles = jsExtensions.map(
 	(ext) => `${projectFolderName}/${allSubFolders}${ext}`

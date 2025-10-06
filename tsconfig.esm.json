@@ -6,8 +6,8 @@
 		"declarationDir": "dist/dts",
 		"declarationMap": true,
 		"outDir": "dist/esm",
-		"allowJs": false,
-		"checkJs": false,
+		"allowJs": true,
+		"checkJs": true,
 		"lib": ["ESNext"],
 		"types": ["node"]
 	}

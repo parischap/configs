@@ -28,7 +28,7 @@ const gitRepo = (repoName: string) => ({
 const bundledConfig = {
 	[constants.packageJsonFileName]: {
 		dependencies: {
-			'@effect/experimental': constants.effectExperimentalVersion
+			'@effect/experimental': '^0.56.0'
 		},
 		scripts: {
 			bundle: 'bundle-files',

@@ -45,7 +45,7 @@ Following is a list of some parameters to provide to the `configSubRepo` and `co
 
 The `configs` package uses itself to generate its configuration files. To that extent, the following procedure must be followed for that package only:
 
-- run `node esm/internal/init/main.mjs`
+- run `node esm/internal/init/main.mjs`: this exe will simply remove tsconfig.json and create a package.json and .git. It does not need to be run if package.json needs not be modified.
 - run `pnpm build`
 
 For other packages, the procedure to follow is:
@@ -71,6 +71,7 @@ Notes:
 # 2 - About tsconfig:
 
 `tsconfig.json` is used by several tools with diverse purposes:
+
 - it is used by Visual Studio Code to report type errors while editing or by tsc used with the noEmit flag to report type errors in the build phase
 - it is used by tsc to transform Typescript code into Javascript code or to emit type declaration files. Some `tsconfig.json` options are specific to that use like the target, rootDir, outDir, declarationDir options. However, even for a package bundled with Vite that defines its own target and ignores the `tsconfig.json` target option, it can make sense to set that option because it changes the default value of other options that are not specific to transpiling.
 - it can be used by Eslint to report type errors.
@@ -80,7 +81,7 @@ When typechecking a file, Typescript looks for the nearest `tsconfig.json` file 
 
 If the include directive of a `tsconfig.json` does not match any ts file, it is considered that there is no include directive. It then falls back to the default which is all files with supported extensions in all subdirectories. In particular, if it finds only .js files and even if allowJs and checkJs are activated, it will revert to the default.
 
-In each package,  the `tsconfig.json` calls two sub projects: the `tsconfig.others.json`, that covers the whole directory except `node_modules`, `dist` and `esm`, allows js files and defines the node library, and the `tsconfig.esm.json` that covers only the `esm` subdirectory, does not allow js files, defines a library according to the parameters in `project.config.js` and defines the output files and directories for the build phase.
+In each package, the `tsconfig.json` calls two sub projects: the `tsconfig.others.json`, that covers the whole directory except `node_modules`, `dist` and `esm`, allows js files and defines the node library, and the `tsconfig.esm.json` that covers only the `esm` subdirectory, allows js files, defines a library according to the parameters in `project.config.js` and defines the output files and directories for the build phase.
 
 There is also a `tsconfig.docgen.json` project, that is used during doc generation by docgen, which covers only the `esm` subdirectory, does not allow js files and defines the node library (because examples are written in nodejs).
 

@@ -8,29 +8,26 @@ import configInternalBase, { Environment } from './configInternalBase.js';
 import configInternalPackage, { Visibility } from './configInternalPackage.js';
 import configInternalTop from './configInternalTop.js';
 import * as constants from './constants.js';
+import { configStarterDependencies, configStarterDevDependencies } from './dependencies.js';
 
-const packageName = basename(resolve());
+export const packageName = basename(resolve());
+
 const binPath = `./${constants.projectFolderName}/${constants.binariesFolderName}/`;
 const prodBinPath = `./${constants.prodFolderName}/${constants.binariesFolderName}/`;
 
 export default merge(
 	configInternalBase({
-		packageName,
+		packageName: packageName,
 		environment: Environment.Type.Node
 	}),
 	configInternalTop,
 	configInternalPackage({
-		packageName,
+		packageName: packageName,
 		repoName: packageName,
 		description: 'Utility to generate configuration files in a repository',
-		dependencies: {
-			minimatch: 'latest',
-			effect: constants.effectVersion,
-			'@effect/platform': constants.effectPlatformVersion,
-			'@effect/platform-node': constants.effectPlatformNodeVersion,
-			'ts-deepmerge': 'latest'
-		},
+		dependencies: configStarterDependencies,
 		devDependencies: {
+			...configStarterDevDependencies,
 			// In this package only, we link to the prod version of the package. pnpm install does not error if the dist directory does not contain any package.json.
 			[`${constants.slashedScope}${packageName}`]: 'link:dist'
 		},

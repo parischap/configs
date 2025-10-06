@@ -8,7 +8,7 @@ export default {
 		declarationDir: `${constants.prodFolderName}/${constants.typesFolderName}`,
 		declarationMap: true,
 		outDir: `${constants.prodFolderName}/${constants.projectFolderName}`,
-		allowJs: false,
-		checkJs: false,
+		allowJs: true,
+		checkJs: true
 	}
 };
