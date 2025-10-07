@@ -1,10 +1,11 @@
-export default `import type { UserConfig } from 'vite';
+export default `/// <reference types="vitest" />
+import { defineConfig } from 'vite';
 
-export default {
+export default defineConfig({
 	test: {
 		include: ['./tests/*.test.ts'],
 		isolate: false,
 		fileParallelism: false,
 		pool: 'threads'
 	}
-} satisfies UserConfig;`;
+});`;
