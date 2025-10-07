@@ -65,7 +65,7 @@ export default ({
 		author: 'Jérôme MARTIN',
 		license: 'MIT',
 		scripts: {
-			tscheck: `tsc -b ${constants.tsConfigFileName} --force`,
+			tscheck: `tsc -b ${constants.tsConfigFileName} --force --noEmit`,
 			lint: 'eslint .',
 			'lint-fix': 'eslint . --fix',
 			'lint-rules': 'pnpx @eslint/config-inspector',

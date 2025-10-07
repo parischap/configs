@@ -4,7 +4,7 @@
 	"author": "Jérôme MARTIN",
 	"license": "MIT",
 	"scripts": {
-		"tscheck": "tsc -b tsconfig.json --force",
+		"tscheck": "tsc -b tsconfig.json --force --noEmit",
 		"lint": "eslint .",
 		"lint-fix": "eslint . --fix",
 		"lint-rules": "pnpx @eslint/config-inspector",
