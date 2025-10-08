@@ -72,6 +72,12 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
 				'error',
 				{
 					ignoreInferredTypes: true,
+					ignoreTypePattern: [
+						'Option\\.Option<[^>]+>',
+						'Either\\.Either<[^>]+>',
+						'RegExp',
+						'Error'
+					],
 					enforcement: 'ReadonlyDeep',
 					returnTypes: { enforcement: 'None' }
 				}
@@ -79,7 +85,7 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
 			'functional/type-declaration-immutability': 'off',
 			'functional/no-expression-statements': [
 				'error',
-				{ ignoreCodePattern: ['process\\.exit', 'super\\('] }
+				{ ignoreCodePattern: ['process\\.exit\\(', 'super\\('] }
 			],
 			'functional/prefer-property-signatures': 'error',
 			'functional/prefer-tacit': 'error',
@@ -89,6 +95,7 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
 			],
 			'functional/no-return-void': 'off',
 			'functional/no-conditional-statements': 'off',
+			'functional/no-mixed-types': 'off',
 			'functional/readonly-type': ['error', 'keyword']
 		}
 	}
@@ -242,7 +249,17 @@ const _default: ConfigArray = defineConfig([
 			// Let's allow console.log in setting files and assertions in test files
 			'functional/no-expression-statements': [
 				'error',
-				{ ignoreVoid: true, ignoreCodePattern: ['process\\.exit', 'super\\(', 'describe\\('] }
+				{
+					ignoreCodePattern: [
+						'process\\.exit',
+						'super\\(',
+						'expect\\(',
+						'describe\\(',
+						'it\\(',
+						'TEUtils\\.',
+						'console\\.log\\('
+					]
+				}
 			]
 		}
 	},
