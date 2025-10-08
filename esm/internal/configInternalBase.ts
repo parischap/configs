@@ -37,12 +37,10 @@ const environmentConfig = (environment: Environment.Type) =>
 			[constants.projectTsConfigFileName]: tsConfigEsmNode,
 			[constants.eslintConfigFileName]: eslintConfigNodeTemplate
 		}
-	: environment === Environment.Type.Library ?
-		{
+	:	{
 			[constants.projectTsConfigFileName]: tsConfigEsmLibrary,
 			[constants.eslintConfigFileName]: eslintConfigLibraryTemplate
-		}
-	:	{};
+		};
 
 export default ({
 	packageName,

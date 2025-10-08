@@ -148,9 +148,7 @@ const program = Effect.gen(function* () {
 
 						const targetPath = path.join(docsPath, name);
 
-						const copy = (
-							p: string
-						): Effect.Effect<[void[], void[]], PlatformError.PlatformError, never> =>
+						const copy = (p: string): Effect.Effect<void, PlatformError.PlatformError> =>
 							pipe(
 								path.join(docgenPath, p),
 								fs.readDirectory,
@@ -202,7 +200,8 @@ const program = Effect.gen(function* () {
 										}),
 										Effect.all
 									)
-								)
+								),
+								Effect.as(undefined)
 							);
 
 						yield* fs.makeDirectory(targetPath);

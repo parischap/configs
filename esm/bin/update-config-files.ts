@@ -196,7 +196,7 @@ const program = Effect.gen(function* () {
 								Either.fromOption(
 									() =>
 										new Error(
-											`Property with extension other than '${'.json'}' must have value of type string`
+											"Property with extension other than '.json' must have value of type string"
 										)
 								)
 							)

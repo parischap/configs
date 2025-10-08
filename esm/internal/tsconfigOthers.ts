@@ -9,6 +9,7 @@ export default {
 		constants.viteTimeStampFileNamePattern
 	],
 	compilerOptions: {
+		rootDir: '.',
 		lib: ['ESNext'],
 		types: ['node'],
 		allowJs: true,

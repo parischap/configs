@@ -13,74 +13,103 @@ import * as constants from './constants.js';
 
 interface ConfigArray extends ReadonlyArray<ConfigObject> {}
 
-const typescriptConfigs: ConfigArray = defineConfig(
-	eslint.configs.recommended,
-	// typescript-eslint-parser is included in all typescript-eslint configs
-	tseslint.configs.recommendedTypeChecked,
+const typescriptConfigs = defineConfig(eslint.configs.recommended, {
+	// Add no rules here because they might get overridden by the typedTypescriptConfig
+	name: 'typescriptConfig',
+	// Add html plugin so we can lint template literals inside javascript code
+	plugins: { functional: functional as never, html },
+	languageOptions: {
+		parserOptions: {
+			ecmaFeatures: { impliedStrict: true }
+		}
+	},
+	linterOptions: {
+		reportUnusedDisableDirectives: 'error'
+	}
+});
+
+const untypedTypescriptConfigs: ConfigArray = defineConfig(
+	// The typescript-eslint-parser requested by the functional plugin is included in all typescript-eslint configs. Add no rules here because they might get overridden by the typedTypescriptConfig
+	tseslint.configs.strict
+);
+
+const typedTypescriptConfigs: ConfigArray = defineConfig(
+	// The typescript-eslint-parser requested by the functional plugin is included in all typescript-eslint configs
+	tseslint.configs.strictTypeChecked,
 	{
-		name: 'typescriptConfig',
-		// Add html plugin so we can lint template literals inside javascript code
-		plugins: { functional: functional as never, html },
+		name: 'typedTypescriptConfig',
 		languageOptions: {
 			parserOptions: {
-				ecmaFeatures: { impliedStrict: true },
 				projectService: true
 			}
 		},
-		linterOptions: {
-			reportUnusedDisableDirectives: 'error'
-		},
+		/**
+		 * Rules that activate type-information can only be modified in that config (type information is
+		 * unavailable in other configs)
+		 */
 		rules: {
-			'@typescript-eslint/no-namespace': 'off', // We want to be able to use namespaces
-			'@typescript-eslint/only-throw-error': 'off', // Effect has its own error management
-			'@typescript-eslint/no-empty-object-type': 'off', // We want to define empty interfaces for opacity
-			'@typescript-eslint/no-unused-vars': [
-				'error',
-				{
-					argsIgnorePattern: '^_',
-					varsIgnorePattern: '^_',
-					caughtErrorsIgnorePattern: '^_'
-				}
-			],
 			'@typescript-eslint/strict-boolean-expressions': 'error',
-			'no-redeclare': 'off', // We want to allow types and variables with same names
-			//'codegen/codegen': 'error',
-			//'sort-destructure-keys/sort-destructure-keys': 'error',
-			'functional/immutable-data': 'error',
-			'functional/no-let': 'off',
-			'functional/prefer-immutable-types': [
-				'off',
-				{
-					ignoreInferredTypes: true,
-					enforcement: 'Immutable',
-					returnTypes: { enforcement: 'None' }
-				}
-			],
-			'functional/type-declaration-immutability': [
-				'off',
-				{
-					rules: [
-						{
-							identifiers: ['^.+$'],
-							immutability: 'ReadonlyDeep',
-							comparator: 'AtLeast'
-						}
-					]
-				}
-			],
-			'functional/prefer-readonly-type': ['error', { allowMutableReturnType: true }],
-			'functional/no-expression-statements': [
+			'@typescript-eslint/no-confusing-void-expression': ['error', { ignoreArrowShorthand: true }],
+			'@typescript-eslint/restrict-template-expressions': [
 				'error',
-				{ ignoreCodePattern: ['process\\.exit', 'super\\('] }
-			],
-			'functional/no-loop-statements': 'off',
-			'functional/prefer-property-signatures': 'error',
-			'functional/prefer-tacit': 'error',
-			// Add html rules so we can lint template literals inside javascript code
-			...html.configs.recommended.rules
+				{ allowNumber: true, allowBoolean: true }
+			]
 		}
 	}
 );
+
+const untypedJavascriptRulesMitigationConfigs = defineConfig({
+	name: 'untypedJavascriptRulesMitigationConfigs',
+	rules: {
+		'no-redeclare': 'off', // We want to allow types and variables with same names
+		'@typescript-eslint/no-namespace': 'off', // We want to be able to use namespaces
+		//'@typescript-eslint/only-throw-error': 'off', // Effect has its own error management
+		'@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'always' }],
+		'@typescript-eslint/no-unused-vars': [
+			'error',
+			{
+				argsIgnorePattern: '^_',
+				varsIgnorePattern: '^_',
+				caughtErrorsIgnorePattern: '^_'
+			}
+		],
+		//'codegen/codegen': 'error',
+		//'sort-destructure-keys/sort-destructure-keys': 'error',
+		'functional/immutable-data': 'error',
+		'functional/no-let': 'off',
+		'functional/prefer-immutable-types': [
+			'off',
+			{
+				ignoreInferredTypes: true,
+				enforcement: 'Immutable',
+				returnTypes: { enforcement: 'None' }
+			}
+		],
+		'functional/type-declaration-immutability': [
+			'off',
+			{
+				rules: [
+					{
+						identifiers: ['^.+$'],
+						immutability: 'ReadonlyDeep',
+						comparator: 'AtLeast'
+					}
+				]
+			}
+		],
+		'functional/prefer-readonly-type': ['error', { allowMutableReturnType: true }],
+		'functional/no-expression-statements': [
+			'error',
+			{ ignoreCodePattern: ['process\\.exit', 'super\\('] }
+		],
+		'functional/no-loop-statements': 'off',
+		'functional/prefer-property-signatures': 'error',
+		'functional/prefer-tacit': 'error',
+		// Add html rules so we can lint template literals inside javascript code
+		...html.configs.recommended.rules
+		//'import/no-extraneous-dependencies': 'off'
+	}
+});
 
 const htmlConfigs: ConfigArray = defineConfig({
 	name: 'htmlConfig',
@@ -138,14 +167,17 @@ const json5Configs: ConfigArray = defineConfig({
 
 const scopeConfig = ({
 	configs,
-	files
+	files,
+	ignores = []
 }: {
 	readonly configs: ConfigArray;
 	readonly files: ReadonlyArray<string>;
+	readonly ignores?: ReadonlyArray<string>;
 }) =>
 	configs.map((config) => ({
 		...config,
-		files: [...files]
+		files: [...files],
+		ignores: [...ignores]
 	}));
 
 const _default: ConfigArray = defineConfig([
@@ -155,6 +187,20 @@ const _default: ConfigArray = defineConfig([
 		'ignoreConfig'
 	),
 	scopeConfig({ configs: typescriptConfigs, files: constants.allJsFiles }),
+	scopeConfig({ configs: untypedTypescriptConfigs, files: constants.allJsInMdFiles }),
+	scopeConfig({
+		configs: typedTypescriptConfigs,
+		files: constants.allJsFiles,
+		/**
+		 * We don't perform typed checks in js files inside md files because types are usually
+		 * unavailable (imports are not analyzed) and there are issues with virtual **.md/*.ts files
+		 * created by typesscript-eslint which the tsconfig file does not cover. Such files could be
+		 * ignored by using the `allowDefaultProject` property but that would slow down linting too
+		 * much. See typescript-eslint FAQ
+		 */
+		ignores: constants.allJsInMdFiles
+	}),
+	scopeConfig({ configs: untypedJavascriptRulesMitigationConfigs, files: constants.allJsFiles }),
 	{
 		name: 'typescriptConfigForOtherFiles',
 		files: constants.allJsFiles,
@@ -164,9 +210,6 @@ const _default: ConfigArray = defineConfig([
 				...globals.nodeBuiltin
 			}
 		}
-		/*rules: {
-			'import/no-extraneous-dependencies': 'off'
-		}*/
 	},
 	scopeConfig({ configs: htmlConfigs, files: constants.allHtmlFiles }),
 	scopeConfig({ configs: ymlConfigs, files: constants.allYmlFiles }),

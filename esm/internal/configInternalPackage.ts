@@ -110,8 +110,7 @@ const visibilityConfig = ({
 				}
 			}
 		}
-	: visibility === Visibility.Type.PublicByForce ?
-		{
+	:	{
 			[constants.packageJsonFileName]: {
 				publishConfig: {
 					// Do not publish maps of this package because it should be private
@@ -122,8 +121,7 @@ const visibilityConfig = ({
 					'build-and-publish': 'pnpm build && pnpm checks && pnpm publish-to-npm'
 				}
 			}
-		}
-	:	{};
+		};
 
 const staticFolderConfig = {
 	[constants.packageJsonFileName]: {

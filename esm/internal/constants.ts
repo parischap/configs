@@ -55,7 +55,8 @@ export const docsFolderName = 'docs';
 export const docgenFolderName = 'modules';
 export const readmeAssetsFolderName = 'readme-assets';
 
-export const allSubFolders = '**/*';
+export const allFiles = '**/*';
+const allFilesInMd = allFiles + '.md/*';
 
 export const tsExtensions = ['.ts', '.mts', '.cts'];
 export const jsExtensions = [...tsExtensions, '.js', '.mjs', '.cjs'];
@@ -67,18 +68,19 @@ export const jsoncExtensions = ['.jsonc'];
 export const json5Extensions = ['.json5'];
 export const ymlExtensions = ['.yml', '.yaml'];
 
-export const allTsFiles = tsExtensions.map((ext) => allSubFolders + ext);
-export const allJsFiles = jsExtensions.map((ext) => allSubFolders + ext);
-export const allCjsFiles = cjsExtensions.map((ext) => allSubFolders + ext);
-export const allHtmlFiles = htmlExtensions.map((ext) => allSubFolders + ext);
-export const allMdFiles = mdExtensions.map((ext) => allSubFolders + ext);
-export const allJsonFiles = jsonExtensions.map((ext) => allSubFolders + ext);
-export const allJsoncFiles = jsoncExtensions.map((ext) => allSubFolders + ext);
-export const allJson5Files = json5Extensions.map((ext) => allSubFolders + ext);
-export const allYmlFiles = ymlExtensions.map((ext) => allSubFolders + ext);
+export const allTsFiles = tsExtensions.map((ext) => allFiles + ext);
+export const allJsFiles = jsExtensions.map((ext) => allFiles + ext);
+export const allCjsFiles = cjsExtensions.map((ext) => allFiles + ext);
+export const allHtmlFiles = htmlExtensions.map((ext) => allFiles + ext);
+export const allMdFiles = mdExtensions.map((ext) => allFiles + ext);
+export const allJsonFiles = jsonExtensions.map((ext) => allFiles + ext);
+export const allJsoncFiles = jsoncExtensions.map((ext) => allFiles + ext);
+export const allJson5Files = json5Extensions.map((ext) => allFiles + ext);
+export const allYmlFiles = ymlExtensions.map((ext) => allFiles + ext);
 export const allProjectJsFiles = jsExtensions.map(
-	(ext) => `${projectFolderName}/${allSubFolders}${ext}`
+	(ext) => `${projectFolderName}/${allFiles}${ext}`
 );
+export const allJsInMdFiles = jsExtensions.map((ext) => allFilesInMd + ext);
 
 export const topJsFiles = jsExtensions.map((ext) => '*' + ext);
 
