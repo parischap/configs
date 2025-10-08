@@ -1,4 +1,3 @@
-/* eslint functional/no-expression-statements: "off" */
 // Attention: @parischap/configs refers to the prod version. So any changes will only reflect here after `pnpm build`.
 import * as Configs from '@parischap/configs';
 import { pipe } from 'effect';

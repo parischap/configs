@@ -1,3 +1,4 @@
+/* eslint functional/no-expression-statements: off, functional/no-try-statements:off, functional/no-throw-statements:off */
 import { execSync } from 'node:child_process';
 import { unlinkSync } from 'node:fs';
 
@@ -7,7 +8,6 @@ import {
 	devDependencies
 } from '../dependencies.js';
 
-/* eslint functional/no-expression-statements: off */
 try {
 	try {
 		unlinkSync('tsconfig.json');

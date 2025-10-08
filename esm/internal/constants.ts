@@ -36,6 +36,7 @@ export const vscodeWorkspaceFileNamePattern = '*.code-workspace';
 export const internalFolderName = 'internal';
 export const tsBuildInfoFolderName = '.tsbuildinfo';
 export const projectFolderName = projectMark;
+export const othersFolderName = 'others';
 export const examplesFolderName = 'examples';
 export const testsFolderName = 'test';
 export const prodFolderName = 'dist';
