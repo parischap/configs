@@ -2,11 +2,7 @@ import { Effect } from 'effect';
 import * as PortError from './PortError.js';
 
 /** Port of Json stringify */
-export const stringify = (
-	value: unknown,
-	/* eslint-disable-next-line functional/prefer-immutable-types*/
-	replacer?: Parameters<typeof JSON.stringify>[1]
-) =>
+export const stringify = (value: unknown, replacer?: Parameters<typeof JSON.stringify>[1]) =>
 	Effect.try({
 		try: () => JSON.stringify(value, replacer),
 		catch: (e) =>

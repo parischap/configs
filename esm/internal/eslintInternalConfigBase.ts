@@ -14,7 +14,6 @@ import * as constants from './constants.js';
 
 interface ConfigArray extends Array<ConfigObject> {}
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const typescriptConfigs: ConfigArray = defineConfig(eslint.configs.recommended, {
 	// Add no rules here because they might get overridden by the typedTypescriptConfig
 	name: 'typescriptConfig',
@@ -31,7 +30,6 @@ const typescriptConfigs: ConfigArray = defineConfig(eslint.configs.recommended, 
 	}
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const untypedTypescriptConfigs: ConfigArray = defineConfig(
 	// The typescript-eslint-parser requested by the functional plugin is included in all typescript-eslint configs. Add no rules here because they might get overridden by the typedTypescriptConfig
 	tseslint.configs.strict,
@@ -41,7 +39,6 @@ const untypedTypescriptConfigs: ConfigArray = defineConfig(
 	}
 );
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const typedTypescriptConfigs: ConfigArray = defineConfig(
 	// The typescript-eslint-parser requested by the functional plugin is included in all typescript-eslint configs
 	tseslint.configs.strictTypeChecked,
@@ -74,20 +71,7 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
 			 * Effect.Either are mutable. I did note manage to use global settings to force these types to
 			 * Immutable
 			 */
-			'functional/prefer-immutable-types': [
-				'error',
-				{
-					ignoreInferredTypes: true,
-					ignoreTypePattern: [
-						'Option\\.Option<[^>]+>',
-						'Either\\.Either<[^>]+>',
-						'RegExp',
-						'Error'
-					],
-					enforcement: 'ReadonlyShallow',
-					returnTypes: { enforcement: 'None' }
-				}
-			],
+			'functional/prefer-immutable-types': 'off',
 			'functional/type-declaration-immutability': 'off',
 			'functional/no-expression-statements': [
 				'error',
@@ -107,7 +91,6 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
 	}
 );
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const javascriptRulesMitigationConfigs: ConfigArray = defineConfig({
 	name: 'untypedJavascriptRulesMitigationConfigs',
 	// Here, we modify rules that don't require type information
@@ -135,7 +118,6 @@ const javascriptRulesMitigationConfigs: ConfigArray = defineConfig({
 	}
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const htmlConfigs: ConfigArray = defineConfig({
 	name: 'htmlConfig',
 	plugins: {
@@ -146,7 +128,6 @@ const htmlConfigs: ConfigArray = defineConfig({
 	rules: {}
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const ymlConfigs: ConfigArray = defineConfig(eslintPluginYml.configs['flat/recommended'] as never, {
 	name: 'ymlConfig',
 	rules: {
@@ -154,7 +135,6 @@ const ymlConfigs: ConfigArray = defineConfig(eslintPluginYml.configs['flat/recom
 	}
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const markdownConfigs: ConfigArray = defineConfig([
 	{
 		name: 'mdConfig',
@@ -166,7 +146,6 @@ const markdownConfigs: ConfigArray = defineConfig([
 	}
 ]);
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const jsonConfigs: ConfigArray = defineConfig({
 	ignores: ['package-lock.json'],
 	plugins: { json },
@@ -174,14 +153,12 @@ const jsonConfigs: ConfigArray = defineConfig({
 	extends: ['json/recommended']
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const jsoncConfigs: ConfigArray = defineConfig({
 	plugins: { json },
 	language: 'json/jsonc',
 	extends: ['json/recommended']
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const json5Configs: ConfigArray = defineConfig({
 	plugins: { json },
 	language: 'json/json5',
@@ -212,7 +189,6 @@ const scopeConfig = ({
 
 const untypedJsFiles = constants.allJsInMdFiles;
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const _default: ConfigArray = defineConfig([
 	// This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
 	globalIgnores(

@@ -3,7 +3,6 @@ import globals from 'globals';
 import * as constants from './constants.js';
 import eslintInternalConfigBase from './eslintInternalConfigBase.js';
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const _default: Array<ConfigObject> = [
 	...eslintInternalConfigBase,
 	{
