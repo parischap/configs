@@ -33,8 +33,7 @@ const bundledConfig = {
 		scripts: {
 			bundle: 'bundle-files',
 			// generate types even when bundling because they can be useful as in the Configs package
-			'generate-types': `tsc -b ${constants.projectTsConfigFileName} --emitDeclarationOnly --force`,
-			compile: 'pnpm bundle && pnpm prodify'
+			compile: `pnpm bundle && pnpm prodify && tsc -b ${constants.projectTsConfigFileName} --emitDeclarationOnly --force`
 		},
 		publishConfig: {
 			exports: {
@@ -53,6 +52,7 @@ const bundledConfig = {
 const transpiledConfig = {
 	[constants.packageJsonFileName]: {
 		scripts: {
+			// transpile-esm builds but also generate types
 			'transpile-esm': `tsc -b ${constants.projectTsConfigFileName} --force`,
 			'transpile-cjs': `babel ${constants.prodFolderName}/${constants.projectFolderName} --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir ${constants.prodFolderName}/${constants.commonJsFolderName} --source-maps`,
 			'transpile-annotate': `babel ${constants.prodFolderName} --plugins annotate-pure-calls --out-dir ${constants.prodFolderName} --source-maps`,
@@ -257,7 +257,7 @@ export default ({
 					'publish-to-npm': `cd ${constants.prodFolderName} && npm publish --access=public && cd ..`,
 					'install-prod': `cd ${constants.prodFolderName} && pnpm i && cd ..`,
 					build:
-						'pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm --if-present generate-types && pnpm install-prod',
+						'pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm install-prod',
 					prodify: 'prodify',
 					examples: pipe(
 						examples,

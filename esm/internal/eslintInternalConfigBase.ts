@@ -19,11 +19,7 @@ const typescriptConfigs: ConfigArray = defineConfig(eslint.configs.recommended, 
 	name: 'typescriptConfig',
 	// Add html plugin so we can lint template literals inside javascript code
 	plugins: { functional: functional as never, html },
-	extends: [
-		functional.configs.externalTypeScriptRecommended as never,
-		functional.configs.strict as never,
-		functional.configs.stylistic as never
-	],
+	extends: [functional.configs.strict as never, functional.configs.stylistic as never],
 	languageOptions: {
 		parserOptions: {
 			ecmaFeatures: { impliedStrict: true }
@@ -50,6 +46,10 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
 	tseslint.configs.strictTypeChecked,
 	{
 		name: 'typedTypescriptConfig',
+		extends: [
+			// These rules require typeChecking and are not cancelled by functional.configs.disableTypeChecked
+			functional.configs.externalTypeScriptRecommended as never
+		],
 		languageOptions: {
 			parserOptions: {
 				projectService: true
