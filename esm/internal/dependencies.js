@@ -7,7 +7,7 @@ export const devDependencies = {
 	'@tsconfig/strictest': '^2.0.6',
 	shx: '^0.4.0',
 	'@parischap/configs': 'latest',
-	'@parischap/test-utils': '^0.10.0',
+	'@parischap/test-utils': '^0.14.0',
 	'@types/node': '^24.7.0',
 	eslint: '^9.37.0',
 	'@eslint/eslintrc': '^3.3.1',

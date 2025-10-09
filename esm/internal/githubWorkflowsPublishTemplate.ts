@@ -72,5 +72,5 @@ jobs:
         working-directory: \${{steps.get-repo.outputs.repo}}
         env:
           NODE_AUTH_TOKEN: \${{ secrets.NPM_PUBLISH_TOKEN }}
-        run: rm -f tsconfig.json && pnpm build-and-publish
+        run: pnpm build-and-publish
 `;
