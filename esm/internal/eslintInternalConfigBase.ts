@@ -257,7 +257,8 @@ const _default: ConfigArray = defineConfig([
 						'describe\\(',
 						'it\\(',
 						'TEUtils\\.',
-						'console\\.log\\('
+						'console\\.log\\(',
+						'.+\n+satisfies\n+.+'
 					]
 				}
 			]
