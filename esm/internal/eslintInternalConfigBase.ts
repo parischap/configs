@@ -8,6 +8,7 @@ import functional from 'eslint-plugin-functional';
 import eslintPluginYml from 'eslint-plugin-yml';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
+
 import tseslint from 'typescript-eslint';
 import * as constants from './constants.js';
 
@@ -68,6 +69,11 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
 			],
 			'@typescript-eslint/no-unnecessary-type-parameters': 'off', // Useful to avoid using any
 			'functional/immutable-data': 'error',
+			/**
+			 * I did not manage to make prefer-immutable-types work because Effect.Option and
+			 * Effect.Either are mutable. I did note manage to use global settings to force these types to
+			 * Immutable
+			 */
 			'functional/prefer-immutable-types': [
 				'error',
 				{
@@ -78,7 +84,7 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
 						'RegExp',
 						'Error'
 					],
-					enforcement: 'ReadonlyDeep',
+					enforcement: 'ReadonlyShallow',
 					returnTypes: { enforcement: 'None' }
 				}
 			],
