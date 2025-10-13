@@ -9,15 +9,15 @@ import * as constants from './constants.js';
 //export const denormalize = (p: string): string => relativePathStart + p;
 
 export const extension = (filename: string) =>
-	pipe(
-		filename,
-		String.lastIndexOf('.'),
-		Option.map(Function.flip(String.substring)(filename)),
-		Option.getOrElse(() => '')
-	);
+  pipe(
+    filename,
+    String.lastIndexOf('.'),
+    Option.map(Function.flip(String.substring)(filename)),
+    Option.getOrElse(() => ''),
+  );
 
 export const fromOsPathToPosixPath: (p: string) => string =
-	path.sep === path.posix.sep ? Function.identity : String.replaceAll(path.sep, path.posix.sep);
+  path.sep === path.posix.sep ? Function.identity : String.replaceAll(path.sep, path.posix.sep);
 
 /*export const fromPosixPathToOsPath: (p: string) => string =
 	path.sep === path.posix.sep ? Function.identity : String.replaceAll(path.posix.sep, path.sep);*/
@@ -25,8 +25,8 @@ export const fromOsPathToPosixPath: (p: string) => string =
 export const expandify = (arr: ReadonlyArray<string>) => `{${arr.join(',')}}`;
 
 export const isSubPathOf = (target: string) => (p: string) => {
-	const relPath = path.relative(target, p);
-	return !relPath.startsWith('..') && !path.isAbsolute(relPath);
+  const relPath = path.relative(target, p);
+  return !relPath.startsWith('..') && !path.isAbsolute(relPath);
 };
 
 /*export const replaceTopPathWith = (oldTopPath: string, newTopPath: string) => (p: string) => {
@@ -43,4 +43,4 @@ export const replaceExtensionWith = (oldExtension: string, newExtension: string)
 
 export const prodWorkspaceLink = 'workspace:*';
 export const devWorkspaceLink = (packageName: string): string =>
-	`workspace:${constants.slashedDevScope}${packageName}@*`;
+  `workspace:${constants.slashedDevScope}${packageName}@*`;

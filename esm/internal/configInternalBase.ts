@@ -19,57 +19,58 @@ import tsConfigOthers from './tsconfigOthers.js';
 import viteConfigTemplate from './viteConfigTemplate.js';
 
 export namespace Environment {
-	export enum Type {
-		Node = 0,
-		Library = 1,
-		Browser = 2
-	}
+  export enum Type {
+    Node = 0,
+    Library = 1,
+    Browser = 2,
+  }
 }
 
 const environmentConfig = (environment: Environment.Type) =>
-	environment === Environment.Type.Browser ?
-		{
-			[constants.projectTsConfigFileName]: tsConfigEsmBrowser,
-			[constants.eslintConfigFileName]: eslintConfigBrowserTemplate
-		}
-	: environment === Environment.Type.Node ?
-		{
-			[constants.projectTsConfigFileName]: tsConfigEsmNode,
-			[constants.eslintConfigFileName]: eslintConfigNodeTemplate
-		}
-	:	{
-			[constants.projectTsConfigFileName]: tsConfigEsmLibrary,
-			[constants.eslintConfigFileName]: eslintConfigLibraryTemplate
-		};
+  environment === Environment.Type.Browser ?
+    {
+      [constants.projectTsConfigFileName]: tsConfigEsmBrowser,
+      [constants.eslintConfigFileName]: eslintConfigBrowserTemplate,
+    }
+  : environment === Environment.Type.Node ?
+    {
+      [constants.projectTsConfigFileName]: tsConfigEsmNode,
+      [constants.eslintConfigFileName]: eslintConfigNodeTemplate,
+    }
+  : {
+      [constants.projectTsConfigFileName]: tsConfigEsmLibrary,
+      [constants.eslintConfigFileName]: eslintConfigLibraryTemplate,
+    };
 
 export default ({
-	packageName,
-	environment
+  packageName,
+  environment,
 }: {
-	readonly packageName: string;
-	readonly environment: Environment.Type;
+  readonly packageName: string;
+  readonly environment: Environment.Type;
 }) => ({
-	// Put prettier in first position so the next generated files will get formatted
-	[constants.prettierConfigFileName]: prettierConfigTemplate,
-	[constants.gitIgnoreFileName]: gitIgnoreTemplate,
-	[constants.prettierIgnoreFileName]: prettierIgnore,
-	[constants.baseTsConfigFileName]: tsconfigBase,
-	[constants.nonProjectTsConfigFileName]: tsConfigOthers,
-	[constants.tsConfigFileName]: tsConfig,
-	[constants.viteConfigFileName]: viteConfigTemplate,
-	[constants.packageJsonFileName]: {
-		name: `${constants.slashedDevScope}${packageName}`,
-		type: 'module',
-		author: 'Jérôme MARTIN',
-		license: 'MIT',
-		scripts: {
-			tscheck: `tsc -b ${constants.tsConfigFileName} --force --noEmit`,
-			lint: 'eslint .',
-			'lint-fix': 'eslint . --fix',
-			'lint-rules': 'pnpx @eslint/config-inspector',
-			'update-config-files': 'update-config-files',
-			'clean-config-files': `shx rm -rf ${constants.packageJsonFileName} && shx rm -rf ${constants.tsConfigFileName}`
-		}
-	},
-	...environmentConfig(environment)
+  // Put prettier in first position so the next generated files will get formatted
+  [constants.prettierConfigFileName]: prettierConfigTemplate,
+  [constants.gitIgnoreFileName]: gitIgnoreTemplate,
+  [constants.prettierIgnoreFileName]: prettierIgnore,
+  [constants.baseTsConfigFileName]: tsconfigBase,
+  [constants.nonProjectTsConfigFileName]: tsConfigOthers,
+  [constants.tsConfigFileName]: tsConfig,
+  [constants.viteConfigFileName]: viteConfigTemplate,
+  [constants.packageJsonFileName]: {
+    name: `${constants.slashedDevScope}${packageName}`,
+    type: 'module',
+    author: 'Jérôme MARTIN',
+    license: 'MIT',
+    scripts: {
+      tscheck: `tsc -b ${constants.tsConfigFileName} --force --noEmit`,
+      lint: 'eslint .',
+      'lint-fix': 'eslint . --fix',
+      'lint-rules': 'pnpx @eslint/config-inspector',
+      format: 'prettier . --write',
+      'update-config-files': 'update-config-files',
+      'clean-config-files': `shx rm -rf ${constants.packageJsonFileName} && shx rm -rf ${constants.tsConfigFileName}`,
+    },
+  },
+  ...environmentConfig(environment),
 });

@@ -9,18 +9,18 @@ import githubWorkflowsPagesTemplate from './githubWorkflowsPagesTemplate.js';
 import githubWorkflowsPublishTemplate from './githubWorkflowsPublishTemplate.js';
 
 export default {
-	[`${constants.githubFolderName}/${constants.workflowsFolderName}/publish.yml`]:
-		githubWorkflowsPublishTemplate,
-	[`${constants.githubFolderName}/${constants.workflowsFolderName}/pages.yml`]:
-		githubWorkflowsPagesTemplate,
-	[constants.packageJsonFileName]: {
-		packageManager: `pnpm@10.18.2`,
-		devDependencies,
-		pnpm: {
-			patchedDependencies: {},
-			overrides: {
-				//'tsconfig-paths': '^4.0.0'
-			}
-		}
-	}
+  [`${constants.githubFolderName}/${constants.workflowsFolderName}/publish.yml`]:
+    githubWorkflowsPublishTemplate,
+  [`${constants.githubFolderName}/${constants.workflowsFolderName}/pages.yml`]:
+    githubWorkflowsPagesTemplate,
+  [constants.packageJsonFileName]: {
+    packageManager: `pnpm@10.18.2`,
+    devDependencies,
+    pnpm: {
+      patchedDependencies: {},
+      overrides: {
+        //'tsconfig-paths': '^4.0.0'
+      },
+    },
+  },
 };

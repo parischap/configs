@@ -14,23 +14,23 @@ import * as utils from '../internal/utils.js';
 
 import { FileSystem as PlatformFs, Path as PlatformPath } from '@effect/platform';
 import {
-	NodeFileSystem as PlatformNodeFs,
-	NodePath as PlatformNodePath
+  NodeFileSystem as PlatformNodeFs,
+  NodePath as PlatformNodePath,
 } from '@effect/platform-node';
 
 import {
-	Array,
-	Cause,
-	Config,
-	Effect,
-	Exit,
-	flow,
-	Layer,
-	Option,
-	pipe,
-	Predicate,
-	Record,
-	String
+  Array,
+  Cause,
+  Config,
+  Effect,
+  Exit,
+  flow,
+  Layer,
+  Option,
+  pipe,
+  Predicate,
+  Record,
+  String,
 } from 'effect';
 import { dirname } from 'node:path';
 import { build } from 'vite';
@@ -43,121 +43,121 @@ const PlatformNodeFsLive = PlatformNodeFs.layer;
 const live = pipe(PlatformNodePathLive, Layer.merge(PlatformNodeFsLive));
 
 const dependencyKeys = (pkg: Record.ReadonlyRecord<string, unknown>, key: string): Array<string> =>
-	pipe(
-		pkg,
-		Record.get(key),
-		Option.filter(Predicate.isRecord),
-		Option.map(Object.keys),
-		Option.getOrElse(() => Array.empty<string>())
-	);
+  pipe(
+    pkg,
+    Record.get(key),
+    Option.filter(Predicate.isRecord),
+    Option.map(Object.keys),
+    Option.getOrElse(() => Array.empty<string>()),
+  );
 
 const program = Effect.gen(function* () {
-	const path = yield* PlatformNodePathService;
-	const fs = yield* PlatformNodeFsService;
+  const path = yield* PlatformNodePathService;
+  const fs = yield* PlatformNodeFsService;
 
-	const rootPath = path.resolve();
-	const packageJsonPath = path.join(rootPath, constants.packageJsonFileName);
-	const projectPath = path.join(rootPath, constants.projectFolderName);
-	const prodPath = path.join(rootPath, constants.prodFolderName);
-	const internalImportsGlob = constants.allTsFiles.map((p) =>
-		path.join(projectPath, constants.internalFolderName, p)
-	);
-	const esmOutDir = path.join(constants.prodFolderName, constants.projectFolderName);
+  const rootPath = path.resolve();
+  const packageJsonPath = path.join(rootPath, constants.packageJsonFileName);
+  const projectPath = path.join(rootPath, constants.projectFolderName);
+  const prodPath = path.join(rootPath, constants.prodFolderName);
+  const internalImportsGlob = constants.allTsFiles.map((p) =>
+    path.join(projectPath, constants.internalFolderName, p),
+  );
+  const esmOutDir = path.join(constants.prodFolderName, constants.projectFolderName);
 
-	yield* Effect.log('Copying static files');
-	const staticFilesPath = path.join(rootPath, constants.staticFolderName);
-	const hasStaticFiles = yield* fs.exists(staticFilesPath);
-	if (hasStaticFiles) {
-		yield* fs.copy(
-			staticFilesPath,
-			path.join(rootPath, constants.prodFolderName, constants.staticFolderName)
-		);
-	}
+  yield* Effect.log('Copying static files');
+  const staticFilesPath = path.join(rootPath, constants.staticFolderName);
+  const hasStaticFiles = yield* fs.exists(staticFilesPath);
+  if (hasStaticFiles) {
+    yield* fs.copy(
+      staticFilesPath,
+      path.join(rootPath, constants.prodFolderName, constants.staticFolderName),
+    );
+  }
 
-	yield* Effect.log(`Determining dependencies from '${packageJsonPath}'`);
+  yield* Effect.log(`Determining dependencies from '${packageJsonPath}'`);
 
-	const packageJsonContents = yield* fs.readFileString(packageJsonPath, 'utf-8');
+  const packageJsonContents = yield* fs.readFileString(packageJsonPath, 'utf-8');
 
-	const pkg = yield* Json.parse(packageJsonContents);
+  const pkg = yield* Json.parse(packageJsonContents);
 
-	if (!Predicate.isRecord(pkg)) {
-		return yield* Effect.fail(new Error(`File '${packageJsonPath}' is invalid`));
-	}
+  if (!Predicate.isRecord(pkg)) {
+    return yield* Effect.fail(new Error(`File '${packageJsonPath}' is invalid`));
+  }
 
-	const dependencies = dependencyKeys(pkg, 'dependencies');
+  const dependencies = dependencyKeys(pkg, 'dependencies');
 
-	const toBeBundled = pipe(internalImportsGlob, Array.appendAll(dependencies));
+  const toBeBundled = pipe(internalImportsGlob, Array.appendAll(dependencies));
 
-	yield* Effect.log('Bundle files');
-	const target = yield* pipe(Config.string('TARGET'), Config.withDefault(''));
+  yield* Effect.log('Bundle files');
+  const target = yield* pipe(Config.string('TARGET'), Config.withDefault(''));
 
-	const dirContents =
-		target === '' ? yield* fs.readDirectory(projectPath, { recursive: true }) : Array.of(target);
+  const dirContents =
+    target === '' ? yield* fs.readDirectory(projectPath, { recursive: true }) : Array.of(target);
 
-	yield* pipe(
-		dirContents,
-		Array.filterMap(
-			flow(
-				Option.liftPredicate(
-					Predicate.and(
-						String.endsWith('.ts'),
-						Predicate.not(utils.isSubPathOf(constants.internalFolderName))
-					)
-				),
-				Option.map(utils.fromOsPathToPosixPath)
-			)
-		),
-		Array.map((fileName) => {
-			const source = path.join(projectPath, fileName);
-			const target = path.join(esmOutDir, dirname(fileName));
+  yield* pipe(
+    dirContents,
+    Array.filterMap(
+      flow(
+        Option.liftPredicate(
+          Predicate.and(
+            String.endsWith('.ts'),
+            Predicate.not(utils.isSubPathOf(constants.internalFolderName)),
+          ),
+        ),
+        Option.map(utils.fromOsPathToPosixPath),
+      ),
+    ),
+    Array.map((fileName) => {
+      const source = path.join(projectPath, fileName);
+      const target = path.join(esmOutDir, dirname(fileName));
 
-			return pipe(
-				Effect.log(`Bundling '${source}' to '${target}'`),
-				Effect.zip(
-					Effect.tryPromise({
-						try: () =>
-							// All settings here are merged with other settings passed in vite.config.ts when there is one
-							build({
-								root: rootPath,
-								build: {
-									ssr: source,
-									outDir: target,
-									sourcemap: true,
-									target: 'es2022',
-									minify: 'esbuild',
-									emptyOutDir: false,
-									copyPublicDir: false
-								},
-								clearScreen: false,
-								ssr: {
-									external: true,
-									noExternal: toBeBundled
-								}
-							}),
-						catch: (e) =>
-							PortError.make({
-								originalError: e,
-								originalFunctionName: 'vite build'
-							})
-					})
-				)
-			);
-		}),
-		Effect.allWith({ concurrency: 1 })
-	);
+      return pipe(
+        Effect.log(`Bundling '${source}' to '${target}'`),
+        Effect.zip(
+          Effect.tryPromise({
+            try: () =>
+              // All settings here are merged with other settings passed in vite.config.ts when there is one
+              build({
+                root: rootPath,
+                build: {
+                  ssr: source,
+                  outDir: target,
+                  sourcemap: true,
+                  target: 'es2022',
+                  minify: 'esbuild',
+                  emptyOutDir: false,
+                  copyPublicDir: false,
+                },
+                clearScreen: false,
+                ssr: {
+                  external: true,
+                  noExternal: toBeBundled,
+                },
+              }),
+            catch: (e) =>
+              PortError.make({
+                originalError: e,
+                originalFunctionName: 'vite build',
+              }),
+          }),
+        ),
+      );
+    }),
+    Effect.allWith({ concurrency: 1 }),
+  );
 
-	yield* Effect.log(`Moving ${constants.binariesFolderName} files`);
-	const srcBinPath = path.join(prodPath, constants.projectFolderName, constants.binariesFolderName);
-	const binExists = yield* fs.exists(srcBinPath);
-	if (binExists) yield* fs.rename(srcBinPath, path.join(prodPath, constants.binariesFolderName));
+  yield* Effect.log(`Moving ${constants.binariesFolderName} files`);
+  const srcBinPath = path.join(prodPath, constants.projectFolderName, constants.binariesFolderName);
+  const binExists = yield* fs.exists(srcBinPath);
+  if (binExists) yield* fs.rename(srcBinPath, path.join(prodPath, constants.binariesFolderName));
 });
 
 const result = await Effect.runPromiseExit(pipe(program, Effect.provide(live)));
 Exit.match(result, {
-	onFailure: (cause) => {
-		// eslint-disable-next-line functional/no-expression-statements
-		console.error(Cause.pretty(cause));
-		process.exit(1);
-	},
-	onSuccess: () => console.log('Successful vite build')
+  onFailure: (cause) => {
+    // eslint-disable-next-line functional/no-expression-statements
+    console.error(Cause.pretty(cause));
+    process.exit(1);
+  },
+  onSuccess: () => console.log('Successful vite build'),
 });

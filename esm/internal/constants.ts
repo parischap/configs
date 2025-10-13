@@ -79,7 +79,7 @@ export const allJsoncFiles = jsoncExtensions.map((ext) => allFiles + ext);
 export const allJson5Files = json5Extensions.map((ext) => allFiles + ext);
 export const allYmlFiles = ymlExtensions.map((ext) => allFiles + ext);
 export const allProjectJsFiles = jsExtensions.map(
-	(ext) => `${projectFolderName}/${allFiles}${ext}`
+  (ext) => `${projectFolderName}/${allFiles}${ext}`,
 );
 export const allJsInMdFiles = jsExtensions.map((ext) => allFilesInMd + ext);
 

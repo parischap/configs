@@ -2,9 +2,9 @@ import { Error as PlatformError, FileSystem as PlatformFs } from '@effect/platfo
 import { NodeFileSystem as PlatformNodeFs } from '@effect/platform-node';
 import { Array, Context, Effect, Layer, Option, Struct, flow, pipe } from 'effect';
 import {
-	format as prettierFormat,
-	getSupportInfo as prettierGetSupportInfo,
-	resolveConfig as prettierResolveConfig
+  format as prettierFormat,
+  getSupportInfo as prettierGetSupportInfo,
+  resolveConfig as prettierResolveConfig,
 } from 'prettier';
 import * as PortError from './PortError.js';
 import * as utils from './utils.js';
@@ -15,98 +15,98 @@ const PlatformNodeFsLive = PlatformNodeFs.layer;
 const moduleTag = '@parischap/configs/Prettier/';
 
 export class Service extends Context.Tag(moduleTag + 'Service')<
-	Service,
-	{
-		readonly save: (
-			target: string,
-			data: string
-		) => Effect.Effect<void, PlatformError.PlatformError | PortError.Type, PlatformFs.FileSystem>;
-	}
+  Service,
+  {
+    readonly save: (
+      target: string,
+      data: string,
+    ) => Effect.Effect<void, PlatformError.PlatformError | PortError.Type, PlatformFs.FileSystem>;
+  }
 >() {}
 
 export const layer = Layer.effect(
-	Service,
-	Effect.gen(function* () {
-		const fs = yield* PlatformNodeFsService;
-		const supportedExtensionsEffect = yield* pipe(
-			Effect.tryPromise({
-				try: () => prettierGetSupportInfo(),
-				catch: (error) =>
-					PortError.make({
-						originalError: error,
-						originalFunctionName: 'prettier.getSupportInfo'
-					})
-			}),
-			Effect.map(
-				flow(
-					Struct.get('languages'),
-					Array.map(
-						flow(
-							Struct.get('extensions'),
-							Option.fromNullable,
-							Option.getOrElse(() => Array.empty<string>())
-						)
-					),
-					Array.flatten
-				)
-			),
-			Effect.cached
-		);
-		return {
-			save: (target: string, data: string) =>
-				Effect.gen(function* () {
-					const extension = utils.extension(target);
-					const supportedExtensions = yield* supportedExtensionsEffect;
-					const formatted =
-						Array.contains(supportedExtensions, extension) ?
-							yield* pipe(
-								Effect.gen(function* () {
-									const prettierOptions = yield* pipe(
-										Effect.tryPromise({
-											try: () => prettierResolveConfig(target),
-											catch: (error) =>
-												PortError.make({
-													originalError: error,
-													originalFunctionName: 'prettier.resolveConfig'
-												})
-										})
-									);
+  Service,
+  Effect.gen(function* () {
+    const fs = yield* PlatformNodeFsService;
+    const supportedExtensionsEffect = yield* pipe(
+      Effect.tryPromise({
+        try: () => prettierGetSupportInfo(),
+        catch: (error) =>
+          PortError.make({
+            originalError: error,
+            originalFunctionName: 'prettier.getSupportInfo',
+          }),
+      }),
+      Effect.map(
+        flow(
+          Struct.get('languages'),
+          Array.map(
+            flow(
+              Struct.get('extensions'),
+              Option.fromNullable,
+              Option.getOrElse(() => Array.empty<string>()),
+            ),
+          ),
+          Array.flatten,
+        ),
+      ),
+      Effect.cached,
+    );
+    return {
+      save: (target: string, data: string) =>
+        Effect.gen(function* () {
+          const extension = utils.extension(target);
+          const supportedExtensions = yield* supportedExtensionsEffect;
+          const formatted =
+            Array.contains(supportedExtensions, extension) ?
+              yield* pipe(
+                Effect.gen(function* () {
+                  const prettierOptions = yield* pipe(
+                    Effect.tryPromise({
+                      try: () => prettierResolveConfig(target),
+                      catch: (error) =>
+                        PortError.make({
+                          originalError: error,
+                          originalFunctionName: 'prettier.resolveConfig',
+                        }),
+                    }),
+                  );
 
-									return yield* Effect.tryPromise({
-										try: () =>
-											prettierFormat(data, {
-												...prettierOptions,
-												filepath: target
-											}),
-										catch: (error) =>
-											PortError.make({
-												originalError: error,
-												originalFunctionName: 'prettier.format'
-											})
-									});
-								}),
-								Effect.catchAll((error) =>
-									Effect.zipRight(
-										Effect.log(`Could not prettify ${target}: ${error.message}`),
-										Effect.succeed(data)
-									)
-								)
-							)
-						:	data;
+                  return yield* Effect.tryPromise({
+                    try: () =>
+                      prettierFormat(data, {
+                        ...prettierOptions,
+                        filepath: target,
+                      }),
+                    catch: (error) =>
+                      PortError.make({
+                        originalError: error,
+                        originalFunctionName: 'prettier.format',
+                      }),
+                  });
+                }),
+                Effect.catchAll((error) =>
+                  Effect.zipRight(
+                    Effect.log(`Could not prettify ${target}: ${error.message}`),
+                    Effect.succeed(data),
+                  ),
+                ),
+              )
+            : data;
 
-					// Do not write file if contents are already what we want because this triggers plenty of threads, e.g vitest or eslint and we run out of memory.
-					const currentContents = yield* pipe(
-						fs.readFileString(target, 'utf-8'),
-						Effect.catchTag('SystemError', (error) =>
-							error.reason === 'NotFound' ? Effect.succeed(undefined) : Effect.fail(error)
-						)
-					);
+          // Do not write file if contents are already what we want because this triggers plenty of threads, e.g vitest or eslint and we run out of memory.
+          const currentContents = yield* pipe(
+            fs.readFileString(target, 'utf-8'),
+            Effect.catchTag('SystemError', (error) =>
+              error.reason === 'NotFound' ? Effect.succeed(undefined) : Effect.fail(error),
+            ),
+          );
 
-					if (formatted === currentContents) return;
-					return yield* fs.writeFileString(target, formatted);
-				})
-		};
-	})
+          if (formatted === currentContents) return;
+          return yield* fs.writeFileString(target, formatted);
+        }),
+    };
+  }),
 );
 
 export const live = pipe(layer, Layer.provide(PlatformNodeFsLive));
