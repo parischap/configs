@@ -23,6 +23,7 @@ export default merge(
         'update-all-config-files':
           'pnpm -r -include-workspace-root=true --workspace-concurrency=1 update-config-files',
         'clean-all-prod-files': 'pnpm -r clean-prod',
+        'clean-all-node-modules': 'pnpm --recursive clean-node-modules',
         'clean-all-config-files': 'pnpm -r -include-workspace-root=true clean-config-files',
         'build-all': 'pnpm -r build',
         'prepare-docs': 'pnpm --recursive --parallel docgen && compile-docs',
