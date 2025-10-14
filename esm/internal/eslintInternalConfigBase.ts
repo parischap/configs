@@ -75,7 +75,14 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
       'functional/type-declaration-immutability': 'off',
       'functional/no-expression-statements': [
         'error',
-        { ignoreCodePattern: ['process\\.exit\\(', 'super\\('] },
+        {
+          ignoreCodePattern: [
+            'process\\.exit\\(',
+            'super\\(',
+            '.+\n+satisfies\n+.+',
+            'Layer\\.launch\\(',
+          ],
+        },
       ],
       'functional/prefer-property-signatures': 'error',
       'functional/prefer-tacit': 'error',
@@ -243,6 +250,7 @@ const _default: ConfigArray = defineConfig([
             'TEUtils\\.',
             'console\\.log\\(',
             '.+\n+satisfies\n+.+',
+            'Layer\\.launch\\(',
           ],
         },
       ],
