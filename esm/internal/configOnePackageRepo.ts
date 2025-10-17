@@ -1,6 +1,6 @@
 /** This config is the one to be used in a standalone repo which is either a library or an executable */
 import { Record } from 'effect';
-import { basename, resolve } from 'node:path';
+import { basename, resolve } from 'node:path/posix';
 import { merge } from 'ts-deepmerge';
 import configInternalBase, { Environment } from './configInternalBase.js';
 import configInternalPackage, { Visibility } from './configInternalPackage.js';
@@ -19,7 +19,6 @@ export default ({
   environment,
   bundled,
   visibility,
-  hasStaticFolder,
   hasDocGen,
   keywords,
 }: {
@@ -33,7 +32,6 @@ export default ({
   readonly environment: Environment.Type;
   readonly bundled: boolean;
   readonly visibility: Visibility.Type;
-  readonly hasStaticFolder: boolean;
   readonly hasDocGen: boolean;
   readonly keywords: ReadonlyArray<string>;
 }) =>
@@ -55,7 +53,6 @@ export default ({
       scripts,
       bundled,
       visibility,
-      hasStaticFolder,
       hasDocGen,
       keywords,
     }),

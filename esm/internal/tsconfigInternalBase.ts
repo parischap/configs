@@ -19,6 +19,7 @@ export default {
     declarationMap: true,
     noEmitOnError: false,
     noErrorTruncation: true,
+    // This will be used only when transpiling libraries which might get used in older browsers
     target: 'ES2022',
     module: 'NodeNext',
     incremental: true,

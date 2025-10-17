@@ -2,7 +2,7 @@
 import * as constants from './constants.js';
 import pnpmWorkspaceTemplate from './pnpmWorkspaceTemplate.js';
 
-import { basename, resolve } from 'node:path';
+import { basename, resolve } from 'node:path/posix';
 import { merge } from 'ts-deepmerge';
 import configInternalBase, { Environment } from './configInternalBase.js';
 import configInternalTop from './configInternalTop.js';

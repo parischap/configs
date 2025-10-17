@@ -263,6 +263,7 @@ const program = Effect.gen(function* () {
     projectContents,
     Array.filterMap(
       flow(
+        utils.fromOsPathToPosixPath,
         Option.liftPredicate(
           Predicate.every(
             Array.make(
@@ -273,7 +274,7 @@ const program = Effect.gen(function* () {
             ),
           ),
         ),
-        Option.map((filename) => path.join(prodProjectPath, utils.fromOsPathToPosixPath(filename))),
+        Option.map((filename) => path.join(prodProjectPath, filename)),
       ),
     ),
     Stream.fromIterable,

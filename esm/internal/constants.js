@@ -1,3 +1,7 @@
+/** This module must be run from the root directory of the configs package */
+import { basename, resolve } from 'node:path/posix';
+
+export const thisPackageName = basename(resolve());
 export const owner = 'parischap';
 export const scope = '@' + owner;
 export const devScope = scope + '-dev';
@@ -44,7 +48,6 @@ export const typesFolderName = 'dts';
 export const commonJsFolderName = 'cjs';
 export const binariesFolderName = 'bin';
 export const npmFolderName = 'node_modules';
-export const staticFolderName = 'public';
 export const vscodeFolderName = '.vscode';
 export const gitFolderName = '.git';
 export const packagesFolderName = 'packages';

@@ -6,7 +6,8 @@ export const devDependencies = {
   globals: '^16.4.0',
   '@tsconfig/strictest': '^2.0.6',
   shx: '^0.4.0',
-  '@parischap/configs': 'latest',
+  // Use `file:` not `link:` so binaries get installed
+  '@parischap/configs': 'file:../configs/dist/.',
   '@parischap/test-utils': '^0.14.0',
   '@types/node': '^24.7.0',
   eslint: '^9.37.0',
@@ -24,9 +25,9 @@ export const devDependencies = {
   // tsx must be installed because it is used by docgen and not requested as a dev-dependency
   tsx: '^4.20.6',
   'typescript-eslint': '^8.45.0',
-  // vite and vite-node are included by vitest and vite is included by vite-node. Make sure that vitest an
   vitest: '^3.2.4',
-  vite: '^7.1.9',
+  // At some point, rolldown will be default in vite. But not the case for the moment
+  vite: 'npm:rolldown-vite@^7.1.17',
   'vite-node': '^3.2.4',
   madge: '^8.0.0',
   '@babel/core': '^7.28.4',
@@ -52,5 +53,9 @@ export const configStarterDependencies = {
   effect: '^3.18.1',
   '@effect/platform': '^0.92.1',
   '@effect/platform-node': '^0.98.3',
+  '@effect/cluster': '^0.50.3',
+  '@effect/rpc': '^0.71.0',
+  '@effect/sql': '^0.46.0',
+  '@effect/workflow': '^0.11.3',
   'ts-deepmerge': '^7.0.3',
 };

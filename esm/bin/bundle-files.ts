@@ -32,7 +32,6 @@ import {
   Record,
   String,
 } from 'effect';
-import { dirname } from 'node:path';
 import { build } from 'vite';
 
 const PlatformNodePathService = PlatformPath.Path;
@@ -98,18 +97,18 @@ const program = Effect.gen(function* () {
     dirContents,
     Array.filterMap(
       flow(
+        utils.fromOsPathToPosixPath,
         Option.liftPredicate(
           Predicate.and(
             String.endsWith('.ts'),
             Predicate.not(utils.isSubPathOf(constants.internalFolderName)),
           ),
         ),
-        Option.map(utils.fromOsPathToPosixPath),
       ),
     ),
     Array.map((fileName) => {
       const source = path.join(projectPath, fileName);
-      const target = path.join(esmOutDir, dirname(fileName));
+      const target = path.join(esmOutDir, path.dirname(fileName));
 
       return pipe(
         Effect.log(`Bundling '${source}' to '${target}'`),

@@ -14,9 +14,7 @@ import { devWorkspaceLink } from './utils.js';
 export namespace Visibility {
   export enum Type {
     Public = 0,
-    // This package should be private, but it has to be made public for technical reasons
-    PublicByForce = 1,
-    Private = 2,
+    Private = 1,
   }
 }
 
@@ -91,8 +89,7 @@ const visibilityConfig = ({
         },
       },
     }
-  : visibility === Visibility.Type.Public ?
-    {
+  : {
       [constants.packageJsonFileName]: {
         bugs: {
           url: `https://github.com/${constants.owner}/${repoName}/issues`,
@@ -110,38 +107,26 @@ const visibilityConfig = ({
           'build-and-publish': 'pnpm build && pnpm checks && pnpm publish-to-npm',
         },
       },
-    }
-  : {
-      [constants.packageJsonFileName]: {
-        publishConfig: {
-          // Do not publish maps of this package because it should be private
-          files: ['*', '!*.map'],
-        },
-        scripts: {
-          // Checks have to be carried out after build for the configs repo
-          'build-and-publish': 'pnpm build && pnpm checks && pnpm publish-to-npm',
-        },
-      },
     };
 
-const staticFolderConfig = {
+/*const staticFolderConfig = {
   [constants.packageJsonFileName]: {
     exports: {
       [`./${constants.staticFolderName}/*`]: {
         require: `./${constants.staticFolderName}/*`,
       },
     },
-    /*publishConfig: {
+    publishConfig: {
 			exports: {
 				[`./${constants.staticFolderName}/*`]: {
 					require: `./${constants.staticFolderName}/*`
 				}
 			}
-		}*/
+		}
   },
 };
 
-const withoutStaticFolderConfig = {};
+const withoutStaticFolderConfig = {};*/
 
 const docGenConfig = {
   [constants.packageJsonFileName]: {
@@ -173,7 +158,6 @@ export default ({
   scripts,
   bundled,
   visibility,
-  hasStaticFolder,
   hasDocGen,
   keywords,
 }: {
@@ -188,7 +172,6 @@ export default ({
   readonly scripts: Record.ReadonlyRecord<string, string>;
   readonly bundled: boolean;
   readonly visibility: Visibility.Type;
-  readonly hasStaticFolder: boolean;
   readonly hasDocGen: boolean;
   readonly keywords: ReadonlyArray<string>;
 }) =>
@@ -196,7 +179,7 @@ export default ({
     bundled ? bundledConfig : transpiledConfig,
     visibilityConfig({ repoName, visibility, keywords }),
     hasDocGen ? docGenConfig : withoutDocGenConfig,
-    hasStaticFolder ? staticFolderConfig : withoutStaticFolderConfig,
+    //hasStaticFolder ? staticFolderConfig : withoutStaticFolderConfig,
     {
       [constants.madgeConfigFileName]: madgercTemplate,
       [constants.packageJsonFileName]: {
@@ -210,7 +193,7 @@ export default ({
         sideEffects: [],
         dependencies,
         devDependencies: {
-          // Include self for tests
+          // Include self for tests. Use `link:` not `file:` because pnpm errors if project is not created yet
           [`${constants.slashedScope}${packageName}`]: 'link:.',
           ...devDependencies,
         },
