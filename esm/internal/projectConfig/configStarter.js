@@ -32,7 +32,6 @@ export default deepMerge(
     repoName: packageName,
     description: 'Utility to generate configuration files in a repository',
     dependencies: {
-      minimatch: '^10.0.3',
       effect: '^3.18.1',
       '@effect/platform': '^0.92.1',
       '@effect/platform-node': '^0.98.3',
@@ -40,7 +39,6 @@ export default deepMerge(
       '@effect/rpc': '^0.71.0',
       '@effect/sql': '^0.46.0',
       '@effect/workflow': '^0.11.3',
-      'ts-deepmerge': '^7.0.3',
     },
     devDependencies: {
       '@eslint/core': '^0.16.0',

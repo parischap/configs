@@ -1,3 +1,3 @@
 import { eslintConfigNode } from '@parischap/configs';
 
-export default eslintConfigNode;
+export default eslintConfigNode

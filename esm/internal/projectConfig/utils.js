@@ -5,32 +5,46 @@
 import * as path from 'node:path';
 import { slashedDevScope } from './constants.js';
 
-/** @import {Record, ReadonlyRecord} from "./types.d.ts" */
+/**
+ * @import {Record, ReadonlyRecord} from "./types.d.ts"
+ */
 
-/** @type (v: unknown) => v is Array<unknown> */
-const isArray = Array.isArray;
+/**
+ * @type (v: unknown) => v is Array<unknown>
+ */
+export const isArray = Array.isArray;
 
-/** @type (v: unknown) => v is Record */
-const isRecord = (v) => typeof v === 'object' && v !== null && !Array.isArray(v);
+/**
+ * @type (v: unknown) => v is Record
+ */
+export const isRecord = (v) => typeof v === 'object' && v !== null && !Array.isArray(v);
 
-/** @type (filename:string) => string */
+/**
+ * @type (filename:string) => string
+ */
 export const getExtension = (filename) => {
   const extPos = filename.lastIndexOf('.');
   if (extPos === -1) return '';
   return filename.substring(extPos);
 };
 
-/** @type (p:string) => string */
+/**
+ * @type (p:string) => string
+ */
 export const fromOsPathToPosixPath = (p) =>
   path.sep === path.posix.sep ? p : p.replaceAll(path.sep, path.posix.sep);
 
-/** @type (target:string) =>(p:string) => boolean */
+/**
+ * @type (target:string) =>(p:string) => boolean
+ */
 export const isSubPathOf = (target) => (p) => {
   const relPath = path.posix.relative(target, p);
   return !relPath.startsWith('..') && !path.posix.isAbsolute(relPath);
 };
 
-/** @type (packageName:string) => string */
+/**
+ * @type (packageName:string) => string
+ */
 export const devWorkspaceLink = (packageName) => `workspace:${slashedDevScope}${packageName}@*`;
 
 /**
@@ -58,5 +72,7 @@ export const deepMerge2 = (first, second) => {
   return result;
 };
 
-/** @type <K extends string | symbol, V>( ...Rs: ReadonlyArray<ReadonlyRecord<K, V>>)=> Record<K, V> */
+/**
+ * @type <K extends string | symbol, V>( ...Rs: ReadonlyArray<ReadonlyRecord<K, V>>)=> Record<K, V>
+ */
 export const deepMerge = (...Rs) => Rs.reduce(deepMerge2, {});
