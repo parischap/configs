@@ -15,6 +15,7 @@ import { fileURLToPath } from 'url';
 import {
   configFileName,
   githubFolderName,
+  packageJsonFileName,
   pnpmLockFileName,
   readMeFileName,
   viteTimeStampFileNamePattern,
@@ -26,6 +27,21 @@ import { fromOsPathToPosixPath, getExtension, isRecord } from '../projectConfig/
 try {
   const posixPath = path.posix;
 
+  try{
+  // Create default package.json if none exists
+    writeFileSync(packageJsonFileName, JSON.stringify({"name": "@parischap/configs",type:'module', "module": "./esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./esm/index.js"
+    }
+  },
+  "devDependencies": {
+    "@parischap/effect-lib": "file:."
+  },},null,2),{flag:'wx'})}
+  catch (e) {
+  if (e instanceof Error)
+    if (e.code!=='EEXIST') throw e;
+}
   // List of configuration files for which an error must not be reported if they are present in the package and not overridden by project.config.js
   const patternsToIgnore = [
     readMeFileName,

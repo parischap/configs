@@ -5,6 +5,8 @@ export const devScope = scope + '-dev';
 export const slashedScope = scope + '/';
 export const slashedDevScope = devScope + '/';
 
+export const packageManager = `pnpm@10.19.0`
+
 export const nonProjectMark = 'others';
 export const projectMark = 'esm';
 export const docgenMark = 'docgen';
@@ -33,6 +35,9 @@ export const pnpmWorkspaceFileName = 'pnpm-workspace.yaml';
 export const pnpmLockFileName = 'pnpm-lock.yaml';
 export const actionFileName = 'action.yml';
 export const vscodeWorkspaceFileNamePattern = '*.code-workspace';
+
+export const configsPackageName = 'configs'
+export const testUtilsPackageName = 'test-utils'
 
 export const internalFolderName = 'internal';
 export const tsBuildInfoFolderName = '.tsbuildinfo';
@@ -85,4 +90,46 @@ export const allJsInMdFiles = jsExtensions.map((ext) => allFilesInMd + ext);
 
 export const topJsFiles = jsExtensions.map((ext) => '*' + ext);
 
-//export const topRootPath = 'C:/Users/JEROME/Documents/MesDeveloppements/effect';
+export const lintingAndFormattingDependencies = {
+      eslint: '^9.37.0',
+      '@eslint/eslintrc': '^3.3.1',
+      '@eslint/js': '^9.37.0',
+      'eslint-config-prettier': '^10.1.8',
+      'eslint-plugin-functional': '^9.0.2',
+      'eslint-plugin-yml': '^1.19.0',
+      '@eslint/markdown': '^7.3.0',
+      '@html-eslint/eslint-plugin': '^0.47.0',
+      '@html-eslint/parser': '^0.47.0',
+      '@eslint/json': '^0.13.2',
+      prettier: '^3.6.2',
+      'typescript-eslint': '^8.45.0',
+      'prettier-plugin-jsdoc': '^1.3.3',
+      //'eslint-plugin-import': 'latest',
+      //'@typescript-eslint/parser': 'latest',
+      //'eslint-import-resolver-typescript': 'latest',
+    }
+
+export const globalDependencies = {
+      globals: '^16.4.0',
+      '@tsconfig/strictest': '^2.0.6',
+      shx: '^0.4.0',
+      // Use `file:` not `link:` so binaries get installed
+      [`@parischap/${configsPackageName}`]: `file:../${configsPackageName}/dist/.`,
+      [`@parischap/${testUtilsPackageName}`]: '^0.14.0',
+      '@types/node': '^24.7.0',
+      typescript: '^5.9.3',
+      // tsx must be installed because it is used by docgen and not requested as a dev-dependency
+      tsx: '^4.20.6',
+      vitest: '^3.2.4',
+      // At some point, rolldown will be default in vite. But not the case for the moment
+      vite: 'npm:rolldown-vite@^7.1.17',
+      'vite-node': '^3.2.4',
+      madge: '^8.0.0',
+      '@babel/core': '^7.28.4',
+      '@babel/plugin-transform-export-namespace-from': '^7.27.1',
+      '@babel/plugin-transform-modules-commonjs': '^7.27.1',
+      'babel-plugin-annotate-pure-calls': '^0.5.0',
+      '@babel/cli': '^7.28.3',
+      '@effect/docgen': '^0.5.2',
+      ...lintingAndFormattingDependencies
+    }
