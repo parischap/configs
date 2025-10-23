@@ -8,10 +8,9 @@ import {
 import { Cause, Effect, Exit, Layer, pipe } from 'effect';
 import * as Json from '../internal/Json.js';
 import * as Prettier from '../internal/Prettier.js';
-import { Environment } from '../internal/configInternalBase.js';
-import { Visibility } from '../internal/configInternalPackage.js';
-import configSubRepo from '../internal/configSubRepo.js';
-import * as constants from '../internal/constants.js';
+import configSubRepo from '../internal/projectConfig/configSubRepo.js';
+import { configFileName, packageJsonFileName } from '../internal/projectConfig/constants.js';
+import { Environment, Visibility } from '../internal/projectConfig/types.js';
 
 const PlatformNodePathService = PlatformPath.Path;
 
@@ -28,8 +27,8 @@ const program = Effect.gen(function* () {
 
   const rootPath = path.resolve();
 
-  yield* Effect.log(`Writing ${constants.packageJsonFileName} to '${rootPath}'`);
-  const targetPackageJsonPath = path.join(rootPath, constants.packageJsonFileName);
+  yield* Effect.log(`Writing ${packageJsonFileName} to '${rootPath}'`);
+  const targetPackageJsonPath = path.join(rootPath, packageJsonFileName);
   const params = {
     description: 'Your description',
     dependencies: {},
@@ -38,20 +37,20 @@ const program = Effect.gen(function* () {
     externalPeerDependencies: {},
     examples: [],
     scripts: {},
-    environment: Environment.Type.Library,
+    environment: Environment.Library,
     bundled: false,
-    visibility: Visibility.Type.Public,
+    visibility: Visibility.Public,
     hasStaticFolder: false,
     hasDocGen: false,
     keywords: [],
   };
   const stringifiedtargetPackageJson = yield* Json.stringify(
-    configSubRepo(params)[constants.packageJsonFileName],
+    configSubRepo(params)[packageJsonFileName],
   );
   yield* prettier.save(targetPackageJsonPath, stringifiedtargetPackageJson);
 
-  yield* Effect.log(`Writing ${constants.configFileName} to '${rootPath}'`);
-  const targetConfigFilePath = path.join(rootPath, constants.configFileName);
+  yield* Effect.log(`Writing ${configFileName} to '${rootPath}'`);
+  const targetConfigFilePath = path.join(rootPath, configFileName);
   return yield* fs.writeFileString(
     targetConfigFilePath,
     `import * as Configs from '@parischap/configs';
@@ -69,5 +68,5 @@ Exit.match(result, {
     console.error(Cause.pretty(cause));
     process.exit(1);
   },
-  onSuccess: () => console.log(`${constants.packageJsonFileName} prodified successfully`),
+  onSuccess: () => console.log(`${packageJsonFileName} prodified successfully`),
 });

@@ -2,12 +2,12 @@
 
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
-import * as constants from '../constants.js';
 import {
   configStarterDependencies,
   configStarterDevDependencies,
   devDependencies,
 } from '../dependencies.js';
+import * as constants from '../projectConfig/constants.js';
 
 /** @type {string} */
 /* eslint-disable-next-line functional/no-let */

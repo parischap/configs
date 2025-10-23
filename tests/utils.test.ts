@@ -1,16 +1,14 @@
-// Attention: @parischap/configs refers to the prod version. So any changes will only reflect here after `pnpm build`.
-import * as Configs from '@parischap/configs';
 import { pipe } from 'effect';
 import * as path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 describe('utils', () => {
-  describe('extension', () => {
+  describe('getExtension', () => {
     it('With no extension', () => {
-      expect(Configs.utils.extension('foo')).toBe('');
+      expect(Configs.utils.getExtension('foo')).toBe('');
     });
     it('With extension', () => {
-      expect(Configs.utils.extension('foo.baz')).toBe('.baz');
+      expect(Configs.utils.getExtension('foo.baz')).toBe('.baz');
     });
   });
 

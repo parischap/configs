@@ -1,7 +1,7 @@
 /**
- * Note that this package has very few dependencies (effect, ts-deepmerge). So all the imports used
- * by the eslint configuration (plugins and pre-defined configs) are devDependencies and therefore
- * do not ship bundled with this package. This is intentional:
+ * Note that this package has very few dependencies. So all the imports used by the eslint
+ * configuration (plugins and pre-defined configs) are devDependencies and therefore do not ship
+ * bundled with this package. This is intentional:
  *
  * - Because the client packages will import the same devDependencies, which they will need for vsCode
  *   and its plugins;
@@ -20,7 +20,19 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
 
 import tseslint from 'typescript-eslint';
-import * as constants from './constants.js';
+import {
+  allHtmlFiles,
+  allJsFiles,
+  allJsInMdFiles,
+  allJson5Files,
+  allJsoncFiles,
+  allJsonFiles,
+  allMdFiles,
+  allYmlFiles,
+  prodFolderName,
+  projectFolderName,
+  viteTimeStampFileNamePattern,
+} from './projectConfig/constants.js';
 
 interface ConfigArray extends Array<ConfigObject> {}
 
@@ -206,19 +218,16 @@ const scopeConfig = ({
     ignores: [...ignores],
   }));
 
-const untypedJsFiles = constants.allJsInMdFiles;
+const untypedJsFiles = allJsInMdFiles;
 
 const _default: ConfigArray = defineConfig([
   // This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
-  globalIgnores(
-    [constants.prodFolderName + '/', constants.viteTimeStampFileNamePattern],
-    'ignoreConfig',
-  ),
-  scopeConfig({ configs: typescriptConfigs, files: constants.allJsFiles }),
+  globalIgnores([prodFolderName + '/', viteTimeStampFileNamePattern], 'ignoreConfig'),
+  scopeConfig({ configs: typescriptConfigs, files: allJsFiles }),
   scopeConfig({ configs: untypedTypescriptConfigs, files: untypedJsFiles }),
   scopeConfig({
     configs: typedTypescriptConfigs,
-    files: constants.allJsFiles,
+    files: allJsFiles,
     /**
      * We don't perform typed checks in js files inside md files because types are usually
      * unavailable (imports are not analyzed) and there are issues with virtual **.md/*.ts files
@@ -228,11 +237,11 @@ const _default: ConfigArray = defineConfig([
      */
     ignores: untypedJsFiles,
   }),
-  scopeConfig({ configs: javascriptRulesMitigationConfigs, files: constants.allJsFiles }),
+  scopeConfig({ configs: javascriptRulesMitigationConfigs, files: allJsFiles }),
   {
     name: 'typescriptConfigForOtherFiles',
-    files: constants.allJsFiles,
-    ignores: [constants.projectFolderName + '/**'],
+    files: allJsFiles,
+    ignores: [projectFolderName + '/**'],
     languageOptions: {
       globals: {
         ...globals.nodeBuiltin,
@@ -243,8 +252,8 @@ const _default: ConfigArray = defineConfig([
   },
   {
     name: 'typedTypescriptConfigForOtherFiles',
-    files: constants.allJsFiles,
-    ignores: [constants.projectFolderName + '/**', ...untypedJsFiles],
+    files: allJsFiles,
+    ignores: [projectFolderName + '/**', ...untypedJsFiles],
     // Here, we can mitigate rules that require type information in other files
     rules: {
       // Let's allow console.log in setting files and assertions in test files
@@ -266,12 +275,12 @@ const _default: ConfigArray = defineConfig([
       ],
     },
   },
-  scopeConfig({ configs: htmlConfigs, files: constants.allHtmlFiles }),
-  scopeConfig({ configs: ymlConfigs, files: constants.allYmlFiles }),
-  scopeConfig({ configs: markdownConfigs, files: constants.allMdFiles }),
-  scopeConfig({ configs: jsonConfigs, files: constants.allJsonFiles }),
-  scopeConfig({ configs: jsoncConfigs, files: constants.allJsoncFiles }),
-  scopeConfig({ configs: json5Configs, files: constants.allJson5Files }),
+  scopeConfig({ configs: htmlConfigs, files: allHtmlFiles }),
+  scopeConfig({ configs: ymlConfigs, files: allYmlFiles }),
+  scopeConfig({ configs: markdownConfigs, files: allMdFiles }),
+  scopeConfig({ configs: jsonConfigs, files: allJsonFiles }),
+  scopeConfig({ configs: jsoncConfigs, files: allJsoncFiles }),
+  scopeConfig({ configs: json5Configs, files: allJson5Files }),
   // Do not specify a files directive. We want to cancel eslint rules for all types of files: *.js, *.ts, *.html...
   eslintConfigPrettier,
 ]);

@@ -17,7 +17,11 @@
  *   directory an `index.md` file.
  */
 
-import * as constants from '../internal/constants.js';
+import {
+  docgenFolderName,
+  docsFolderName,
+  packagesFolderName,
+} from '../internal/projectConfig/constants.js';
 
 import {
   Error as PlatformError,
@@ -56,9 +60,9 @@ const program = Effect.gen(function* () {
   const fs = yield* PlatformNodeFsService;
 
   const rootPath = path.resolve();
-  //const packageJsonPath = path.join(rootPath, constants.packageJsonFileName);
-  const packagesPath = path.join(rootPath, constants.packagesFolderName);
-  const docsPath = path.join(rootPath, constants.docsFolderName);
+  //const packageJsonPath = path.join(rootPath, packageJsonFileName);
+  const packagesPath = path.join(rootPath, packagesFolderName);
+  const docsPath = path.join(rootPath, docsFolderName);
 
   yield* Effect.log(`Removing all folders in '${docsPath}'`);
 
@@ -120,11 +124,7 @@ const program = Effect.gen(function* () {
             Option.liftPredicate(({ stat: { type } }) => type === 'Directory'),
             Option.map(({ name, path: folderPath }) =>
               Effect.gen(function* () {
-                const p = path.join(
-                  folderPath,
-                  constants.docsFolderName,
-                  constants.docgenFolderName,
-                );
+                const p = path.join(folderPath, docsFolderName, docgenFolderName);
                 const exists = yield* fs.exists(p);
                 return {
                   name: name,
@@ -209,7 +209,7 @@ const program = Effect.gen(function* () {
             const indexContent = `---
 title: "${name}"
 has_children: true
-permalink: /${constants.docsFolderName}/${name}
+permalink: /${docsFolderName}/${name}
 nav_order: ${order + 2}
 ---
 `;

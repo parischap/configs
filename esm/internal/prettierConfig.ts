@@ -1,7 +1,7 @@
 /**
- * Note that this package has very few dependencies (effect, ts-deepmerge). So all the imports used
- * by the eslint configuration (plugins and pre-defined configs) are devDependencies and therefore
- * do not ship bundled with this package. This is intentional:
+ * Note that this package has very few dependencies. So all the imports used by the eslint
+ * configuration (plugins and pre-defined configs) are devDependencies and therefore do not ship
+ * bundled with this package. This is intentional:
  *
  * - Because the client packages will import the same devDependencies, which they will need for vsCode
  *   and its plugins;
@@ -9,17 +9,18 @@
  *   by the client packages are not in the same version.
  */
 import { type Config } from 'prettier';
-import * as constants from './constants.js';
+import { allJsFiles } from './projectConfig/constants.js';
 
 const _default: Config = {
   printWidth: 100,
   overrides: [
     {
-      files: constants.allJsFiles,
+      files: allJsFiles,
       options: {
         singleQuote: true,
         experimentalTernaries: true,
         experimentalOperatorPosition: 'start',
+        jsdocCapitalizeDescription: false,
         plugins: ['prettier-plugin-jsdoc'],
       },
     },

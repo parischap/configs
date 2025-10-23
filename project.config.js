@@ -1,3 +1,3 @@
-import * as Configs from '@parischap/configs';
+import { configStarter } from '@parischap/configs';
 
-export default Configs.configStarter;
+export default configStarter;

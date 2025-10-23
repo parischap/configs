@@ -7,7 +7,7 @@ import {
   resolveConfig as prettierResolveConfig,
 } from 'prettier';
 import * as PortError from './PortError.js';
-import * as utils from './utils.js';
+import { getExtension } from './projectConfig/utils.js';
 
 const PlatformNodeFsService = PlatformFs.FileSystem;
 const PlatformNodeFsLive = PlatformNodeFs.layer;
@@ -55,7 +55,7 @@ export const layer = Layer.effect(
     return {
       save: (target: string, data: string) =>
         Effect.gen(function* () {
-          const extension = utils.extension(target);
+          const extension = getExtension(target);
           const supportedExtensions = yield* supportedExtensionsEffect;
           const formatted =
             Array.contains(supportedExtensions, extension) ?

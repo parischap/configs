@@ -35,9 +35,21 @@ import {
 } from 'effect';
 import * as Json from '../internal/Json.js';
 import * as Prettier from '../internal/Prettier.js';
-import * as constants from '../internal/constants.js';
-import licenseTemplate from '../internal/licenseTemplate.js';
-import * as utils from '../internal/utils.js';
+import {
+  binariesFolderName,
+  commonJsFolderName,
+  internalFolderName,
+  licenseFileName,
+  packageJsonFileName,
+  prodFolderName,
+  projectFolderName,
+  readMeFileName,
+  slashedDevScope,
+  slashedScope,
+  typesFolderName,
+} from '../internal/projectConfig/constants.js';
+import license from '../internal/projectConfig/license.js';
+import { fromOsPathToPosixPath, isSubPathOf } from '../internal/projectConfig/utils.js';
 
 const PlatformNodePathService = PlatformPath.Path;
 
@@ -58,21 +70,21 @@ const program = Effect.gen(function* () {
 
   const rootPath = path.resolve();
 
-  const srcPackageJsonPath = path.join(rootPath, constants.packageJsonFileName);
-  const prodPath = path.join(rootPath, constants.prodFolderName);
-  const projectPath = path.join(rootPath, constants.projectFolderName);
-  const prodProjectPath = path.join(prodPath, constants.projectFolderName);
+  const srcPackageJsonPath = path.join(rootPath, packageJsonFileName);
+  const prodPath = path.join(rootPath, prodFolderName);
+  const projectPath = path.join(rootPath, projectFolderName);
+  const prodProjectPath = path.join(prodPath, projectFolderName);
 
-  const prodPackageJsonPath = path.join(prodPath, constants.packageJsonFileName);
+  const prodPackageJsonPath = path.join(prodPath, packageJsonFileName);
 
-  const prodProjectPackageJsonPath = path.join(prodProjectPath, constants.packageJsonFileName);
+  const prodProjectPackageJsonPath = path.join(prodProjectPath, packageJsonFileName);
 
-  const binPath = path.join(prodPath, constants.binariesFolderName);
+  const binPath = path.join(prodPath, binariesFolderName);
 
-  yield* Effect.log(`Copying ${constants.readMeFileName} to '${prodPath}'`);
-  const readMePath = path.join(rootPath, constants.readMeFileName);
+  yield* Effect.log(`Copying ${readMeFileName} to '${prodPath}'`);
+  const readMePath = path.join(rootPath, readMeFileName);
   const hasReadMe = yield* fs.exists(readMePath);
-  if (hasReadMe) yield* fs.copyFile(readMePath, path.join(prodPath, constants.readMeFileName));
+  if (hasReadMe) yield* fs.copyFile(readMePath, path.join(prodPath, readMeFileName));
 
   /*yield* Effect.log(
 		`Copying contents of ${constants.docsFolderName}/${constants.docsAssetsFolderName} to '${prodPath}'`
@@ -93,8 +105,8 @@ const program = Effect.gen(function* () {
 		yield* fs.copy(docsAssetsPath, prodDocsPath);
 	}*/
 
-  yield* Effect.log(`Writing ${constants.licenseFileName} to '${prodPath}'`);
-  yield* fs.writeFileString(path.join(prodPath, constants.licenseFileName), licenseTemplate);
+  yield* Effect.log(`Writing ${licenseFileName} to '${prodPath}'`);
+  yield* fs.writeFileString(path.join(prodPath, licenseFileName), license);
 
   yield* Effect.log('Determining list of bin files');
   const binContents = yield* pipe(
@@ -106,9 +118,9 @@ const program = Effect.gen(function* () {
   const binFiles = pipe(
     binContents,
     Array.filter(String.endsWith('.js')),
-    Array.map(flow(utils.fromOsPathToPosixPath, String.slice(0, -3))),
+    Array.map(flow(fromOsPathToPosixPath, String.slice(0, -3))),
     Record.fromIterableWith((fileName) =>
-      Tuple.make(fileName, path.join(constants.binariesFolderName, fileName + '.js')),
+      Tuple.make(fileName, path.join(binariesFolderName, fileName + '.js')),
     ),
   );
 
@@ -133,17 +145,17 @@ const program = Effect.gen(function* () {
     pkg,
     Record.get('name'),
     Option.filter(Predicate.isString),
-    Option.filter(String.startsWith(constants.slashedDevScope)),
-    Option.map(String.substring(constants.slashedDevScope.length)),
+    Option.filter(String.startsWith(slashedDevScope)),
+    Option.map(String.substring(slashedDevScope.length)),
     Either.fromOption(
       () =>
         new Error(
-          `Field 'name' of ${srcPackageJsonPath} must be a string starting with '${constants.slashedDevScope}'`,
+          `Field 'name' of ${srcPackageJsonPath} must be a string starting with '${slashedDevScope}'`,
         ),
     ),
   );
 
-  const prodPackageName = constants.slashedScope + packageName;
+  const prodPackageName = slashedScope + packageName;
 
   const prodPackageJson = pipe(
     {
@@ -194,9 +206,9 @@ const program = Effect.gen(function* () {
     Array.map(([_, exportFileName]) =>
       pipe(
         baseProdPackageJson,
-        Record.set('main', `../${constants.commonJsFolderName}/${exportFileName}.js`),
-        Record.set('module', `../${constants.projectFolderName}/${exportFileName}.js`),
-        Record.set('types', `../${constants.typesFolderName}/${exportFileName}.d.ts`),
+        Record.set('main', `../${commonJsFolderName}/${exportFileName}.js`),
+        Record.set('module', `../${projectFolderName}/${exportFileName}.js`),
+        Record.set('types', `../${typesFolderName}/${exportFileName}.d.ts`),
         Json.stringify,
       ),
     ),
@@ -206,7 +218,7 @@ const program = Effect.gen(function* () {
   yield* pipe(
     Array.zip(directoriesToCreate, directoriesToCreateContent),
     Array.map(([dirPath, content]) =>
-      prettier.save(path.join(dirPath, constants.packageJsonFileName), content),
+      prettier.save(path.join(dirPath, packageJsonFileName), content),
     ),
     Effect.all,
   );
@@ -263,14 +275,14 @@ const program = Effect.gen(function* () {
     projectContents,
     Array.filterMap(
       flow(
-        utils.fromOsPathToPosixPath,
+        fromOsPathToPosixPath,
         Option.liftPredicate(
           Predicate.every(
             Array.make(
               String.endsWith('.js'),
               Predicate.not(Equal.equals('index.js')),
-              Predicate.not(utils.isSubPathOf(constants.internalFolderName)),
-              Predicate.not(utils.isSubPathOf(constants.binariesFolderName)),
+              Predicate.not(isSubPathOf(internalFolderName)),
+              Predicate.not(isSubPathOf(binariesFolderName)),
             ),
           ),
         ),
@@ -287,7 +299,7 @@ const program = Effect.gen(function* () {
             if (
               importFilename !== 'effect'
               && !String.startsWith('@effect/')(importFilename)
-              && !String.startsWith(constants.slashedScope)(importFilename)
+              && !String.startsWith(slashedScope)(importFilename)
             )
               return match;
             return pipe(
@@ -328,5 +340,5 @@ Exit.match(result, {
     console.error(Cause.pretty(cause));
     process.exit(1);
   },
-  onSuccess: () => console.log(`${constants.packageJsonFileName} prodified successfully`),
+  onSuccess: () => console.log(`${packageJsonFileName} prodified successfully`),
 });

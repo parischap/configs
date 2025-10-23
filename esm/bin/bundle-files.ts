@@ -7,10 +7,17 @@
  * an `esm/bin/` directory exists, it will be built directly under `dist` and not under `dist/esm`
  */
 
-import * as constants from '../internal/constants.js';
 import * as Json from '../internal/Json.js';
 import * as PortError from '../internal/PortError.js';
-import * as utils from '../internal/utils.js';
+import {
+  allTsFiles,
+  binariesFolderName,
+  internalFolderName,
+  packageJsonFileName,
+  prodFolderName,
+  projectFolderName,
+} from '../internal/projectConfig/constants.js';
+import { fromOsPathToPosixPath, isSubPathOf } from '../internal/projectConfig/utils.js';
 
 import { FileSystem as PlatformFs, Path as PlatformPath } from '@effect/platform';
 import {
@@ -55,15 +62,13 @@ const program = Effect.gen(function* () {
   const fs = yield* PlatformNodeFsService;
 
   const rootPath = path.resolve();
-  const packageJsonPath = path.join(rootPath, constants.packageJsonFileName);
-  const projectPath = path.join(rootPath, constants.projectFolderName);
-  const prodPath = path.join(rootPath, constants.prodFolderName);
-  const internalImportsGlob = constants.allTsFiles.map((p) =>
-    path.join(projectPath, constants.internalFolderName, p),
-  );
-  const esmOutDir = path.join(constants.prodFolderName, constants.projectFolderName);
+  const packageJsonPath = path.join(rootPath, packageJsonFileName);
+  const projectPath = path.join(rootPath, projectFolderName);
+  const prodPath = path.join(rootPath, prodFolderName);
+  const internalImportsGlob = allTsFiles.map((p) => path.join(projectPath, internalFolderName, p));
+  const esmOutDir = path.join(prodFolderName, projectFolderName);
 
-  yield* Effect.log('Copying static files');
+  /* yield* Effect.log('Copying static files');
   const staticFilesPath = path.join(rootPath, constants.staticFolderName);
   const hasStaticFiles = yield* fs.exists(staticFilesPath);
   if (hasStaticFiles) {
@@ -71,7 +76,7 @@ const program = Effect.gen(function* () {
       staticFilesPath,
       path.join(rootPath, constants.prodFolderName, constants.staticFolderName),
     );
-  }
+  }*/
 
   yield* Effect.log(`Determining dependencies from '${packageJsonPath}'`);
 
@@ -97,12 +102,9 @@ const program = Effect.gen(function* () {
     dirContents,
     Array.filterMap(
       flow(
-        utils.fromOsPathToPosixPath,
+        fromOsPathToPosixPath,
         Option.liftPredicate(
-          Predicate.and(
-            String.endsWith('.ts'),
-            Predicate.not(utils.isSubPathOf(constants.internalFolderName)),
-          ),
+          Predicate.and(String.endsWith('.ts'), Predicate.not(isSubPathOf(internalFolderName))),
         ),
       ),
     ),
@@ -145,10 +147,10 @@ const program = Effect.gen(function* () {
     Effect.allWith({ concurrency: 1 }),
   );
 
-  yield* Effect.log(`Moving ${constants.binariesFolderName} files`);
-  const srcBinPath = path.join(prodPath, constants.projectFolderName, constants.binariesFolderName);
+  yield* Effect.log(`Moving ${binariesFolderName} files`);
+  const srcBinPath = path.join(prodPath, projectFolderName, binariesFolderName);
   const binExists = yield* fs.exists(srcBinPath);
-  if (binExists) yield* fs.rename(srcBinPath, path.join(prodPath, constants.binariesFolderName));
+  if (binExists) yield* fs.rename(srcBinPath, path.join(prodPath, binariesFolderName));
 });
 
 const result = await Effect.runPromiseExit(pipe(program, Effect.provide(live)));
