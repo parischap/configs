@@ -6,11 +6,13 @@ import configMonorepo from "./internal/projectConfig/configMonorepo.js";
 import configOnePackageRepo from "./internal/projectConfig/configOnePackageRepo.js";
 import configSubRepo from "./internal/projectConfig/configSubRepo.js";
 import * as constants from "./internal/projectConfig/constants.js";
+import { Environment, Visibility } from "./internal/projectConfig/types.js";
 
 export {
     configMonorepo, configOnePackageRepo,
-    configSubRepo, constants, eslintConfigBrowser,
+    configSubRepo, constants, Environment, eslintConfigBrowser,
     eslintConfigLibrary,
     eslintConfigNode,
-    prettierconfigBase
+    prettierconfigBase, Visibility
 };
+

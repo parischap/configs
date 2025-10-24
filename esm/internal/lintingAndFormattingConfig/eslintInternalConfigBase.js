@@ -1,14 +1,4 @@
-/**
- * Note that this package has very few dependencies. So all the imports used by the eslint
- * configuration (plugins and pre-defined configs) are devDependencies and therefore do not ship
- * bundled with this package. This is intentional:
- *
- * - Because the client packages will import the same devDependencies, which they will need for vsCode
- *   and its plugins;
- * - Because if they were bundled, there would be a risk that the bundled package and the one imported
- *   by the client packages are not in the same version.
- */
-import { type ConfigObject } from '@eslint/core';
+// Whatever external package this file uses must be added as peerDependency
 import eslint from '@eslint/js';
 import json from '@eslint/json';
 import markdown from '@eslint/markdown';
@@ -32,16 +22,22 @@ import {
   prodFolderName,
   projectFolderName,
   viteTimeStampFileNamePattern,
-} from './projectConfig/constants.js';
+} from '../projectConfig/constants.js';
 
-interface ConfigArray extends Array<ConfigObject> {}
+/**
+ * @import { ConfigObject} from "@eslint/core"
+ * @typedef {Array<ConfigObject>} ConfigArray
+ */
 
-const typescriptConfigs: ConfigArray = defineConfig(eslint.configs.recommended, {
+/**
+ * @type ConfigArray
+ */
+const typescriptConfigs = defineConfig(eslint.configs.recommended, {
   // Add no rules here because they might get overridden by the typedTypescriptConfig
   name: 'typescriptConfig',
   // Add html plugin so we can lint template literals inside javascript code
-  plugins: { functional: functional as never, html },
-  extends: [functional.configs.strict as never, functional.configs.stylistic as never],
+  plugins: { functional: /** @type {never}**/(functional), html },
+  extends: [/** @type {never}**/(functional.configs.strict), /** @type {never}**/(functional.configs.stylistic)],
   languageOptions: {
     parserOptions: {
       ecmaFeatures: { impliedStrict: true },
@@ -52,23 +48,29 @@ const typescriptConfigs: ConfigArray = defineConfig(eslint.configs.recommended, 
   },
 });
 
-const untypedTypescriptConfigs: ConfigArray = defineConfig(
+/**
+ * @type ConfigArray
+ */
+const untypedTypescriptConfigs = defineConfig(
   // The typescript-eslint-parser requested by the functional plugin is included in all typescript-eslint configs. Add no rules here because they might get overridden by the typedTypescriptConfig
   tseslint.configs.strict,
   {
     name: 'untypedTypescriptConfigs',
-    extends: [functional.configs.disableTypeChecked as never],
+    extends: [/** @type {never}**/(functional.configs.disableTypeChecked)],
   },
 );
 
-const typedTypescriptConfigs: ConfigArray = defineConfig(
+/**
+ * @type ConfigArray
+ */
+const typedTypescriptConfigs = defineConfig(
   // The typescript-eslint-parser requested by the functional plugin is included in all typescript-eslint configs
   tseslint.configs.strictTypeChecked,
   {
     name: 'typedTypescriptConfig',
     extends: [
       // These rules require typeChecking and are not cancelled by functional.configs.disableTypeChecked
-      functional.configs.externalTypeScriptRecommended as never,
+      /** @type {never}**/(functional.configs.externalTypeScriptRecommended),
     ],
     languageOptions: {
       parserOptions: {
@@ -120,7 +122,10 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
   },
 );
 
-const javascriptRulesMitigationConfigs: ConfigArray = defineConfig({
+/**
+ * @type ConfigArray
+ */
+const javascriptRulesMitigationConfigs = defineConfig({
   name: 'untypedJavascriptRulesMitigationConfigs',
   // Here, we modify rules that don't require type information
   rules: {
@@ -147,7 +152,10 @@ const javascriptRulesMitigationConfigs: ConfigArray = defineConfig({
   },
 });
 
-const htmlConfigs: ConfigArray = defineConfig({
+/**
+ * @type ConfigArray
+ */
+const htmlConfigs = defineConfig({
   name: 'htmlConfig',
   plugins: {
     html,
@@ -159,14 +167,20 @@ const htmlConfigs: ConfigArray = defineConfig({
   },
 });
 
-const ymlConfigs: ConfigArray = defineConfig(eslintPluginYml.configs['flat/recommended'] as never, {
+/**
+ * @type ConfigArray
+ */
+const ymlConfigs = defineConfig(/** @type {never}**/(eslintPluginYml.configs['flat/recommended']), {
   name: 'ymlConfig',
   rules: {
     'yml/no-empty-mapping-value': 'off',
   },
 });
 
-const markdownConfigs: ConfigArray = defineConfig([
+/**
+ * @type ConfigArray
+ */
+const markdownConfigs = defineConfig([
   {
     name: 'mdConfig',
     plugins: {
@@ -177,20 +191,29 @@ const markdownConfigs: ConfigArray = defineConfig([
   },
 ]);
 
-const jsonConfigs: ConfigArray = defineConfig({
+/**
+ * @type ConfigArray
+ */
+const jsonConfigs = defineConfig({
   ignores: ['package-lock.json'],
   plugins: { json },
   language: 'json/json',
   extends: ['json/recommended'],
 });
 
-const jsoncConfigs: ConfigArray = defineConfig({
+/**
+ * @type ConfigArray
+ */
+const jsoncConfigs = defineConfig({
   plugins: { json },
   language: 'json/jsonc',
   extends: ['json/recommended'],
 });
 
-const json5Configs: ConfigArray = defineConfig({
+/**
+ * @type ConfigArray
+ */
+const json5Configs = defineConfig({
   plugins: { json },
   language: 'json/json5',
   extends: ['json/recommended'],
@@ -201,26 +224,33 @@ const json5Configs: ConfigArray = defineConfig({
  * object applies to the files specified in its files property. If several objects apply to a file,
  * properties of all applicable objects are merged. If the same property appears in several objects,
  * the latest one prevails.
+ * 
+ * @param {{
+ *  readonly configs: ReadonlyArray<ConfigObject>;
+ *  readonly files: ReadonlyArray<string>;
+ *  readonly ignores?: ReadonlyArray<string>;}} params
+ *
  */
 
-const scopeConfig = ({
+const scopeConfig = (params) =>{
+  const {
   configs,
   files,
   ignores = [],
-}: {
-  readonly configs: ReadonlyArray<ConfigObject>;
-  readonly files: ReadonlyArray<string>;
-  readonly ignores?: ReadonlyArray<string>;
-}) =>
-  configs.map((config) => ({
+} = params
+return configs.map((config) => ({
     ...config,
     files: [...files],
     ignores: [...ignores],
   }));
-
+}
+  
 const untypedJsFiles = allJsInMdFiles;
 
-const _default: ConfigArray = defineConfig([
+/**
+ * @type ConfigArray
+ */
+export default defineConfig([
   // This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
   globalIgnores([prodFolderName + '/', viteTimeStampFileNamePattern], 'ignoreConfig'),
   scopeConfig({ configs: typescriptConfigs, files: allJsFiles }),
@@ -284,5 +314,3 @@ const _default: ConfigArray = defineConfig([
   // Do not specify a files directive. We want to cancel eslint rules for all types of files: *.js, *.ts, *.html...
   eslintConfigPrettier,
 ]);
-
-export default _default;

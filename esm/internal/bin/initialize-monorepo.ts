@@ -7,7 +7,6 @@ import {
 } from '@effect/platform-node';
 import { Cause, Effect, Exit, Layer, pipe } from 'effect';
 import * as Json from '../internal/Json.js';
-import * as Prettier from '../internal/Prettier.js';
 import configMonorepo from '../internal/projectConfig/configMonorepo.js';
 import { configFileName, packageJsonFileName } from '../internal/projectConfig/constants.js';
 
@@ -22,14 +21,13 @@ const live = pipe(PlatformNodePathLive, Layer.merge(PlatformNodeFsLive));
 const program = Effect.gen(function* () {
   const path = yield* PlatformNodePathService;
   const fs = yield* PlatformNodeFsService;
-  const prettier = yield* Prettier.Service;
 
   const rootPath = path.resolve();
 
   yield* Effect.log(`Writing ${packageJsonFileName} to '${rootPath}'`);
   const targetPackageJsonPath = path.join(rootPath, packageJsonFileName);
   const stringifiedtargetPackageJson = yield* Json.stringify(configMonorepo[packageJsonFileName]);
-  yield* prettier.save(targetPackageJsonPath, stringifiedtargetPackageJson);
+  yield* fs.writeFileString(targetPackageJsonPath, stringifiedtargetPackageJson);
 
   yield* Effect.log(`Writing ${configFileName} to '${rootPath}'`);
   const targetConfigFilePath = path.join(rootPath, configFileName);
@@ -42,7 +40,7 @@ export default Configs.configMonorepo;`,
 });
 
 const result = await Effect.runPromiseExit(
-  pipe(program, Effect.provide(live), Effect.provide(Prettier.live)),
+  Effect.provide(program, live)
 );
 Exit.match(result, {
   onFailure: (cause) => {

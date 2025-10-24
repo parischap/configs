@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 /**
  * Copies `esm/README.md` if there is one to `dist`. Generates the `LICENSE` file directly under
- * `dist`. Copies `esm/package.json` to `dist` but spreads the `publishConfig` key so that any key
- * present in `publishConfig` will override the key with the same name. Also adds a `bin` key with
+ * `dist`. Copies `esm/package.json` to `dist` but spreads the `publishConfig` key. Also adds a `bin` key with
  * all the bin executables present under `esm/bin/` and removes keys with empty objects, empty
- * arrays or empty strings as value. Result is prettified using prettier. Creates a `package.json`
+ * arrays or empty strings as value. Creates a `package.json`
  * file under `dist/esm/` so that files in this directory can import one another. It is not
  * necessary to create one under `dist/cjs/` for transpiled packages as `type: 'commonjs'` is the
  * default. Creates a directory with a `package.json` in `dist/` for each file directly under `esm/`
@@ -34,10 +33,8 @@ import {
   pipe,
 } from 'effect';
 import * as Json from '../internal/Json.js';
-import * as Prettier from '../internal/Prettier.js';
 import {
   binariesFolderName,
-  commonJsFolderName,
   internalFolderName,
   licenseFileName,
   packageJsonFileName,
@@ -46,10 +43,11 @@ import {
   readMeFileName,
   slashedDevScope,
   slashedScope,
-  typesFolderName,
+  typesFolderName
 } from '../internal/projectConfig/constants.js';
 import license from '../internal/projectConfig/license.js';
-import { fromOsPathToPosixPath, isSubPathOf } from '../internal/projectConfig/utils.js';
+import { deepMerge, fromOsPathToPosixPath, isSubPathOf } from '../internal/projectConfig/utils.js';
+import { commonJsFolderName } from '../projectConfig/constants.js';
 
 const PlatformNodePathService = PlatformPath.Path;
 
@@ -66,7 +64,6 @@ const asRegExp = /\s+as\s+/;
 const program = Effect.gen(function* () {
   const path = yield* PlatformNodePathService;
   const fs = yield* PlatformNodeFsService;
-  const prettier = yield* Prettier.Service;
 
   const rootPath = path.resolve();
 
@@ -74,10 +71,10 @@ const program = Effect.gen(function* () {
   const prodPath = path.join(rootPath, prodFolderName);
   const projectPath = path.join(rootPath, projectFolderName);
   const prodProjectPath = path.join(prodPath, projectFolderName);
+  const prodCommonJsPath = path.join(prodPath, commonJsFolderName);
 
   const prodPackageJsonPath = path.join(prodPath, packageJsonFileName);
-
-  const prodProjectPackageJsonPath = path.join(prodProjectPath, packageJsonFileName);
+  const prodCommonJsPackageJsonPath = path.join(prodCommonJsPath, packageJsonFileName);
 
   const binPath = path.join(prodPath, binariesFolderName);
 
@@ -134,11 +131,11 @@ const program = Effect.gen(function* () {
     return yield* Effect.fail(new Error(`File '${srcPackageJsonPath}' is invalid`));
   }
 
-  const publishConfig = pipe(
+  const publishConfig = yield* pipe(
     pkg,
     Record.get('publishConfig'),
-    Option.filter(Predicate.isRecord),
     Option.getOrElse(() => Record.empty<string | symbol, unknown>()),
+    Either.liftPredicate(Predicate.isRecord, ()=>new Error(`'publishConfig' field in '${srcPackageJsonPath}' must be a record`)),
   );
 
   const packageName = yield* pipe(
@@ -158,21 +155,25 @@ const program = Effect.gen(function* () {
   const prodPackageName = slashedScope + packageName;
 
   const prodPackageJson = pipe(
-    {
-      ...pkg,
-      ...publishConfig,
-    },
+    deepMerge(pkg, publishConfig),
     Record.set('name', prodPackageName),
+    // Remove scripts in prod
+    Record.remove('scripts'),
+    // Remove devDependencies in prod
+    Record.remove('devDependencies'),
+    // Remove publishConfig in prod
+    Record.remove('publishConfig'),
+    // Remove packageManager in prod
+    Record.remove('packageManager'),
+    // Remove pnpm in prod as we don't know which package manager the client uses
+    Record.remove('pnpm'),
+    // Remove devEngine in prod
+    Record.remove('devEngine'),
+    // See if I must unset dependencies in prod
+
     Record.isEmptyRecord(binFiles) ? Function.identity : Record.set('bin', binFiles),
-    // Remove empty arrays, records and strings and undefined values
-    // Except sideEffects for which an empty array is a meaningful value
-    Record.filter(
-      (v, key) =>
-        v !== undefined
-        && (!Predicate.isRecord(v) || !Record.isEmptyRecord(v))
-        && (!Array.isArray(v) || !Array.isEmptyArray(v) || key === 'sideEffect')
-        && (!Predicate.isString(v) || !String.isEmpty(v)),
-    ),
+    // Remove undefined values
+    Record.filter(Predicate.isNotUndefined),
   );
 
   // We add a sideEffects key to the prodProjectPackageJson only if the prodPackageJson has one
@@ -218,7 +219,7 @@ const program = Effect.gen(function* () {
   yield* pipe(
     Array.zip(directoriesToCreate, directoriesToCreateContent),
     Array.map(([dirPath, content]) =>
-      prettier.save(path.join(dirPath, packageJsonFileName), content),
+      fs.writeFileString(path.join(dirPath, packageJsonFileName), content),
     ),
     Effect.all,
   );
@@ -259,15 +260,21 @@ const program = Effect.gen(function* () {
     Json.stringify,
   );
 
-  yield* prettier.save(prodPackageJsonPath, stringifiedProdPackageJsonWithExports);
+  yield* fs.writeFileString(prodPackageJsonPath, stringifiedProdPackageJsonWithExports);
 
-  yield* Effect.log(`Writing '${prodProjectPackageJsonPath}'`);
-  const prodProjectPackageJson = yield* pipe(
+  const hasCommonJsFolder = yield* fs.exists(prodCommonJsPath)
+
+  if (hasCommonJsFolder){
+    yield* Effect.log(`Writing '${prodCommonJsPackageJsonPath}'`);
+    const prodCommonJsPackageJson = yield* pipe(
     baseProdPackageJson,
-    Record.set('type', 'module'),
+    // Normally unnecessary as this is the default value. But clearer as an empty package.json file
+    Record.set('type', 'commonjs'),
     Json.stringify,
   );
-  yield* prettier.save(prodProjectPackageJsonPath, prodProjectPackageJson);
+  yield* fs.writeFileString(prodCommonJsPackageJsonPath, prodCommonJsPackageJson);
+  }
+  
 
   yield* Effect.log('Transforming named imports to default imports');
   const projectContents = yield* fs.readDirectory(prodProjectPath, { recursive: true });
@@ -332,7 +339,7 @@ const program = Effect.gen(function* () {
 });
 
 const result = await Effect.runPromiseExit(
-  pipe(program, Effect.provide(live), Effect.provide(Prettier.live)),
+  Effect.provide(program,live),
 );
 Exit.match(result, {
   onFailure: (cause) => {

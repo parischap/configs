@@ -1,4 +1,4 @@
-// This file must not import anything external
+// Whatever external package this file uses must be added as peerDependency
 import { allFiles, prodFolderName, projectFolderName, typesFolderName } from './constants.js';
 /**
  * @import {ReadonlyRecord} from "./types.d.ts"

@@ -2,9 +2,9 @@ import { Effect } from 'effect';
 import * as PortError from './PortError.js';
 
 /** Port of Json stringify */
-export const stringify = (value: unknown, replacer?: Parameters<typeof JSON.stringify>[1]) =>
+export const stringify = (value: unknown) =>
   Effect.try({
-    try: () => JSON.stringify(value, replacer),
+    try: () => JSON.stringify(value, null, 2),
     catch: (e) =>
       PortError.make({
         originalError: e,
@@ -13,9 +13,9 @@ export const stringify = (value: unknown, replacer?: Parameters<typeof JSON.stri
   });
 
 /** Port of Json parse */
-export const parse = (text: string, reviver?: Parameters<typeof JSON.parse>[1]) =>
+export const parse = (text: string) =>
   Effect.try({
-    try: () => JSON.parse(text, reviver) as unknown,
+    try: () => JSON.parse(text) as unknown,
     catch: (e) =>
       PortError.make({
         originalError: e,

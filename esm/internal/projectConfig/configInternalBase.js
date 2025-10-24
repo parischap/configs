@@ -3,7 +3,7 @@
  * included by config.monorepo.ts, config.starter.ts, config.subrepo.ts and config.onepackagerepo.ts
  * configs.
  */
-// This file must not import anything external
+// Whatever external package this file uses must be added as peerDependency
 import {
   baseTsConfigFileName,
   eslintConfigFileName,
@@ -36,7 +36,8 @@ import viteConfig from './viteConfig.js';
  */
 
 /**
- * @type (environment:Environment) => Config
+ * @param {Environment} environment
+ * @returns {Config}
  */
 const environmentConfig = (environment) =>
   environment === 'Browser' ?
@@ -55,11 +56,10 @@ const environmentConfig = (environment) =>
     };
 
 /**
- * @type ({packageName, environment, }: { readonly packageName: string; readonly environment:
- *   Environment; })=>Config
+ * @type 
+ * ({packageName, environment }: { readonly packageName: string; readonly environment:Environment; })=>Config
  */
 export default ({ packageName, environment }) => ({
-  // Put prettier in first position so the next generated files will get formatted
   [prettierConfigFileName]: prettierConfig,
   [gitIgnoreFileName]: gitIgnore,
   [prettierIgnoreFileName]: prettierIgnore,

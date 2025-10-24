@@ -1,4 +1,4 @@
-// This file must not import anything external
+// Whatever external package this file uses must be added as peerDependency
 import tsConfigEsm from './tsconfigEsm.js';
 import { deepMerge } from './utils.js';
 /**

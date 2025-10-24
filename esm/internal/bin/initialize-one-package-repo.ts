@@ -7,7 +7,6 @@ import {
 } from '@effect/platform-node';
 import { Cause, Effect, Exit, Layer, pipe } from 'effect';
 import * as Json from '../internal/Json.js';
-import * as Prettier from '../internal/Prettier.js';
 import configOnePackageRepo from '../internal/projectConfig/configOnePackageRepo.js';
 import { configFileName, packageJsonFileName } from '../internal/projectConfig/constants.js';
 import { Environment, Visibility } from '../internal/projectConfig/types.js';
@@ -23,7 +22,6 @@ const live = pipe(PlatformNodePathLive, Layer.merge(PlatformNodeFsLive));
 const program = Effect.gen(function* () {
   const path = yield* PlatformNodePathService;
   const fs = yield* PlatformNodeFsService;
-  const prettier = yield* Prettier.Service;
 
   const rootPath = path.resolve();
 
@@ -45,9 +43,9 @@ const program = Effect.gen(function* () {
     keywords: [],
   };
   const stringifiedtargetPackageJson = yield* Json.stringify(
-    configOnePackageRepo(params)[packageJsonFileName],
+    configOnePackageRepo(params)[packageJsonFileName]
   );
-  yield* prettier.save(targetPackageJsonPath, stringifiedtargetPackageJson);
+  yield* fs.writeFileString(targetPackageJsonPath, stringifiedtargetPackageJson);
 
   yield* Effect.log(`Writing ${configFileName} to '${rootPath}'`);
   const targetConfigFilePath = path.join(rootPath, configFileName);
@@ -60,7 +58,7 @@ export default Configs.configOnePackageRepo(${JSON.stringify(params)});`,
 });
 
 const result = await Effect.runPromiseExit(
-  pipe(program, Effect.provide(live), Effect.provide(Prettier.live)),
+  Effect.provide(program, live),
 );
 Exit.match(result, {
   onFailure: (cause) => {

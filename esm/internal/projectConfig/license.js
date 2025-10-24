@@ -1,4 +1,4 @@
-// This file must not import anything external
+// Whatever external package this file uses must be added as peerDependency
 export default `MIT License
 
 Copyright (c) 2023 Effectful Technologies Inc

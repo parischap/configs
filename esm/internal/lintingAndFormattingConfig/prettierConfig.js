@@ -8,11 +8,16 @@
  * - Because if they were bundled, there would be a risk that the bundled package and the one imported
  *   by the client packages are not in the same version.
  */
-import { type Config } from 'prettier';
-import { allJsFiles } from './projectConfig/constants.js';
+import { allJsFiles } from '../projectConfig/constants.js';
+/**
+ * @import { Config} from "prettier"
+ */
 
-const _default: Config = {
-  printWidth: 100,
+/**
+ * @type Config
+ */
+export default {
+  printWidth:  100,
   overrides: [
     {
       files: allJsFiles,
@@ -26,5 +31,3 @@ const _default: Config = {
     },
   ],
 };
-
-export default _default;

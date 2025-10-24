@@ -1,4 +1,4 @@
-// This file must not import anything external
+// Whatever external package this file uses must be added as peerDependency
 export const owner = 'parischap';
 export const scope = '@' + owner;
 export const devScope = scope + '-dev';
@@ -22,6 +22,7 @@ export const baseTsConfigFileName = `tsconfig.base.json`;
 export const docgenTsConfigFileName = `tsconfig.${docgenMark}.json`;
 export const projectTsConfigFileName = `tsconfig.${projectMark}.json`;
 export const nonProjectTsConfigFileName = `tsconfig.${nonProjectMark}.json`;
+// Needs to be a .js file because will be imported in prod by a Node (non-typescript) executable
 export const configFileName = 'project.config.js';
 export const prettierConfigFileName = 'prettier.config.js';
 export const eslintConfigFileName = 'eslint.config.js';
@@ -113,7 +114,7 @@ export const globalDependencies = {
       globals: '^16.4.0',
       '@tsconfig/strictest': '^2.0.6',
       shx: '^0.4.0',
-      // Use `file:` not `link:` so binaries get installed
+      // Use `file:` not `link:` so binaries get installed. But pnpm i must be run whenever the configs package gets modified for the modifications to take effect
       [`@parischap/${configsPackageName}`]: `file:../${configsPackageName}/dist/.`,
       [`@parischap/${testUtilsPackageName}`]: '^0.14.0',
       '@types/node': '^24.7.0',

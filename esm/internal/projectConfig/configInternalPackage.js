@@ -3,7 +3,7 @@
  * directly. It is included by config.starter.ts, config.subrepo.ts and config.onepackagerepo.ts
  * configs.
  */
-// This file must not import anything external
+// Whatever external package this file uses must be added as peerDependency
 import {
   commonJsFolderName,
   docgenConfigFileName,
@@ -18,21 +18,28 @@ import {
   slashedScope,
   tsExecuter,
   typesFolderName,
-} from './constants.js';
-import docgen from './docgen.js';
-import madge from './madge.js';
-import tsconfigDocgen from './tsconfigDocgen.js';
-import { deepMerge, devWorkspaceLink } from './utils.js';
+} from "./constants.js";
+import docgen from "./docgen.js";
+import madge from "./madge.js";
+import tsconfigDocgen from "./tsconfigDocgen.js";
+import { deepMerge, devWorkspaceLink } from "./utils.js";
 /**
  * @import {Visibility, Config, ReadonlyRecord, ReadonlyStringRecord} from "./types.d.ts"
  */
 
 /**
- * @type (repoName: string)=> ReadonlyRecord
+ * @param {string} repoName
+ * @param {string} packageName
+ * @returns {ReadonlyRecord}
  */
-const gitRepo = (repoName) => ({
-  type: 'git',
+const repository = (repoName, packageName) => ({
+  type: "git",
   url: `git+https://github.com/${owner}/${repoName}.git`,
+  ...(packageName === repoName
+    ? {}
+    : {
+        directory: `packages/${packageName}`,
+      }),
 });
 
 /**
@@ -40,24 +47,13 @@ const gitRepo = (repoName) => ({
  */
 const bundledConfig = {
   [packageJsonFileName]: {
+    module: `./${projectFolderName}/main.js`,
     dependencies: {
-      '@effect/experimental': '^0.56.0',
+      "@effect/experimental": "^0.56.0",
     },
     scripts: {
-      bundle: 'bundle-files',
-      // generate types even when bundling because they can be useful as in the Configs package
-      compile: `pnpm bundle && pnpm prodify && tsc -b ${projectTsConfigFileName} --emitDeclarationOnly --force`,
-    },
-    publishConfig: {
-      exports: {
-        '.': {
-          types: `./${typesFolderName}/index.d.ts`,
-        },
-      },
-      // Remove dependencies in prod because they have been bundled
-      dependencies: {},
-      // Unset sideEffects in prod
-      sideEffects: undefined,
+      bundle: "bundle-files",
+      compile: `pnpm bundle && pnpm prodify`,
     },
   },
 };
@@ -67,61 +63,70 @@ const bundledConfig = {
  */
 const transpiledConfig = {
   [packageJsonFileName]: {
-    scripts: {
-      // transpile-esm builds but also generate types
-      'transpile-esm': `tsc -b ${projectTsConfigFileName} --force`,
-      'transpile-cjs': `babel ${prodFolderName}/${projectFolderName} --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir ${prodFolderName}/${commonJsFolderName} --source-maps`,
-      'transpile-annotate': `babel ${prodFolderName} --plugins annotate-pure-calls --out-dir ${prodFolderName} --source-maps`,
-      compile:
-        'pnpm transpile-esm && pnpm transpile-cjs && pnpm transpile-annotate && pnpm prodify',
-    },
+    module: `./${projectFolderName}/index.js`,
+    sideEffects: [],
     publishConfig: {
       main: `./${commonJsFolderName}/index.js`,
       types: `./${typesFolderName}/index.d.ts`,
       exports: {
-        '.': {
+        ".": {
+          types: `./${typesFolderName}/index.d.ts`,
           default: `./${commonJsFolderName}/index.js`,
         },
       },
-      // Do not unset sideEffects for libraries as the consumers of these libraries might bundle
+    },
+    scripts: {
+      // transpile-esm builds but also generate types
+      "transpile-esm": `tsc -b ${projectTsConfigFileName} --force`,
+      "transpile-cjs": `babel ${prodFolderName}/${projectFolderName} --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir ${prodFolderName}/${commonJsFolderName} --source-maps`,
+      "transpile-annotate": `babel ${prodFolderName} --plugins annotate-pure-calls --out-dir ${prodFolderName} --source-maps`,
+      compile:
+        "pnpm transpile-esm && pnpm transpile-cjs && pnpm transpile-annotate && pnpm prodify",
     },
   },
 };
 
 /**
- * @type ({ repoName, visibility, keywords, }: { readonly repoName: string; readonly visibility:
+ * @type
+ * ({ repoName, visibility, keywords }: { readonly repoName: string; readonly visibility:
  *   Visibility; readonly keywords: ReadonlyArray<string>; })=> Config
  */
 const visibilityConfig = ({ repoName, visibility, keywords }) =>
-  visibility === 'Private' ?
-    {
-      [packageJsonFileName]: {
-        private: true,
-        scripts: {
-          // Do not use an empty string because it gets wiped out by prodify
-          'build-and-publish': 'echo "private package cannot be published"',
-        },
-      },
-    }
-  : {
-      [packageJsonFileName]: {
-        bugs: {
-          url: `https://github.com/${owner}/${repoName}/issues`,
-        },
-        funding: [
-          {
-            type: 'ko-fi',
-            url: 'https://ko-fi.com/parischap',
+  visibility === "Private"
+    ? {
+        [packageJsonFileName]: {
+          private: true,
+          scripts: {
+            // Do not use an empty string because it gets wiped out by prodify
+            "build-and-publish": 'echo "private package cannot be published"',
           },
-        ],
-        // Put specific keywords in first position so important keywords come out first
-        keywords: [...keywords, 'effect', 'typescript', 'functional-programming'],
-        scripts: {
-          // Checks have to be carried out after build for the configs repo
-          'build-and-publish': 'pnpm build && pnpm checks && pnpm publish-to-npm',
         },
-      },
-    };
+      }
+    : {
+        [packageJsonFileName]: {
+          bugs: {
+            url: `https://github.com/${owner}/${repoName}/issues`,
+          },
+          funding: [
+            {
+              type: "ko-fi",
+              url: "https://ko-fi.com/parischap",
+            },
+          ],
+          // Put specific keywords in first position so important keywords come out first
+          keywords: [
+            ...keywords,
+            "effect",
+            "typescript",
+            "functional-programming",
+          ],
+          scripts: {
+            // Checks have to be carried out after build for the configs repo
+            "build-and-publish":
+              "pnpm build && pnpm checks && pnpm publish-to-npm",
+          },
+        },
+      };
 
 /*
 const staticFolderConfig:Types.Config.Type = {
@@ -149,7 +154,7 @@ const withoutStaticFolderConfig = {};*/
 const docGenConfig = {
   [packageJsonFileName]: {
     scripts: {
-      docgen: 'docgen',
+      docgen: "docgen",
     },
   },
   [docgenTsConfigFileName]: tsconfigDocgen,
@@ -201,98 +206,97 @@ export default (params) => {
     hasDocGen,
     keywords,
   } = params;
+
+  const prodInternalPeerDependencies = {
+    // Put npm version of internal peerDependencies
+    ...Object.fromEntries(
+      Object.entries(internalPeerDependencies).map(([depName, depVersion]) => [
+        slashedScope + depName,
+        depVersion,
+      ])
+    ),
+  };
+
   return deepMerge(
-    bundled ? bundledConfig : transpiledConfig,
-    visibilityConfig({ repoName, visibility, keywords }),
-    hasDocGen ? docGenConfig : withoutDocGenConfig,
-    //hasStaticFolder ? staticFolderConfig : withoutStaticFolderConfig,
     {
       [madgeConfigFileName]: madge,
       [packageJsonFileName]: {
         description,
-        module: `./${projectFolderName}/index.js`,
+        ...(Object.keys(dependencies).length === 0 ? {} : { dependencies }),
         exports: {
-          '.': {
-            import: `./${projectFolderName}/index.ts`,
+          ".": {
+            import: `./${projectFolderName}/index.js`,
           },
         },
-        sideEffects: [],
-        dependencies,
         devDependencies: {
-          // Include self for tests. Use `file:` not `link:` so binaries get installed
-          [`${slashedScope}${packageName}`]: 'link:.',
+          /** Include self for tests. `link:` is better than `file:` so we don't need to run `pnpm i` whenever we make a modification */
+          [`${slashedScope}${packageName}`]: "link:.",
           ...devDependencies,
         },
-        peerDependencies: {
-          // Put workspace version of internal peerDependencies
-          ...Object.fromEntries(
-            Object.keys(internalPeerDependencies).map((depName) => [
-              slashedScope + depName,
-              devWorkspaceLink(depName),
-            ]),
-          ),
-          ...externalPeerDependencies,
-        },
+        ...(Object.keys(internalPeerDependencies).length === 0 &&
+        Object.keys(externalPeerDependencies).length === 0
+          ? {}
+          : {
+              peerDependencies: {
+                // Put workspace version of internal peerDependencies
+                ...Object.fromEntries(
+                  Object.keys(internalPeerDependencies).map((depName) => [
+                    slashedScope + depName,
+                    devWorkspaceLink(depName),
+                  ])
+                ),
+                ...externalPeerDependencies,
+              },
+            }),
         publishConfig: {
-          // Remove scripts in prod
-          scripts: {},
-          // Remove devDependencies in prod
-          devDependencies: {},
-          peerDependencies: {
-            // Put npm version of internal peerDependencies
-            ...Object.fromEntries(
-              Object.entries(internalPeerDependencies).map(([depName, depVersion]) => [
-                slashedScope + depName,
-                depVersion,
-              ]),
-            ),
-            ...externalPeerDependencies,
-          },
-          // Remove publishConfig in prod
-          publishConfig: {},
-          // Unset packageManager in prod
-          packageManager: '',
-          // Remove pnpm in prod
-          pnpm: {},
-          // Unset type in prod
-          type: '',
-          exports: {
-            '.': {
-              import: `./${projectFolderName}/index.js`,
-              types: `./${typesFolderName}/index.d.ts`,
-            },
-          },
+          ...(Object.keys(prodInternalPeerDependencies).length === 0
+            ? {}
+            : { peerDependencies: prodInternalPeerDependencies }),
         },
         scripts: {
           circular: `madge --extensions ts --circular --no-color --no-spinner ${projectFolderName}`,
-          checks: 'pnpm circular && pnpm lint && pnpm tscheck && pnpm test',
-          test: 'vitest run',
-          'clean-prod': `shx rm -rf ${prodFolderName} && shx mkdir -p ${prodFolderName}`,
+          checks: "pnpm circular && pnpm lint && pnpm tscheck && pnpm test",
+          test: "vitest run",
+          "clean-prod": `shx rm -rf ${prodFolderName} && shx mkdir -p ${prodFolderName}`,
           // npm publish ./dist --access=public does not work
-          'publish-to-npm': `cd ${prodFolderName} && npm publish --access=public && cd ..`,
-          'install-prod': `cd ${prodFolderName} && pnpm i && cd ..`,
+          "publish-to-npm": `cd ${prodFolderName} && npm publish --access=public && cd ..`,
+          "install-prod": `cd ${prodFolderName} && pnpm i && cd ..`,
           build:
-            'pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm install-prod',
-          prodify: 'prodify',
+            "pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && pnpm install-prod",
+          prodify: "prodify",
           examples: examples
-            .map((exampleName) => `${tsExecuter} ${examplesFolderName}/${exampleName}`)
-            .join('&&'),
+            .map(
+              (exampleName) =>
+                `${tsExecuter} ${examplesFolderName}/${exampleName}`
+            )
+            .join("&&"),
 
           ...scripts,
         },
         // Must be present even for private packages as it can be used for other purposes
-        repository:
-          packageName === repoName ?
-            gitRepo(repoName)
-          : {
-              ...gitRepo(repoName),
-              directory: `packages/${packageName}`,
-            },
+        repository: repository(repoName, packageName),
         // Must be present even for private packages as it can be used for instance by docgen
         homepage:
-          `https://github.com/${owner}/${repoName}`
-          + (packageName === repoName ? '' : `/tree/master/packages/${packageName}`),
+          `https://github.com/${owner}/${repoName}` +
+          (packageName === repoName
+            ? ""
+            : `/tree/master/packages/${packageName}`),
+        devEngines: {
+          runtime: {
+            name: "node",
+            onFail: "error",
+          },
+          packageManager: {
+            name: "pnpm",
+            onFail: "error",
+          },
+        },
       },
     },
+    // Put transpiledConfig after general config because `default` exports needs to be last in publishConfig exports
+    bundled ? bundledConfig : transpiledConfig,
+    visibilityConfig({ repoName, visibility, keywords }),
+    hasDocGen ? docGenConfig : withoutDocGenConfig
+    //hasStaticFolder ? staticFolderConfig : withoutStaticFolderConfig,
   );
 };

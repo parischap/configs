@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * This bin reads the keys and values of a default object exported by the file named
  * project.config.js located in the current path. It creates a file for each key of that object with
@@ -8,40 +7,40 @@
  * files which are not created by this bin (there are a few exceptions: the `project.config.js` file
  * itself, the `README.md` file... see `patternsToIgnore` below)
  */
-// This file must not import anything external
-import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
-import * as path from 'node:path';
-import { fileURLToPath } from 'url';
+// Whatever external package this file uses must be added as peerDependency
+import { mkdir, readdir, writeFile } from "node:fs/promises";
+import * as path from "node:path";
+import { fileURLToPath } from "url";
 import {
   configFileName,
   githubFolderName,
-  packageJsonFileName,
   pnpmLockFileName,
   readMeFileName,
   viteTimeStampFileNamePattern,
   vscodeWorkspaceFileNamePattern,
-} from '../projectConfig/constants.js';
-import { fromOsPathToPosixPath, getExtension, isRecord } from '../projectConfig/utils.js';
+} from "../projectConfig/constants.js";
+import {
+  fromOsPathToPosixPath,
+  getExtension,
+  isRecord,
+} from "../projectConfig/utils.js";
 
-/* eslint-disable-next-line functional/no-try-statements*/
-try {
+/**
+ * @import {Dirent} from "node:fs"
+ */
+
+/**
+ * @param {string} folder
+ * @returns {Promise<Array<Dirent>>}
+ * */
+const  readMissingDir = (folder)=>new Promise((resolve, reject)=>{
+  /* eslint-disable-next-line functional/no-expression-statements*/
+ readdir(folder, { recursive: true, withFileTypes: true }).then(resolve).catch((/**@type {unknown}**/ e)=>typeof e === 'object' && e !== null && 'code' in e && e.code === "ENOENT"?resolve([]): e instanceof Error ?reject(e): reject(new Error('Unknwon error')))
+})
+
+export const command = async () => {
   const posixPath = path.posix;
 
-  try{
-  // Create default package.json if none exists
-    writeFileSync(packageJsonFileName, JSON.stringify({"name": "@parischap/configs",type:'module', "module": "./esm/index.js",
-  "exports": {
-    ".": {
-      "import": "./esm/index.js"
-    }
-  },
-  "devDependencies": {
-    "@parischap/effect-lib": "file:."
-  },},null,2),{flag:'wx'})}
-  catch (e) {
-  if (e instanceof Error)
-    if (e.code!=='EEXIST') throw e;
-}
   // List of configuration files for which an error must not be reported if they are present in the package and not overridden by project.config.js
   const patternsToIgnore = [
     readMeFileName,
@@ -52,11 +51,15 @@ try {
   ];
 
   const patternsToIgnoreRegExp = new RegExp(
-    '^'
-      + patternsToIgnore
-        .map((pattern) => pattern.replace(/[/\\^$+?.()|[\]{}]/g, '\\$&').replace(/\*/g, '[^\\/]*'))
-        .join('|')
-      + '$',
+    "^" +
+      patternsToIgnore
+        .map((pattern) =>
+          pattern
+            .replace(/[/\\^$+?.()|[\]{}]/g, "\\$&")
+            .replace(/\*/g, "[^\\/]*")
+        )
+        .join("|") +
+      "$"
   );
 
   // List of folders where configuration files might be found
@@ -69,12 +72,12 @@ try {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const configPath = posixPath.join(
     fromOsPathToPosixPath(path.relative(__dirname, path.resolve())),
-    configFileName,
+    configFileName
   );
   const packageName = posixPath.basename(posixPath.resolve());
 
   /* eslint-disable-next-line functional/no-expression-statements*/
-  console.log(`Handling '${packageName}'`);
+  console.log(`Creating default config files for: '${packageName}'`);
 
   /* eslint-disable-next-line functional/no-expression-statements*/
   console.log(`\tReading '${configPath}'`);
@@ -84,61 +87,70 @@ try {
    */
   const config = await import(configPath);
 
-  if (!isRecord(config) || !('default' in config) || !isRecord(config['default']))
+  if (
+    !isRecord(config) ||
+    !("default" in config) ||
+    !isRecord(config["default"])
+  )
     /* eslint-disable-next-line functional/no-throw-statements*/
-    throw new Error(`Config file '${configPath}' must export a non-null default object`);
+    throw new Error(
+      `Config file '${configPath}' must export a non-null default object`
+    );
 
-  const configDefault = config['default'];
-  const filesToCreate = Object.keys(configDefault).map(posixPath.normalize.bind(posixPath));
+  const configDefault = config["default"];
+
+  const filesToCreate = Object.keys(configDefault).map(
+    posixPath.normalize.bind(posixPath)
+  );
 
   /* eslint-disable-next-line functional/no-expression-statements*/
-  console.log('\tDetermine potential configuration files');
+  console.log("\tDetermine potential configuration files");
 
-  const unexpectedConfigFiles = [
-    ...readdirSync('.', { withFileTypes: true }),
+  const files = await Promise.all([
+    readdir(".", { withFileTypes: true }),
     ...foldersToInclude
-      .map((folder) =>
-        existsSync(folder) ? readdirSync(folder, { recursive: true, withFileTypes: true }) : [],
-      )
-      .flat(),
-  ]
-    .filter((dirent) => dirent.isFile())
-    .map((dirent) => posixPath.join(fromOsPathToPosixPath(dirent.parentPath), dirent.name))
-    .filter((path) => !filesToCreate.includes(path) && !patternsToIgnoreRegExp.test(path));
+      .map(readMissingDir)
+  ])
+    
+ const unexpectedConfigFiles = files.flat().filter((dirent) => dirent.isFile())
+    .map((dirent) =>
+      posixPath.join(fromOsPathToPosixPath(dirent.parentPath), dirent.name)
+    )
+    .filter(
+      (path) =>
+        !filesToCreate.includes(path) && !patternsToIgnoreRegExp.test(path)
+    );
 
   if (unexpectedConfigFiles.length > 0)
     /* eslint-disable-next-line functional/no-throw-statements*/
     throw new Error(
-      'Following unexpected files where found in the package:\n'
-        + unexpectedConfigFiles.join(',\n'),
+      "Following unexpected files where found in the package:\n" +
+        unexpectedConfigFiles.join(",\n")
     );
 
   /* eslint-disable-next-line functional/no-expression-statements*/
-  console.log('\tCreating configuration files');
+  console.log("\tCreating configuration files");
   /* eslint-disable-next-line functional/no-loop-statements*/
   for (const [fileName, fileContent] of Object.entries(configDefault)) {
     const contentToWriteFunc =
-      getExtension(fileName) === '.json' ? () => JSON.stringify(fileContent, null, 2)
-      : typeof fileContent === 'string' ? () => fileContent
-      : () => {
-          /* eslint-disable-next-line functional/no-throw-statements*/
-          throw new Error(`Entry '${fileName}' in '${configPath}' must have value of type string`);
-        };
+      getExtension(fileName) === ".json"
+        ? () => JSON.stringify(fileContent, null, 2)
+        : typeof fileContent === "string"
+          ? () => fileContent
+          : () => {
+              /* eslint-disable-next-line functional/no-throw-statements*/
+              throw new Error(
+                `Entry '${fileName}' in '${configPath}' must have value of type string`
+              );
+            };
 
     const contentToWrite = contentToWriteFunc();
 
     // Create directory in case it does not exist
     /* eslint-disable-next-line functional/no-expression-statements*/
-    mkdirSync(posixPath.dirname(fileName), { recursive: true });
+    await mkdir(posixPath.dirname(fileName), { recursive: true });
 
     /* eslint-disable-next-line functional/no-expression-statements*/
-    writeFileSync(fileName, contentToWrite);
+    await writeFile(fileName, contentToWrite);
   }
-} catch (e) {
-  if (e instanceof Error)
-    /* eslint-disable-next-line functional/no-expression-statements*/
-    console.log(`\tError thrown with message: '${e.message}'`);
-  process.exit(1);
-}
-/* eslint-disable-next-line functional/no-expression-statements*/
-console.log('\tSUCCESS');
+};

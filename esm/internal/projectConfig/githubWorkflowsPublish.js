@@ -1,4 +1,4 @@
-// This file must not import anything external
+// Whatever external package this file uses must be added as peerDependency
 export default `
 # This workflow is triggered by a new release. Based on the release tag that must be in the form version or repo@version, it will create build the target repo, update the version number of the package.json in this repo and publish the repo to npm.
 
@@ -13,7 +13,8 @@ concurrency:
   group: \${{ github.workflow }}-\${{ github.ref }}
   cancel-in-progress: true
 
-permissions: {}
+permissions:
+  id-token: write
 
 jobs:
   publish:

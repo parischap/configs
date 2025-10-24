@@ -1,7 +1,7 @@
 /**
  * This config is the one to be used in a standalone repo which is either a library or an executable
  */
-// This file must not import anything external
+// Whatever external package this file uses must be added as peerDependency
 import { basename, resolve } from 'node:path/posix';
 import configInternalBase from './configInternalBase.js';
 import configInternalPackage from './configInternalPackage.js';
@@ -45,12 +45,14 @@ export default (params) => {
     hasDocGen,
     keywords,
   } = params;
+  
   return deepMerge(
     configInternalBase({
       packageName,
       environment,
     }),
     configInternalTop,
+    // Add configInternalPackage after configInternalTop so the good version of `@parischap/configs` gets installed for `@parischap/configs`
     configInternalPackage({
       packageName,
       repoName: packageName,

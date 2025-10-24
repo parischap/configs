@@ -1,4 +1,4 @@
-// This file must not import anything external
+// Whatever external package this file uses must be added as peerDependency
 export default `
 # This workflow is triggered manually. It will create the documentation and push it to github pages
 

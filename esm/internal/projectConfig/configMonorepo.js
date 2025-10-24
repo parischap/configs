@@ -1,7 +1,7 @@
 /**
  * This config is the one to be used at the root (top) of a monorepo.
  */
-// This file must not import anything external
+// Whatever external package this file uses must be added as peerDependency
 import { basename, resolve } from 'node:path/posix';
 import configInternalBase from './configInternalBase.js';
 import configInternalTop from './configInternalTop.js';

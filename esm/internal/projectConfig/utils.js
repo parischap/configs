@@ -1,6 +1,6 @@
 /* eslint-disable */
 // @ts-nocheck
-// This file must not import anything external
+// Whatever external package this file uses must be added as peerDependency
 
 import * as path from 'node:path';
 import { slashedDevScope } from './constants.js';
@@ -20,7 +20,8 @@ export const isArray = Array.isArray;
 export const isRecord = (v) => typeof v === 'object' && v !== null && !Array.isArray(v);
 
 /**
- * @type (filename:string) => string
+ * @param {string} filename
+ * @returns {string}
  */
 export const getExtension = (filename) => {
   const extPos = filename.lastIndexOf('.');
@@ -29,7 +30,8 @@ export const getExtension = (filename) => {
 };
 
 /**
- * @type (p:string) => string
+ * @param {string} p
+ * @returns {string}
  */
 export const fromOsPathToPosixPath = (p) =>
   path.sep === path.posix.sep ? p : p.replaceAll(path.sep, path.posix.sep);
@@ -43,7 +45,8 @@ export const isSubPathOf = (target) => (p) => {
 };
 
 /**
- * @type (packageName:string) => string
+ * @param {string} packageName
+ * @returns {string}
  */
 export const devWorkspaceLink = (packageName) => `workspace:${slashedDevScope}${packageName}@*`;
 
@@ -59,12 +62,12 @@ export const deepMerge2 = (first, second) => {
     const secondValue = second[secondKey];
     if (!(secondKey in first)) {
       result[secondKey] = secondValue;
-      break;
+      continue;
     }
 
     const firstValue = first[secondKey];
     result[secondKey] =
-      isRecord(secondValue) && isRecord(firstValue) ? deepMerge2(secondValue, firstValue)
+      isRecord(secondValue) && isRecord(firstValue) ? deepMerge2(firstValue, secondValue)
       : isArray(secondValue) && isArray(firstValue) ? [...firstValue, ...secondValue]
       : secondValue;
   }
