@@ -1,5 +1,5 @@
 # Same rules as .git
-esm/
+dist/
 node_modules/
 vite.config.ts.timestamp-*.mjs
 /.tsbuildinfo/

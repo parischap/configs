@@ -1,0 +1,41 @@
+// This module must not import any external dependency. It must be runnable without a package.json
+import { tsBuildInfoFolderName } from '../constants.js';
+/** @import {ReadonlyRecord} from "../types.js" */
+
+/** @type ReadonlyRecord */
+export default {
+  $schema: 'https://json.schemastore.org/tsconfig',
+  _version: '20.1.0',
+  extends: ['@tsconfig/strictest/tsconfig.json'],
+  compilerOptions: {
+    moduleDetection: 'force',
+    composite: true,
+    resolveJsonModule: true,
+    esModuleInterop: false,
+    declaration: true,
+    skipLibCheck: true,
+    emitDecoratorMetadata: true,
+    experimentalDecorators: true,
+    moduleResolution: 'NodeNext',
+    isolatedModules: true,
+    sourceMap: true,
+    declarationMap: true,
+    noEmitOnError: false,
+    noErrorTruncation: true,
+    // This will be used only when transpiling libraries which might get used in older browsers
+    target: 'ES2022',
+    module: 'NodeNext',
+    incremental: true,
+    removeComments: false,
+    stripInternal: true,
+    lib: [],
+    // Do not use types (in particular node types) unless included explicitely
+    types: [],
+    plugins: [
+      {
+        name: '@effect/language-service',
+      },
+    ],
+    tsBuildInfoFile: `${tsBuildInfoFolderName}/project.tsbuildinfo`,
+  },
+};

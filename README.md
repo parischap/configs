@@ -1,12 +1,41 @@
 <!-- LTeX: language=en-US -->
 
-# 1 - Doc
+Goal of this package is to generate all the necessary configuration files (eslint.config.js, prettier.config.js,...) of a monorepo or package. In case of a monorepo, it must generate all these files at the root level and in each package contained in the `packages` directory. To that extent, each package (in the case of a monorepo, the root level and each package contained in the `packages` directory) must contain a project.config.js file that indicates the files to be created.  
 
-Goal of this package is to install all the necessary configuration files of a monorepo or package (eslint.config.js, prettier.config.js,...). If a configuration file needs changing, we only need to modify it in this package and all the repos/packages that use this package will be updated automatically.
-
+# 1 - Use cases
 This package is meant to be used in the following situations:
 
-- creation of a library (as a single package or as a monorepo): in that configuration, the exported files constituting the library are under `esm/` and files used internally are under `esm/internal/`. An `index.ts` file in `esm/` must reexport all visible exports (so as to enable named imports for clients). All files are transpiled by tsc for ESM output and by Babel for cjs output. In the `dist/` directory, a directory is created for each exported file (so as to enable default imports for clients). During the build, imports of all files (exported or not) are automatically changed from named imports to default imports (for tree-shaking). Functions of files under the `esm/internal/` directory should be tagged with `@internal` so no types and no doc get generated for them. Moreover, doc is alltogether skipped for files in `esm/internal`.
+## 1.1 - Libraries
+
+
+
+## 1.2 Standalone executable
+A standalone executable is simply a program that can be run by node. It does not need anything: all its dependencies must be bundled inside the executable and no `package.json` must be generated. For node to know it's an `esm` program without having to try compiling it as a `cjs` program first, a standalone executable must have a `.mjs` extension.
+
+The code of the executable can be split in several modules all under the `esm/` directory, but the entry module must bear the name `index.ts`. This `index.ts` can export functions for test purposes.
+
+A standalone executable can be private or public.
+
+For public libraries, the build phase must:
+- transpile all modules from Typescript to a widely natively understandable javascript. Transpilation is performed by `tsc` for `esm` output and by `babel` for `cjs` output. Type files get also generated for `esm` output.
+
+Each module in a library except those under `esm/internal` must be documented.
+
+Documentation and type do not get generated for any value commented with tsdoc `@internal`. `@internal` should be used for any value exported in a module under `esm/internal`. It should also be used for any value exported only for test purposes (clients using typescript will be informed that this value should not be used).
+
+Each module in a library must be tested.
+
+A library must import itself as `devDependency` for test purposes.
+
+## 1.3 Standalone command
+
+## 1.4 Buildless project
+
+## 1.5 App server
+
+## 1.6 App client
+
+This program must in any case ship with a `package.json` file so node knows 
 - creation of a standalone executable: the executable must be located under the `esm/` directory and be called `main.ts`. All files used by it must be under the `esm/internal/` directory. The executable will get bundled during the build and will be added as binary in `package.json` so clients can call it with `pnpm main`. The package can also include an `index.js` file that can be used to reexport stuff.
 
 In both cases, the `README.md` file present at the top of the package is copied to the `dist/` directory a license file gets automatically generated in the `dist/` directory.
@@ -92,15 +121,6 @@ NPM is free for public packages. I did not find a way to publish to npm a packag
 NPM error messages are misleading. It can for instance indicate an authentification error when the issue is that the package is marked as private in package.json.
 To publish a package for the first time, just proceed as usual by publishing a new release in GitHub (This needs no longer be done: cd to the dist folder of the package to publish and hit `npm publish --access=public`. If there is an authentification error, try hitting `npm adduser` first). Once the repo is created on npm, go to its settings and choose 'Require two-factor authentication or an automation or granular access token' for publishing access.
 
-# 4 - About package.json:
-
-Dependencies imported at the top of a monorepo and bin executables defined there are available in all sub packages. Only devDependencies and bin executables should be added in that manner as each package must have the list of its real dependencies.
-DevDependencies defined with 'latest' don't update to latest systematically. From time to time, cut the devDependencies key in package.json, run `pnpm i` to uninstall, paste the devDependencies, and run `pnpm i`.
-
 # 5 - About vitest:
 
 Creating a workspace is useful if we need to run all test files with the vitest cli from the monorepo level. But we run tests in each package seperately. So do not use this feature. In settings.json, add `"vitest.maximumConfigs": 15` so the vitest vscode extension can load all extensions.
-
-# 6 - About paths
-
-Posix paths are understood in all environments (including Windows). And configuration files (like package.json, `tsconfig.json`,...) only understand Posix paths. For that reason, this package works only with Posix paths. Only issue is when reading a directory with the `{recursive:true}` option, we get some local-system paths that we must therefore convert with the `utils.fromOsPathToPosixPath` function

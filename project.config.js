@@ -1,6 +1,6 @@
-import { configOnePackageRepo, constants } from '@parischap/configs';
+import { configOnePackageRepo, constants, deepMerge } from '@parischap/configs';
 
-export default configOnePackageRepo({
+export default deepMerge(configOnePackageRepo({
   description: 'Utility to generate configuration files in a repository',
   dependencies: {
     effect: '^3.18.1',
@@ -19,16 +19,23 @@ export default configOnePackageRepo({
   internalPeerDependencies: {},
   externalPeerDependencies: constants.lintingAndFormattingDependencies,
   examples: [],
-  scripts: {
-    //bundle: `${tsExecuter} ${binPath}bundle-files.ts`,
-    //prodify: `node ${prodBinPath}prodify.js`,
-    //'update-config-files': `node ${prodBinPath}update-config-files.js`,
-    'pre-build': 'pnpm i',
-    'post-build': 'pnpm update-config-files',
-  },
   environment: 'Node',
   bundled: true,
   visibility: 'Private',
   hasDocGen: false,
   keywords: [],
-});
+}),
+{"exports": {
+    "./prettierConfig": {
+      "import": "./esm/lintingAndFormattingConfig/prettierConfig.js"
+    },
+    "./eslintConfigBrowser": {
+      "import": "./esm/lintingAndFormattingConfig/eslintConfigBrowser.js"
+    },
+    "./eslintConfigLibrary": {
+      "import": "./esm/lintingAndFormattingConfig/eslintConfigLibrary.js"
+    },
+    "./eslintConfigNode": {
+      "import": "./esm/lintingAndFormattingConfig/eslintConfigNode.js"
+    },
+  }});
