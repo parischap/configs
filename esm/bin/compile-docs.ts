@@ -60,7 +60,7 @@ const program = Effect.gen(function* () {
   const fs = yield* PlatformNodeFsService;
 
   const rootPath = path.resolve();
-  //const packageJsonPath = path.join(rootPath, packageJsonFileName);
+  //const packageJsonPath = path.join(rootPath, packageJsonFilename);
   const packagesPath = path.join(rootPath, packagesFolderName);
   const docsPath = path.join(rootPath, docsFolderName);
 

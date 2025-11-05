@@ -1,6 +1,8 @@
 /**
  * This bin reads the keys and values of a default object exported by the file named
- * project.config.js located in the current path. It creates a file for each key of that object with
+ * project.config.js located in the current path. If no such file exists, it uses 
+ * 
+ * It creates a file for each key of that object with
  * the key as name. If the key ends with .json, the value is converted from an object to a json
  * string with JSON.stringfy. Otherwise, the value must be a string and it is written as is. This
  * bin will also check that there are no unexpected config files present in the package, i.e config
@@ -8,25 +10,39 @@
  * itself, the `README.md` file... see `patternsToIgnore` below)
  */
 // This module must not import any external dependency. It must be runnable without a package.json
-import { mkdir, readdir, writeFile, type Dirent } from 'node:fs/promises';
+import { type Dirent } from 'node:fs';
+import { mkdir, readdir, writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import { fileURLToPath } from 'url';
 import {
-  configFileName,
+  configFilename,
   githubFolderName,
-  pnpmLockFileName,
-  readMeFileName,
-  viteTimeStampFileNamePattern,
-  vscodeWorkspaceFileNamePattern,
+  lintingAndFormattingDependencies,
+  pnpmLockFilename,
+  readMeFilename,
+  viteTimeStampFilenamePattern,
+  vscodeWorkspaceFilenamePattern,
 } from '../constants.js';
-import { fromOsPathToPosixPath, getExtension, isRecord } from '../utils.js';
+import configOnePackageRepo from '../internal/configOnePackageRepo.js';
+import { fromOsPathToPosixPath, getExtension, isRecord, prettyStringify } from '../utils.js';
+
+/*publishConfig: {
+      main: `./${commonJsFolderName}/index.js`,
+      types: `./${typesFolderName}/index.d.ts`,
+      exports: {
+        '.': {
+          types: `./${typesFolderName}/index.d.ts`,
+          default: `./${commonJsFolderName}/index.js`,
+        },
+      },
+    },*/
 
 const readMissingDir = (folder:string):Promise<Dirent[]> =>
   new Promise((resolve, reject) => {
     /* eslint-disable-next-line functional/no-expression-statements*/
     readdir(folder, { recursive: true, withFileTypes: true })
       .then(resolve)
-      .catch((/** @type {unknown} * */ e) =>
+      .catch((e:unknown) =>
         typeof e === 'object' && e !== null && 'code' in e && e.code === 'ENOENT' ? resolve([])
         : e instanceof Error ? reject(e)
         : reject(new Error('Unknwon error')),
@@ -38,11 +54,11 @@ const readMissingDir = (folder:string):Promise<Dirent[]> =>
 
   // List of configuration files for which an error must not be reported if they are present in the package and not overridden by project.config.js
   const patternsToIgnore = [
-    readMeFileName,
-    configFileName,
-    viteTimeStampFileNamePattern,
-    pnpmLockFileName,
-    vscodeWorkspaceFileNamePattern,
+    readMeFilename,
+    configFilename,
+    viteTimeStampFilenamePattern,
+    pnpmLockFilename,
+    vscodeWorkspaceFilenamePattern,
   ];
 
   const patternsToIgnoreRegExp = new RegExp(
@@ -63,7 +79,7 @@ const readMissingDir = (folder:string):Promise<Dirent[]> =>
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const configPath = posixPath.join(
     fromOsPathToPosixPath(path.relative(__dirname, path.resolve())),
-    configFileName,
+    configFilename,
   );
   const packageName = posixPath.basename(posixPath.resolve());
 
@@ -73,7 +89,49 @@ const readMissingDir = (folder:string):Promise<Dirent[]> =>
   /* eslint-disable-next-line functional/no-expression-statements*/
   console.log(`\tReading '${configPath}'`);
 
-  const config:unknown = await import(configPath);
+  let config:unknown;
+
+  try{
+     config = await import(configPath);
+  }
+  catch (e:unknown)
+  {
+    if (typeof e === 'object' && e !== null && 'code' in e && e.code === 'ERR_MODULE_NOT_FOUND')
+    {
+      /* eslint-disable-next-line functional/no-expression-statements*/
+      console.log('\tNo such file, using starter config file');
+      config = {
+        default: configOnePackageRepo({
+    description: 'Utility to generate configuration files in a repository',
+    dependencies: {
+      effect: '^3.18.1',
+      '@effect/platform': '^0.92.1',
+      '@effect/platform-node': '^0.98.3',
+      '@effect/cluster': '^0.50.3',
+      '@effect/rpc': '^0.71.0',
+      '@effect/sql': '^0.46.0',
+      '@effect/workflow': '^0.11.3',
+    },
+    devDependencies: {
+      '@types/eslint': '^9.6.1',
+      '@types/eslint-config-prettier': '^6.11.3',
+    },
+    internalPeerDependencies: {},
+    externalPeerDependencies: lintingAndFormattingDependencies,
+    examples: [],
+    scripts:{},
+    environment: 'Node',
+    packageType: 'Library',
+    visibility: 'Private',
+    hasDocGen: false,
+    keywords: [],
+  })
+      }
+    }
+      
+  else
+    throw e;
+  };
 
   if (!isRecord(config) || !('default' in config) || !isRecord(config['default']))
     /* eslint-disable-next-line functional/no-throw-statements*/
@@ -107,21 +165,21 @@ const readMissingDir = (folder:string):Promise<Dirent[]> =>
   /* eslint-disable-next-line functional/no-expression-statements*/
   console.log('\tCreating configuration files');
   /* eslint-disable-next-line functional/no-loop-statements*/
-  for (const [fileName, fileContent] of Object.entries(configDefault)) {
+  for (const [filename, fileContent] of Object.entries(configDefault)) {
     const contentToWriteFunc =
-      getExtension(fileName) === '.json' ? () => JSON.stringify(fileContent, null, 2)
+      getExtension(filename) === '.json' ? () => prettyStringify(fileContent)
       : typeof fileContent === 'string' ? () => fileContent
       : () => {
           /* eslint-disable-next-line functional/no-throw-statements*/
-          throw new Error(`Entry '${fileName}' in '${configPath}' must have value of type string`);
+          throw new Error(`Entry '${filename}' in '${configPath}' must have value of type string`);
         };
 
     const contentToWrite = contentToWriteFunc();
 
     // Create directory in case it does not exist
     /* eslint-disable-next-line functional/no-expression-statements*/
-    await mkdir(posixPath.dirname(fileName), { recursive: true });
+    await mkdir(posixPath.dirname(filename), { recursive: true });
 
     /* eslint-disable-next-line functional/no-expression-statements*/
-    await writeFile(fileName, contentToWrite);
+    await writeFile(filename, contentToWrite);
   }

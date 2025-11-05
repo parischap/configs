@@ -1,9 +1,8 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import { tsBuildInfoFolderName } from '../constants.js';
-/** @import {ReadonlyRecord} from "../types.js" */
+import type { ReadonlyRecord } from "../types.js";
 
-/** @type ReadonlyRecord */
-export default {
+const _default:ReadonlyRecord= {
   $schema: 'https://json.schemastore.org/tsconfig',
   _version: '20.1.0',
   extends: ['@tsconfig/strictest/tsconfig.json'],
@@ -39,3 +38,5 @@ export default {
     tsBuildInfoFile: `${tsBuildInfoFolderName}/project.tsbuildinfo`,
   },
 };
+
+export default _default

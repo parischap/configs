@@ -2,7 +2,6 @@ export type Environment = 'Node' | 'Library' | 'Browser';
 
 export type Visibility = 'Public' | 'Private';
 
-export type PackageType = 
 /**
  * A library is a set of exported modules that are made separately available to a client.
 
@@ -33,10 +32,9 @@ A library must import itself as `devDependency` for test purposes.
 
 If several libraries are interdependent, they can be grouped in a monorepo. In that case, if one of the libraries in the monorepo uses another library of the monorepo, it must import the dev version of that library in development (so any modification in the dependencies is immediately taken into account for tests) and the prod version of that library (the one in the `npm` registry if it's a public library, or the one in the `dist/` directory if it's a private library) in production.
  */
+export type PackageType = 
 | 'Library'
 | 'StandaloneExecutable'
-| 'Command'
-| 'NoBuild'
 | 'AppServer'
 | 'AppClient';
 
@@ -48,6 +46,6 @@ export type ReadonlyRecord<K extends string | symbol = string, V = unknown> = {
   readonly [k in K]: V;
 };
 
-export interface ReadonlyStringRecord extends ReadonlyRecord.Type<string, string> {}
+export interface ReadonlyStringRecord extends ReadonlyRecord<string, string> {}
 
 export interface Config extends Record<string, string | ReadonlyRecord> {}

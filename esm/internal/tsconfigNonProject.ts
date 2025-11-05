@@ -4,14 +4,13 @@ import {
   othersFolderName,
   prodFolderName,
   projectFolderName,
-  viteTimeStampFileNamePattern,
+  viteTimeStampFilenamePattern,
 } from '../constants.js';
-/** @import {ReadonlyRecord} from "../types.js" */
+import type { ReadonlyRecord } from "../types.js";
 
-/** @type ReadonlyRecord */
-export default {
+const _default:ReadonlyRecord= {
   extends: './tsconfig.base.json',
-  exclude: [projectFolderName, npmFolderName, prodFolderName, viteTimeStampFileNamePattern],
+  exclude: [projectFolderName, npmFolderName, prodFolderName, viteTimeStampFilenamePattern],
   compilerOptions: {
     /**
      * Need to define rootDir and outDir even if project is not meant to be built with tsc.
@@ -25,3 +24,5 @@ export default {
     checkJs: true,
   },
 };
+
+export default _default

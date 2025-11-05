@@ -1,9 +1,7 @@
 // Whatever external package this file uses must be added as peerDependency
+import type { Config } from "prettier";
 import { allJsFiles } from './constants.js';
-/** @import {Config} from "prettier" */
-
-/** @type Config */
-export default {
+const _default:Config = {
   printWidth: 100,
   overrides: [
     {
@@ -18,3 +16,5 @@ export default {
     },
   ],
 };
+
+export default _default

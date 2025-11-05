@@ -4,14 +4,13 @@ import {
   docsFolderName,
   internalFolderName,
   projectFolderName,
-  tsConfigDocGenFileName,
+  tsConfigDocGenFilename,
 } from '../constants.js';
-/** @import {ReadonlyRecord} from "../types.js" */
+import type { ReadonlyRecord } from "../types.js";
 
-/** @type ReadonlyRecord */
-export default {
-  parseCompilerOptions: `./${tsConfigDocGenFileName}`,
-  examplesCompilerOptions: `./${tsConfigDocGenFileName}`,
+const _default:ReadonlyRecord = {
+  parseCompilerOptions: `./${tsConfigDocGenFilename}`,
+  examplesCompilerOptions: `./${tsConfigDocGenFilename}`,
   srcDir: `./${projectFolderName}`,
   outDir: docsFolderName,
   exclude: [
@@ -21,3 +20,5 @@ export default {
   enforceDescriptions: true,
   enforceVersion: false,
 };
+
+export default _default

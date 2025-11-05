@@ -9,40 +9,40 @@
  */
 import { FileSystem as PlatformFs, Path as PlatformPath } from '@effect/platform';
 import {
-  NodeFileSystem as PlatformNodeFs,
-  NodePath as PlatformNodePath,
+    NodeFileSystem as PlatformNodeFs,
+    NodePath as PlatformNodePath,
 } from '@effect/platform-node';
 import {
-  Array,
-  Cause,
-  Effect,
-  Either,
-  Equal,
-  Exit,
-  Function,
-  Layer,
-  Option,
-  Predicate,
-  Record,
-  Stream,
-  String,
-  Tuple,
-  flow,
-  pipe,
+    Array,
+    Cause,
+    Effect,
+    Either,
+    Equal,
+    Exit,
+    Function,
+    Layer,
+    Option,
+    Predicate,
+    Record,
+    Stream,
+    String,
+    Tuple,
+    flow,
+    pipe,
 } from 'effect';
 import * as Json from '../Json.js';
 import {
-  binariesFolderName,
-  commonJsFolderName,
-  internalFolderName,
-  licenseFileName,
-  packageJsonFileName,
-  prodFolderName,
-  projectFolderName,
-  readMeFileName,
-  slashedDevScope,
-  slashedScope,
-  typesFolderName,
+    binariesFolderName,
+    commonJsFolderName,
+    internalFolderName,
+    licenseFilename,
+    packageJsonFilename,
+    prodFolderName,
+    projectFolderName,
+    readMeFilename,
+    slashedDevScope,
+    slashedScope,
+    typesFolderName,
 } from '../constants.js';
 import license from '../internal/license.js';
 import { deepMerge, fromOsPathToPosixPath, isSubPathOf } from '../utils.js';
@@ -65,21 +65,21 @@ const program = Effect.gen(function* () {
 
   const rootPath = path.resolve();
 
-  const srcPackageJsonPath = path.join(rootPath, packageJsonFileName);
+  const srcPackageJsonPath = path.join(rootPath, packageJsonFilename);
   const prodPath = path.join(rootPath, prodFolderName);
   const projectPath = path.join(rootPath, projectFolderName);
   const prodProjectPath = path.join(prodPath, projectFolderName);
   const prodCommonJsPath = path.join(prodPath, commonJsFolderName);
 
-  const prodPackageJsonPath = path.join(prodPath, packageJsonFileName);
-  const prodCommonJsPackageJsonPath = path.join(prodCommonJsPath, packageJsonFileName);
+  const prodPackageJsonPath = path.join(prodPath, packageJsonFilename);
+  const prodCommonJsPackageJsonPath = path.join(prodCommonJsPath, packageJsonFilename);
 
   const binPath = path.join(prodPath, binariesFolderName);
 
-  yield* Effect.log(`Copying ${readMeFileName} to '${prodPath}'`);
-  const readMePath = path.join(rootPath, readMeFileName);
+  yield* Effect.log(`Copying ${readMeFilename} to '${prodPath}'`);
+  const readMePath = path.join(rootPath, readMeFilename);
   const hasReadMe = yield* fs.exists(readMePath);
-  if (hasReadMe) yield* fs.copyFile(readMePath, path.join(prodPath, readMeFileName));
+  if (hasReadMe) yield* fs.copyFile(readMePath, path.join(prodPath, readMeFilename));
 
   /*yield* Effect.log(
 		`Copying contents of ${constants.docsFolderName}/${constants.docsAssetsFolderName} to '${prodPath}'`
@@ -100,8 +100,8 @@ const program = Effect.gen(function* () {
 		yield* fs.copy(docsAssetsPath, prodDocsPath);
 	}*/
 
-  yield* Effect.log(`Writing ${licenseFileName} to '${prodPath}'`);
-  yield* fs.writeFileString(path.join(prodPath, licenseFileName), license);
+  yield* Effect.log(`Writing ${licenseFilename} to '${prodPath}'`);
+  yield* fs.writeFileString(path.join(prodPath, licenseFilename), license);
 
   yield* Effect.log('Determining list of bin files');
   const binContents = yield* pipe(
@@ -114,8 +114,8 @@ const program = Effect.gen(function* () {
     binContents,
     Array.filter(String.endsWith('.js')),
     Array.map(flow(fromOsPathToPosixPath, String.slice(0, -3))),
-    Record.fromIterableWith((fileName) =>
-      Tuple.make(fileName, path.join(binariesFolderName, fileName + '.js')),
+    Record.fromIterableWith((filename) =>
+      Tuple.make(filename, path.join(binariesFolderName, filename + '.js')),
     ),
   );
 
@@ -191,7 +191,7 @@ const program = Effect.gen(function* () {
         flow(Array.take(3), Array.drop(1), Tuple.make, Tuple.appendElement(indexContents)),
       ),
     ),
-  ) as unknown as ReadonlyArray<readonly [namedExport: string, exportFileName: string]>;
+  ) as unknown as ReadonlyArray<readonly [namedExport: string, exportFilename: string]>;
 
   yield* Effect.log('Creating a directory for each exported files');
   const directoriesToCreate = Array.map(exports, ([namedExport]) =>
@@ -204,12 +204,12 @@ const program = Effect.gen(function* () {
   );
   const directoriesToCreateContent = yield* pipe(
     exports,
-    Array.map(([_, exportFileName]) =>
+    Array.map(([_, exportFilename]) =>
       pipe(
         baseProdPackageJson,
-        Record.set('main', `../${commonJsFolderName}/${exportFileName}.js`),
-        Record.set('module', `../${projectFolderName}/${exportFileName}.js`),
-        Record.set('types', `../${typesFolderName}/${exportFileName}.d.ts`),
+        Record.set('main', `../${commonJsFolderName}/${exportFilename}.js`),
+        Record.set('module', `../${projectFolderName}/${exportFilename}.js`),
+        Record.set('types', `../${typesFolderName}/${exportFilename}.d.ts`),
         Json.stringify,
       ),
     ),
@@ -219,7 +219,7 @@ const program = Effect.gen(function* () {
   yield* pipe(
     Array.zip(directoriesToCreate, directoriesToCreateContent),
     Array.map(([dirPath, content]) =>
-      fs.writeFileString(path.join(dirPath, packageJsonFileName), content),
+      fs.writeFileString(path.join(dirPath, packageJsonFilename), content),
     ),
     Effect.all,
   );
@@ -238,10 +238,10 @@ const program = Effect.gen(function* () {
             exports,
             Tuple.mapBoth({
               onFirst: (namedExport) => `./${namedExport}`,
-              onSecond: (exportFileName) => ({
-                types: `./dts/${exportFileName}.d.ts`,
-                import: `./esm/${exportFileName}.js`,
-                default: `./cjs/${exportFileName}.js`,
+              onSecond: (exportFilename) => ({
+                types: `./dts/${exportFilename}.d.ts`,
+                import: `./esm/${exportFilename}.js`,
+                default: `./cjs/${exportFilename}.js`,
               }),
             }),
           ),
@@ -344,5 +344,5 @@ Exit.match(result, {
     console.error(Cause.pretty(cause));
     process.exit(1);
   },
-  onSuccess: () => console.log(`${packageJsonFileName} prodified successfully`),
+  onSuccess: () => console.log(`${packageJsonFilename} prodified successfully`),
 });

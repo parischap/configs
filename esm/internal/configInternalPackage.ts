@@ -7,34 +7,28 @@
 import {
   commonJsFolderName,
   configsPackageName,
-  docgenConfigFileName,
+  docgenConfigFilename,
   examplesFolderName,
-  madgeConfigFileName,
+  madgeConfigFilename,
   owner,
-  packageJsonFileName,
+  packageJsonFilename,
   prodFolderName,
   projectFolderName,
   slashedScope,
   testUtilsPackageName,
-  tsConfigDocGenFileName,
-  tsConfigProjectFileName,
+  tsConfigDocGenFilename,
+  tsConfigProjectFilename,
   tsExecuter,
-  typesFolderName,
-  viteConfigFileName,
+  viteConfigFilename
 } from '../constants.js';
+import type { Config, PackageType, ReadonlyRecord, ReadonlyStringRecord, Visibility } from "../types.js";
 import { deepMerge } from '../utils.js';
 import docgenConfig from './docgenConfig.js';
 import madgeConfig from './madgeConfig.js';
 import tsconfigDocgen from './tsconfigDocgen.js';
 import viteConfig from './viteConfig.js';
-/** @import {Visibility, Config, ReadonlyRecord, ReadonlyStringRecord, PackageType} from "../types.js" */
 
-/**
- * @param {string} repoName
- * @param {string} packageName
- * @returns {ReadonlyRecord}
- */
-const repository = (repoName, packageName) => ({
+const repository = (repoName:string, packageName:string):ReadonlyRecord => ({
   type: 'git',
   url: `git+https://github.com/${owner}/${repoName}.git`,
   ...(packageName === repoName ?
@@ -44,43 +38,19 @@ const repository = (repoName, packageName) => ({
     }),
 });  
 
-/**
- * @param {PackageType} packageType
- * @returns {Config}
- */
-const buildConfig = (packageType)=> 
+const buildConfig = ({packageType, visibility}:{readonly packageType:PackageType, readonly visibility:Visibility}):Config=> 
   packageType === 'Library' ? {
-  [packageJsonFileName]: {
+  [packageJsonFilename]: {
     sideEffects: [],
-    publishConfig: {
-      main: `./${commonJsFolderName}/index.js`,
-      types: `./${typesFolderName}/index.d.ts`,
-      exports: {
-        '.': {
-          types: `./${typesFolderName}/index.d.ts`,
-          default: `./${commonJsFolderName}/index.js`,
-        },
-      },
-    },
     scripts: {
-      // transpile-esm builds but also generate types
-      'transpile-esm': `tsc -b ${tsConfigProjectFileName} --force`,
-      'transpile-cjs': `babel ${prodFolderName}/${projectFolderName} --plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs --out-dir ${prodFolderName}/${commonJsFolderName} --source-maps`,
-      'transpile-annotate': `babel ${prodFolderName} --plugins annotate-pure-calls --out-dir ${prodFolderName} --source-maps`,
       compile:
-        'pnpm transpile-esm && pnpm transpile-cjs && pnpm transpile-annotate && pnpm prodify-lib',
-    },
-    devDependencies:{
-      '@babel/core': '^7.28.4',
-      '@babel/plugin-transform-export-namespace-from': '^7.27.1',
-      '@babel/plugin-transform-modules-commonjs': '^7.27.1',
-      'babel-plugin-annotate-pure-calls': '^0.5.0',
-      '@babel/cli': '^7.28.3',
+        // tsc builds but also generate types
+        `tsc -b ${tsConfigProjectFilename} --force` + (visibility === 'Public' ? ` && babel ${prodFolderName}/${projectFolderName} --out-dir ${prodFolderName}/${commonJsFolderName}` + '--plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs  --source-maps' : '') + ` && babel ${prodFolderName} --plugins annotate-pure-calls --out-dir ${prodFolderName} --source-maps` + ' && pnpm prodify-lib'
     }
   },
 } :
 {
-  [packageJsonFileName]: {
+  [packageJsonFilename]: {
     module: `./${projectFolderName}/main.js`,
     dependencies: {
       '@effect/experimental': '^0.56.0',
@@ -88,30 +58,16 @@ const buildConfig = (packageType)=>
     scripts: {
       bundle: 'bundle-files',
       compile: `pnpm bundle && pnpm prodify-bundle`,
-    },
-    devDependencies:{
-      // At some point, rolldown will be default in vite. But not the case for the moment
-      vite: 'npm:rolldown-vite@^7.1.17'
     }
   },
-  [viteConfigFileName]: viteConfig(packageType),
+  [viteConfigFilename]: viteConfig(packageType),
 };
 
-
-/**
- * @param {{ readonly repoName: string; readonly visibility:
- *   Visibility; readonly keywords: ReadonlyArray<string>; }} params
- * @returns {Config}
- */
-const visibilityConfig = ({ repoName, visibility, keywords }) =>
-  visibility === 'Private' ?
-    {
-      [packageJsonFileName]: {
-        private: true
-      },
-    }
-  : {
-      [packageJsonFileName]: {
+const visibilityConfig = ({ repoName, visibility, keywords }:{ readonly repoName: string; readonly visibility:
+ Visibility; readonly keywords: ReadonlyArray<string>; }):Config =>
+  visibility === 'Public' ?
+ {
+      [packageJsonFilename]: {
         bugs: {
           url: `https://github.com/${owner}/${repoName}/issues`,
         },
@@ -130,14 +86,15 @@ const visibilityConfig = ({ repoName, visibility, keywords }) =>
           'publish-to-npm': `cd ${prodFolderName} && npm publish --access=public && cd ..`,
         },
       },
+    }:
+    {
+      [packageJsonFilename]: {
+        private: true
+      },
     };
 
-/**
- * @param {boolean} hasDocGen
- * @returns {Config}
- */
-const docGenConfig = (hasDocGen) => hasDocGen ? {
-  [packageJsonFileName]: {
+const docGenConfig = (hasDocGen:boolean):Config => hasDocGen ? {
+  [packageJsonFilename]: {
     scripts: {
       docgen: 'docgen',
     },
@@ -147,31 +104,15 @@ const docGenConfig = (hasDocGen) => hasDocGen ? {
       tsx: '^4.20.6',
     }
   },
-  [tsConfigDocGenFileName]: tsconfigDocgen,
-  [docgenConfigFileName]: docgenConfig,
+  [tsConfigDocGenFilename]: tsconfigDocgen,
+  [docgenConfigFilename]: docgenConfig,
 }:
 
 
  {}
 ;
 
-/**
- * @param {{
- *   readonly repoName: string;
- *   readonly packageName: string;
- *   readonly dependencies: ReadonlyStringRecord;
- *   readonly devDependencies: ReadonlyStringRecord;
- *   readonly internalPeerDependencies: ReadonlyStringRecord;
- *   readonly externalPeerDependencies: ReadonlyStringRecord;
- *   readonly examples: ReadonlyArray<string>;
- *   readonly packageType: PackageType;
- *   readonly visibility: Visibility;
- *   readonly hasDocGen: boolean;
- *   readonly keywords: ReadonlyArray<string>;
- * }} params
- * @returns {Config}
- */
-export default ({
+const _default= ({
     repoName,
     packageName,
     dependencies,
@@ -183,7 +124,19 @@ export default ({
     visibility,
     hasDocGen,
     keywords,
-  }) => {
+  }:{
+   readonly repoName: string;
+ readonly packageName: string;
+readonly dependencies: ReadonlyStringRecord;
+ readonly devDependencies: ReadonlyStringRecord;
+ readonly internalPeerDependencies: ReadonlyStringRecord;
+ readonly externalPeerDependencies: ReadonlyStringRecord;
+ readonly examples: ReadonlyArray<string>;
+ readonly packageType: PackageType;
+ readonly visibility: Visibility;
+readonly hasDocGen: boolean;
+ readonly keywords: ReadonlyArray<string>;
+ }):Config => {
 
   const prodInternalPeerDependencies = {
     // Put npm version of internal peerDependencies
@@ -197,15 +150,16 @@ export default ({
 
   return deepMerge(
     {
-      [madgeConfigFileName]: madgeConfig,
-      [packageJsonFileName]: {
-        ...(Object.keys(dependencies).length === 0 ? {} : { dependencies }),
+      [madgeConfigFilename]: madgeConfig,
+      [packageJsonFilename]: {
+        type: 'module',
         module: `./${projectFolderName}/index.js`,
         exports: {
           '.': {
             import: `./${projectFolderName}/index.js`,
           },
         },
+        ...(Object.keys(dependencies).length === 0 ? {} : { dependencies }),
         devDependencies: {
           // Include self for tests if not already included. 
           ...(packageName === configsPackageName ? {} : {
@@ -214,10 +168,6 @@ export default ({
           }),
           // Include test utilities. Use `link:` not `file:` so modifications take effect immediately
           [`${slashedScope}${testUtilsPackageName}`]: `link:../${testUtilsPackageName}/.`,
-          madge: '^8.0.0',
-          vitest: '^3.2.4',
-          // vite-node is used to run examples and an AppServer
-          ...(examples.length!==0 || packageType === 'AppServer'  ? {'vite-node': '^3.2.4'}:{}),
           ...devDependencies,
         },
         ...((
@@ -259,21 +209,12 @@ export default ({
         homepage:
           `https://github.com/${owner}/${repoName}`
           + (packageName === repoName ? '' : `/tree/master/packages/${packageName}`),
-        devEngines: {
-          runtime: {
-            name: 'node',
-            onFail: 'error',
-          },
-          packageManager: {
-            name: 'pnpm',
-            onFail: 'error',
-          },
-        },
       },
     },
-    // Put transpiledConfig after general config because `default` exports needs to be last in publishConfig exports
-    bundled ? bundledConfig : transpiledConfig,
+    buildConfig({packageType, visibility}),
     visibilityConfig({ repoName, visibility, keywords }),
     docGenConfig(hasDocGen)
   );
 };
+
+export default _default

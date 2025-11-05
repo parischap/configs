@@ -13,7 +13,7 @@ import {
   allTsFiles,
   binariesFolderName,
   internalFolderName,
-  packageJsonFileName,
+  packageJsonFilename,
   prodFolderName,
   projectFolderName,
 } from '../constants.js';
@@ -62,7 +62,7 @@ const program = Effect.gen(function* () {
   const fs = yield* PlatformNodeFsService;
 
   const rootPath = path.resolve();
-  const packageJsonPath = path.join(rootPath, packageJsonFileName);
+  const packageJsonPath = path.join(rootPath, packageJsonFilename);
   const projectPath = path.join(rootPath, projectFolderName);
   const prodPath = path.join(rootPath, prodFolderName);
   const internalImportsGlob = allTsFiles.map((p) => path.join(projectPath, internalFolderName, p));
@@ -108,9 +108,9 @@ const program = Effect.gen(function* () {
         ),
       ),
     ),
-    Array.map((fileName) => {
-      const source = path.join(projectPath, fileName);
-      const target = path.join(esmOutDir, path.dirname(fileName));
+    Array.map((filename) => {
+      const source = path.join(projectPath, filename);
+      const target = path.join(esmOutDir, path.dirname(filename));
 
       return pipe(
         Effect.log(`Bundling '${source}' to '${target}'`),

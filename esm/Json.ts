@@ -1,10 +1,11 @@
 import { Effect } from 'effect';
 import * as PortError from './PortError.js';
+import { prettyStringify } from './utils.js';
 
 /** Port of Json stringify */
 export const stringify = (value: unknown) =>
   Effect.try({
-    try: () => JSON.stringify(value, null, 2),
+    try: () => prettyStringify(value),
     catch: (e:unknown) =>
       PortError.make({
         originalError: e,
