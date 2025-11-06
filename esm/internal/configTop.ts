@@ -1,11 +1,13 @@
 /** This config is the one to be used at the root (top) of a monorepo. */
 // This module must not import any external dependency. It must be runnable without a package.json
 import { basename, resolve } from 'node:path/posix';
+import { gitIgnoreFilename, packageJsonFilename, packageManager, pnpmWorkspaceFilename, vitestConfigFilename, vscodeDependencies } from '../constants.js';
 import type { Config } from "../types.js";
 import { deepMerge } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
-import configInternalRepo from './configInternalRepo.js';
-import repoPnpmWorkspaceConfig from './repoPnpmWorkspaceConfig.js';
+import topGitIgnoreConfig from './topGitIgnoreConfig.js';
+import topPnpmWorkspaceConfig from './topPnpmWorkspaceConfig.js';
+import topVitestConfig from './topVitestConfig.js';
 
 const packageName = basename(resolve());
 
@@ -20,17 +22,27 @@ const _default= ({description}:{readonly description:string}):Config=> deepMerge
         'clean-all-node-modules': 'pnpm -t clean-node-modules',
         'clean-all-config-files': 'pnpm -r -include-workspace-root=true clean-config-files',
         'build-all': 'pnpm -r build',
-        'prepare-docs': 'pnpm -r --if-present --parallel docgen && compile-docs',
       }
   }),
+  {
+    [gitIgnoreFilename]: topGitIgnoreConfig,
+    [vitestConfigFilename]: topVitestConfig,
+    [pnpmWorkspaceFilename]:topPnpmWorkspaceConfig,
+    [packageJsonFilename]: {
+      packageManager,
+      devDependencies:{
+        ...vscodeDependencies,
+  },
   
-  configInternalRepo({
-    // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
-    isPublished:true,
-    // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
-    hasDocGen:true,
-    repoPnpmWorkspaceConfig
-  }),
+      /*pnpm: {
+        patchedDependencies: {},
+        overrides: {
+          //'tsconfig-paths': '^4.0.0'
+        },
+      },*/
+    },
+  }
+ 
 );
 
 export default _default;

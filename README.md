@@ -75,10 +75,8 @@ Following is a list of some parameters to provide to the `configSubRepo` and `co
 
 The `configs` package uses itself to generate its configuration files. To that extent, the following procedure must be followed for that package only if no `package.json` is present:
 ```bash
-pnpm i -g vite-node
 rm tsconfig.json # it imports `@tsconfig/strictest/tsconfig.json` which is not installed yet
-vite-node esm/bin/update-config-files.ts
-pnpm uninstall -g vite-node
+pnpx vite-node esm/bin/update-config-files.ts
 pnpm i
 ```
 
@@ -129,4 +127,5 @@ To publish a package for the first time, just proceed as usual by publishing a n
 
 ## Dependencies
 When including a dependency with `link:`, a symlink is created in node_modules to the target package. This implies that this package does not need to exist, that any modification to the package are immediately reflected but also that bin executables are not installed. Inversely, when including a dependency with `file:`, the target package is copied into node_modules. Changes will only take effect after `pnpm i` est called and bin executables will be installed.
+When including a dependency with the `workspace:` protocol, a symlink is created in node_modules to the target package.
 

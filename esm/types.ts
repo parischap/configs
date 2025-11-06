@@ -1,7 +1,5 @@
 export type Environment = 'Node' | 'Library' | 'Browser';
 
-export type Visibility = 'Public' | 'Private';
-
 /**
  * A library is a set of exported modules that are made separately available to a client.
 
@@ -48,4 +46,4 @@ export type ReadonlyRecord<K extends string | symbol = string, V = unknown> = {
 
 export interface ReadonlyStringRecord extends ReadonlyRecord<string, string> {}
 
-export interface Config extends Record<string, string | ReadonlyRecord> {}
+export interface Config extends ReadonlyRecord<string, string | ReadonlyRecord> {}

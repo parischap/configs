@@ -1,26 +1,25 @@
 // This module must not import any external dependency. It must be runnable without a package.json
-import { defineConfig, mergeConfig } from "vite";
-import type { PackageType } from "../types.js";
-import { prettyStringify } from '../utils.js';
+import type { PackageType, Record } from "../types.js";
+import { deepMerge, prettyStringify } from '../utils.js';
 
 const _default = (packageType:PackageType):string=>{
 	
-	const baseConfig = defineConfig({
+	const baseConfig:Record = {
 			build: {
 				outDir: '${prodFolderName}',
 				minify: 'esbuild',
 			}
-		});
-	const ssrConfig = defineConfig(packageType !== 'AppClient'?{
+		};
+	const ssrConfig:Record = packageType !== 'AppClient'?{
 			build:{
 				ssr: './esm.index.ts'
 			},
 			ssr: {
 				noExternal: true,
 			}
-		}:{})
-	const config = mergeConfig(
-		 baseConfig,ssrConfig, false
+		}:{}
+	const config = deepMerge(
+		 baseConfig,ssrConfig
 		)
 	
 

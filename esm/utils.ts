@@ -22,12 +22,12 @@ export const isSubPathOf = (target:string) => (p:string):boolean => {
 //export const devWorkspaceLink = (packageName:string):string => `workspace:${slashedDevScope}${packageName}@*`;
 export const prettyStringify= (v:unknown):string => JSON.stringify(v,null,2);
 
-export const deepMerge2 = <K extends string | symbol, V>( first: ReadonlyRecord<K, V>, second: ReadonlyRecord<K, V>,
- ) : Record<K, V> => {
-  const result = { ...first } as Record<K,V> ;
+export const deepMerge2 = <R extends ReadonlyRecord>( first: R, second: R) : R => {
+  const result = { ...first } ;
 
-  const seconKeys = Reflect.ownKeys(second) as Array<K>
-  for (const secondKey of seconKeys) {
+  const secondKeys = Reflect.ownKeys(second) as ReadonlyArray<keyof R>
+  
+  for (const secondKey of secondKeys) {
     const secondValue = second[secondKey];
     if (!(secondKey in first)) {
       result[secondKey] = secondValue;
@@ -36,8 +36,8 @@ export const deepMerge2 = <K extends string | symbol, V>( first: ReadonlyRecord<
 
     const firstValue = first[secondKey];
     result[secondKey] =
-      isRecord(secondValue) && isRecord(firstValue) ? deepMerge2(firstValue, secondValue) as V
-      : isArray(secondValue) && isArray(firstValue) ? [...firstValue, ...secondValue] as V
+      isRecord(secondValue) && isRecord(firstValue) ? deepMerge2(firstValue, secondValue) as never
+      : isArray(secondValue) && isArray(firstValue) ? [...firstValue, ...secondValue] as never
       : secondValue;
   }
 

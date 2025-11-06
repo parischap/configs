@@ -14,14 +14,14 @@ import {
   packageJsonFilename,
   prodFolderName,
   projectFolderName,
+  slashedDevScope,
   slashedScope,
-  testUtilsPackageName,
   tsConfigDocGenFilename,
   tsConfigProjectFilename,
   tsExecuter,
   viteConfigFilename
 } from '../constants.js';
-import type { Config, PackageType, ReadonlyRecord, ReadonlyStringRecord, Visibility } from "../types.js";
+import type { Config, PackageType, ReadonlyRecord, ReadonlyStringRecord } from "../types.js";
 import { deepMerge } from '../utils.js';
 import docgenConfig from './docgenConfig.js';
 import madgeConfig from './madgeConfig.js';
@@ -38,14 +38,14 @@ const repository = (repoName:string, packageName:string):ReadonlyRecord => ({
     }),
 });  
 
-const buildConfig = ({packageType, visibility}:{readonly packageType:PackageType, readonly visibility:Visibility}):Config=> 
+const buildConfig = ({packageType, isPublished}:{readonly packageType:PackageType, readonly isPublished:boolean}):Config=> 
   packageType === 'Library' ? {
   [packageJsonFilename]: {
     sideEffects: [],
     scripts: {
       compile:
         // tsc builds but also generate types
-        `tsc -b ${tsConfigProjectFilename} --force` + (visibility === 'Public' ? ` && babel ${prodFolderName}/${projectFolderName} --out-dir ${prodFolderName}/${commonJsFolderName}` + '--plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs  --source-maps' : '') + ` && babel ${prodFolderName} --plugins annotate-pure-calls --out-dir ${prodFolderName} --source-maps` + ' && pnpm prodify-lib'
+        `tsc -b ${tsConfigProjectFilename} --force` + (isPublished ? ` && babel ${prodFolderName}/${projectFolderName} --out-dir ${prodFolderName}/${commonJsFolderName}` + '--plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs  --source-maps' : '') + ` && babel ${prodFolderName} --plugins annotate-pure-calls --out-dir ${prodFolderName} --source-maps` + ' && pnpm prodify-lib'
     }
   },
 } :
@@ -63,9 +63,9 @@ const buildConfig = ({packageType, visibility}:{readonly packageType:PackageType
   [viteConfigFilename]: viteConfig(packageType),
 };
 
-const visibilityConfig = ({ repoName, visibility, keywords }:{ readonly repoName: string; readonly visibility:
- Visibility; readonly keywords: ReadonlyArray<string>; }):Config =>
-  visibility === 'Public' ?
+const visibilityConfig = ({ repoName, isPublished, keywords }:{ readonly repoName: string; readonly isPublished:
+ boolean; readonly keywords: ReadonlyArray<string>; }):Config =>
+  isPublished?
  {
       [packageJsonFilename]: {
         bugs: {
@@ -97,19 +97,13 @@ const docGenConfig = (hasDocGen:boolean):Config => hasDocGen ? {
   [packageJsonFilename]: {
     scripts: {
       docgen: 'docgen',
-    },
-    devDependencies:{
-      '@effect/docgen': '^0.5.2',
-      // tsx must be installed because it is used by docgen (strangely, it is not requested as a dev-dependency
-      tsx: '^4.20.6',
     }
   },
   [tsConfigDocGenFilename]: tsconfigDocgen,
   [docgenConfigFilename]: docgenConfig,
 }:
-
-
- {}
+ {
+ }
 ;
 
 const _default= ({
@@ -121,7 +115,7 @@ const _default= ({
     externalPeerDependencies,
     examples,
     packageType,
-    visibility,
+    isPublished,
     hasDocGen,
     keywords,
   }:{
@@ -133,7 +127,7 @@ readonly dependencies: ReadonlyStringRecord;
  readonly externalPeerDependencies: ReadonlyStringRecord;
  readonly examples: ReadonlyArray<string>;
  readonly packageType: PackageType;
- readonly visibility: Visibility;
+ readonly isPublished: boolean;
 readonly hasDocGen: boolean;
  readonly keywords: ReadonlyArray<string>;
  }):Config => {
@@ -152,7 +146,6 @@ readonly hasDocGen: boolean;
     {
       [madgeConfigFilename]: madgeConfig,
       [packageJsonFilename]: {
-        type: 'module',
         module: `./${projectFolderName}/index.js`,
         exports: {
           '.': {
@@ -161,13 +154,10 @@ readonly hasDocGen: boolean;
         },
         ...(Object.keys(dependencies).length === 0 ? {} : { dependencies }),
         devDependencies: {
-          // Include self for tests if not already included. 
+          // Include self in dev version for tests if not already included. 
           ...(packageName === configsPackageName ? {} : {
-            // Use `link:` not `file:` so modifications take effect immediately
-            [`${slashedScope}${packageName}`]: 'link:.',
+            [`${slashedScope}${packageName}`]: `workspace:${slashedDevScope}${packageName}`,
           }),
-          // Include test utilities. Use `link:` not `file:` so modifications take effect immediately
-          [`${slashedScope}${testUtilsPackageName}`]: `link:../${testUtilsPackageName}/.`,
           ...devDependencies,
         },
         ...((
@@ -198,7 +188,7 @@ readonly hasDocGen: boolean;
           test: 'vitest run',
           'clean-prod': `shx rm -rf ${prodFolderName} && shx mkdir -p ${prodFolderName}`,
           build:
-            'pnpm clean-prod && pnpm --if-present pre-build && pnpm compile && pnpm --if-present post-build && cd ${prodFolderName} && pnpm i && cd ..',
+            'pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..',
           examples: examples
             .map((exampleName) => `${tsExecuter} ${examplesFolderName}/${exampleName}`)
             .join('&&')
@@ -211,8 +201,8 @@ readonly hasDocGen: boolean;
           + (packageName === repoName ? '' : `/tree/master/packages/${packageName}`),
       },
     },
-    buildConfig({packageType, visibility}),
-    visibilityConfig({ repoName, visibility, keywords }),
+    buildConfig({packageType, isPublished}),
+    visibilityConfig({ repoName, isPublished, keywords }),
     docGenConfig(hasDocGen)
   );
 };

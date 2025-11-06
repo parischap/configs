@@ -6,7 +6,6 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
   eslintConfigFilename,
-  gitIgnoreFilename,
   packageJsonFilename,
   prettierConfigFilename,
   prettierIgnoreFilename,
@@ -19,7 +18,6 @@ import {
 import eslintConfigBrowser from './eslintConfigBrowser.js';
 import eslintConfigLibrary from './eslintConfigLibrary.js';
 import eslintConfigNode from './eslintConfigNode.js';
-import gitIgnoreConfig from './gitIgnoreConfig.js';
 import prettierConfig from './prettierConfig.js';
 import prettierIgnore from './prettierIgnoreConfig.js';
 import tsConfig from './tsconfig.js';
@@ -52,14 +50,16 @@ export default ({ packageName, description, environment,scripts }:{
  readonly description: string;
  readonly environment:Environment; 
  readonly scripts: ReadonlyStringRecord}):Config => ({
+  // We could have a globa prettier.config.js. But it makes sense tio have it at the same level as the eslint.config.js
   [prettierConfigFilename]: prettierConfig,
-  [gitIgnoreFilename]: gitIgnoreConfig,
   [prettierIgnoreFilename]: prettierIgnore,
   [tsConfigBaseFilename]: tsconfigBase,
   [tsConfigNonProjectFilename]: tsConfigNonProject,
   [tsConfigFilename]: tsConfig,
   [packageJsonFilename]: {
     name: `${slashedDevScope}${packageName}`,
+    // Needs to be present even at the top or root of a monorepo because there are some javascript config files
+    type: 'module',
     description,
     author: 'Jérôme MARTIN',
     license: 'MIT',

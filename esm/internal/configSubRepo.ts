@@ -1,7 +1,7 @@
 /** This config is the one to be used in the sub-package of a monorepo. */
 // This module must not import any external dependency. It must be runnable without a package.json
 import { basename, dirname, resolve } from 'node:path/posix';
-import type { Config, Environment, PackageType, ReadonlyStringRecord, Visibility } from "../types.js";
+import type { Config, Environment, PackageType, ReadonlyStringRecord } from "../types.js";
 import { deepMerge } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
 import configInternalPackage from './configInternalPackage.js';
@@ -20,7 +20,7 @@ const _default= ({
     scripts,
     environment,
     packageType,
-    visibility,
+    isPublished,
     hasDocGen,
     keywords,
   }:{
@@ -33,7 +33,7 @@ readonly examples: ReadonlyArray<string>;
 readonly scripts: ReadonlyStringRecord;
 readonly environment: Environment;
 readonly packageType: PackageType;
-readonly visibility: Visibility;
+readonly isPublished: boolean;
 readonly hasDocGen: boolean;
 readonly keywords: ReadonlyArray<string>;}):Config => {
   return deepMerge(
@@ -52,7 +52,7 @@ readonly keywords: ReadonlyArray<string>;}):Config => {
       externalPeerDependencies,
       examples,
       packageType,
-      visibility,
+      isPublished,
       hasDocGen,
       keywords,
     }),

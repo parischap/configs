@@ -1,11 +1,11 @@
 /** This config is the one to be used in a standalone repo which is either a library or an executable */
 // This module must not import any external dependency. It must be runnable without a package.json
 import { basename, resolve } from 'node:path/posix';
-import type { Config, Environment, PackageType, ReadonlyStringRecord, Visibility } from "../types.js";
+import type { Config, Environment, PackageType, ReadonlyStringRecord } from "../types.js";
 import { deepMerge } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
 import configInternalPackage from './configInternalPackage.js';
-import configInternalTop from './configInternalTop.js';
+import configInternalRepo from './configInternalRepo.js';
 
 const packageName = basename(resolve());
 
@@ -19,7 +19,7 @@ const  _default = ({
     scripts={},
     environment,
     packageType,
-    visibility,
+    isPublished,
     hasDocGen=false,
     keywords=[],
   }:{
@@ -32,7 +32,7 @@ const  _default = ({
  readonly scripts: ReadonlyStringRecord;
  readonly environment: Environment;
  readonly packageType: PackageType;
- readonly visibility: Visibility;
+ readonly isPublished: boolean;
  readonly hasDocGen: boolean;
  readonly keywords: ReadonlyArray<string>;
  }):Config => {
@@ -44,7 +44,7 @@ const  _default = ({
       environment,
             scripts,
     }),
-    configInternalTop(),
+    configInternalRepo({isPublished, hasDocGen,pnpmWorkspaceConfig:''}),
     configInternalPackage({
       packageName,
       repoName: packageName,
@@ -54,7 +54,7 @@ const  _default = ({
       externalPeerDependencies,
       examples,
       packageType,
-      visibility,
+      isPublished,
       hasDocGen,
       keywords,
     }),

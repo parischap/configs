@@ -96,6 +96,7 @@ const readMissingDir = (folder:string):Promise<Dirent[]> =>
   }
   catch (e:unknown)
   {
+    // This error code is specific to vite-node. So would have to be changed if we use something else
     if (typeof e === 'object' && e !== null && 'code' in e && e.code === 'ERR_MODULE_NOT_FOUND')
     {
       /* eslint-disable-next-line functional/no-expression-statements*/

@@ -32,14 +32,12 @@ export const eslintConfigFilename = 'eslint.config.js';
 export const madgeConfigFilename = '.madgerc';
 export const readMeFilename = 'README.md';
 export const licenseFilename = 'LICENSE';
-export const configsManagerInitFilename = 'init.mjs';
 export const pnpmWorkspaceFilename = 'pnpm-workspace.yaml';
 export const pnpmLockFilename = 'pnpm-lock.yaml';
 export const actionFilename = 'action.yml';
 export const viteConfigFilename = 'vite.config.js';
 export const viteTimeStampFilenamePattern = 'vite.config.ts.timestamp-*.mjs';
 export const vitestConfigFilename = 'vitest.config.js';
-export const vitestWorkspaceConfigFilename = 'vitest.workspace.js';
 export const vscodeWorkspaceFilenamePattern = '*.code-workspace';
 
 export const configsPackageName = 'configs';
@@ -115,4 +113,18 @@ export const lintingAndFormattingDependencies = {
   //'eslint-plugin-import': 'latest',
   //'@typescript-eslint/parser': 'latest',
   //'eslint-import-resolver-typescript': 'latest',
+};
+
+// These dependencies are necessary at the top
+export const vscodeDependencies = {
+    // Used by vscode plugins
+      ...lintingAndFormattingDependencies,
+   // Used by vscode, see `typescript.tsdk` key of settings.json
+      typescript: '^5.9.3',
+      // Needed by the vscode vitest plugin
+      vitest: '^3.2.4',
+      // Better have the same version across the whole repo
+        '@tsconfig/strictest': '^2.0.6',
+        // Better have the same version across the whole repo
+        '@types/node': '^24.7.0',
 };
