@@ -34,14 +34,17 @@ export const deepMerge2 = <R extends ReadonlyRecord>(first: R, second: R): R => 
 
   const secondKeys = Reflect.ownKeys(second) as ReadonlyArray<keyof R>;
 
+  /* eslint-disable-next-line functional/no-loop-statements*/
   for (const secondKey of secondKeys) {
     const secondValue = second[secondKey];
     if (!(secondKey in first)) {
+      /* eslint-disable-next-line functional/no-expression-statements, functional/immutable-data*/
       result[secondKey] = secondValue;
       continue;
     }
 
     const firstValue = first[secondKey];
+    /* eslint-disable-next-line functional/no-expression-statements, functional/immutable-data*/
     result[secondKey] =
       isRecord(secondValue) && isRecord(firstValue) ? (deepMerge2(firstValue, secondValue) as never)
       : isArray(secondValue) && isArray(firstValue) ? ([...firstValue, ...secondValue] as never)

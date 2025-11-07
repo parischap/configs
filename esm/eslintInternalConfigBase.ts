@@ -23,8 +23,7 @@ import {
   projectFolderName,
   viteTimeStampFilenamePattern,
 } from './constants.js';
-
-interface ConfigArray extends ReadonlyArray<Config> {}
+type ConfigArray = ReadonlyArray<Config>;
 
 const typescriptConfigs: ConfigArray = defineConfig(eslint.configs.recommended, {
   // Add no rules here because they might get overridden by the typedTypescriptConfig
@@ -60,6 +59,19 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
       // These rules require typeChecking and are not cancelled by functional.configs.disableTypeChecked
       functional.configs.externalTypeScriptRecommended as never,
     ],
+    settings: {
+      immutability: {
+        overrides: [
+          {
+            type: {
+              from: 'lib',
+              name: 'ReadonlyArray',
+            },
+            to: 'Immutable',
+          },
+        ],
+      },
+    },
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -83,8 +95,31 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
        * Effect.Either are mutable. I did note manage to use global settings to force these types to
        * Immutable
        */
-      'functional/prefer-immutable-types': 'off',
-      'functional/type-declaration-immutability': 'off',
+      'functional/prefer-immutable-types': [
+        'error',
+        {
+          enforcement: 'None',
+          ignoreInferredTypes: true,
+          parameters: {
+            enforcement: 'ReadonlyDeep',
+          },
+        },
+      ],
+      'functional/type-declaration-immutability': [
+        'error',
+        {
+          rules: [
+            {
+              identifiers: '^.+$',
+              immutability: 'Immutable',
+              comparator: 'AtLeast',
+              fixer: false,
+              suggestions: false,
+            },
+          ],
+          ignoreInterfaces: false,
+        },
+      ],
       'functional/no-expression-statements': [
         'error',
         {
@@ -160,7 +195,7 @@ const markdownConfigs: ConfigArray = defineConfig([
   {
     name: 'mdConfig',
     plugins: {
-      markdown,
+      markdown: markdown as never,
     },
     extends: ['markdown/recommended', 'markdown/processor'],
     rules: {},

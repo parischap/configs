@@ -165,7 +165,7 @@ const _default = ({
         module: `./${projectFolderName}/index.js`,
         exports: {
           '.': {
-            import: `./${projectFolderName}/index.js`,
+            import: `./${projectFolderName}/index.ts`,
           },
         },
         dependencies: {

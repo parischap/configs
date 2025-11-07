@@ -2,6 +2,7 @@
 import {
   npmFolderName,
   othersFolderName,
+  packagesFolderName,
   prodFolderName,
   projectFolderName,
   viteTimeStampFilenamePattern,
@@ -10,7 +11,13 @@ import type { ReadonlyRecord } from '../types.js';
 
 const _default: ReadonlyRecord = {
   extends: './tsconfig.base.json',
-  exclude: [projectFolderName, npmFolderName, prodFolderName, viteTimeStampFilenamePattern],
+  exclude: [
+    projectFolderName,
+    npmFolderName,
+    prodFolderName,
+    packagesFolderName,
+    viteTimeStampFilenamePattern,
+  ],
   compilerOptions: {
     /**
      * Need to define rootDir and outDir even if project is not meant to be built with tsc.

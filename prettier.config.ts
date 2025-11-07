@@ -1,3 +1,3 @@
-import prettierConfig from '@parischap/configs/prettierConfig';
+import prettierConfig from "@parischap/configs/prettierConfig";
 
-export default prettierConfig;
+ export default prettierConfig;
