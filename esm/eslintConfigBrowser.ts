@@ -4,7 +4,7 @@ import globals from 'globals';
 import { allProjectJsFiles } from './constants.js';
 import eslintInternalConfigBase from './eslintInternalConfigBase.js';
 
-const _default:ReadonlyArray<Config> = [
+const _default: ReadonlyArray<Config> = [
   ...eslintInternalConfigBase,
   {
     files: allProjectJsFiles,
@@ -16,4 +16,4 @@ const _default:ReadonlyArray<Config> = [
   },
 ];
 
-export default  _default
+export default _default;

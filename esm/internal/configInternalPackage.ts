@@ -8,6 +8,7 @@ import {
   commonJsFolderName,
   configsPackageName,
   docgenConfigFilename,
+  effectDependencies,
   examplesFolderName,
   madgeConfigFilename,
   owner,
@@ -19,16 +20,16 @@ import {
   tsConfigDocGenFilename,
   tsConfigProjectFilename,
   tsExecuter,
-  viteConfigFilename
+  viteConfigFilename,
 } from '../constants.js';
-import type { Config, PackageType, ReadonlyRecord, ReadonlyStringRecord } from "../types.js";
+import type { Config, PackageType, ReadonlyRecord, ReadonlyStringRecord } from '../types.js';
 import { deepMerge } from '../utils.js';
 import docgenConfig from './docgenConfig.js';
 import madgeConfig from './madgeConfig.js';
 import tsconfigDocgen from './tsconfigDocgen.js';
 import viteConfig from './viteConfig.js';
 
-const repository = (repoName:string, packageName:string):ReadonlyRecord => ({
+const repository = (repoName: string, packageName: string): ReadonlyRecord => ({
   type: 'git',
   url: `git+https://github.com/${owner}/${repoName}.git`,
   ...(packageName === repoName ?
@@ -36,37 +37,54 @@ const repository = (repoName:string, packageName:string):ReadonlyRecord => ({
   : {
       directory: `packages/${packageName}`,
     }),
-});  
+});
 
-const buildConfig = ({packageType, isPublished}:{readonly packageType:PackageType, readonly isPublished:boolean}):Config=> 
-  packageType === 'Library' ? {
-  [packageJsonFilename]: {
-    sideEffects: [],
-    scripts: {
-      compile:
-        // tsc builds but also generate types
-        `tsc -b ${tsConfigProjectFilename} --force` + (isPublished ? ` && babel ${prodFolderName}/${projectFolderName} --out-dir ${prodFolderName}/${commonJsFolderName}` + '--plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs  --source-maps' : '') + ` && babel ${prodFolderName} --plugins annotate-pure-calls --out-dir ${prodFolderName} --source-maps` + ' && pnpm prodify-lib'
+const buildConfig = ({
+  packageType,
+  isPublished,
+}: {
+  readonly packageType: PackageType;
+  readonly isPublished: boolean;
+}): Config =>
+  packageType === 'Library' ?
+    {
+      [packageJsonFilename]: {
+        sideEffects: [],
+        scripts: {
+          compile:
+            // tsc builds but also generate types
+            `tsc -b ${tsConfigProjectFilename} --force`
+            + (isPublished ?
+              ` && babel ${prodFolderName}/${projectFolderName} --out-dir ${prodFolderName}/${commonJsFolderName}`
+              + '--plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs  --source-maps'
+            : '')
+            + ` && babel ${prodFolderName} --plugins annotate-pure-calls --out-dir ${prodFolderName} --source-maps`
+            + ' && pnpm prodify-lib',
+        },
+      },
     }
-  },
-} :
-{
-  [packageJsonFilename]: {
-    module: `./${projectFolderName}/main.js`,
-    dependencies: {
-      '@effect/experimental': '^0.56.0',
-    },
-    scripts: {
-      bundle: 'bundle-files',
-      compile: `pnpm bundle && pnpm prodify-bundle`,
-    }
-  },
-  [viteConfigFilename]: viteConfig(packageType),
-};
+  : {
+      [packageJsonFilename]: {
+        module: `./${projectFolderName}/main.js`,
+        scripts: {
+          bundle: 'bundle-files',
+          compile: `pnpm bundle && pnpm prodify-bundle`,
+        },
+      },
+      [viteConfigFilename]: viteConfig(packageType),
+    };
 
-const visibilityConfig = ({ repoName, isPublished, keywords }:{ readonly repoName: string; readonly isPublished:
- boolean; readonly keywords: ReadonlyArray<string>; }):Config =>
-  isPublished?
- {
+const visibilityConfig = ({
+  repoName,
+  isPublished,
+  keywords,
+}: {
+  readonly repoName: string;
+  readonly isPublished: boolean;
+  readonly keywords: ReadonlyArray<string>;
+}): Config =>
+  isPublished ?
+    {
       [packageJsonFilename]: {
         bugs: {
           url: `https://github.com/${owner}/${repoName}/issues`,
@@ -86,52 +104,50 @@ const visibilityConfig = ({ repoName, isPublished, keywords }:{ readonly repoNam
           'publish-to-npm': `cd ${prodFolderName} && npm publish --access=public && cd ..`,
         },
       },
-    }:
-    {
+    }
+  : {
       [packageJsonFilename]: {
-        private: true
+        private: true,
       },
     };
 
-const docGenConfig = (hasDocGen:boolean):Config => hasDocGen ? {
-  [packageJsonFilename]: {
-    scripts: {
-      docgen: 'docgen',
+const docGenConfig = (hasDocGen: boolean): Config =>
+  hasDocGen ?
+    {
+      [packageJsonFilename]: {
+        scripts: {
+          docgen: 'docgen',
+        },
+      },
+      [tsConfigDocGenFilename]: tsconfigDocgen,
+      [docgenConfigFilename]: docgenConfig,
     }
-  },
-  [tsConfigDocGenFilename]: tsconfigDocgen,
-  [docgenConfigFilename]: docgenConfig,
-}:
- {
- }
-;
-
-const _default= ({
-    repoName,
-    packageName,
-    dependencies,
-    devDependencies,
-    internalPeerDependencies,
-    externalPeerDependencies,
-    examples,
-    packageType,
-    isPublished,
-    hasDocGen,
-    keywords,
-  }:{
-   readonly repoName: string;
- readonly packageName: string;
-readonly dependencies: ReadonlyStringRecord;
- readonly devDependencies: ReadonlyStringRecord;
- readonly internalPeerDependencies: ReadonlyStringRecord;
- readonly externalPeerDependencies: ReadonlyStringRecord;
- readonly examples: ReadonlyArray<string>;
- readonly packageType: PackageType;
- readonly isPublished: boolean;
-readonly hasDocGen: boolean;
- readonly keywords: ReadonlyArray<string>;
- }):Config => {
-
+  : {};
+const _default = ({
+  repoName,
+  packageName,
+  dependencies,
+  devDependencies,
+  internalPeerDependencies,
+  externalPeerDependencies,
+  examples,
+  packageType,
+  isPublished,
+  hasDocGen,
+  keywords,
+}: {
+  readonly repoName: string;
+  readonly packageName: string;
+  readonly dependencies: ReadonlyStringRecord;
+  readonly devDependencies: ReadonlyStringRecord;
+  readonly internalPeerDependencies: ReadonlyStringRecord;
+  readonly externalPeerDependencies: ReadonlyStringRecord;
+  readonly examples: ReadonlyArray<string>;
+  readonly packageType: PackageType;
+  readonly isPublished: boolean;
+  readonly hasDocGen: boolean;
+  readonly keywords: ReadonlyArray<string>;
+}): Config => {
   const prodInternalPeerDependencies = {
     // Put npm version of internal peerDependencies
     ...Object.fromEntries(
@@ -152,12 +168,17 @@ readonly hasDocGen: boolean;
             import: `./${projectFolderName}/index.js`,
           },
         },
-        ...(Object.keys(dependencies).length === 0 ? {} : { dependencies }),
+        dependencies: {
+          ...effectDependencies,
+          ...dependencies,
+        },
         devDependencies: {
-          // Include self in dev version for tests if not already included. 
-          ...(packageName === configsPackageName ? {} : {
-            [`${slashedScope}${packageName}`]: `workspace:${slashedDevScope}${packageName}`,
-          }),
+          // Include self in dev version for tests if not already included.
+          ...(packageName === configsPackageName ?
+            {}
+          : {
+              [`${slashedScope}${packageName}`]: `workspace:${slashedDevScope}${packageName}@*`,
+            }),
           ...devDependencies,
         },
         ...((
@@ -187,11 +208,10 @@ readonly hasDocGen: boolean;
           checks: 'pnpm circular && pnpm lint && pnpm tscheck && pnpm test',
           test: 'vitest run',
           'clean-prod': `shx rm -rf ${prodFolderName} && shx mkdir -p ${prodFolderName}`,
-          build:
-            'pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..',
+          build: 'pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..',
           examples: examples
             .map((exampleName) => `${tsExecuter} ${examplesFolderName}/${exampleName}`)
-            .join('&&')
+            .join('&&'),
         },
         // Must be present even for private packages as it can be used for other purposes
         repository: repository(repoName, packageName),
@@ -201,10 +221,10 @@ readonly hasDocGen: boolean;
           + (packageName === repoName ? '' : `/tree/master/packages/${packageName}`),
       },
     },
-    buildConfig({packageType, isPublished}),
+    buildConfig({ packageType, isPublished }),
     visibilityConfig({ repoName, isPublished, keywords }),
-    docGenConfig(hasDocGen)
+    docGenConfig(hasDocGen),
   );
 };
 
-export default _default
+export default _default;

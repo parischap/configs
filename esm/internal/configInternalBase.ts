@@ -5,15 +5,17 @@
  */
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
+  configsPackageName,
   eslintConfigFilename,
   packageJsonFilename,
   prettierConfigFilename,
   prettierIgnoreFilename,
   slashedDevScope,
+  slashedScope,
   tsConfigBaseFilename,
   tsConfigFilename,
   tsConfigNonProjectFilename,
-  tsConfigProjectFilename
+  tsConfigProjectFilename,
 } from '../constants.js';
 import eslintConfigBrowser from './eslintConfigBrowser.js';
 import eslintConfigLibrary from './eslintConfigLibrary.js';
@@ -27,9 +29,9 @@ import tsConfigEsmBrowser from './tsconfigProjectBrowser.js';
 import tsConfigEsmLibrary from './tsconfigProjectLibrary.js';
 import tsConfigEsmNode from './tsconfigProjectNode.js';
 
-import type { Config, Environment, ReadonlyStringRecord } from "../types.js";
+import type { Config, Environment, ReadonlyStringRecord } from '../types.js';
 
-const environmentConfig = (environment:Environment):Config =>
+const environmentConfig = (environment: Environment): Config =>
   environment === 'Browser' ?
     {
       [tsConfigProjectFilename]: tsConfigEsmBrowser,
@@ -45,11 +47,17 @@ const environmentConfig = (environment:Environment):Config =>
       [eslintConfigFilename]: eslintConfigLibrary,
     };
 
-export default ({ packageName, description, environment,scripts }:{
- readonly packageName: string;
- readonly description: string;
- readonly environment:Environment; 
- readonly scripts: ReadonlyStringRecord}):Config => ({
+export default ({
+  packageName,
+  description,
+  environment,
+  scripts,
+}: {
+  readonly packageName: string;
+  readonly description: string;
+  readonly environment: Environment;
+  readonly scripts: ReadonlyStringRecord;
+}): Config => ({
   // We could have a globa prettier.config.js. But it makes sense tio have it at the same level as the eslint.config.js
   [prettierConfigFilename]: prettierConfig,
   [prettierIgnoreFilename]: prettierIgnore,
@@ -64,16 +72,25 @@ export default ({ packageName, description, environment,scripts }:{
     author: 'Jérôme MARTIN',
     license: 'MIT',
     scripts: {
+      'update-config-files': 'jiti node_modules/@parischap/configs/esm/bin/update-config-files.ts',
       tscheck: `tsc -b ${tsConfigFilename} --force --noEmit`,
       lint: 'eslint .',
       'lint-rules': 'pnpx @eslint/config-inspector',
       format: 'prettier . --write',
-      'update-config-files': 'node ./node_modules/update-config-files',
       'clean-config-files': `shx rm -f ${packageJsonFilename} && shx rm -f ${tsConfigFilename}`,
       'clean-node-modules': 'shx rm -rf node_modules',
       'reinstall-all-dependencies': 'pnpm i --force',
-      ...scripts
-    }
+      ...scripts,
+    },
+    devDependencies: {
+      /**
+       * Import configs in dev version to generate config files. Do it here so we can find it
+       * at `node_modules/@parischap/configs` in all packages. Necessary for the
+       * `update-config-files` script so as not to have to install bin executables which would
+       * force us to reinstall the configs package after every modification
+       */
+      [`${slashedScope}${configsPackageName}`]: `workspace:${slashedDevScope}${configsPackageName}@*`,
+    },
   },
   ...environmentConfig(environment),
 });

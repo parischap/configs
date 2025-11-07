@@ -1,8 +1,8 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import { allFiles, prodFolderName, projectFolderName, typesFolderName } from '../constants.js';
-import type { ReadonlyRecord } from "../types.js";
+import type { ReadonlyRecord } from '../types.js';
 
-const _default:ReadonlyRecord= {
+const _default: ReadonlyRecord = {
   extends: './tsconfig.base.json',
   include: [`${projectFolderName}/${allFiles}`],
   compilerOptions: {
@@ -15,4 +15,4 @@ const _default:ReadonlyRecord= {
   },
 };
 
-export default _default
+export default _default;

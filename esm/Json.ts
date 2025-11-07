@@ -6,7 +6,7 @@ import { prettyStringify } from './utils.js';
 export const stringify = (value: unknown) =>
   Effect.try({
     try: () => prettyStringify(value),
-    catch: (e:unknown) =>
+    catch: (e: unknown) =>
       PortError.make({
         originalError: e,
         originalFunctionName: 'JSON.stringify',
@@ -17,7 +17,7 @@ export const stringify = (value: unknown) =>
 export const parse = (text: string) =>
   Effect.try({
     try: () => JSON.parse(text) as unknown,
-    catch: (e:unknown) =>
+    catch: (e: unknown) =>
       PortError.make({
         originalError: e,
         originalFunctionName: 'JSON.parse',

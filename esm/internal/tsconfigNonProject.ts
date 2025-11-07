@@ -6,9 +6,9 @@ import {
   projectFolderName,
   viteTimeStampFilenamePattern,
 } from '../constants.js';
-import type { ReadonlyRecord } from "../types.js";
+import type { ReadonlyRecord } from '../types.js';
 
-const _default:ReadonlyRecord= {
+const _default: ReadonlyRecord = {
   extends: './tsconfig.base.json',
   exclude: [projectFolderName, npmFolderName, prodFolderName, viteTimeStampFilenamePattern],
   compilerOptions: {
@@ -25,4 +25,4 @@ const _default:ReadonlyRecord= {
   },
 };
 
-export default _default
+export default _default;

@@ -26,15 +26,12 @@ import {
 
 interface ConfigArray extends ReadonlyArray<Config> {}
 
-const typescriptConfigs:ConfigArray = defineConfig(eslint.configs.recommended, {
+const typescriptConfigs: ConfigArray = defineConfig(eslint.configs.recommended, {
   // Add no rules here because they might get overridden by the typedTypescriptConfig
   name: 'typescriptConfig',
   // Add html plugin so we can lint template literals inside javascript code
-  plugins: { functional:  functional as never, html:html as never},
-  extends: [
-    functional.configs.strict as never,
-    functional.configs.stylistic as never,
-  ],
+  plugins: { functional: functional as never, html: html as never },
+  extends: [functional.configs.strict as never, functional.configs.stylistic as never],
   languageOptions: {
     parserOptions: {
       ecmaFeatures: { impliedStrict: true },
@@ -45,7 +42,7 @@ const typescriptConfigs:ConfigArray = defineConfig(eslint.configs.recommended, {
   },
 });
 
-const untypedTypescriptConfigs:ConfigArray = defineConfig(
+const untypedTypescriptConfigs: ConfigArray = defineConfig(
   // The typescript-eslint-parser requested by the functional plugin is included in all typescript-eslint configs. Add no rules here because they might get overridden by the typedTypescriptConfig
   tseslint.configs.strict,
   {
@@ -54,7 +51,7 @@ const untypedTypescriptConfigs:ConfigArray = defineConfig(
   },
 );
 
-const typedTypescriptConfigs:ConfigArray = defineConfig(
+const typedTypescriptConfigs: ConfigArray = defineConfig(
   // The typescript-eslint-parser requested by the functional plugin is included in all typescript-eslint configs
   tseslint.configs.strictTypeChecked,
   {
@@ -113,7 +110,7 @@ const typedTypescriptConfigs:ConfigArray = defineConfig(
   },
 );
 
-const javascriptRulesMitigationConfigs:ConfigArray = defineConfig({
+const javascriptRulesMitigationConfigs: ConfigArray = defineConfig({
   name: 'untypedJavascriptRulesMitigationConfigs',
   // Here, we modify rules that don't require type information
   rules: {
@@ -140,10 +137,10 @@ const javascriptRulesMitigationConfigs:ConfigArray = defineConfig({
   },
 });
 
-const htmlConfigs:ConfigArray = defineConfig({
+const htmlConfigs: ConfigArray = defineConfig({
   name: 'htmlConfig',
   plugins: {
-    html:html as never,
+    html: html as never,
   },
   extends: ['html/recommended'],
   language: 'html/html',
@@ -152,17 +149,14 @@ const htmlConfigs:ConfigArray = defineConfig({
   },
 });
 
-const ymlConfigs:ConfigArray = defineConfig(
-  eslintPluginYml.configs['flat/recommended'] as never,
-  {
-    name: 'ymlConfig',
-    rules: {
-      'yml/no-empty-mapping-value': 'off',
-    },
+const ymlConfigs: ConfigArray = defineConfig(eslintPluginYml.configs['flat/recommended'] as never, {
+  name: 'ymlConfig',
+  rules: {
+    'yml/no-empty-mapping-value': 'off',
   },
-);
+});
 
-const markdownConfigs:ConfigArray = defineConfig([
+const markdownConfigs: ConfigArray = defineConfig([
   {
     name: 'mdConfig',
     plugins: {
@@ -173,21 +167,21 @@ const markdownConfigs:ConfigArray = defineConfig([
   },
 ]);
 
-const jsonConfigs:ConfigArray = defineConfig({
+const jsonConfigs: ConfigArray = defineConfig({
   ignores: ['package-lock.json'],
   plugins: { json: json as never },
   language: 'json/json',
   extends: ['json/recommended'],
 });
 
-const jsoncConfigs:ConfigArray = defineConfig({
-  plugins: { json:json as never },
+const jsoncConfigs: ConfigArray = defineConfig({
+  plugins: { json: json as never },
   language: 'json/jsonc',
   extends: ['json/recommended'],
 });
 
-const json5Configs:ConfigArray = defineConfig({
-  plugins: { json:json as never },
+const json5Configs: ConfigArray = defineConfig({
+  plugins: { json: json as never },
   language: 'json/json5',
   extends: ['json/recommended'],
 });
@@ -197,14 +191,18 @@ const json5Configs:ConfigArray = defineConfig({
  * object applies to the files specified in its files property. If several objects apply to a file,
  * properties of all applicable objects are merged. If the same property appears in several objects,
  * the latest one prevails.
- *
  */
 
-const scopeConfig = ({ configs, files, ignores = [] }:{
- readonly configs: ConfigArray;
- readonly files: ReadonlyArray<string>;
- readonly ignores?: ReadonlyArray<string>;
- }) => configs.map((config) => ({
+const scopeConfig = ({
+  configs,
+  files,
+  ignores = [],
+}: {
+  readonly configs: ConfigArray;
+  readonly files: ReadonlyArray<string>;
+  readonly ignores?: ReadonlyArray<string>;
+}) =>
+  configs.map((config) => ({
     ...config,
     files: [...files],
     ignores: [...ignores],
@@ -212,7 +210,7 @@ const scopeConfig = ({ configs, files, ignores = [] }:{
 
 const untypedJsFiles = allJsInMdFiles;
 
-const _default:ConfigArray =  defineConfig([
+const _default: ConfigArray = defineConfig([
   // This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
   globalIgnores([prodFolderName + '/', viteTimeStampFilenamePattern], 'ignoreConfig'),
   scopeConfig({ configs: typescriptConfigs, files: allJsFiles }),

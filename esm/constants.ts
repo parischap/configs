@@ -1,6 +1,10 @@
 /**
- * Posix paths are understood in all environments (including Windows). And configuration files (like package.json, `tsconfig.json`,...) only understand Posix paths. For that reason, this package works only with Posix paths. Only issue is when reading a directory with the `{recursive:true}` option, we get some local-system paths that we must therefore convert with the `utils.fromOsPathToPosixPath` function
- **/
+ * Posix paths are understood in all environments (including Windows). And configuration files (like
+ * package.json, `tsconfig.json`,...) only understand Posix paths. For that reason, this package
+ * works only with Posix paths. Only issue is when reading a directory with the `{recursive:true}`
+ * option, we get some local-system paths that we must therefore convert with the
+ * `utils.fromOsPathToPosixPath` function
+ */
 
 export const owner = 'parischap';
 export const scope = '@' + owner;
@@ -25,23 +29,23 @@ export const tsConfigBaseFilename = `tsconfig.base.json`;
 export const tsConfigDocGenFilename = `tsconfig.${docgenMark}.json`;
 export const tsConfigProjectFilename = `tsconfig.${projectMark}.json`;
 export const tsConfigNonProjectFilename = `tsconfig.${nonProjectMark}.json`;
-// Needs to be a .js file because will be imported in prod by a Node (non-typescript) executable
-export const configFilename = 'project.config.js';
-export const prettierConfigFilename = 'prettier.config.js';
-export const eslintConfigFilename = 'eslint.config.js';
+export const configFilename = 'project.config.ts';
+export const prettierConfigFilename = 'prettier.config.ts';
+export const eslintConfigFilename = 'eslint.config.ts';
 export const madgeConfigFilename = '.madgerc';
 export const readMeFilename = 'README.md';
 export const licenseFilename = 'LICENSE';
 export const pnpmWorkspaceFilename = 'pnpm-workspace.yaml';
 export const pnpmLockFilename = 'pnpm-lock.yaml';
 export const actionFilename = 'action.yml';
-export const viteConfigFilename = 'vite.config.js';
+export const viteConfigFilename = 'vite.config.ts';
 export const viteTimeStampFilenamePattern = 'vite.config.ts.timestamp-*.mjs';
-export const vitestConfigFilename = 'vitest.config.js';
+export const vitestConfigFilename = 'vitest.config.ts';
 export const vscodeWorkspaceFilenamePattern = '*.code-workspace';
 
 export const configsPackageName = 'configs';
 export const testUtilsPackageName = 'test-utils';
+export const topPackageName = 'myeffectdevs';
 
 export const internalFolderName = 'internal';
 export const tsBuildInfoFolderName = '.tsbuildinfo';
@@ -106,7 +110,7 @@ export const lintingAndFormattingDependencies = {
   '@eslint/markdown': '^7.3.0',
   '@html-eslint/eslint-plugin': '^0.47.0',
   '@html-eslint/parser': '^0.47.0',
-  '@eslint/json': '^0.13.2',
+  '@eslint/json': '^0.14.0',
   prettier: '^3.6.2',
   'typescript-eslint': '^8.45.0',
   'prettier-plugin-jsdoc': '^1.3.3',
@@ -116,15 +120,55 @@ export const lintingAndFormattingDependencies = {
 };
 
 // These dependencies are necessary at the top
-export const vscodeDependencies = {
-    // Used by vscode plugins
-      ...lintingAndFormattingDependencies,
-   // Used by vscode, see `typescript.tsdk` key of settings.json
-      typescript: '^5.9.3',
-      // Needed by the vscode vitest plugin
-      vitest: '^3.2.4',
-      // Better have the same version across the whole repo
-        '@tsconfig/strictest': '^2.0.6',
-        // Better have the same version across the whole repo
-        '@types/node': '^24.7.0',
+export const topDependencies = {
+  // Used by vscode plugins
+  ...lintingAndFormattingDependencies,
+  // Used by vscode, see `typescript.tsdk` key of settings.json
+  typescript: '^5.9.3',
+  // Needed by the vscode vitest plugin
+  vitest: '^4.0.7',
+  // Necessary at the top because used by top tsconfig.json
+  '@tsconfig/strictest': '^2.0.6',
+  // Necessary at the top because used by top tsconfig.json
+  '@types/node': '^24.7.0',
+  // Used by eslint and the `update-config-files` script
+  jiti: '2.6.1',
+};
+
+export const docGenDependencies = {
+  '@effect/docgen': '^0.5.2',
+  // tsx must be installed because it is used by docgen (strangely, it is not requested as a dev-dependency
+  tsx: '^4.20.6',
+};
+
+export const effectDependencies = {
+  effect: '^3.18.1',
+  '@effect/experimental': '0.57.0',
+};
+
+export const effectPlatformDependencies = {
+  '@effect/platform': '^0.93.0',
+  '@effect/platform-node': '^0.100.0',
+  '@effect/cluster': '^0.52.5',
+  '@effect/rpc': '^0.72.1',
+  '@effect/sql': '^0.48.0',
+  '@effect/workflow': '^0.12.2',
+};
+
+export const repoOnlyDependencies = {
+  '@effect/language-service': '^0.55.2',
+  // Better have the same version across the whole repo
+  shx: '^0.4.0',
+  // Better have the same version across the whole repo
+  madge: '^8.0.0',
+  // At some point, rolldown will be default in vite. But not the case for the moment
+  // Not necessary in all configurations but vite is installed by vitest in any case so better install it here
+  vite: 'npm:rolldown-vite@^7.1.17',
+  // Not necessary in all configurations but better have the same version across the whole repo
+  'vite-node': '^5.0.0',
+  // Not necessary in all configurations but best if shared when neeeded
+  '@babel/core': '^7.28.4',
+  'babel-plugin-annotate-pure-calls': '^0.5.0',
+  '@babel/plugin-transform-export-namespace-from': '^7.27.1',
+  '@babel/plugin-transform-modules-commonjs': '^7.27.1',
 };

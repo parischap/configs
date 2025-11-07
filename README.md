@@ -1,15 +1,15 @@
 <!-- LTeX: language=en-US -->
 
-Goal of this package is to generate all the necessary configuration files (eslint.config.js, prettier.config.js,...) of a monorepo or package. In case of a monorepo, it must generate all these files at the root level and in each package contained in the `packages` directory. To that extent, each package (in the case of a monorepo, the root level and each package contained in the `packages` directory) must contain a project.config.js file that indicates the files to be created.  
+Goal of this package is to generate all the necessary configuration files (eslint.config.js, prettier.config.js,...) of a monorepo or package. In case of a monorepo, it must generate all these files at the root level and in each package contained in the `packages` directory. To that extent, each package (in the case of a monorepo, the root level and each package contained in the `packages` directory) must contain a project.config.js file that indicates the files to be created.
 
 # 1 - Use cases
+
 This package is meant to be used in the following situations:
 
 ## 1.1 - Libraries
 
-
-
 ## 1.2 Standalone executable
+
 A standalone executable is simply a program that can be run by node. It does not need anything: all its dependencies must be bundled inside the executable and no `package.json` must be generated. For node to know it's an `esm` program without having to try compiling it as a `cjs` program first, a standalone executable must have a `.mjs` extension.
 
 The code of the executable can be split in several modules all under the `esm/` directory, but the entry module must bear the name `index.ts`. This `index.ts` can export functions for test purposes.
@@ -17,6 +17,7 @@ The code of the executable can be split in several modules all under the `esm/` 
 A standalone executable can be private or public.
 
 For public libraries, the build phase must:
+
 - transpile all modules from Typescript to a widely natively understandable javascript. Transpilation is performed by `tsc` for `esm` output and by `babel` for `cjs` output. Type files get also generated for `esm` output.
 
 Each module in a library except those under `esm/internal` must be documented.
@@ -35,7 +36,8 @@ A library must import itself as `devDependency` for test purposes.
 
 ## 1.6 App client
 
-This program must in any case ship with a `package.json` file so node knows 
+This program must in any case ship with a `package.json` file so node knows
+
 - creation of a standalone executable: the executable must be located under the `esm/` directory and be called `main.ts`. All files used by it must be under the `esm/internal/` directory. The executable will get bundled during the build and will be added as binary in `package.json` so clients can call it with `pnpm main`. The package can also include an `index.js` file that can be used to reexport stuff.
 
 In both cases, the `README.md` file present at the top of the package is copied to the `dist/` directory a license file gets automatically generated in the `dist/` directory.
@@ -74,6 +76,7 @@ Following is a list of some parameters to provide to the `configSubRepo` and `co
 - **keywords**: a list of keywords for packages published to npm.
 
 The `configs` package uses itself to generate its configuration files. To that extent, the following procedure must be followed for that package only if no `package.json` is present:
+
 ```bash
 rm tsconfig.json # it imports `@tsconfig/strictest/tsconfig.json` which is not installed yet
 pnpx vite-node esm/bin/update-config-files.ts
@@ -84,6 +87,8 @@ For other packages, the procedure to follow is:
 
 - run `pnpm update-config-files` at the target package root. Alternatively, in a monorepo, you can run `pnpm update-all-config-files` at the root of the monorepo.
 - run `pnpm build`
+
+Compared to vscode, jiti has the advantage of not reading `tsconfig.json`
 
 When a package is built, you can push it to github. Upon creating a new release, the `publish` github workflow will automatically publish the package to npm if this is a public package (see github.workflows.publish.template.ts).
 
@@ -126,6 +131,6 @@ To publish a package for the first time, just proceed as usual by publishing a n
 # 4 - About package.json:
 
 ## Dependencies
+
 When including a dependency with `link:`, a symlink is created in node_modules to the target package. This implies that this package does not need to exist, that any modification to the package are immediately reflected but also that bin executables are not installed. Inversely, when including a dependency with `file:`, the target package is copied into node_modules. Changes will only take effect after `pnpm i` est called and bin executables will be installed.
 When including a dependency with the `workspace:` protocol, a symlink is created in node_modules to the target package.
-

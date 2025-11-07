@@ -17,11 +17,7 @@
  *   directory an `index.md` file.
  */
 
-import {
-  docgenFolderName,
-  docsFolderName,
-  packagesFolderName,
-} from '../constants.js';
+import { docgenFolderName, docsFolderName, packagesFolderName } from '../constants.js';
 
 import {
   Error as PlatformError,

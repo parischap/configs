@@ -6,9 +6,9 @@ import {
   projectFolderName,
   tsConfigDocGenFilename,
 } from '../constants.js';
-import type { ReadonlyRecord } from "../types.js";
+import type { ReadonlyRecord } from '../types.js';
 
-const _default:ReadonlyRecord = {
+const _default: ReadonlyRecord = {
   parseCompilerOptions: `./${tsConfigDocGenFilename}`,
   examplesCompilerOptions: `./${tsConfigDocGenFilename}`,
   srcDir: `./${projectFolderName}`,
@@ -21,4 +21,4 @@ const _default:ReadonlyRecord = {
   enforceVersion: false,
 };
 
-export default _default
+export default _default;

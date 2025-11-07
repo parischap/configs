@@ -2,47 +2,48 @@
 /**
  * Copies `esm/README.md` if there is one to `dist`. Generates the `LICENSE` file directly under
  * `dist`. Copies `esm/package.json` to `dist` but spreads the `publishConfig` key. Also adds a
- * `bin` key with all the bin executables present under `esm/bin/` and removes keys with undefined values. Creates a `package.json` file under `dist/esm/`
- * so that files in this directory can import one another. It is not necessary to create one under
- * `dist/cjs/` for transpiled packages as `type: 'commonjs'` is the default. Creates a directory
- * with a `package.json` in `dist/` for each file directly under `esm/` except `index.ts`.
+ * `bin` key with all the bin executables present under `esm/bin/` and removes keys with undefined
+ * values. Creates a `package.json` file under `dist/esm/` so that files in this directory can
+ * import one another. It is not necessary to create one under `dist/cjs/` for transpiled packages
+ * as `type: 'commonjs'` is the default. Creates a directory with a `package.json` in `dist/` for
+ * each file directly under `esm/` except `index.ts`.
  */
 import { FileSystem as PlatformFs, Path as PlatformPath } from '@effect/platform';
 import {
-    NodeFileSystem as PlatformNodeFs,
-    NodePath as PlatformNodePath,
+  NodeFileSystem as PlatformNodeFs,
+  NodePath as PlatformNodePath,
 } from '@effect/platform-node';
 import {
-    Array,
-    Cause,
-    Effect,
-    Either,
-    Equal,
-    Exit,
-    Function,
-    Layer,
-    Option,
-    Predicate,
-    Record,
-    Stream,
-    String,
-    Tuple,
-    flow,
-    pipe,
+  Array,
+  Cause,
+  Effect,
+  Either,
+  Equal,
+  Exit,
+  Function,
+  Layer,
+  Option,
+  Predicate,
+  Record,
+  Stream,
+  String,
+  Tuple,
+  flow,
+  pipe,
 } from 'effect';
 import * as Json from '../Json.js';
 import {
-    binariesFolderName,
-    commonJsFolderName,
-    internalFolderName,
-    licenseFilename,
-    packageJsonFilename,
-    prodFolderName,
-    projectFolderName,
-    readMeFilename,
-    slashedDevScope,
-    slashedScope,
-    typesFolderName,
+  binariesFolderName,
+  commonJsFolderName,
+  internalFolderName,
+  licenseFilename,
+  packageJsonFilename,
+  prodFolderName,
+  projectFolderName,
+  readMeFilename,
+  slashedDevScope,
+  slashedScope,
+  typesFolderName,
 } from '../constants.js';
 import license from '../internal/license.js';
 import { deepMerge, fromOsPathToPosixPath, isSubPathOf } from '../utils.js';
