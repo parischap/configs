@@ -69,12 +69,20 @@ const typedTypescriptConfigs: ConfigArray = defineConfig(
             },
             to: 'Immutable',
           },
+          {
+            type: {
+              from: 'lib',
+              name: 'Error',
+            },
+            to: 'Immutable',
+          },
         ],
       },
     },
     languageOptions: {
       parserOptions: {
         projectService: true,
+        //tsconfigRootDir: import.meta.dirname,
       },
     },
     /**

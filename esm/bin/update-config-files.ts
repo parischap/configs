@@ -12,8 +12,7 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import { type Dirent } from 'node:fs';
 import { mkdir, readdir, stat, writeFile } from 'node:fs/promises';
-import * as path from 'node:path';
-import { fileURLToPath } from 'url';
+import { dirname, join, normalize, relative, resolve } from 'node:path/posix';
 import {
   configFilename,
   configsPackageName,
@@ -21,6 +20,7 @@ import {
   githubFolderName,
   lintingAndFormattingDependencies,
   packageJsonFilename,
+  packagesFolderName,
   pnpmLockFilename,
   projectFolderName,
   readMeFilename,
@@ -28,9 +28,10 @@ import {
   viteTimeStampFilenamePattern,
   vscodeWorkspaceFilenamePattern,
 } from '../constants.js';
+import configMonoRepo from '../internal/configMonoRepo.js';
 import configOnePackageRepo from '../internal/configOnePackageRepo.js';
+import configSubRepo from '../internal/configSubRepo.js';
 import configTop from '../internal/configTop.js';
-import { ReadonlyRecord } from '../types.js';
 import {
   deepMerge,
   fromOsPathToPosixPath,
@@ -40,8 +41,7 @@ import {
   prettyStringify,
 } from '../utils.js';
 
-const posixPath = path.posix;
-const normalize = posixPath.normalize.bind(posixPath);
+const posixDirname = fromOsPathToPosixPath(import.meta.dirname);
 
 // List of configuration files for which an error must not be reported if they are present in the package and not overridden by project.config.js
 const patternsToIgnore = [
@@ -63,10 +63,6 @@ const patternsToIgnoreRegExp = new RegExp(
 // List of folders where configuration files might be found
 const foldersToInclude = [githubFolderName];
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const packageName = packageNameFromCWD();
-
 /*publishConfig: {
       main: `./${commonJsFolderName}/index.js`,
       types: `./${typesFolderName}/index.d.ts`,
@@ -78,10 +74,16 @@ const packageName = packageNameFromCWD();
       },
     },*/
 
-const readMissingDir = async (folder: string): Promise<Dirent[]> => {
+const readDirEvenIfMissing = async ({
+  folder,
+  recursive,
+}: {
+  readonly folder: string;
+  readonly recursive: boolean;
+}): Promise<Dirent[]> => {
   /* eslint-disable-next-line functional/no-try-statements*/
   try {
-    return await readdir(folder, { recursive: true, withFileTypes: true });
+    return await readdir(folder, { recursive, withFileTypes: true });
   } catch (e: unknown) {
     if (typeof e === 'object' && e !== null && 'code' in e && e.code === 'ENOENT') return [];
     /* eslint-disable-next-line functional/no-throw-statements*/
@@ -102,90 +104,43 @@ const fileExists = async (path: string): Promise<boolean> => {
   }
 };
 
-const applyConfig = async (config: ReadonlyRecord, targetPath: string) => {
-  const filesToCreate = Object.keys(config).map(normalize);
-  /* eslint-disable-next-line functional/no-expression-statements*/
-  console.log('\tDetermining potential conflicting files');
+const applyConfig = async ({
+  packagePath,
+  packageName,
+  level,
+}: {
+  readonly packagePath: string;
+  readonly packageName: string;
+  readonly level:
+    | 'top'
+    | 'configsRepo'
+    | 'otherMonorepo'
+    | 'onePackageRepo'
+    | 'subRepo'
+    | 'unknown';
+}) => {
+  const targetPath = join(packagePath, packageName);
+  const configPath = join(targetPath, configFilename);
 
-  const files = await Promise.all([
-    readdir(targetPath, { withFileTypes: true }),
-    ...foldersToInclude.map((f) => readMissingDir(posixPath.join(targetPath, f))),
-  ]);
-
-  const unexpectedConfigFiles = files
-    .flat()
-    .filter((dirent) => dirent.isFile())
-    .map((dirent) =>
-      posixPath.relative(
-        targetPath,
-        posixPath.join(fromOsPathToPosixPath(dirent.parentPath), dirent.name),
-      ),
-    )
-    .filter((path) => !filesToCreate.includes(path) && !patternsToIgnoreRegExp.test(path));
-
-  if (unexpectedConfigFiles.length > 0)
-    /* eslint-disable-next-line functional/no-throw-statements*/
-    throw new Error(
-      'Following unexpected files where found in the package:\n'
-        + unexpectedConfigFiles.join(',\n'),
-    );
-
-  /* eslint-disable-next-line functional/no-expression-statements*/
-  console.log('\tWriting configuration files');
-  /* eslint-disable-next-line functional/no-loop-statements*/
-  for (const [filename, fileContent] of Object.entries(config)) {
-    const contentToWriteFunc =
-      getExtension(filename) === '.json' ? () => prettyStringify(fileContent)
-      : typeof fileContent === 'string' ? () => fileContent
-      : () => {
-          /* eslint-disable-next-line functional/no-throw-statements*/
-          throw new Error(
-            `Entry '${filename}' in '${configFilename}' must have value of type string`,
-          );
-        };
-
-    const contentToWrite = contentToWriteFunc();
-
-    const targetFilename = posixPath.join(targetPath, filename);
-    // Create directory in case it does not exist
-    /* eslint-disable-next-line functional/no-expression-statements*/
-    await mkdir(posixPath.dirname(targetFilename), { recursive: true });
-
-    /* eslint-disable-next-line functional/no-expression-statements*/
-    await writeFile(targetFilename, contentToWrite);
+  if (level === 'top' || level === 'configsRepo') {
+    const hasConfigFile = await fileExists(configPath);
+    if (hasConfigFile)
+      /* eslint-disable-next-line functional/no-throw-statements*/
+      throw new Error(`'${packageName}': no '${configFilename}' file allowed`);
   }
-};
 
-/* eslint-disable-next-line functional/no-expression-statements*/
-console.log(`Creating default config files for: '${packageName}'`);
-
-const isConfigPackage = packageName === configsPackageName;
-const isTopPackage = packageName === topPackageName;
-
-if (isConfigPackage || isTopPackage) {
-  const hasConfig = await fileExists(configFilename);
-  if (hasConfig)
-    /* eslint-disable-next-line functional/no-throw-statements*/
-    throw new Error(`Package '${configsPackageName}' must not contain a file '${configFilename}'`);
-}
-
-const topConfigFunc = () =>
-  configTop({
-    description: 'Top repo of my developments',
-  });
-
-if (isConfigPackage || isTopPackage)
-  /* eslint-disable-next-line functional/no-expression-statements*/
-  console.log('\tUsing default configuration');
-else
-  /* eslint-disable-next-line functional/no-expression-statements*/
-  console.log(`\tReading '${configFilename}'`);
-
-const configFunc =
-  isConfigPackage ?
-    () =>
-      Promise.resolve(
-        deepMerge(
+  const configFunc =
+    level === 'top' ?
+      async () => {
+        console.log(`'${packageName}': using default top configuration`);
+        return configTop({
+          description: 'Top repo of my developments',
+        });
+      }
+    : level === 'configsRepo' ?
+      async () => {
+        console.log(`'${packageName}': using default configs configuration`);
+        return deepMerge(
           configOnePackageRepo({
             description: 'Utility to generate configuration files in a repository',
             dependencies: {
@@ -220,36 +175,167 @@ const configFunc =
               },
             },
           },
-        ),
-      )
-  : isTopPackage ? () => Promise.resolve(topConfigFunc())
-  : async () => {
-      const contents: unknown = await import(
-        posixPath.join(
-          fromOsPathToPosixPath(path.relative(__dirname, path.resolve())),
-          configFilename,
-        )
-      );
+        );
+      }
+    : async () => {
+        try {
+          // if passed a relative path, import uses current module path as reference path
+          const contents = await import(relative(posixDirname, configPath));
+          if (!isRecord(contents) || !('default' in contents) || !isRecord(contents['default']))
+            /* eslint-disable-next-line functional/no-throw-statements*/
+            throw new Error(
+              `'${packageName}': '${configFilename}' must export a non-null default object`,
+            );
+          return contents['default'];
+        } catch (e) {
+          if (level === 'unknown')
+            throw new Error(`'${packageName}': ${e instanceof Error ? e.message : 'Error'}`, {
+              cause: e,
+            });
+          const configFunc =
+            level === 'otherMonorepo' ?
+              () => {
+                console.log(
+                  `'${packageName}': error while reading '${configFilename}', using default monorepo configuration`,
+                );
+                return configMonoRepo({ description: 'Default monorepo' });
+              }
+            : level === 'onePackageRepo' ?
+              () => {
+                console.log(
+                  `'${packageName}': error while reading '${configFilename}', using default one-package repo configuration`,
+                );
+                return configOnePackageRepo({
+                  description: 'Utility to generate configuration files in a repository',
+                  environment: 'Node',
+                  packageType: 'Library',
+                  isPublished: false,
+                  hasDocGen: false,
+                });
+              }
+            : () => {
+                console.log(
+                  `'${packageName}': error while reading '${configFilename}', using default subrepo configuration`,
+                );
+                return configSubRepo({
+                  description: 'Default subrepo',
+                  environment: 'Node',
+                  packageType: 'Library',
+                  isPublished: false,
+                  hasDocGen: false,
+                });
+              };
+          return configFunc();
+        }
+      };
 
-      if (!isRecord(contents) || !('default' in contents) || !isRecord(contents['default']))
-        /* eslint-disable-next-line functional/no-throw-statements*/
-        throw new Error(`Config file '${configFilename}' must export a non-null default object`);
+  const config = await configFunc();
+  const filesToCreate = Object.keys(config).map(normalize);
+  /* eslint-disable-next-line functional/no-expression-statements*/
+  console.log(`'${packageName}': Determining potential conflicting files`);
 
-      return contents['default'];
-    };
-const config = await configFunc();
-/* eslint-disable-next-line functional/no-expression-statements*/
-await applyConfig(config, '.');
+  const files = await Promise.all([
+    readdir(targetPath, { withFileTypes: true }),
+    ...foldersToInclude.map((f) =>
+      readDirEvenIfMissing({ folder: join(targetPath, f), recursive: true }),
+    ),
+  ]);
 
-if (isConfigPackage) {
-  const hasTopPackageJson = await fileExists(`../../${packageJsonFilename}`);
-  if (!hasTopPackageJson) {
+  const unexpectedConfigFiles = files
+    .flat()
+    .filter((dirent) => dirent.isFile())
+    .map((dirent) =>
+      relative(targetPath, join(fromOsPathToPosixPath(dirent.parentPath), dirent.name)),
+    )
+    .filter((path) => !filesToCreate.includes(path) && !patternsToIgnoreRegExp.test(path));
+
+  if (unexpectedConfigFiles.length > 0)
+    /* eslint-disable-next-line functional/no-throw-statements*/
+    throw new Error(
+      `'${packageName}': Following unexpected files where found in the package:\n`
+        + unexpectedConfigFiles.join(',\n'),
+    );
+
+  /* eslint-disable-next-line functional/no-expression-statements*/
+  console.log(`'${packageName}': Writing configuration files`);
+  /* eslint-disable-next-line functional/no-loop-statements*/
+  for (const [filename, fileContent] of Object.entries(config)) {
+    const contentToWriteFunc =
+      getExtension(filename) === '.json' ? () => prettyStringify(fileContent)
+      : typeof fileContent === 'string' ? () => fileContent
+      : () => {
+          /* eslint-disable-next-line functional/no-throw-statements*/
+          throw new Error(
+            `'${packageName}': Entry '${filename}' in '${configFilename}' must have value of type string`,
+          );
+        };
+
+    const contentToWrite = contentToWriteFunc();
+
+    const targetFilename = join(targetPath, filename);
+    // Create directory in case it does not exist
     /* eslint-disable-next-line functional/no-expression-statements*/
-    console.log(`Creating default config files for: '${topPackageName}'`);
+    await mkdir(dirname(targetFilename), { recursive: true });
+
     /* eslint-disable-next-line functional/no-expression-statements*/
-    await applyConfig(topConfigFunc(), '../..');
+    await writeFile(targetFilename, contentToWrite);
   }
-}
+};
+
+const packageName = packageNameFromCWD();
+const isConfigsPackage = packageName === configsPackageName;
+if (isConfigsPackage) {
+  const topPath = '../../..';
+  /* eslint-disable-next-line functional/no-expression-statements*/
+  await applyConfig({ packagePath: topPath, packageName: topPackageName, level: 'top' });
+  const topPackagesPath = join(topPath, topPackageName, packagesFolderName);
+  const repoNames = (await readdir(topPackagesPath, { withFileTypes: true }))
+    .filter((dirent) => dirent.isDirectory)
+    .map((dirent) => dirent.name);
+  const repoApplyConfigPromises = repoNames.map(async (repoName) => {
+    const isMonoRepo = await fileExists(join(topPackagesPath, repoName, packagesFolderName));
+    return await applyConfig({
+      packagePath: topPackagesPath,
+      packageName: repoName,
+      level:
+        repoName === configsPackageName ? 'configsRepo'
+        : isMonoRepo ? 'otherMonorepo'
+        : 'onePackageRepo',
+    });
+  });
+  /* eslint-disable-next-line functional/no-expression-statements*/
+  await Promise.all(repoApplyConfigPromises);
+  const subRepoApplyConfigPromises = (
+    await Promise.all(
+      repoNames.map((repoName) =>
+        readDirEvenIfMissing({
+          folder: join(topPackagesPath, repoName, packagesFolderName),
+          recursive: false,
+        }),
+      ),
+    )
+  )
+    .flat()
+    .filter((dirent) => dirent.isDirectory)
+    .map((subRepoDirent) =>
+      applyConfig({
+        packagePath: subRepoDirent.parentPath,
+        packageName: subRepoDirent.name,
+        level: 'subRepo',
+      }),
+    );
+  /* eslint-disable-next-line functional/no-expression-statements*/
+  await Promise.all(subRepoApplyConfigPromises);
+} else
+  /* eslint-disable-next-line functional/no-expression-statements*/
+  await applyConfig({
+    packagePath: resolve(),
+    packageName,
+    level:
+      isConfigsPackage ? 'configsRepo'
+      : packageName === topPackageName ? 'top'
+      : 'unknown',
+  });
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 console.log('SUCCESS');
