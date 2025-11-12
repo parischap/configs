@@ -221,7 +221,6 @@ nav_order: ${order + 2}
 const result = await Effect.runPromiseExit(pipe(program, Effect.provide(live)));
 Exit.match(result, {
   onFailure: (cause) => {
-    // eslint-disable-next-line functional/no-expression-statements
     console.error(Cause.pretty(cause));
     process.exit(1);
   },

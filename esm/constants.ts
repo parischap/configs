@@ -1,18 +1,10 @@
-/**
- * Posix paths are understood in all environments (including Windows). And configuration files (like
- * package.json, `tsconfig.json`,...) only understand Posix paths. For that reason, this package
- * works only with Posix paths. Only issue is when reading a directory with the `{recursive:true}`
- * option, we get some local-system paths that we must therefore convert with the
- * `utils.fromOsPathToPosixPath` function
- */
-
 export const owner = 'parischap';
 export const scope = '@' + owner;
 export const devScope = scope + '-dev';
 export const slashedScope = scope + '/';
 export const slashedDevScope = devScope + '/';
 
-export const packageManager = `pnpm@10.20.0`;
+export const packageManager = `pnpm@10.22.0`;
 
 export const nonProjectMark = 'others';
 export const projectMark = 'esm';
@@ -143,7 +135,6 @@ export const docGenDependencies = {
 
 export const effectDependencies = {
   effect: '^3.18.1',
-  '@effect/experimental': '0.57.0',
 };
 
 export const effectPlatformDependencies = {
@@ -157,6 +148,7 @@ export const effectPlatformDependencies = {
 
 export const repoOnlyDependencies = {
   '@effect/language-service': '^0.55.2',
+  '@effect/experimental': '0.57.0',
   // Better have the same version across the whole repo
   shx: '^0.4.0',
   // Better have the same version across the whole repo

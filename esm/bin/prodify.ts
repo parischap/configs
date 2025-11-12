@@ -341,7 +341,6 @@ const program = Effect.gen(function* () {
 const result = await Effect.runPromiseExit(Effect.provide(program, live));
 Exit.match(result, {
   onFailure: (cause) => {
-    // eslint-disable-next-line functional/no-expression-statements
     console.error(Cause.pretty(cause));
     process.exit(1);
   },

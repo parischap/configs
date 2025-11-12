@@ -4,8 +4,8 @@ import globals from 'globals';
 import { allProjectJsFiles } from './constants.js';
 import eslintInternalConfigBase from './eslintInternalConfigBase.js';
 
-const _default: ReadonlyArray<Config> = [
-  ...eslintInternalConfigBase,
+export default (tsconfigRootDir: string): ReadonlyArray<Config> => [
+  ...eslintInternalConfigBase(tsconfigRootDir),
   {
     files: allProjectJsFiles,
     languageOptions: {
@@ -15,5 +15,3 @@ const _default: ReadonlyArray<Config> = [
     },
   },
 ];
-
-export default _default;

@@ -72,7 +72,8 @@ export default ({
     author: 'Jérôme MARTIN',
     license: 'MIT',
     scripts: {
-      'update-config-files': 'jiti node_modules/@parischap/configs/esm/bin/update-config-files.ts',
+      'update-config-files':
+        'vite-node node_modules/@parischap/configs/esm/bin/update-config-files.ts',
       tscheck: `tsc -b ${tsConfigFilename} --force --noEmit`,
       lint: 'eslint .',
       'lint-rules': 'pnpx @eslint/config-inspector',
@@ -84,12 +85,11 @@ export default ({
     },
     devDependencies: {
       /**
-       * Import configs in dev version to generate config files. Do it here so we can find it
-       * at `node_modules/@parischap/configs` in all packages. Necessary for the
-       * `update-config-files` script so as not to have to install bin executables which would
-       * force us to reinstall the configs package after every modification
+       * Import configs. Do it here so we can find it at `node_modules/@parischap/configs` in all
+       * packages. Necessary for the `update-config-files` script so as not to have to install bin
+       * executables which would force us to reinstall the configs package after every modification
        */
-      [`${slashedScope}${configsPackageName}`]: `workspace:${slashedDevScope}${configsPackageName}@*`,
+      [`${slashedScope}${configsPackageName}`]: 'latest',
     },
   },
   ...environmentConfig(environment),

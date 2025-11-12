@@ -15,21 +15,20 @@ import {
   packageJsonFilename,
   prodFolderName,
   projectFolderName,
-  slashedDevScope,
   slashedScope,
   tsConfigDocGenFilename,
   tsConfigProjectFilename,
   tsExecuter,
   viteConfigFilename,
 } from '../constants.js';
-import type { Config, PackageType, ReadonlyRecord, ReadonlyStringRecord } from '../types.js';
+import type { Config, PackageType, ReadonlyStringRecord } from '../types.js';
 import { deepMerge } from '../utils.js';
 import docgenConfig from './docgenConfig.js';
 import madgeConfig from './madgeConfig.js';
 import tsconfigDocgen from './tsconfigDocgen.js';
 import viteConfig from './viteConfig.js';
 
-const repository = (repoName: string, packageName: string): ReadonlyRecord => ({
+const repository = (repoName: string, packageName: string) => ({
   type: 'git',
   url: `git+https://github.com/${owner}/${repoName}.git`,
   ...(packageName === repoName ?
@@ -123,13 +122,12 @@ const docGenConfig = (hasDocGen: boolean): Config =>
       [docgenConfigFilename]: docgenConfig,
     }
   : {};
-const _default = ({
+export default ({
   repoName,
   packageName,
   dependencies,
   devDependencies,
-  internalPeerDependencies,
-  externalPeerDependencies,
+  peerDependencies,
   examples,
   packageType,
   isPublished,
@@ -140,32 +138,22 @@ const _default = ({
   readonly packageName: string;
   readonly dependencies: ReadonlyStringRecord;
   readonly devDependencies: ReadonlyStringRecord;
-  readonly internalPeerDependencies: ReadonlyStringRecord;
-  readonly externalPeerDependencies: ReadonlyStringRecord;
+  readonly peerDependencies: ReadonlyStringRecord;
   readonly examples: ReadonlyArray<string>;
   readonly packageType: PackageType;
   readonly isPublished: boolean;
   readonly hasDocGen: boolean;
   readonly keywords: ReadonlyArray<string>;
-}): Config => {
-  const prodInternalPeerDependencies = {
-    // Put npm version of internal peerDependencies
-    ...Object.fromEntries(
-      Object.entries(internalPeerDependencies).map(([depName, depVersion]) => [
-        slashedScope + depName,
-        depVersion,
-      ]),
-    ),
-  };
-
-  return deepMerge(
+}): Config =>
+  deepMerge(
     {
       [madgeConfigFilename]: madgeConfig,
       [packageJsonFilename]: {
         module: `./${projectFolderName}/index.js`,
         exports: {
           '.': {
-            import: `./${projectFolderName}/index.ts`,
+            // import .js so it does not need to be changed after build
+            import: `./${projectFolderName}/index.js`,
           },
         },
         dependencies: {
@@ -173,36 +161,15 @@ const _default = ({
           ...dependencies,
         },
         devDependencies: {
-          // Include self in dev version for tests if not already included.
+          // Include self for tests if not already included.
           ...(packageName === configsPackageName ?
             {}
           : {
-              [`${slashedScope}${packageName}`]: `workspace:${slashedDevScope}${packageName}@*`,
+              [`${slashedScope}${packageName}`]: 'latest',
             }),
           ...devDependencies,
         },
-        ...((
-          Object.keys(internalPeerDependencies).length === 0
-          && Object.keys(externalPeerDependencies).length === 0
-        ) ?
-          {}
-        : {
-            peerDependencies: {
-              // Put dev version of internal peerDependencies
-              ...Object.fromEntries(
-                Object.keys(internalPeerDependencies).map((depName) => [
-                  slashedScope + depName,
-                  `../${depName}/.`,
-                ]),
-              ),
-              ...externalPeerDependencies,
-            },
-          }),
-        publishConfig: {
-          ...(Object.keys(prodInternalPeerDependencies).length === 0 ?
-            {}
-          : { peerDependencies: prodInternalPeerDependencies }),
-        },
+        peerDependencies,
         scripts: {
           circular: `madge --extensions ts --circular --no-color --no-spinner ${projectFolderName}`,
           checks: 'pnpm circular && pnpm lint && pnpm tscheck && pnpm test',
@@ -225,6 +192,3 @@ const _default = ({
     visibilityConfig({ repoName, isPublished, keywords }),
     docGenConfig(hasDocGen),
   );
-};
-
-export default _default;

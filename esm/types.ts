@@ -1,3 +1,5 @@
+import { packageJsonFilename } from './constants.js';
+
 export type Environment = 'Node' | 'Library' | 'Browser';
 
 /**
@@ -64,6 +66,22 @@ export type ReadonlyRecord<K extends string | symbol = string, V = unknown> = {
   readonly [k in K]: V;
 };
 
+/* eslint-disable-next-line functional/type-declaration-immutability */
+export interface StringRecord extends Record<string, string> {}
+
 export interface ReadonlyStringRecord extends ReadonlyRecord<string, string> {}
 
-export interface Config extends ReadonlyRecord<string, string | ReadonlyRecord> {}
+export interface Config {
+  readonly [key: string]: string | ReadonlyRecord;
+  readonly [packageJsonFilename]?: {
+    readonly [key: string]: unknown;
+    readonly dependencies?: ReadonlyStringRecord;
+    readonly devDependencies?: ReadonlyStringRecord;
+    readonly peerDependencies?: ReadonlyStringRecord;
+  };
+}
+
+export const isArray: (v: unknown) => v is Array<unknown> = Array.isArray;
+
+export const isRecord = (v: unknown): v is Record =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);

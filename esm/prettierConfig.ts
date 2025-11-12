@@ -1,5 +1,6 @@
 // Whatever external package this file uses must be added as peerDependency
 import type { Config } from 'prettier';
+/* eslint-disable-next-line functional/prefer-immutable-types */
 const _default: Config = {
   printWidth: 100,
   singleQuote: true,

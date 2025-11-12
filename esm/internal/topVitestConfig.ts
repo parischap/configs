@@ -7,6 +7,7 @@ export default defineConfig({
       {
         test: {
           include: ['**/tests/*.ts'],
+          exclude: ['**/node_modules/**'],
           // it is recommended to define a name when using inline configs
           name: 'general',
           isolate: false,

@@ -1,6 +1,20 @@
 <!-- LTeX: language=en-US -->
 
-Goal of this package is to generate all the necessary configuration files (eslint.config.js, prettier.config.js,...) of a monorepo or package. In case of a monorepo, it must generate all these files at the root level and in each package contained in the `packages` directory. To that extent, each package (in the case of a monorepo, the root level and each package contained in the `packages` directory) must contain a project.config.js file that indicates the files to be created.
+Goal of this package is to generate all the necessary configuration files (eslint.config.ts, prettier.config.ts,...) of a monorepo or package.
+
+# Project organization
+
+All my Effect developments are under the same folder `myeffectdevs`.
+
+But some are public (visible by everybody on github and published on NPM), and some are private. There seems to be a possibility to have public and private submodules in a github repo. But integration with vscode seems incomplete. Also, the github pages documentation seems to be linked to a repo.
+
+For these reasons, I have decided to have several git projects under `myeffectdevs`.
+
+This allows me to have access to all my Effect devs from a single vscode instance (faster and less memory consumption). It also allows me to put all my projects in a pnpm workspace: I can then import them as dependencies from my local drive as if they were on NPM.
+
+With this organization, it is not necessary to use a vscode workspace. It would be useful if my devs were in folders not located under the same directory.
+
+In case of a monorepo, it must generate all these files at the root level and in each package contained in the `packages` directory. To that extent, each package (in the case of a monorepo, the root level and each package contained in the `packages` directory) must contain a project.config.js file that indicates the files to be created.
 
 # 1 - Use cases
 
@@ -78,8 +92,7 @@ Following is a list of some parameters to provide to the `configSubRepo` and `co
 The `configs` package uses itself to generate its configuration files. To that extent, the following procedure must be followed for that package only if no `package.json` is present:
 
 ```bash
-rm tsconfig.json # it imports `@tsconfig/strictest/tsconfig.json` which is not installed yet
-pnpx vite-node esm/bin/update-config-files.ts
+pnpx jiti esm/bin/update-config-files.ts
 pnpm i
 ```
 
@@ -132,5 +145,15 @@ To publish a package for the first time, just proceed as usual by publishing a n
 
 ## Dependencies
 
+Dependencies imported in a `package.json` and bin executables defined in it are available in all subdirectories (scripts are only available in the directory where the `package.json` is defined). Only `devDependencies` and bin executables should be added in that manner as each package must have the list of its real dependencies.
+
 When including a dependency with `link:`, a symlink is created in node_modules to the target package. This implies that this package does not need to exist, that any modification to the package are immediately reflected but also that bin executables are not installed. Inversely, when including a dependency with `file:`, the target package is copied into node_modules. Changes will only take effect after `pnpm i` est called and bin executables will be installed.
 When including a dependency with the `workspace:` protocol, a symlink is created in node_modules to the target package.
+
+# 5 - About paths
+
+In all configuration files (`package.json`, `tsconfig.json`, `eslint.config.ts`...), paths are written POSIX style. That's to make sure these files can be used on all platforms. We make the same choice for `project.config.ts`. For this reason, all paths in `constants.ts` are written POSIX style.
+
+However, when using file system functions, it's best to use directly paths understandable by the operating system. For instance, `path.posix.resolve()` skips the initial `C:\` for Windows paths and this leads to issues when using path.relative.
+
+`path.normalize` can be used to convert POSIX-style paths to OS paths.
