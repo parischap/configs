@@ -6,7 +6,6 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
   commonJsFolderName,
-  configsPackageName,
   docgenConfigFilename,
   effectDependencies,
   examplesFolderName,
@@ -161,12 +160,8 @@ export default ({
           ...dependencies,
         },
         devDependencies: {
-          // Include self for tests if not already included.
-          ...(packageName === configsPackageName ?
-            {}
-          : {
-              [`${slashedScope}${packageName}`]: 'latest',
-            }),
+          // Include self for tests if not already included
+          [`${slashedScope}${packageName}`]: 'latest',
           ...devDependencies,
         },
         peerDependencies,

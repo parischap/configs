@@ -21,14 +21,15 @@ import { Config } from '../types.js';
 import githubWorkflowsPages from './githubWorkflowsPages.js';
 import githubWorkflowsPublish from './githubWorkflowsPublish.js';
 import repoGitIgnoreConfig from './repoGitIgnoreConfig.js';
-import repoPnpmWorkspaceConfig from './repoPnpmWorkspaceConfig.js';
 
 export default ({
   hasDocGen,
   isPublished,
+  repoPnpmWorkspaceConfig,
 }: {
   readonly hasDocGen: boolean;
   readonly isPublished: boolean;
+  readonly repoPnpmWorkspaceConfig: string;
 }): Config => ({
   ...(isPublished ?
     { [`${githubFolderName}/${workflowsFolderName}/publish.yml`]: githubWorkflowsPublish }

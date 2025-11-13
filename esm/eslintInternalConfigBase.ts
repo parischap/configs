@@ -1,3 +1,10 @@
+/**
+ * See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-objects. Each
+ * object applies to the files specified in its files property. If several objects apply to a file,
+ * properties of all applicable objects are merged. If the same property appears in several objects,
+ * the latest one prevails.
+ */
+
 // Whatever external package this file uses must be added as peerDependency
 import eslint from '@eslint/js';
 import json from '@eslint/json';
@@ -5,10 +12,10 @@ import markdown from '@eslint/markdown';
 import html from '@html-eslint/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import functional from 'eslint-plugin-functional';
+import { importX } from 'eslint-plugin-import-x';
 import eslintPluginYml from 'eslint-plugin-yml';
 import { defineConfig, globalIgnores, type Config } from 'eslint/config';
 import globals from 'globals';
-
 import tseslint from 'typescript-eslint';
 import {
   allHtmlFiles,
@@ -28,11 +35,15 @@ import {
 interface ConfigArray extends ReadonlyArray<Config> {}
 
 /* eslint-disable-next-line functional/prefer-immutable-types */
-const typescriptConfigs: ConfigArray = defineConfig(eslint.configs.recommended, {
+const javascriptPreConfig: ConfigArray = defineConfig(eslint.configs.recommended, {
   // Add no rules here because they might get overridden by the typedTypescriptConfig
-  name: 'typescriptConfig',
+  name: 'javascriptPreConfig',
   // Add html plugin so we can lint template literals inside javascript code
   plugins: { functional: functional as never, html: html as never },
+  /**
+   * functional.configs.strict and functional.configs.stylistic contain rules that require type
+   * information. They must be deactivated for md files
+   */
   extends: [functional.configs.strict as never, functional.configs.stylistic as never],
   languageOptions: {
     parserOptions: {
@@ -44,24 +55,15 @@ const typescriptConfigs: ConfigArray = defineConfig(eslint.configs.recommended, 
   },
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
-const untypedTypescriptConfigs: ConfigArray = defineConfig(
-  // The typescript-eslint-parser requested by the functional plugin is included in all typescript-eslint configs. Add no rules here because they might get overridden by the typedTypescriptConfig
-  tseslint.configs.strict,
-  {
-    name: 'untypedTypescriptConfigs',
-    extends: [functional.configs.disableTypeChecked as never],
-  },
-);
-
-const typedTypescriptConfigs = (tsconfigRootDir: string): ConfigArray =>
+const javascriptConfigForNonMdFiles = (tsconfigRootDir: string): ConfigArray =>
   defineConfig(
-    // The typescript-eslint-parser requested by the functional plugin is included in all typescript-eslint configs
+    // The typescript-eslint-parser requested by the functional plugin and the eslint-plugin-import-x is included in all typescript-eslint configs
     tseslint.configs.strictTypeChecked,
     {
-      name: 'typedTypescriptConfig',
+      name: 'javascriptConfigForNonMdFiles',
+      plugins: { 'import-x': importX },
       extends: [
-        // These rules require typeChecking and are not cancelled by functional.configs.disableTypeChecked
+        /* These rules are ts-eslint rules (not rules of the functional plugin) which the functional plugin recommends to activate because they make sense for a functional programmings style. They require typeChecking and are not cancelled by functional.configs.disableTypeChecked */
         functional.configs.externalTypeScriptRecommended as never,
       ],
       settings: {
@@ -105,6 +107,16 @@ const typedTypescriptConfigs = (tsconfigRootDir: string): ConfigArray =>
           { allowNumber: true, allowBoolean: true },
         ],
         '@typescript-eslint/no-unnecessary-type-parameters': 'off', // Useful to avoid using any
+        'import-x/export': 'error',
+        'import-x/no-extraneous-dependencies': [
+          'error',
+          {
+            devDependencies: false,
+            peerDependencies: true,
+            optionalDependencies: false,
+            bundledDependencies: false,
+          },
+        ],
         'functional/immutable-data': 'error',
         /**
          * I did not manage to make prefer-immutable-types work because Effect.Option and
@@ -171,9 +183,75 @@ const typedTypescriptConfigs = (tsconfigRootDir: string): ConfigArray =>
   );
 
 /* eslint-disable-next-line functional/prefer-immutable-types */
-const javascriptRulesMitigationConfigs: ConfigArray = defineConfig({
-  name: 'untypedJavascriptRulesMitigationConfigs',
-  // Here, we modify rules that don't require type information
+const javascriptConfigForNonProjectNonMdFiles: ConfigArray = defineConfig({
+  name: 'javascriptConfigForNonProjectNonMdFiles',
+  // Here, we can mitigate rules defined in javascriptConfigForNonMdFiles specifically in non project files
+  rules: {
+    'import-x/no-extraneous-dependencies': [
+      'error',
+      {
+        devDependencies: true,
+        peerDependencies: true,
+        optionalDependencies: false,
+        bundledDependencies: false,
+      },
+    ],
+    // Let's allow console.log in setting files and assertions in test files
+    'functional/no-expression-statements': [
+      'error',
+      {
+        ignoreVoid: true,
+        ignoreCodePattern: [
+          //process.exit returns never, not void
+          'process\\.exit',
+          //'super\\(',
+          //'expect\\(',
+          'describe\\(',
+          'it\\(',
+          'TEUtils\\.',
+          //'console\\.log\\(',
+          '.+\n+satisfies\n+.+',
+          'Layer\\.launch\\(',
+        ],
+      },
+    ],
+  },
+});
+
+/* eslint-disable-next-line functional/prefer-immutable-types */
+const javascriptConfigForMdFiles: ConfigArray = defineConfig(
+  /**
+   * We don't perform typed checks in js files inside md files because types are usually unavailable
+   * (imports are not analyzed) and there are issues with virtual **.md/*.ts files created by
+   * typescript-eslint which the tsconfig file does not cover. Such files could be ignored by using
+   * the `allowDefaultProject` property but that would slow down linting too much. See
+   * typescript-eslint FAQ.
+   *
+   * The typescript-eslint-parser requested by the functional plugin is included in all
+   * typescript-eslint configs.
+   */
+  tseslint.configs.strict,
+  {
+    name: 'javascriptConfigForMdFiles',
+    // Deactivate rules that require type information that was activated in javascriptPreSetting
+    extends: [functional.configs.disableTypeChecked as never],
+  },
+);
+
+/* eslint-disable-next-line functional/prefer-immutable-types */
+const javascriptConfigForNonProjectFiles: ConfigArray = defineConfig({
+  name: 'javascriptConfigForNonProjectFiles',
+  languageOptions: {
+    globals: {
+      ...globals.nodeBuiltin,
+    },
+  },
+});
+
+/* eslint-disable-next-line functional/prefer-immutable-types */
+const javascriptPostConfig: ConfigArray = defineConfig({
+  name: 'javascriptPostConfig',
+  // Here, we mitigate rules that don't require type information.
   rules: {
     'no-redeclare': 'off', // We want to allow types and variables with same names
     '@typescript-eslint/no-namespace': 'off', // We want to be able to use namespaces
@@ -198,7 +276,6 @@ const javascriptRulesMitigationConfigs: ConfigArray = defineConfig({
     'functional/no-try-statements': 'off',
     // Add html rules so we can lint template literals inside javascript code
     ...html.configs.recommended.rules,
-    //'import/no-extraneous-dependencies': 'off'
   },
 });
 
@@ -257,13 +334,6 @@ const json5Configs: ConfigArray = defineConfig({
   extends: ['json/recommended'],
 });
 
-/**
- * See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-objects Each
- * object applies to the files specified in its files property. If several objects apply to a file,
- * properties of all applicable objects are merged. If the same property appears in several objects,
- * the latest one prevails.
- */
-
 /* eslint-disable-next-line functional/prefer-immutable-types */
 const scopeConfig = ({
   configs,
@@ -280,66 +350,28 @@ const scopeConfig = ({
     ignores: [...ignores],
   }));
 
-const untypedJsFiles = allJsInMdFiles;
-
 export default (tsconfigRootDir: string): ConfigArray =>
   defineConfig([
     // This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
     globalIgnores([prodFolderName + '/', viteTimeStampFilenamePattern], 'ignoreConfig'),
-    scopeConfig({ configs: typescriptConfigs, files: allJsFiles }),
-    scopeConfig({ configs: untypedTypescriptConfigs, files: untypedJsFiles }),
+    scopeConfig({ configs: javascriptPreConfig, files: allJsFiles }),
     scopeConfig({
-      configs: typedTypescriptConfigs(tsconfigRootDir),
+      configs: javascriptConfigForNonMdFiles(tsconfigRootDir),
       files: allJsFiles,
-      /**
-       * We don't perform typed checks in js files inside md files because types are usually
-       * unavailable (imports are not analyzed) and there are issues with virtual **.md/*.ts files
-       * created by typescript-eslint which the tsconfig file does not cover. Such files could be
-       * ignored by using the `allowDefaultProject` property but that would slow down linting too
-       * much. See typescript-eslint FAQ
-       */
-      ignores: untypedJsFiles,
+      ignores: allJsInMdFiles,
     }),
-    scopeConfig({ configs: javascriptRulesMitigationConfigs, files: allJsFiles }),
-    {
-      name: 'typescriptConfigForNonProject',
+    scopeConfig({
+      configs: javascriptConfigForNonProjectNonMdFiles,
+      files: allJsFiles,
+      ignores: [projectFolderName + '/**', ...allJsInMdFiles],
+    }),
+    scopeConfig({ configs: javascriptConfigForMdFiles, files: allJsInMdFiles }),
+    scopeConfig({
+      configs: javascriptConfigForNonProjectFiles,
       files: allJsFiles,
       ignores: [projectFolderName + '/**'],
-      languageOptions: {
-        globals: {
-          ...globals.nodeBuiltin,
-        },
-      },
-      // Here, we can mitigate rules that don't require type information in other files
-      rules: {},
-    },
-    {
-      name: 'typedTypescriptConfigForNonProject',
-      files: allJsFiles,
-      ignores: [projectFolderName + '/**', ...untypedJsFiles],
-      // Here, we can mitigate rules that require type information in other files
-      rules: {
-        // Let's allow console.log in setting files and assertions in test files
-        'functional/no-expression-statements': [
-          'error',
-          {
-            ignoreVoid: true,
-            ignoreCodePattern: [
-              //process.exit returns never, not void
-              'process\\.exit',
-              //'super\\(',
-              //'expect\\(',
-              'describe\\(',
-              'it\\(',
-              'TEUtils\\.',
-              //'console\\.log\\(',
-              '.+\n+satisfies\n+.+',
-              'Layer\\.launch\\(',
-            ],
-          },
-        ],
-      },
-    },
+    }),
+    scopeConfig({ configs: javascriptPostConfig, files: allJsFiles }),
     scopeConfig({ configs: htmlConfigs, files: allHtmlFiles }),
     scopeConfig({ configs: ymlConfigs, files: allYmlFiles }),
     scopeConfig({ configs: markdownConfigs, files: allMdFiles }),

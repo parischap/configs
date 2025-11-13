@@ -106,9 +106,8 @@ export const lintingAndFormattingDependencies = {
   prettier: '^3.6.2',
   'typescript-eslint': '^8.45.0',
   'prettier-plugin-jsdoc': '^1.3.3',
-  //'eslint-plugin-import': 'latest',
-  //'@typescript-eslint/parser': 'latest',
-  //'eslint-import-resolver-typescript': 'latest',
+  'eslint-plugin-import-x': '4.16.1',
+  'eslint-import-resolver-typescript': '4.4.4',
 };
 
 // These dependencies are necessary at the top

@@ -5,6 +5,7 @@ import { deepMerge, makeConfigWithLocalInternalDependencies } from '../utils.js'
 import configInternalBase from './configInternalBase.js';
 import configInternalPackage from './configInternalPackage.js';
 import configInternalRepo from './configInternalRepo.js';
+import onePackageRepoPnpmWorkspaceConfig from './onePackageRepoPnpmWorkspaceConfig.js';
 
 export default ({
   packageName,
@@ -41,7 +42,11 @@ export default ({
         environment,
         scripts,
       }),
-      configInternalRepo({ isPublished, hasDocGen }),
+      configInternalRepo({
+        isPublished,
+        hasDocGen,
+        repoPnpmWorkspaceConfig: onePackageRepoPnpmWorkspaceConfig,
+      }),
       configInternalPackage({
         packageName,
         repoName: packageName,

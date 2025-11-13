@@ -116,24 +116,20 @@ const toInternalExternalDependencies = (
   ];
 };
 
-const addAsIfNotEmpty = ({
-  key,
-  value,
-}: {
-  readonly key: string;
-  readonly value: ReadonlyRecord;
-}) => (Object.keys(value).length === 0 ? {} : { [key]: value });
-
 export const makeConfigWithLocalInternalDependencies = <C extends Config>(config: C): C => {
   const packageJsonConfig = config[packageJsonFilename];
 
   if (packageJsonConfig === undefined) return config;
 
-  const devDependencies = packageJsonConfig['devDependencies'] ?? {};
   const peerDependencies = packageJsonConfig['peerDependencies'] ?? {};
   const dependencies = Object.fromEntries(
     Object.entries(packageJsonConfig['dependencies'] ?? {}).filter(
       ([packageName]) => !(packageName in peerDependencies),
+    ),
+  );
+  const devDependencies = Object.fromEntries(
+    Object.entries(packageJsonConfig['devDependencies'] ?? {}).filter(
+      ([packageName]) => !(packageName in peerDependencies) && !(packageName in dependencies),
     ),
   );
 
@@ -145,35 +141,56 @@ export const makeConfigWithLocalInternalDependencies = <C extends Config>(config
   const [internalPeerDependencies, localInternalPeerDependencies, externalPeerDependencies] =
     toInternalExternalDependencies(peerDependencies);
 
+  const newPackageJsonConfig = {
+    ...packageJsonConfig,
+    dependencies: { ...localInternalDependencies, ...externalDependencies },
+    devDependencies: { ...localInternalDevDependencies, ...externalDevDependencies },
+    peerDependencies: { ...localInternalPeerDependencies, ...externalPeerDependencies },
+    publishConfig: {
+      dependencies: internalDependencies,
+      peerDependencies: internalPeerDependencies,
+    },
+  };
+
+  const newDependencies = newPackageJsonConfig.dependencies;
+  if (newDependencies !== undefined && Object.keys(newDependencies).length === 0)
+    /* @ts-expect-error This is not functional*/
+    delete newPackageJsonConfig.dependencies;
+
+  const newDevDependencies = newPackageJsonConfig.dependencies;
+  if (newDevDependencies !== undefined && Object.keys(newDevDependencies).length === 0)
+    /* @ts-expect-error This is not functional*/
+    delete newPackageJsonConfig.devDependencies;
+
+  const newPeerDependencies = newPackageJsonConfig.peerDependencies;
+  if (newPeerDependencies !== undefined && Object.keys(newPeerDependencies).length === 0)
+    /* @ts-expect-error This is not functional*/
+    delete newPackageJsonConfig.peerDependencies;
+
+  const publishConfig = newPackageJsonConfig.publishConfig;
+
+  const publishConfigDependencies = publishConfig.dependencies;
+  if (
+    publishConfigDependencies !== undefined
+    && Object.keys(publishConfigDependencies).length === 0
+  )
+    /* @ts-expect-error This is not functional*/
+    delete publishConfig.dependencies;
+
+  const publishConfigPeerDependencies = publishConfig.peerDependencies;
+  if (
+    publishConfigPeerDependencies !== undefined
+    && Object.keys(publishConfigPeerDependencies).length === 0
+  )
+    /* @ts-expect-error This is not functional*/
+    delete publishConfig.peerDependencies;
+
+  if (Object.keys(publishConfig).length === 0)
+    /* @ts-expect-error This is not functional*/
+    delete newPackageJsonConfig.publishConfig;
+
   return {
     ...config,
-    [packageJsonFilename]: {
-      ...config[packageJsonFilename],
-      ...addAsIfNotEmpty({
-        key: 'dependencies',
-        value: { ...localInternalDependencies, ...externalDependencies },
-      }),
-      ...addAsIfNotEmpty({
-        key: 'devDependencies',
-        value: { ...localInternalDevDependencies, ...externalDevDependencies },
-      }),
-      ...addAsIfNotEmpty({
-        key: 'peerDependencies',
-        value: { ...localInternalPeerDependencies, ...externalPeerDependencies },
-      }),
-      ...addAsIfNotEmpty({
-        key: 'publishConfig',
-        value: {
-          ...addAsIfNotEmpty({
-            key: 'dependencies',
-            value: internalDependencies,
-          }),
-          ...addAsIfNotEmpty({
-            key: 'peerDependencies',
-            value: internalPeerDependencies,
-          }),
-        },
-      }),
-    },
+    [packageJsonFilename]: newPackageJsonConfig,
   };
 };

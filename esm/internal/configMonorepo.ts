@@ -4,6 +4,7 @@ import { Config } from '../types.js';
 import { deepMerge, makeConfigWithLocalInternalDependencies } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
 import configInternalRepo from './configInternalRepo.js';
+import monoRepoPnpmWorkspaceConfig from './monoRepoPnpmWorkspaceConfig.js';
 
 export default ({
   packageName,
@@ -32,6 +33,7 @@ export default ({
         isPublished: true,
         // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
         hasDocGen: true,
+        repoPnpmWorkspaceConfig: monoRepoPnpmWorkspaceConfig,
       }),
     ),
   );
