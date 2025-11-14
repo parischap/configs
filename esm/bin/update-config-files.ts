@@ -24,6 +24,7 @@ import { basename, dirname, join, normalize, relative, resolve } from 'node:path
 import {
   configFilename,
   configsPackageName,
+  effectDependencies,
   effectPlatformDependencies,
   githubFolderName,
   lintingAndFormattingDependencies,
@@ -140,16 +141,17 @@ const applyConfig = async ({
             configOnePackageRepo({
               packageName,
               description: 'Utility to generate configuration files in a repository',
-              dependencies: {
-                ...effectPlatformDependencies,
-              },
               devDependencies: {
                 '@types/eslint': '^9.6.1',
                 '@types/eslint-config-prettier': '^6.11.3',
               },
-              peerDependencies: lintingAndFormattingDependencies,
+              peerDependencies: {
+                ...lintingAndFormattingDependencies,
+                ...effectDependencies,
+                ...effectPlatformDependencies,
+              },
               environment: 'Node',
-              packageType: 'Library',
+              buildMethod: 'None',
               isPublished: false,
               hasDocGen: false,
             }),
@@ -210,7 +212,7 @@ const applyConfig = async ({
                   packageName,
                   description: 'Default configuration of a one-package repo',
                   environment: 'Node',
-                  packageType: 'Library',
+                  buildMethod: 'Bundle',
                   isPublished: false,
                   hasDocGen: false,
                 });
@@ -224,7 +226,7 @@ const applyConfig = async ({
                   packageName,
                   description: 'Default subrepo',
                   environment: 'Node',
-                  packageType: 'Library',
+                  buildMethod: 'Transpile',
                   isPublished: false,
                   hasDocGen: false,
                 });

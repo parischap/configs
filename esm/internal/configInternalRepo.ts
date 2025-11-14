@@ -12,12 +12,9 @@ import {
   packageManager,
   pnpmWorkspaceFilename,
   repoOnlyDependencies,
-  slashedScope,
-  testUtilsPackageName,
   topDependencies,
   workflowsFolderName,
 } from '../constants.js';
-import { Config } from '../types.js';
 import githubWorkflowsPages from './githubWorkflowsPages.js';
 import githubWorkflowsPublish from './githubWorkflowsPublish.js';
 import repoGitIgnoreConfig from './repoGitIgnoreConfig.js';
@@ -25,12 +22,12 @@ import repoGitIgnoreConfig from './repoGitIgnoreConfig.js';
 export default ({
   hasDocGen,
   isPublished,
-  repoPnpmWorkspaceConfig,
+  monoRepoPnpmWorkspaceConfig,
 }: {
   readonly hasDocGen: boolean;
   readonly isPublished: boolean;
-  readonly repoPnpmWorkspaceConfig: string;
-}): Config => ({
+  readonly monoRepoPnpmWorkspaceConfig: string;
+}) => ({
   ...(isPublished ?
     { [`${githubFolderName}/${workflowsFolderName}/publish.yml`]: githubWorkflowsPublish }
   : {}),
@@ -38,15 +35,15 @@ export default ({
     { [`${githubFolderName}/${workflowsFolderName}/pages.yml`]: githubWorkflowsPages }
   : {}),
   [gitIgnoreFilename]: repoGitIgnoreConfig,
-  [pnpmWorkspaceFilename]: repoPnpmWorkspaceConfig,
+  ...(monoRepoPnpmWorkspaceConfig === '' ?
+    {}
+  : { [pnpmWorkspaceFilename]: monoRepoPnpmWorkspaceConfig }),
   [packageJsonFilename]: {
     packageManager,
     /* Import here devDependencies that must not appear more than once in a monorepo. Note that even those devDependecies that are imported at the top level need to be reimported here because they may be needed by github actions */
     devDependencies: {
       ...topDependencies,
       ...repoOnlyDependencies,
-      /** Import test-utils to handle tests */
-      [`${slashedScope}${testUtilsPackageName}`]: 'latest',
       ...(hasDocGen ? docGenDependencies : {}),
     },
 

@@ -6,6 +6,7 @@ export const slashedDevScope = devScope + '/';
 
 export const packageManager = `pnpm@10.22.0`;
 
+export const versionControlService = 'github.com';
 export const nonProjectMark = 'others';
 export const projectMark = 'esm';
 export const docgenMark = 'docgen';
@@ -146,6 +147,7 @@ export const effectPlatformDependencies = {
 };
 
 export const repoOnlyDependencies = {
+  ...effectPlatformDependencies,
   '@effect/language-service': '^0.55.2',
   '@effect/experimental': '0.57.0',
   // Better have the same version across the whole repo

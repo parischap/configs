@@ -1,8 +1,8 @@
 // This module must not import any external dependency. It must be runnable without a package.json
-import type { PackageType, ReadonlyRecord } from '../types.js';
+import type { BuildMethod, ReadonlyRecord } from '../types.js';
 import { deepMerge, prettyStringify } from '../utils.js';
 
-const _default = (packageType: PackageType): string => {
+const _default = (buildMethod: BuildMethod): string => {
   const baseConfig: ReadonlyRecord = {
     build: {
       outDir: '${prodFolderName}',
@@ -10,7 +10,7 @@ const _default = (packageType: PackageType): string => {
     },
   };
   const ssrConfig: ReadonlyRecord =
-    packageType !== 'AppClient' ?
+    buildMethod !== 'AppClient' ?
       {
         build: {
           ssr: './esm.index.ts',

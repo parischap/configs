@@ -4,7 +4,6 @@ import {
   gitIgnoreFilename,
   packageJsonFilename,
   packageManager,
-  pnpmWorkspaceFilename,
   topDependencies,
   topPackageName,
   vitestConfigFilename,
@@ -13,7 +12,6 @@ import { Config } from '../types.js';
 import { deepMerge, makeConfigWithLocalInternalDependencies } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
 import topGitIgnoreConfig from './topGitIgnoreConfig.js';
-import topPnpmWorkspaceConfig from './topPnpmWorkspaceConfig.js';
 import topVitestConfig from './topVitestConfig.js';
 
 export default ({ description }: { readonly description: string }): Config =>
@@ -34,7 +32,6 @@ export default ({ description }: { readonly description: string }): Config =>
       {
         [gitIgnoreFilename]: topGitIgnoreConfig,
         [vitestConfigFilename]: topVitestConfig,
-        [pnpmWorkspaceFilename]: topPnpmWorkspaceConfig,
         [packageJsonFilename]: {
           packageManager,
           devDependencies: {

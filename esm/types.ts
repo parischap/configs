@@ -56,7 +56,7 @@ export type Environment = 'Node' | 'Library' | 'Browser';
  * if it's a public library, or the one in the `dist/` directory if it's a private library) in
  * production.
  */
-export type PackageType = 'Library' | 'StandaloneExecutable' | 'AppServer' | 'AppClient';
+export type BuildMethod = 'None' | 'Transpile' | 'Bundle' | 'BundleWithDeps' | 'AppClient';
 
 export type Record<K extends string | symbol = string, V = unknown> = {
   [k in K]: V;
@@ -73,8 +73,9 @@ export interface ReadonlyStringRecord extends ReadonlyRecord<string, string> {}
 
 export interface Config {
   readonly [key: string]: string | ReadonlyRecord;
-  readonly [packageJsonFilename]?: {
+  readonly [packageJsonFilename]: {
     readonly [key: string]: unknown;
+    readonly name: string;
     readonly dependencies?: ReadonlyStringRecord;
     readonly devDependencies?: ReadonlyStringRecord;
     readonly peerDependencies?: ReadonlyStringRecord;

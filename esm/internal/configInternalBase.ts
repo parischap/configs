@@ -29,9 +29,9 @@ import tsConfigEsmBrowser from './tsconfigProjectBrowser.js';
 import tsConfigEsmLibrary from './tsconfigProjectLibrary.js';
 import tsConfigEsmNode from './tsconfigProjectNode.js';
 
-import type { Config, Environment, ReadonlyStringRecord } from '../types.js';
+import type { Environment, ReadonlyStringRecord } from '../types.js';
 
-const environmentConfig = (environment: Environment): Config =>
+const environmentConfig = (environment: Environment) =>
   environment === 'Browser' ?
     {
       [tsConfigProjectFilename]: tsConfigEsmBrowser,
@@ -57,7 +57,7 @@ export default ({
   readonly description: string;
   readonly environment: Environment;
   readonly scripts: ReadonlyStringRecord;
-}): Config => ({
+}) => ({
   // We could have a globa prettier.config.js. But it makes sense tio have it at the same level as the eslint.config.js
   [prettierConfigFilename]: prettierConfig,
   [prettierIgnoreFilename]: prettierIgnore,
@@ -85,11 +85,17 @@ export default ({
     },
     devDependencies: {
       /**
-       * Import configs. Do it here so we can find it at `node_modules/@parischap/configs` in all
-       * packages. Necessary for the `update-config-files` script so as not to have to install bin
-       * executables which would force us to reinstall the configs package after every modification
+       * Import configs if not already included. Do it here so we can find it at
+       * `node_modules/@parischap/configs` in all packages. Necessary for the `update-config-files`
+       * script so as not to have to install bin executables which would force us to reinstall the
+       * configs package after every modification
        */
-      [`${slashedScope}${configsPackageName}`]: 'latest',
+      ...(packageName === configsPackageName ?
+        {}
+      : {
+          [`${slashedScope}${configsPackageName}`]:
+            "sourceInProd='GITHUB'&versionInProd=''&parent=''&buildTypeInProd='DEV'&buildTypeInDev='DEV'",
+        }),
     },
   },
   ...environmentConfig(environment),

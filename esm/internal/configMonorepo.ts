@@ -33,7 +33,7 @@ export default ({
         isPublished: true,
         // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
         hasDocGen: true,
-        repoPnpmWorkspaceConfig: monoRepoPnpmWorkspaceConfig,
+        monoRepoPnpmWorkspaceConfig,
       }),
     ),
   );

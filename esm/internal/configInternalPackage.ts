@@ -6,6 +6,7 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
   commonJsFolderName,
+  configsPackageName,
   docgenConfigFilename,
   effectDependencies,
   examplesFolderName,
@@ -15,12 +16,14 @@ import {
   prodFolderName,
   projectFolderName,
   slashedScope,
+  testUtilsPackageName,
   tsConfigDocGenFilename,
   tsConfigProjectFilename,
   tsExecuter,
+  versionControlService,
   viteConfigFilename,
 } from '../constants.js';
-import type { Config, PackageType, ReadonlyStringRecord } from '../types.js';
+import type { BuildMethod, Config, ReadonlyStringRecord } from '../types.js';
 import { deepMerge } from '../utils.js';
 import docgenConfig from './docgenConfig.js';
 import madgeConfig from './madgeConfig.js';
@@ -29,7 +32,7 @@ import viteConfig from './viteConfig.js';
 
 const repository = (repoName: string, packageName: string) => ({
   type: 'git',
-  url: `git+https://github.com/${owner}/${repoName}.git`,
+  url: `git+https://${versionControlService}/${owner}/${repoName}.git`,
   ...(packageName === repoName ?
     {}
   : {
@@ -38,13 +41,13 @@ const repository = (repoName: string, packageName: string) => ({
 });
 
 const buildConfig = ({
-  packageType,
+  buildMethod,
   isPublished,
 }: {
-  readonly packageType: PackageType;
+  readonly buildMethod: BuildMethod;
   readonly isPublished: boolean;
 }): Config =>
-  packageType === 'Library' ?
+  buildMethod === 'Library' ?
     {
       [packageJsonFilename]: {
         sideEffects: [],
@@ -69,7 +72,7 @@ const buildConfig = ({
           compile: `pnpm bundle && pnpm prodify-bundle`,
         },
       },
-      [viteConfigFilename]: viteConfig(packageType),
+      [viteConfigFilename]: viteConfig(buildMethod),
     };
 
 const visibilityConfig = ({
@@ -80,7 +83,7 @@ const visibilityConfig = ({
   readonly repoName: string;
   readonly isPublished: boolean;
   readonly keywords: ReadonlyArray<string>;
-}): Config =>
+}) =>
   isPublished ?
     {
       [packageJsonFilename]: {
@@ -109,7 +112,7 @@ const visibilityConfig = ({
       },
     };
 
-const docGenConfig = (hasDocGen: boolean): Config =>
+const docGenConfig = (hasDocGen: boolean) =>
   hasDocGen ?
     {
       [packageJsonFilename]: {
@@ -121,6 +124,7 @@ const docGenConfig = (hasDocGen: boolean): Config =>
       [docgenConfigFilename]: docgenConfig,
     }
   : {};
+
 export default ({
   repoName,
   packageName,
@@ -128,7 +132,7 @@ export default ({
   devDependencies,
   peerDependencies,
   examples,
-  packageType,
+  buildMethod,
   isPublished,
   hasDocGen,
   keywords,
@@ -139,11 +143,11 @@ export default ({
   readonly devDependencies: ReadonlyStringRecord;
   readonly peerDependencies: ReadonlyStringRecord;
   readonly examples: ReadonlyArray<string>;
-  readonly packageType: PackageType;
+  readonly buildMethod: BuildMethod;
   readonly isPublished: boolean;
   readonly hasDocGen: boolean;
   readonly keywords: ReadonlyArray<string>;
-}): Config =>
+}) =>
   deepMerge(
     {
       [madgeConfigFilename]: madgeConfig,
@@ -160,8 +164,21 @@ export default ({
           ...dependencies,
         },
         devDependencies: {
-          // Include self for tests if not already included
-          [`${slashedScope}${packageName}`]: 'latest',
+          // Include self for tests. Use link: not file: so changes get immediately reflected
+          [`${slashedScope}${packageName}`]: 'SELF',
+          /**
+           * Include test-utils to handle tests except
+           *
+           * - in the configs package because the first time I build configs test-utils does not exist
+           *   yet
+           * - in the test-utils package because it already includes itself for tests
+           */
+          ...(packageName === configsPackageName || packageName === testUtilsPackageName ?
+            {}
+          : {
+              [`${slashedScope}${testUtilsPackageName}`]:
+                "sourceInProd='GITHUB'&versionInProd=''&parent=''&buildTypeInProd='DEV'&buildTypeInDev='DEV'",
+            }),
           ...devDependencies,
         },
         peerDependencies,
@@ -179,11 +196,11 @@ export default ({
         repository: repository(repoName, packageName),
         // Must be present even for private packages as it can be used for instance by docgen
         homepage:
-          `https://github.com/${owner}/${repoName}`
+          `https://${versionControlService}/${owner}/${repoName}`
           + (packageName === repoName ? '' : `/tree/master/packages/${packageName}`),
       },
     },
-    buildConfig({ packageType, isPublished }),
+    buildConfig({ buildMethod, isPublished }),
     visibilityConfig({ repoName, isPublished, keywords }),
     docGenConfig(hasDocGen),
   );

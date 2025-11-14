@@ -19,11 +19,11 @@
     "clean-prod": "shx rm -rf dist && shx mkdir -p dist",
     "build": "pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..",
     "examples": "",
-    "compile": "tsc -b tsconfig.esm.json --force && babel dist --plugins annotate-pure-calls --out-dir dist --source-maps && pnpm prodify-lib"
+    "bundle": "bundle-files",
+    "compile": "pnpm bundle && pnpm prodify-bundle"
   },
   "devDependencies": {
-    "@parischap/configs": "workspace:@parischap-dev/configs@*",
-    "@parischap/test-utils": "workspace:@parischap-dev/test-utils@*",
+    "@parischap/configs": "link:.",
     "typescript": "^5.9.3",
     "vitest": "^4.0.7",
     "@tsconfig/strictest": "^2.0.6",
@@ -43,7 +43,7 @@
     "@types/eslint-config-prettier": "^6.11.3"
   },
   "packageManager": "pnpm@10.22.0",
-  "module": "./esm/index.js",
+  "module": "./esm/main.js",
   "exports": {
     ".": {
       "import": "./esm/index.js"
@@ -61,15 +61,6 @@
       "import": "./esm/eslintConfigLibrary.ts"
     }
   },
-  "dependencies": {
-    "effect": "^3.18.1",
-    "@effect/platform": "^0.93.0",
-    "@effect/platform-node": "^0.100.0",
-    "@effect/cluster": "^0.52.5",
-    "@effect/rpc": "^0.72.1",
-    "@effect/sql": "^0.48.0",
-    "@effect/workflow": "^0.12.2"
-  },
   "peerDependencies": {
     "globals": "^16.4.0",
     "eslint": "^9.37.0",
@@ -86,13 +77,19 @@
     "typescript-eslint": "^8.45.0",
     "prettier-plugin-jsdoc": "^1.3.3",
     "eslint-plugin-import-x": "4.16.1",
-    "eslint-import-resolver-typescript": "4.4.4"
+    "eslint-import-resolver-typescript": "4.4.4",
+    "effect": "^3.18.1",
+    "@effect/platform": "^0.93.0",
+    "@effect/platform-node": "^0.100.0",
+    "@effect/cluster": "^0.52.5",
+    "@effect/rpc": "^0.72.1",
+    "@effect/sql": "^0.48.0",
+    "@effect/workflow": "^0.12.2"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/parischap/configs.git"
   },
   "homepage": "https://github.com/parischap/configs",
-  "sideEffects": [],
   "private": true
 }

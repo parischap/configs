@@ -92,10 +92,11 @@ Following is a list of some parameters to provide to the `configSubRepo` and `co
 The `configs` package uses itself to generate its configuration files. To that extent, the following procedure must be followed for that package only if no `package.json` is present:
 
 ```bash
-pnpx jiti esm/bin/update-config-files.ts
+pnpx vite-node esm/bin/update-config-files.ts
 pnpm i
 ```
 
+You may get an error if a `tsconfig.json` file exists and the `node_modules` directory has not been populated yet because `tsconfig.json` uses indirectly the `@tsconfig/strictest` dependency. In that case, the best solution is to delete the `tsconfig.json` file.
 For other packages, the procedure to follow is:
 
 - run `pnpm update-config-files` at the target package root. Alternatively, in a monorepo, you can run `pnpm update-all-config-files` at the root of the monorepo.
@@ -149,6 +150,8 @@ Dependencies imported in a `package.json` and bin executables defined in it are 
 
 When including a dependency with `link:`, a symlink is created in node_modules to the target package. This implies that this package does not need to exist, that any modification to the package are immediately reflected but also that bin executables are not installed. Inversely, when including a dependency with `file:`, the target package is copied into node_modules. Changes will only take effect after `pnpm i` est called and bin executables will be installed.
 When including a dependency with the `workspace:` protocol, a symlink is created in node_modules to the target package.
+
+We can include a dependency from github or another version service using: `git+https://versionService/owner/repo#version&path:subpath`. The part starting at `#` is optional. An example of sub-path is `packages/effect-lib` in the effect-libs repo. Version can be a github release, e.g. `effect-lib@0.11.0` or a semver in the form `semver:^2.0.0`.
 
 # 5 - About paths
 
