@@ -17,7 +17,7 @@ import {
   prodFolderName,
   projectFolderName,
 } from '../constants.js';
-import { fromOsPathToPosixPath, isSubPathOf } from '../utils.js';
+import { isSubPathOf } from '../utils.js';
 
 import { FileSystem as PlatformFs, Path as PlatformPath } from '@effect/platform';
 import {

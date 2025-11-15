@@ -1,3 +1,4 @@
+// This module must not import any external dependency. It must be runnable without a package.json
 import { isAbsolute, relative } from 'node:path';
 import {
   owner,
@@ -99,7 +100,7 @@ export const deepMerge: {
   ): MergedRecord<MergedRecord<MergedRecord<R1, R2>, R3>, R4>;
 } = (...Rs: ReadonlyArray<ReadonlyRecord>) => Rs.reduce(deepMerge2, {} as never) as never;
 
-const toInternalExternalDependencies = ({
+export const toInternalExternalDependencies = ({
   dependencies,
   isDevDependencies,
   packageName,
@@ -164,7 +165,6 @@ const toInternalExternalDependencies = ({
           ...(version === '' ? [] : [version]),
           ...(subRepoPath === '' ? [] : [`path:${subRepoPath}`]),
         ].join('&');
-
         return `git+https://${versionControlService}/${owner}/${repo}${params === '' ? '' : '#' + params}`;
       };
 

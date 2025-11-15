@@ -1,20 +1,14 @@
 <!-- LTeX: language=en-US -->
 
-Goal of this package is to generate all the necessary configuration files (eslint.config.ts, prettier.config.ts,...) of a monorepo or package.
+Goal of this package is to generate all the necessary configuration files (`eslint.config.ts`, `prettier.config.ts`, ...) of a monorepo or package.
 
 # Project organization
 
-All my Effect developments are under the same folder `myeffectdevs`.
+There are three levels:
 
-But some are public (visible by everybody on github and published on NPM), and some are private. There seems to be a possibility to have public and private submodules in a github repo. But integration with vscode seems incomplete. Also, the github pages documentation seems to be linked to a repo.
-
-For these reasons, I have decided to have several git projects under `myeffectdevs`.
-
-This allows me to have access to all my Effect devs from a single vscode instance (faster and less memory consumption). It also allows me to put all my projects in a pnpm workspace: I can then import them as dependencies from my local drive as if they were on NPM.
-
-With this organization, it is not necessary to use a vscode workspace. It would be useful if my devs were in folders not located under the same directory.
-
-In case of a monorepo, it must generate all these files at the root level and in each package contained in the `packages` directory. To that extent, each package (in the case of a monorepo, the root level and each package contained in the `packages` directory) must contain a project.config.js file that indicates the files to be created.
+- top: this is the level at which vscode is opened. It gives access to all my Effect repos which are under the packages folder. There is no need for a vscode workspace because vscode workspaces are used to fictively group packages located in diverse folders. At this level, we must install all the dependencies needed by vscode and its plugins (eslint, prettier, typescript, vitest...). This level is synchronized with a private github repository. However it does not cover the `packages` folder. We do not have a pnpm workspace at this level because it would allow us to import packages of a repo in another repo. That would work locally because all repos see the top level where the workspace would be defined but not in github where repos have no access to the top level. If we need to use a private repo in another repo, the only solution is to use a github link.
+- repo: this is the level at which all my repos are, be they monorepos or one-package repos. Each repo at this level is synchronized with a public or private github repository that includes the repo and its sub-repos (when there are some). All the processes (build, checks,...) must work locally but also in github where repos have no access to the top level. So we need to have at this level all the dependencies necessary for the build and checks processes (eslint, prettier, typescript, vitest...) as well as the config files necessary for these processes (vitest config file, vite config files if necessary...). We have a pnpm workspace at the level of each monorepo because importing a dependency from github only works for dependencies and devDependencies (not for peerDependencies). If a package in a monorepo needs a peerDependency, it must fetch it from npm (if it is a public dependency) or it must fetch it from within itself using the workspace syntax. Fetching a dependency from github would have the advantage of forcing me to commit after each change. Using the workspace syntax has the advantage of being very fast. Documentation pages are available at the level of each github repo. At repo level, we have a binary that
+- subrepo:
 
 # 1 - Use cases
 
@@ -96,8 +90,17 @@ pnpx vite-node esm/bin/update-config-files.ts
 pnpm i
 ```
 
-You may get an error if a `tsconfig.json` file exists and the `node_modules` directory has not been populated yet because `tsconfig.json` uses indirectly the `@tsconfig/strictest` dependency. In that case, the best solution is to delete the `tsconfig.json` file.
-For other packages, the procedure to follow is:
+`update-config-files` reads the keys and values of a default object exported by the file named`project.config.ts` located in the current path. It creates a file for each key of that object with the key as name. If the key ends with .json, the value is converted from an object to a json string with JSON.stringfy. Otherwise, the value must be a string and it is written as is. `update-config-files` will also check that there are no unexpected config files present in the package, i.e. config files which are not created by itself.
+
+When `update-config-files` is executed at the top package level, it does not read a `project.config.ts` file, which must not be present. A default configuration stored in `update-config-files` is used instead.
+
+When `update-config-files` is executed at the configs package level, it does not read a`project.config.ts` file, which must not be present. A default configuration stored in `update-config-files` is used instead. Moreover, in that case only:
+
+- it will install configuration files for the top package and all repos and sub-repos ;
+- if there is no `project.config.ts` in one of the repos or sub-repos, or if this file exists but contains errors, a default configuration stored in `update-config-files` is used instead.
+- the `update-config-files` binary used is the one present locally on that machine. However, it imports the `project.config.ts` files present in each repo and sub-repo and these files import themselves the configs package that is included in the `package.json` file of that package if there is one. Which means it will import the configurations as they are stored on github!
+- an error may be encountered if a `tsconfig.json` file exists in the configs package and the `node_modules` directory has not been populated yet. That's because, before doing anything, vite-node tries to load `tsconfig.json` which indirectly uses the `@tsconfig/strictest` dependency (which has not been installed yet). In that case, the best solution is to delete the `tsconfig.json` file.
+  For other packages, the procedure to follow is:
 
 - run `pnpm update-config-files` at the target package root. Alternatively, in a monorepo, you can run `pnpm update-all-config-files` at the root of the monorepo.
 - run `pnpm build`
@@ -160,3 +163,7 @@ In all configuration files (`package.json`, `tsconfig.json`, `eslint.config.ts`.
 However, when using file system functions, it's best to use directly paths understandable by the operating system. For instance, `path.posix.resolve()` skips the initial `C:\` for Windows paths and this leads to issues when using path.relative.
 
 `path.normalize` can be used to convert POSIX-style paths to OS paths.
+
+# 6 - Vite and Vitest
+
+Although it is possible to have the vitest configuration inside the vite configuration files, this is not a good idea in our case because we do not have a vite configuration in all repos whereas all repos need a testing configuration. So it's good to keep matters separate.

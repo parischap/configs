@@ -183,6 +183,7 @@ const program = Effect.gen(function* () {
   yield* Effect.log('Determining list of exported files');
   const indexContents = yield* fs.readFileString(path.join(projectPath, 'index.ts'), 'utf-8');
 
+  // Remove './tests' entry
   const exports = Array.unfold(
     indexContents,
     flow(

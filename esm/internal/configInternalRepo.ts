@@ -5,47 +5,64 @@
  */
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
-  docGenDependencies,
+  docsFolderName,
   githubFolderName,
   gitIgnoreFilename,
+  owner,
   packageJsonFilename,
   packageManager,
   pnpmWorkspaceFilename,
-  repoOnlyDependencies,
-  topDependencies,
+  repoDevDependencies,
   workflowsFolderName,
 } from '../constants.js';
 import githubWorkflowsPages from './githubWorkflowsPages.js';
 import githubWorkflowsPublish from './githubWorkflowsPublish.js';
 import repoGitIgnoreConfig from './repoGitIgnoreConfig.js';
+import repoPnpmWorkspaceConfig from './repoPnpmWorkspaceConfig.js';
 
 export default ({
+  packageName,
   hasDocGen,
   isPublished,
-  monoRepoPnpmWorkspaceConfig,
+  description,
 }: {
+  readonly packageName: string;
   readonly hasDocGen: boolean;
   readonly isPublished: boolean;
-  readonly monoRepoPnpmWorkspaceConfig: string;
+  readonly description: string;
 }) => ({
   ...(isPublished ?
+    /* Github actions need to be at the root of the github repo. This action calls a script `build-and-publish` but changes the working directory to the published package directory before calling them. So this script must be in configInternalPackage.ts.
+     */
     { [`${githubFolderName}/${workflowsFolderName}/publish.yml`]: githubWorkflowsPublish }
   : {}),
   ...(hasDocGen ?
-    { [`${githubFolderName}/${workflowsFolderName}/pages.yml`]: githubWorkflowsPages }
+    {
+      /* Github actions need to be at the root of the github repo. This action calls a script `prepare-docs'`  */
+      [`${githubFolderName}/${workflowsFolderName}/pages.yml`]: githubWorkflowsPages,
+      // Used by the github pages.yml action
+      [`${docsFolderName}/index.md`]: description,
+      // Used by the github pages.yml action
+      [`${docsFolderName}/_config.yml`]: `remote_theme: mikearnaldi/just-the-docs
+search_enabled: true
+aux_links:
+  "GitHub":
+    - "//github.com/${owner}/${packageName}"`,
+    }
   : {}),
   [gitIgnoreFilename]: repoGitIgnoreConfig,
-  ...(monoRepoPnpmWorkspaceConfig === '' ?
-    {}
-  : { [pnpmWorkspaceFilename]: monoRepoPnpmWorkspaceConfig }),
+  [pnpmWorkspaceFilename]: repoPnpmWorkspaceConfig,
   [packageJsonFilename]: {
     packageManager,
-    /* Import here devDependencies that must not appear more than once in a monorepo. Note that even those devDependecies that are imported at the top level need to be reimported here because they may be needed by github actions */
-    devDependencies: {
-      ...topDependencies,
-      ...repoOnlyDependencies,
-      ...(hasDocGen ? docGenDependencies : {}),
-    },
+    devDependencies: repoDevDependencies,
+    ...(hasDocGen ?
+      {
+        scripts: {
+          'prepare-docs':
+            'pnpm -r --if-present -include-workspace-root=true --parallel docgen && compile-docs',
+        },
+      }
+    : {}),
 
     /*pnpm: {
       patchedDependencies: {},

@@ -1,4 +1,3 @@
-// Whatever external package this file uses must be added as peerDependency
 import { type Config } from 'eslint/config';
 import globals from 'globals';
 import { allProjectJsFiles } from './constants.js';

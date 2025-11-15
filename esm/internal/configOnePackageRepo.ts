@@ -39,12 +39,15 @@ export default ({
         packageName,
         description,
         environment,
-        scripts,
+        scripts: {
+          'build-all': 'pnpm build',
+        },
       }),
       configInternalRepo({
+        packageName,
         isPublished,
         hasDocGen,
-        monoRepoPnpmWorkspaceConfig: '',
+        description,
       }),
       configInternalPackage({
         packageName,

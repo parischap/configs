@@ -17,6 +17,8 @@
  *   directory an `index.md` file.
  */
 
+// To be modified: it must also collect files in the `docs/modules/` directory at the repo level.
+
 import { docgenFolderName, docsFolderName, packagesFolderName } from '../constants.js';
 
 import {

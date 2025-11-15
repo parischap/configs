@@ -48,6 +48,9 @@
     ".": {
       "import": "./esm/index.js"
     },
+    "./tests": {
+      "import": "./esm/index.tests.js"
+    },
     "./prettierConfig": {
       "import": "./esm/prettierConfig.ts"
     },

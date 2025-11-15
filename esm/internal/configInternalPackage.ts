@@ -8,10 +8,12 @@ import {
   commonJsFolderName,
   configsPackageName,
   docgenConfigFilename,
+  docGenDependencies,
   effectDependencies,
   examplesFolderName,
   madgeConfigFilename,
   owner,
+  packageDevDependencies,
   packageJsonFilename,
   prodFolderName,
   projectFolderName,
@@ -23,7 +25,7 @@ import {
   versionControlService,
   viteConfigFilename,
 } from '../constants.js';
-import type { BuildMethod, Config, ReadonlyStringRecord } from '../types.js';
+import type { BuildMethod, ReadonlyStringRecord } from '../types.js';
 import { deepMerge } from '../utils.js';
 import docgenConfig from './docgenConfig.js';
 import madgeConfig from './madgeConfig.js';
@@ -46,8 +48,8 @@ const buildConfig = ({
 }: {
   readonly buildMethod: BuildMethod;
   readonly isPublished: boolean;
-}): Config =>
-  buildMethod === 'Library' ?
+}) =>
+  buildMethod === 'Transpile' ?
     {
       [packageJsonFilename]: {
         sideEffects: [],
@@ -99,7 +101,7 @@ const visibilityConfig = ({
         // Put specific keywords in first position so important keywords come out first
         keywords: [...keywords, 'effect', 'typescript', 'functional-programming'],
         scripts: {
-          // Checks have to be carried out after build for the configs repo
+          // Called by the publish github action defined in configInternalRepo.ts/
           'build-and-publish': 'pnpm build && pnpm checks && pnpm publish-to-npm',
           // npm publish ./dist --access=public does not work
           'publish-to-npm': `cd ${prodFolderName} && npm publish --access=public && cd ..`,
@@ -119,6 +121,7 @@ const docGenConfig = (hasDocGen: boolean) =>
         scripts: {
           docgen: 'docgen',
         },
+        devDependencies: docGenDependencies,
       },
       [tsConfigDocGenFilename]: tsconfigDocgen,
       [docgenConfigFilename]: docgenConfig,
@@ -150,6 +153,7 @@ export default ({
 }) =>
   deepMerge(
     {
+      // Used by the circular script
       [madgeConfigFilename]: madgeConfig,
       [packageJsonFilename]: {
         module: `./${projectFolderName}/index.js`,
@@ -157,6 +161,9 @@ export default ({
           '.': {
             // import .js so it does not need to be changed after build
             import: `./${projectFolderName}/index.js`,
+          },
+          './tests': {
+            import: `./${projectFolderName}/index.tests.js`,
           },
         },
         dependencies: {
@@ -179,6 +186,7 @@ export default ({
               [`${slashedScope}${testUtilsPackageName}`]:
                 "sourceInProd='GITHUB'&versionInProd=''&parent=''&buildTypeInProd='DEV'&buildTypeInDev='DEV'",
             }),
+          ...packageDevDependencies,
           ...devDependencies,
         },
         peerDependencies,

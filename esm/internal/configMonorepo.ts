@@ -4,7 +4,6 @@ import { Config } from '../types.js';
 import { deepMerge, makeConfigWithLocalInternalDependencies } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
 import configInternalRepo from './configInternalRepo.js';
-import monoRepoPnpmWorkspaceConfig from './monoRepoPnpmWorkspaceConfig.js';
 
 export default ({
   packageName,
@@ -22,18 +21,19 @@ export default ({
         scripts: {
           'update-all-config-files':
             'pnpm -r -include-workspace-root=true --workspace-concurrency=1 update-config-files',
-          'clean-all-node-modules': 'pnpm -t clean-node-modules',
+          'clean-all-node-modules': 'pnpm -r -include-workspace-root=true clean-node-modules',
           'clean-all-config-files': 'pnpm -r -include-workspace-root=true clean-config-files',
+          'clean-all-prod': 'pnpm -r clean-prod',
           'build-all': 'pnpm -r build',
-          'prepare-docs': 'pnpm -r --if-present --parallel docgen && compile-docs',
         },
       }),
       configInternalRepo({
+        packageName,
         // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
         isPublished: true,
         // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
         hasDocGen: true,
-        monoRepoPnpmWorkspaceConfig,
+        description,
       }),
     ),
   );

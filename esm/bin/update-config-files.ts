@@ -24,10 +24,9 @@ import { basename, dirname, join, normalize, relative, resolve } from 'node:path
 import {
   configFilename,
   configsPackageName,
-  effectDependencies,
-  effectPlatformDependencies,
+  configsPackagePeerDependencies,
+  docsFolderName,
   githubFolderName,
-  lintingAndFormattingDependencies,
   packageJsonFilename,
   packagesFolderName,
   pnpmLockFilename,
@@ -62,7 +61,7 @@ const patternsToIgnoreRegExp = new RegExp(
 );
 
 // List of folders where configuration files might be found
-const foldersToInclude = [githubFolderName];
+const foldersToInclude = [githubFolderName, docsFolderName];
 
 /*publishConfig: {
       main: `./${commonJsFolderName}/index.js`,
@@ -145,11 +144,7 @@ const applyConfig = async ({
                 '@types/eslint': '^9.6.1',
                 '@types/eslint-config-prettier': '^6.11.3',
               },
-              peerDependencies: {
-                ...lintingAndFormattingDependencies,
-                ...effectDependencies,
-                ...effectPlatformDependencies,
-              },
+              peerDependencies: configsPackagePeerDependencies,
               environment: 'Node',
               buildMethod: 'None',
               isPublished: false,

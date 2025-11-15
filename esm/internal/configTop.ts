@@ -3,8 +3,7 @@
 import {
   gitIgnoreFilename,
   packageJsonFilename,
-  packageManager,
-  topDependencies,
+  topDevDependencies,
   topPackageName,
   vitestConfigFilename,
 } from '../constants.js';
@@ -24,19 +23,16 @@ export default ({ description }: { readonly description: string }): Config =>
         scripts: {
           'update-all-config-files':
             'pnpm -r -include-workspace-root=true --workspace-concurrency=1 update-config-files',
-          'clean-all-node-modules': 'pnpm -t clean-node-modules',
+          'clean-all-node-modules': 'pnpm -r -include-workspace-root=true clean-node-modules',
           'clean-all-config-files': 'pnpm -r -include-workspace-root=true clean-config-files',
-          'build-all': 'pnpm -r build',
+          'build-all': 'pnpm -r build-all',
         },
       }),
       {
         [gitIgnoreFilename]: topGitIgnoreConfig,
         [vitestConfigFilename]: topVitestConfig,
         [packageJsonFilename]: {
-          packageManager,
-          devDependencies: {
-            ...topDependencies,
-          },
+          devDependencies: topDevDependencies,
 
           /*pnpm: {
         patchedDependencies: {},

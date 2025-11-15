@@ -61,7 +61,7 @@ const javascriptConfigForNonMdFiles = (tsconfigRootDir: string): ConfigArray =>
     tseslint.configs.strictTypeChecked,
     {
       name: 'javascriptConfigForNonMdFiles',
-      plugins: { 'import-x': importX },
+      plugins: { 'import-x': importX as never },
       extends: [
         /* These rules are ts-eslint rules (not rules of the functional plugin) which the functional plugin recommends to activate because they make sense for a functional programmings style. They require typeChecking and are not cancelled by functional.configs.disableTypeChecked */
         functional.configs.externalTypeScriptRecommended as never,
