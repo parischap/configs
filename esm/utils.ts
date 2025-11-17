@@ -6,6 +6,7 @@ import {
   packageJsonFilename,
   packagesFolderName,
   prodFolderName,
+  slashedDevScope,
   slashedScope,
   versionControlService,
 } from './constants.js';
@@ -122,6 +123,15 @@ const toVersionControlSource = ({
   return `git+ssh://${versionControlService}/${owner}/${importRepoName}${params === '' ? '' : '#' + params}`;
 };
 
+const toWorkspaceSource = ({
+  buildStage,
+  unscopedImportName,
+}: {
+  readonly buildStage: 'PROD' | 'DEV';
+  readonly unscopedImportName: string;
+}): string =>
+  buildStage === 'DEV' ? `workspace:${slashedDevScope}${unscopedImportName}@*` : 'workspace:*';
+
 /**
  * Takes a list of dependencies with their name and source. Returns:
  *
@@ -181,6 +191,7 @@ export const toInternalExternalDependencies = ({
 ] => {
   type DependencyEntry = readonly [packageName: string, packageSource: string];
   interface DependencyEntries extends ReadonlyArray<DependencyEntry> {}
+
   const [internalDependencies, externalDependencies] = Object.entries(dependencies).reduce(
     ([internalDependencies, externalDependencies], entry) =>
       entry[0].startsWith(slashedScope) ?
@@ -190,14 +201,14 @@ export const toInternalExternalDependencies = ({
   );
 
   const decodedInternalDependencies = internalDependencies.map(([importName, importSource]) => {
-    const { sourceInProd, versionInProd, buildStageInProd, SourceInDev, buildStageInDev, parent } =
+    const { sourceInProd, versionInProd, buildStageInProd, sourceInDev, buildStageInDev, parent } =
       parse(importSource);
 
     if (
       Array.isArray(sourceInProd)
       || Array.isArray(versionInProd)
       || Array.isArray(buildStageInProd)
-      || Array.isArray(SourceInDev)
+      || Array.isArray(sourceInDev)
       || Array.isArray(buildStageInDev)
       || Array.isArray(parent)
     )
@@ -215,22 +226,26 @@ export const toInternalExternalDependencies = ({
         sourceInProd,
         versionInProd,
         buildStageInProd,
-        SourceInDev,
+        sourceInDev,
         buildStageInDev,
         importRepoName,
         importSubRepoName,
+        unscopedImportName,
       },
     ] as const;
   });
 
   const internalDependenciesInDev = decodedInternalDependencies.map(
-    ([importName, { SourceInDev, buildStageInDev, importRepoName, importSubRepoName }]) => {
+    ([
+      importName,
+      { sourceInDev, buildStageInDev, importRepoName, importSubRepoName, unscopedImportName },
+    ]) => {
       if (buildStageInDev !== 'DEV' && buildStageInDev !== 'PROD')
         throw new Error(
           `'${packageName}': dependency '${importName}' must have value 'DEV' or 'PROD' for 'buildStageInDev' parameter. Actual:'${buildStageInDev}'`,
         );
 
-      if (SourceInDev === 'GITHUB')
+      if (sourceInDev === 'GITHUB')
         return [
           importName,
           toVersionControlSource({
@@ -239,9 +254,12 @@ export const toInternalExternalDependencies = ({
             importSubRepoName,
           }),
         ] as const;
-      else if (SourceInDev === 'WORKSPACE')
+      else if (sourceInDev === 'WORKSPACE')
         if (repoName === importRepoName && allowWorkspaceSources)
-          return [importName, 'workspace:*'] as const;
+          return [
+            importName,
+            toWorkspaceSource({ buildStage: buildStageInDev, unscopedImportName }),
+          ] as const;
         else
           throw new Error(
             `'${packageName}': dependency '${importName}' is not allowed to use 'WORKSPACE' for 'SourceInDev' parameter`
@@ -249,9 +267,12 @@ export const toInternalExternalDependencies = ({
                 ` because '${packageName}' belongs to repo '${repoName}' and '${importName}' belongs to repo ${importRepoName}`
               : ''),
           );
-      else if (SourceInDev === 'AUTO')
+      else if (sourceInDev === 'AUTO')
         if (repoName === importRepoName && allowWorkspaceSources)
-          return [importName, 'workspace:*'] as const;
+          return [
+            importName,
+            toWorkspaceSource({ buildStage: buildStageInDev, unscopedImportName }),
+          ] as const;
         else
           return [
             importName,
@@ -263,7 +284,7 @@ export const toInternalExternalDependencies = ({
           ] as const;
       else
         throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'GITHUB', 'WORKSPACE' or 'AUTO' for 'SourceInDev' parameter. Actual:'${SourceInDev}'`,
+          `'${packageName}': dependency '${importName}' must have value 'GITHUB', 'WORKSPACE' or 'AUTO' for 'sourceInDev' parameter. Actual:'${sourceInDev}'`,
         );
     },
   );
@@ -302,27 +323,27 @@ export const toInternalExternalDependencies = ({
           throw new Error(
             `'${packageName}': dependency '${importName}' cannot define a value for 'buildStageInProd' parameter because it uses source 'NPM'. Actual:'${buildStageInProd}'`,
           );
-        else return [importName, versionInProd] as const;
+        else return [importName, versionInProd ?? 'latest'] as const;
 
       if (buildStageInProd !== 'DEV' && buildStageInProd !== 'PROD')
         throw new Error(
           `'${packageName}': dependency '${importName}' must have value 'DEV' or 'PROD' for 'buildStageInProd' parameter. Actual:'${buildStageInProd}'`,
         );
 
-      if (sourceInProd === 'GITHUB')
-        return [
-          importName,
-          toVersionControlSource({
-            version: versionInProd,
-            buildStage: buildStageInProd,
-            importRepoName,
-            importSubRepoName,
-          }),
-        ] as const;
-      else
+      if (sourceInProd !== 'GITHUB')
         throw new Error(
           `'${packageName}': dependency '${importName}' must have value 'GITHUB' or 'NPM' for 'SourceInProd' parameter. Actual:'${sourceInProd}'`,
         );
+
+      return [
+        importName,
+        toVersionControlSource({
+          version: versionInProd,
+          buildStage: buildStageInProd,
+          importRepoName,
+          importSubRepoName,
+        }),
+      ] as const;
     },
   );
 

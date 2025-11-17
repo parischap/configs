@@ -162,19 +162,14 @@ export default ({
         },
         devDependencies: {
           // Include self for tests. Use link: not file: so changes get immediately reflected
-          [`${slashedScope}${packageName}`]: 'SELF',
-          /**
-           * Include test-utils to handle tests except
-           *
-           * - in the configs package because the first time I build configs test-utils does not exist
-           *   yet
-           * - in the test-utils package because it already includes itself for tests
+          [`${slashedScope}${packageName}`]: 'sourceInDev=WORKSPACE&buildStageInDev=DEV',
+          /*
+           * Include test-utils to handle tests except in the configs package because the first time I build configs test-utils does not exist yet
            */
-          ...(packageName === configsPackageName || packageName === testUtilsPackageName ?
+          ...(packageName === configsPackageName ?
             {}
           : {
-              [`${slashedScope}${testUtilsPackageName}`]:
-                "sourceInProd='GITHUB'&versionInProd=''&parent=''&buildTypeInProd='DEV'&buildTypeInDev='DEV'",
+              [`${slashedScope}${testUtilsPackageName}`]: 'sourceInDev=AUTO&buildStageInDev=DEV',
             }),
           ...packageDevDependencies,
           ...devDependencies,

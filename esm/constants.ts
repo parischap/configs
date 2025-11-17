@@ -139,14 +139,9 @@ export const testDependencies = {
 };
 
 // Add here all devDependencies used by configInternalBase.ts, be it in scripts, github actions, installed config files...
-export const baseDevDependencies = (packageName: string) => ({
-  // Used by the update-config-files script and all the eslint and prettier config files
-  ...(packageName === configsPackageName ?
-    { [`${slashedScope}${configsPackageName}`]: 'SELF' }
-  : {
-      [`${slashedScope}${configsPackageName}`]:
-        "sourceInProd='GITHUB'&versionInProd=''&parent=''&buildTypeInProd='DEV'&buildTypeInDev='DEV'",
-    }),
+export const baseDevDependencies = {
+  /* Import configs to generate configuration files. Used by the update-config-files script and all the eslint and prettier config files */
+  [`${slashedScope}${configsPackageName}`]: 'sourceInDev=AUTO&buildStageInDev=DEV',
   // Used by the configs package imported just above
   ...configsPackagePeerDependencies,
   // Used by the format script. Only imported as type by the configs package
@@ -163,7 +158,7 @@ export const baseDevDependencies = (packageName: string) => ({
   typescript: '^5.9.3',
   // Used as peerDependency of eslint
   jiti: '2.6.1',
-});
+};
 
 // Add here all devDependencies used by configInternalRepo.ts, be it in scripts, github actions, installed config files...
 export const repoDevDependencies = {};

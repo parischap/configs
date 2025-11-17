@@ -92,7 +92,7 @@ export default ({
       'reinstall-all-dependencies': 'pnpm i --force',
       ...scripts,
     },
-    devDependencies: baseDevDependencies(packageName),
+    devDependencies: baseDevDependencies,
   },
   ...environmentConfig(environment),
 });
