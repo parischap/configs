@@ -12,8 +12,12 @@ export default ({
   readonly packageName: string;
   readonly description: string;
 }): Config =>
-  makeConfigWithLocalInternalDependencies(
-    deepMerge(
+  makeConfigWithLocalInternalDependencies({
+    repoName: packageName,
+    packageName,
+    onlyAllowDevDependencies: true,
+    allowWorkspaceSources: true,
+    config: deepMerge(
       configInternalBase({
         packageName,
         description,
@@ -36,4 +40,4 @@ export default ({
         description,
       }),
     ),
-  );
+  });

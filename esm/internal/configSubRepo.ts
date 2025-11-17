@@ -34,8 +34,12 @@ export default ({
   readonly hasDocGen: boolean;
   readonly keywords?: ReadonlyArray<string>;
 }): Config =>
-  makeConfigWithLocalInternalDependencies(
-    deepMerge(
+  makeConfigWithLocalInternalDependencies({
+    repoName,
+    packageName,
+    onlyAllowDevDependencies: false,
+    allowWorkspaceSources: true,
+    config: deepMerge(
       configInternalBase({
         packageName,
         description,
@@ -55,4 +59,4 @@ export default ({
         keywords,
       }),
     ) as Config,
-  );
+  });

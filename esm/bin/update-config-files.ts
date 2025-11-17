@@ -7,7 +7,7 @@
  * files which are not created by this bin (there are a few exceptions: the `project.config.js` file
  * itself, the `README.md` file... see `patternsToIgnore` below).
  *
- * There is two exceptions:
+ * There are two exceptions:
  *
  * - when this bin is executed at the top package level, it does not read a `project.config.ts` file,
  *   which must not be present. A default configuration is stored for this package in this bin.

@@ -1,7 +1,6 @@
 /**
  * This config implements what is necessary in all situations. It should not be used directly. It is
- * included by config.monorepo.ts, config.starter.ts, config.subrepo.ts and config.onepackagerepo.ts
- * configs.
+ * included by configMonoRepo.ts, configSubRepo.ts, configOnePackageRepo.ts and configTop.ts.
  */
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
@@ -87,7 +86,8 @@ export default ({
       format: 'prettier . --write',
       'update-config-files':
         'vite-node node_modules/@parischap/configs/esm/bin/update-config-files.ts',
-      'clean-node-modules': 'shx rm -rf node_modules',
+      rm: 'node node_modules/@parischap/configs/esm/bin/rm.js',
+      'clean-node-modules': 'rm node  node_modules',
       'clean-config-files': `shx rm -f ${packageJsonFilename} && shx rm -f ${tsConfigFilename}`,
       'reinstall-all-dependencies': 'pnpm i --force',
       ...scripts,

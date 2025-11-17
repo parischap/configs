@@ -1,7 +1,6 @@
 /**
  * This config implements what is necessary at the root of a github repo. It should not be used
- * directly. It is included by config.monorepo.ts, config.starter.ts and config.onepackagerepo.ts
- * configs.
+ * directly. It is included by configMonoRepo.ts and configOnePackageRepo.ts.
  */
 // This module must not import any external dependency. It must be runnable without a package.json
 import {

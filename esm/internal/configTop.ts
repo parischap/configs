@@ -1,21 +1,18 @@
 /** This config is the one to be used at the root (top) of a monorepo. */
 // This module must not import any external dependency. It must be runnable without a package.json
-import {
-  gitIgnoreFilename,
-  packageJsonFilename,
-  topDevDependencies,
-  topPackageName,
-  vitestConfigFilename,
-} from '../constants.js';
+import { topPackageName } from '../constants.js';
 import { Config } from '../types.js';
 import { deepMerge, makeConfigWithLocalInternalDependencies } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
-import topGitIgnoreConfig from './topGitIgnoreConfig.js';
-import topVitestConfig from './topVitestConfig.js';
+import configInternalTop from './configInternalTop.js';
 
 export default ({ description }: { readonly description: string }): Config =>
-  makeConfigWithLocalInternalDependencies(
-    deepMerge(
+  makeConfigWithLocalInternalDependencies({
+    repoName: topPackageName,
+    packageName: topPackageName,
+    onlyAllowDevDependencies: true,
+    allowWorkspaceSources: false,
+    config: deepMerge(
       configInternalBase({
         packageName: topPackageName,
         description,
@@ -28,19 +25,6 @@ export default ({ description }: { readonly description: string }): Config =>
           'build-all': 'pnpm -r build-all',
         },
       }),
-      {
-        [gitIgnoreFilename]: topGitIgnoreConfig,
-        [vitestConfigFilename]: topVitestConfig,
-        [packageJsonFilename]: {
-          devDependencies: topDevDependencies,
-
-          /*pnpm: {
-        patchedDependencies: {},
-        overrides: {
-          //'tsconfig-paths': '^4.0.0'
-        },
-      },*/
-        },
-      },
+      configInternalTop,
     ),
-  );
+  });

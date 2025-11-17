@@ -1,7 +1,6 @@
 /**
  * This config implements what is necessary in a package that needs building. It should not be used
- * directly. It is included by config.starter.ts, config.subrepo.ts and config.onepackagerepo.ts
- * configs.
+ * directly. It is included by configSubRepo.ts and configOnePackageRepo.ts.
  */
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
@@ -15,6 +14,7 @@ import {
   owner,
   packageDevDependencies,
   packageJsonFilename,
+  packagesFolderName,
   prodFolderName,
   projectFolderName,
   slashedScope,
@@ -32,16 +32,6 @@ import madgeConfig from './madgeConfig.js';
 import tsconfigDocgen from './tsconfigDocgen.js';
 import viteConfig from './viteConfig.js';
 
-const repository = (repoName: string, packageName: string) => ({
-  type: 'git',
-  url: `git+https://${versionControlService}/${owner}/${repoName}.git`,
-  ...(packageName === repoName ?
-    {}
-  : {
-      directory: `packages/${packageName}`,
-    }),
-});
-
 const buildConfig = ({
   buildMethod,
   isPublished,
@@ -55,7 +45,7 @@ const buildConfig = ({
         sideEffects: [],
         scripts: {
           compile:
-            // tsc builds but also generate types
+            // tsc builds but also generate types. All my packages ship with the sideEffects-free key in package.json. And this is perfectly well understood by vite and rollup. So annotate-pure-calls is only necessary for published packages and that might be used by clients who use old bundlers. As far as I am concerned, I do not need cjs code. Likewise, this is only necessary for published packages.
             `tsc -b ${tsConfigProjectFilename} --force`
             + (isPublished ?
               ` && babel ${prodFolderName}/${projectFolderName} --out-dir ${prodFolderName}/${commonJsFolderName}`
@@ -201,11 +191,21 @@ export default ({
             .join('&&'),
         },
         // Must be present even for private packages as it can be used for other purposes
-        repository: repository(repoName, packageName),
+        repository: {
+          type: 'git',
+          // Use git+https protocol as specified in npm documentation
+          url: `git+https://${versionControlService}/${owner}/${repoName}.git`,
+          ...(packageName === repoName ?
+            {}
+          : {
+              directory: `${packagesFolderName}/${packageName}`,
+            }),
+        },
         // Must be present even for private packages as it can be used for instance by docgen
         homepage:
+          // Use https protocol as specified in npm documentation
           `https://${versionControlService}/${owner}/${repoName}`
-          + (packageName === repoName ? '' : `/tree/master/packages/${packageName}`),
+          + (packageName === repoName ? '' : `/tree/master/${packagesFolderName}/${packageName}`),
       },
     },
     buildConfig({ buildMethod, isPublished }),

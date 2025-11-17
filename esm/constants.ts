@@ -134,10 +134,6 @@ export const docGenDependencies = {
   tsx: '^4.20.6',
 };
 
-export const shellDependencies = {
-  shx: '^0.4.0',
-};
-
 export const testDependencies = {
   vitest: '^4.0.7',
 };
@@ -153,12 +149,12 @@ export const baseDevDependencies = (packageName: string) => ({
     }),
   // Used by the configs package imported just above
   ...configsPackagePeerDependencies,
-  // Used by the clean-config-files and clean-node-modules scripts
-  ...shellDependencies,
   // Used by the format script. Only imported as type by the configs package
   prettier: '^3.6.2',
   // Used by tsconfig.base.json
   '@tsconfig/strictest': '^2.0.6',
+  // Used as plugin by tsconfig.base.json
+  '@effect/language-service': '^0.55.2',
   // Used by tsconfig.docgen.json and tsconfig.others.json
   '@types/node': '^24.7.0',
   // Used by the update-config-files script
@@ -174,11 +170,9 @@ export const repoDevDependencies = {};
 
 // Add here all devDependencies used by configInternalPackage.ts, be it in scripts, github actions, installed config files...
 export const packageDevDependencies = {
-  // Used by the clean-prod script
-  ...shellDependencies,
   ...testDependencies,
   madge: '^8.0.0',
-  '@effect/language-service': '^0.55.2',
+  /* All packages use Effect and all may use @effect/experimental. @effect/experimental is included in the esm modules and should therefore be included as a dependency. But @effect/experimental is for debugging and performance optimization only. So the code that uses it must be removed or by-passed in prod. So this dependency must not be shipped in prod: it's a devDependency. */
   '@effect/experimental': '0.57.0',
   // At some point, rolldown will be default in vite. But not the case for the moment
   // Not necessary in all configurations but vite is installed by vitest in any case so better install it here
@@ -190,7 +184,7 @@ export const packageDevDependencies = {
   '@babel/plugin-transform-modules-commonjs': '^7.27.1',
 };
 
-// These dependencies are necessary at the top
+// Add here all devDependencies used by configInternalTop.ts, be it in scripts, github actions, installed config files...
 export const topDevDependencies = {
   // Needed by the vscode vitest plugin
   ...testDependencies,

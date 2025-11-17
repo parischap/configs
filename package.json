@@ -11,7 +11,7 @@
     "lint-rules": "pnpx @eslint/config-inspector",
     "format": "prettier . --write",
     "clean-config-files": "shx rm -f package.json && shx rm -f tsconfig.json",
-    "clean-node-modules": "shx rm -rf node_modules",
+    "clean-node-modules": "pnpm rmfr node_modules",
     "reinstall-all-dependencies": "pnpm i --force",
     "circular": "madge --extensions ts --circular --no-color --no-spinner esm",
     "checks": "pnpm circular && pnpm lint && pnpm tscheck && pnpm test",
@@ -20,7 +20,8 @@
     "build": "pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..",
     "examples": "",
     "bundle": "bundle-files",
-    "compile": "pnpm bundle && pnpm prodify-bundle"
+    "compile": "pnpm bundle && pnpm prodify-bundle",
+    "rmfr": "node node_modules/@parischap/configs/esm/bin/rm.js"
   },
   "devDependencies": {
     "@parischap/configs": "link:.",
