@@ -86,9 +86,11 @@ export default ({
       format: 'prettier . --write',
       'update-config-files':
         'vite-node node_modules/@parischap/configs/esm/bin/update-config-files.ts',
-      rm: 'node node_modules/@parischap/configs/esm/bin/rm.js',
+      rmrf: 'node node_modules/@parischap/configs/esm/bin/rmrf.mjs',
+      mkdirp: 'node node_modules/@parischap/configs/esm/bin/mkdirp.mjs',
       'clean-node-modules': 'rm node  node_modules',
-      'clean-config-files': `shx rm -f ${packageJsonFilename} && shx rm -f ${tsConfigFilename}`,
+      // Suppress package.json after because once suppressed the rmrf script no longer exists
+      'clean-config-files': `pnpm rmrf ${tsConfigFilename} && pnpm rmrf ${packageJsonFilename}`,
       'reinstall-all-dependencies': 'pnpm i --force',
       ...scripts,
     },

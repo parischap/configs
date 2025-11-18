@@ -190,6 +190,7 @@ const applyConfig = async ({
             throw new Error(`'${packageName}': ${e instanceof Error ? e.message : 'Error'}`, {
               cause: e,
             });
+          //throw e;
           const configFunc =
             level === 'otherMonorepo' ?
               () => {

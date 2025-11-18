@@ -179,7 +179,7 @@ export default ({
           circular: `madge --extensions ts --circular --no-color --no-spinner ${projectFolderName}`,
           checks: 'pnpm circular && pnpm lint && pnpm tscheck && pnpm test',
           test: 'vitest run',
-          'clean-prod': `shx rm -rf ${prodFolderName} && shx mkdir -p ${prodFolderName}`,
+          'clean-prod': `pnpm rmrf ${prodFolderName} && pnpm mkdirp ${prodFolderName}`,
           build: 'pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..',
           examples: examples
             .map((exampleName) => `${tsExecuter} ${examplesFolderName}/${exampleName}`)
