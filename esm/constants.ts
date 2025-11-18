@@ -96,7 +96,7 @@ export const topJsFiles = jsExtensions.map((ext) => '*' + ext);
 /* Do not use carret at start of dependency versions because we could end up with different versions in the diverse projects. Set one version and update it regularly */
 
 export const effectDependencies = {
-  effect: '3.19.0',
+  effect: '3.19.4',
 };
 
 
