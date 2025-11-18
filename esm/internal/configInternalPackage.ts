@@ -161,8 +161,8 @@ export default ({
           ...dependencies,
         },
         devDependencies: {
-          // Include self for tests. Use link: not file: so changes get immediately reflected
-          [`${slashedScope}${packageName}`]: 'sourceInDev=WORKSPACE&buildStageInDev=DEV',
+          // Include self for tests
+          [`${slashedScope}${packageName}`]: `sourceInDev=WORKSPACE&buildStageInDev=DEV&parent=${repoName}`,
           /*
            * Include test-utils to handle tests except in the configs package because the first time I build configs test-utils does not exist yet
            */
