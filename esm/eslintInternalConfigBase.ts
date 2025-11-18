@@ -26,8 +26,10 @@ import {
   allJsonFiles,
   allMdFiles,
   allYmlFiles,
+  packagesFolderName,
   prodFolderName,
   projectFolderName,
+  projectsFolderName,
   viteTimeStampFilenamePattern,
 } from './constants.js';
 
@@ -353,7 +355,7 @@ const scopeConfig = ({
 export default (tsconfigRootDir: string): ConfigArray =>
   defineConfig([
     // This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
-    globalIgnores([prodFolderName + '/', viteTimeStampFilenamePattern], 'ignoreConfig'),
+    globalIgnores([prodFolderName + '/', packagesFolderName+'/',projectsFolderName+'/', viteTimeStampFilenamePattern], 'ignoreConfig'),
     scopeConfig({ configs: javascriptPreConfig, files: allJsFiles }),
     scopeConfig({
       configs: javascriptConfigForNonMdFiles(tsconfigRootDir),

@@ -31,6 +31,7 @@ import {
   packagesFolderName,
   pnpmLockFilename,
   projectFolderName,
+  projectsFolderName,
   readMeFilename,
   topPackageName,
   viteTimeStampFilenamePattern,
@@ -285,13 +286,13 @@ if (isConfigsPackage) {
   const topPath = join('..', '..');
   /* eslint-disable-next-line functional/no-expression-statements*/
   await applyConfig({ packagePath: topPath, packageName: topPackageName, level: 'top' });
-  const topPackagesPath = join(topPath, packagesFolderName);
-  const repoNames = (await readdir(topPackagesPath, { withFileTypes: true }))
+  const topProjectsPath = join(topPath, projectsFolderName);
+  const repoNames = (await readdir(topProjectsPath, { withFileTypes: true }))
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name);
 
   const repoApplyConfigPromises = repoNames.map(async (repoName) => {
-    const repoPath = join(topPackagesPath, repoName);
+    const repoPath = join(topProjectsPath, repoName);
     const isMonoRepo = await fileExists(join(repoPath, packagesFolderName));
     /* eslint-disable-next-line functional/no-expression-statements */
     await applyConfig({
@@ -309,7 +310,7 @@ if (isConfigsPackage) {
     await Promise.all(
       repoNames.map((repoName) =>
         readDirEvenIfMissing({
-          path: join(topPackagesPath, repoName, packagesFolderName),
+          path: join(topProjectsPath, repoName, packagesFolderName),
           recursive: false,
         }),
       ),

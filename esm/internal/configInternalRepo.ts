@@ -12,12 +12,14 @@ import {
   packageManager,
   pnpmWorkspaceFilename,
   repoDevDependencies,
+  vitestConfigFilename,
   workflowsFolderName,
 } from '../constants.js';
 import githubWorkflowsPages from './githubWorkflowsPages.js';
 import githubWorkflowsPublish from './githubWorkflowsPublish.js';
 import repoGitIgnoreConfig from './repoGitIgnoreConfig.js';
 import repoPnpmWorkspaceConfig from './repoPnpmWorkspaceConfig.js';
+import repoVitestConfig from './repoVitestConfig.js';
 
 export default ({
   packageName,
@@ -51,6 +53,7 @@ aux_links:
   : {}),
   [gitIgnoreFilename]: repoGitIgnoreConfig,
   [pnpmWorkspaceFilename]: repoPnpmWorkspaceConfig,
+   [vitestConfigFilename]: repoVitestConfig(packageName),
   [packageJsonFilename]: {
     packageManager,
     devDependencies: repoDevDependencies,

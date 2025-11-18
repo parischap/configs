@@ -5,6 +5,7 @@ import {
   packagesFolderName,
   prodFolderName,
   projectFolderName,
+  projectsFolderName,
   viteTimeStampFilenamePattern,
 } from '../constants.js';
 import type { ReadonlyRecord } from '../types.js';
@@ -16,6 +17,7 @@ const _default: ReadonlyRecord = {
     npmFolderName,
     prodFolderName,
     packagesFolderName,
+    projectsFolderName,
     viteTimeStampFilenamePattern,
   ],
   compilerOptions: {
