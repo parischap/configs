@@ -1,8 +1,8 @@
 // This module must not import any external dependency. It must be runnable without a package.json
-import type { BuildMethod, ReadonlyRecord } from '../types.js';
+import type { ReadonlyRecord } from '../types.js';
 import { deepMerge, prettyStringify } from '../utils.js';
 
-const _default = (buildMethod: BuildMethod): string => {
+const _default = (buildMethod: string): string => {
   const baseConfig: ReadonlyRecord = {
     build: {
       outDir: '${prodFolderName}',

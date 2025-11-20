@@ -12,8 +12,10 @@ export const nonProjectMark = 'others';
 export const projectMark = 'esm';
 export const docgenMark = 'docgen';
 
-export const tsExecuter = 'vite-node';
+export const tsExecuter = 'jiti';
 
+export const rmrfFilename = 'rmrf.ts';
+export const mkdirpFilename = 'mkdirp.ts';
 export const docgenConfigFilename = 'docgen.json';
 export const gitIgnoreFilename = '.gitignore';
 export const prettierIgnoreFilename = '.prettierignore';
@@ -120,8 +122,6 @@ export const testDependencies = {
 
 // Add here all devDependencies used by configInternalBase.ts, be it in scripts, github actions, installed config files...
 export const baseDevDependencies = {
-  /* Import configs to generate configuration files. Used by the update-config-files script and all the eslint and prettier config files */
-  [`${slashedScope}${configsPackageName}`]: 'sourceInDev=AUTO&buildStageInDev=DEV',
   // Used by the eslint.config.ts file
   globals: '16.4.0',
   // Used by the lint script and vscode and its plugins
@@ -162,11 +162,9 @@ export const baseDevDependencies = {
   '@effect/language-service': '0.55.2',
   // Used by tsconfig.docgen.json and tsconfig.others.json
   '@types/node': '24.7.0',
-  // Used by the update-config-files script
-  'vite-node': '5.0.0',
   // Used by the tscheck script and by vscode and its plugins
   typescript: '5.9.3',
-  // Used as peerDependency of eslint
+  // Used as peerDependency of eslint, to run the examples scripts and by the update-config-files script
   jiti: '2.6.1',
 };
 

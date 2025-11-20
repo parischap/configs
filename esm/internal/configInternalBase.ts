@@ -6,20 +6,22 @@
 import {
   baseDevDependencies,
   eslintConfigFilename,
+  mkdirpFilename,
   packageJsonFilename,
   prettierConfigFilename,
   prettierIgnoreFilename,
+  rmrfFilename,
   slashedDevScope,
   tsConfigBaseFilename,
   tsConfigFilename,
   tsConfigNonProjectFilename,
   tsConfigProjectFilename,
 } from '../constants.js';
-import eslintConfigBrowser from './eslintConfigBrowser.js';
-import eslintConfigLibrary from './eslintConfigLibrary.js';
-import eslintConfigNode from './eslintConfigNode.js';
+import eslintConfig from './eslintConfig.js';
+import mkdirpCommand from './mkdirpCommandConfig.js';
 import prettierConfig from './prettierConfig.js';
 import prettierIgnore from './prettierIgnoreConfig.js';
+import rmrfCommand from './rmrfCommandConfig.js';
 import tsConfig from './tsconfig.js';
 import tsconfigBase from './tsconfigBase.js';
 import tsConfigNonProject from './tsconfigNonProject.js';
@@ -29,37 +31,41 @@ import tsConfigEsmNode from './tsconfigProjectNode.js';
 
 import type { ReadonlyStringRecord } from '../types.js';
 
-const environmentConfig = ({packageName, environment}:{readonly packageName: string; readonly environment: string}) =>
-{
-   if (environment === 'Browser')
+const environmentConfig = ({
+  packageName,
+  environment,
+}: {
+  readonly packageName: string;
+  readonly environment: string;
+}) => {
+  if (environment === 'Browser')
     return {
-        // Used by the tscheck script
-        [tsConfigProjectFilename]: tsConfigEsmBrowser,
-        // Used by the lint script
-        [eslintConfigFilename]: eslintConfigBrowser,
-      }
+      // Used by the tscheck script
+      [tsConfigProjectFilename]: tsConfigEsmBrowser,
+      // Used by the lint script
+      [eslintConfigFilename]: eslintConfig('globals.browser'),
+    };
 
-         if (environment === 'Node')
+  if (environment === 'Node')
     return {
       // Used by the tscheck script
       [tsConfigProjectFilename]: tsConfigEsmNode,
       // Used by the lint script
-      [eslintConfigFilename]: eslintConfigNode,
-    }
+      [eslintConfigFilename]: eslintConfig('globals.nodeBuiltin'),
+    };
 
-             if (environment === 'Library')
+  if (environment === 'Library')
     return {
       // Used by the tscheck script
       [tsConfigProjectFilename]: tsConfigEsmLibrary,
       // Used by the lint script
-      [eslintConfigFilename]: eslintConfigLibrary,
-    }
+      [eslintConfigFilename]: eslintConfig("globals['shared-node-browser']"),
+    };
 
-    throw new Error(
-                  `'${packageName}': disallowed value for 'environment' parameter. Actual: '${environment}'`,
-                );
-
-}
+  throw new Error(
+    `'${packageName}': disallowed value for 'environment' parameter. Actual: '${environment}'`,
+  );
+};
 
 export default ({
   packageName,
@@ -72,6 +78,10 @@ export default ({
   readonly environment: string;
   readonly scripts: ReadonlyStringRecord;
 }) => ({
+  // Used by the rmrf script
+  [rmrfFilename]: rmrfCommand,
+  // Used by the mkdirp script
+  [mkdirpFilename]: mkdirpCommand,
   // Used by the format script
   [prettierConfigFilename]: prettierConfig,
   // Used by the format script
@@ -94,10 +104,8 @@ export default ({
       lint: 'eslint .',
       'lint-rules': 'pnpx @eslint/config-inspector',
       format: 'prettier . --write',
-      'update-config-files':
-        'vite-node node_modules/@parischap/configs/esm/bin/update-config-files.ts',
-      rmrf: 'node node_modules/@parischap/configs/esm/bin/rmrf.mjs',
-      mkdirp: 'node node_modules/@parischap/configs/esm/bin/mkdirp.mjs',
+      rmrf: 'node --experimental-transform-types rmrf.ts',
+      mkdirp: 'node --experimental-transform-types mkdirp.ts',
       'clean-node-modules': 'rm node  node_modules',
       // Suppress package.json after because once suppressed the rmrf script no longer exists
       'clean-config-files': `pnpm rmrf ${tsConfigFilename} && pnpm rmrf ${packageJsonFilename}`,
@@ -106,5 +114,5 @@ export default ({
     },
     devDependencies: baseDevDependencies,
   },
-  ...environmentConfig({packageName, environment}),
+  ...environmentConfig({ packageName, environment }),
 });

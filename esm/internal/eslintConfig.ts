@@ -1,11 +1,28 @@
-/**
+// This module must not import any external dependency. It must be runnable without a package.json
+import {
+  allHtmlFiles,
+  allJsFiles,
+  allJsInMdFiles,
+  allJson5Files,
+  allJsoncFiles,
+  allJsonFiles,
+  allMdFiles,
+  allProjectJsFiles,
+  allYmlFiles,
+  packagesFolderName,
+  prodFolderName,
+  projectFolderName,
+  projectsFolderName,
+  viteTimeStampFilenamePattern,
+} from '../constants.js';
+
+export default (globals: string) => `/**
  * See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-objects. Each
  * object applies to the files specified in its files property. If several objects apply to a file,
  * properties of all applicable objects are merged. If the same property appears in several objects,
  * the latest one prevails.
  */
 
-// Whatever external package this file uses must be added as peerDependency
 import eslint from '@eslint/js';
 import json from '@eslint/json';
 import markdown from '@eslint/markdown';
@@ -17,21 +34,6 @@ import eslintPluginYml from 'eslint-plugin-yml';
 import { defineConfig, globalIgnores, type Config } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
-import {
-  allHtmlFiles,
-  allJsFiles,
-  allJsInMdFiles,
-  allJson5Files,
-  allJsoncFiles,
-  allJsonFiles,
-  allMdFiles,
-  allYmlFiles,
-  packagesFolderName,
-  prodFolderName,
-  projectFolderName,
-  projectsFolderName,
-  viteTimeStampFilenamePattern,
-} from './constants.js';
 
 /* eslint-disable-next-line functional/type-declaration-immutability */
 interface ConfigArray extends ReadonlyArray<Config> {}
@@ -57,132 +59,128 @@ const javascriptPreConfig: ConfigArray = defineConfig(eslint.configs.recommended
   },
 });
 
-const javascriptConfigForNonMdFiles = (tsconfigRootDir: string): ConfigArray =>
-  defineConfig(
-    // The typescript-eslint-parser requested by the functional plugin and the eslint-plugin-import-x is included in all typescript-eslint configs
-    tseslint.configs.strictTypeChecked,
-    {
-      name: 'javascriptConfigForNonMdFiles',
-      plugins: { 'import-x': importX as never },
-      extends: [
-        /* These rules are ts-eslint rules (not rules of the functional plugin) which the functional plugin recommends to activate because they make sense for a functional programmings style. They require typeChecking and are not cancelled by functional.configs.disableTypeChecked */
-        functional.configs.externalTypeScriptRecommended as never,
-      ],
-      settings: {
-        immutability: {
-          overrides: [
-            /* {
+const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
+  // The typescript-eslint-parser requested by the functional plugin and the eslint-plugin-import-x is included in all typescript-eslint configs
+  tseslint.configs.strictTypeChecked,
+  {
+    name: 'javascriptConfigForNonMdFiles',
+    plugins: { 'import-x': importX as never },
+    extends: [
+      /* These rules are ts-eslint rules (not rules of the functional plugin) which the functional plugin recommends to activate because they make sense for a functional programmings style. They require typeChecking and are not cancelled by functional.configs.disableTypeChecked */
+      functional.configs.externalTypeScriptRecommended as never,
+    ],
+    settings: {
+      immutability: {
+        overrides: [
+          /* {
               type: {
                 from: 'lib',
                 name: 'ReadonlyArray',
               },
               to: 'Immutable',
             },*/
-            {
-              type: {
-                from: 'lib',
-                name: 'Error',
-              },
-              to: 'ReadonlyDeep',
+          {
+            type: {
+              from: 'lib',
+              name: 'Error',
             },
-          ],
-        },
-      },
-      languageOptions: {
-        parserOptions: {
-          projectService: true,
-          tsconfigRootDir,
-        },
-      },
-      /**
-       * Rules that require type-information can only be modified in that config (type information
-       * is unavailable in other configs)
-       */
-      rules: {
-        '@typescript-eslint/strict-boolean-expressions': 'error',
-        '@typescript-eslint/no-confusing-void-expression': [
-          'error',
-          { ignoreArrowShorthand: true },
-        ],
-        '@typescript-eslint/restrict-template-expressions': [
-          'error',
-          { allowNumber: true, allowBoolean: true },
-        ],
-        '@typescript-eslint/no-unnecessary-type-parameters': 'off', // Useful to avoid using any
-        'import-x/export': 'error',
-        'import-x/no-extraneous-dependencies': [
-          'error',
-          {
-            devDependencies: false,
-            peerDependencies: true,
-            optionalDependencies: false,
-            bundledDependencies: false,
+            to: 'ReadonlyDeep',
           },
         ],
-        'functional/immutable-data': 'error',
-        /**
-         * I did not manage to make prefer-immutable-types work because Effect.Option and
-         * Effect.Either are mutable. I did note manage to use global settings to force these types
-         * to Immutable
-         */
-        'functional/prefer-immutable-types': [
-          'error',
-          {
-            enforcement: 'None',
-            ignoreInferredTypes: true,
-            parameters: {
-              enforcement: 'ReadonlyDeep',
-            },
-            variables: {
-              enforcement: 'ReadonlyDeep',
-            },
-          },
-        ],
-        'functional/type-declaration-immutability': [
-          'error',
-          {
-            rules: [
-              {
-                identifiers: '^.+$',
-                /* Immutable is hard to reach because ReadonlyArray and Readonly tuples are not considered immutable. We can easily create an override to make ReadonlyArrays immutable, but the same is not true for readonly tuples */
-                immutability: 'ReadonlyDeep',
-                comparator: 'AtLeast',
-                fixer: false,
-                suggestions: false,
-              },
-            ],
-            ignoreInterfaces: false,
-          },
-        ],
-        // We keep this rule because it can catch dead cause inserted to jump fast to the doc of a function
-        'functional/no-expression-statements': [
-          'error',
-          {
-            ignoreVoid: true,
-            ignoreCodePattern: [
-              // process.exit returns never, not void
-              'process\\.exit\\(',
-              //'super\\(',
-              '.+\n+satisfies\n+.+',
-              'Layer\\.launch\\(',
-            ],
-          },
-        ],
-        'functional/prefer-property-signatures': 'error',
-        'functional/prefer-tacit': 'error',
-        'functional/functional-parameters': [
-          'error',
-          { allowRestParameter: true, allowArgumentsKeyword: false, enforceParameterCount: false },
-        ],
-        'functional/no-return-void': 'off',
-        'functional/no-conditional-statements': 'off',
-        'functional/no-mixed-types': 'off',
-        'functional/readonly-type': ['error', 'keyword'],
-        // It's impossible I use a throw without being aware. Would be useful in a team to enforce a code style
-        'functional/no-throw-statements': 'off',
       },
     },
-  );
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    /**
+     * Rules that require type-information can only be modified in that config (type information is
+     * unavailable in other configs)
+     */
+    rules: {
+      '@typescript-eslint/strict-boolean-expressions': 'error',
+      '@typescript-eslint/no-confusing-void-expression': ['error', { ignoreArrowShorthand: true }],
+      '@typescript-eslint/restrict-template-expressions': [
+        'error',
+        { allowNumber: true, allowBoolean: true },
+      ],
+      '@typescript-eslint/no-unnecessary-type-parameters': 'off', // Useful to avoid using any
+      'import-x/export': 'error',
+      'import-x/no-extraneous-dependencies': [
+        'error',
+        {
+          devDependencies: false,
+          peerDependencies: true,
+          optionalDependencies: false,
+          bundledDependencies: false,
+        },
+      ],
+      'functional/immutable-data': 'error',
+      /**
+       * I did not manage to make prefer-immutable-types work because Effect.Option and
+       * Effect.Either are mutable. I did note manage to use global settings to force these types to
+       * Immutable
+       */
+      'functional/prefer-immutable-types': [
+        'error',
+        {
+          enforcement: 'None',
+          ignoreInferredTypes: true,
+          parameters: {
+            enforcement: 'ReadonlyDeep',
+          },
+          variables: {
+            enforcement: 'ReadonlyDeep',
+          },
+        },
+      ],
+      'functional/type-declaration-immutability': [
+        'error',
+        {
+          rules: [
+            {
+              identifiers: '^.+$',
+              /* Immutable is hard to reach because ReadonlyArray and Readonly tuples are not considered immutable. We can easily create an override to make ReadonlyArrays immutable, but the same is not true for readonly tuples */
+              immutability: 'ReadonlyDeep',
+              comparator: 'AtLeast',
+              fixer: false,
+              suggestions: false,
+            },
+          ],
+          ignoreInterfaces: false,
+        },
+      ],
+      // We keep this rule because it can catch dead cause inserted to jump fast to the doc of a function
+      'functional/no-expression-statements': [
+        'error',
+        {
+          ignoreVoid: true,
+          ignoreCodePattern: [
+            // process.exit returns never, not void
+            'process\\.exit\\(',
+            //'super\\(',
+            '.+\n+satisfies\n+.+',
+            'Layer\\.launch\\(',
+          ],
+        },
+      ],
+      'functional/prefer-property-signatures': 'error',
+      'functional/prefer-tacit': 'error',
+      'functional/functional-parameters': [
+        'error',
+        { allowRestParameter: true, allowArgumentsKeyword: false, enforceParameterCount: false },
+      ],
+      'functional/no-return-void': 'off',
+      'functional/no-conditional-statements': 'off',
+      'functional/no-mixed-types': 'off',
+      'functional/readonly-type': ['error', 'keyword'],
+      // It's impossible I use a throw without being aware. Would be useful in a team to enforce a code style
+      'functional/no-throw-statements': 'off',
+    },
+  },
+);
 
 /* eslint-disable-next-line functional/prefer-immutable-types */
 const javascriptConfigForNonProjectNonMdFiles: ConfigArray = defineConfig({
@@ -226,7 +224,7 @@ const javascriptConfigForMdFiles: ConfigArray = defineConfig(
    * We don't perform typed checks in js files inside md files because types are usually unavailable
    * (imports are not analyzed) and there are issues with virtual **.md/*.ts files created by
    * typescript-eslint which the tsconfig file does not cover. Such files could be ignored by using
-   * the `allowDefaultProject` property but that would slow down linting too much. See
+   * the allowDefaultProject property but that would slow down linting too much. See
    * typescript-eslint FAQ.
    *
    * The typescript-eslint-parser requested by the functional plugin is included in all
@@ -352,34 +350,51 @@ const scopeConfig = ({
     ignores: [...ignores],
   }));
 
-export default (tsconfigRootDir: string): ConfigArray =>
-  defineConfig([
-    // This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
-    globalIgnores([prodFolderName + '/', packagesFolderName+'/',projectsFolderName+'/', viteTimeStampFilenamePattern], 'ignoreConfig'),
-    scopeConfig({ configs: javascriptPreConfig, files: allJsFiles }),
-    scopeConfig({
-      configs: javascriptConfigForNonMdFiles(tsconfigRootDir),
-      files: allJsFiles,
-      ignores: allJsInMdFiles,
-    }),
-    scopeConfig({
-      configs: javascriptConfigForNonProjectNonMdFiles,
-      files: allJsFiles,
-      ignores: [projectFolderName + '/**', ...allJsInMdFiles],
-    }),
-    scopeConfig({ configs: javascriptConfigForMdFiles, files: allJsInMdFiles }),
-    scopeConfig({
-      configs: javascriptConfigForNonProjectFiles,
-      files: allJsFiles,
-      ignores: [projectFolderName + '/**'],
-    }),
-    scopeConfig({ configs: javascriptPostConfig, files: allJsFiles }),
-    scopeConfig({ configs: htmlConfigs, files: allHtmlFiles }),
-    scopeConfig({ configs: ymlConfigs, files: allYmlFiles }),
-    scopeConfig({ configs: markdownConfigs, files: allMdFiles }),
-    scopeConfig({ configs: jsonConfigs, files: allJsonFiles }),
-    scopeConfig({ configs: jsoncConfigs, files: allJsoncFiles }),
-    scopeConfig({ configs: json5Configs, files: allJson5Files }),
-    // Do not specify a files directive. We want to cancel eslint rules for all types of files: *.js, *.ts, *.html...
-    eslintConfigPrettier,
-  ]);
+const _default: Config = defineConfig([
+  // This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
+  globalIgnores(
+    [
+      ${prodFolderName} + '/',
+      ${packagesFolderName} + '/',
+      ${projectsFolderName} + '/',
+      ${viteTimeStampFilenamePattern},
+    ],
+    'ignoreConfig',
+  ),
+  scopeConfig({ configs: javascriptPreConfig, files: ${allJsFiles} }),
+  scopeConfig({
+    configs: javascriptConfigForNonMdFiles,
+    files: ${allJsFiles},
+    ignores: ${allJsInMdFiles},
+  }),
+  scopeConfig({
+    configs: javascriptConfigForNonProjectNonMdFiles,
+    files: ${allJsFiles},
+    ignores: [${projectFolderName} + '/**', ...${allJsInMdFiles}],
+  }),
+  scopeConfig({ configs: javascriptConfigForMdFiles, files: ${allJsInMdFiles} }),
+  scopeConfig({
+    configs: javascriptConfigForNonProjectFiles,
+    files: ${allJsFiles},
+    ignores: [${projectFolderName} + '/**'],
+  }),
+  scopeConfig({ configs: javascriptPostConfig, files: ${allJsFiles} }),
+  scopeConfig({ configs: htmlConfigs, files: ${allHtmlFiles} }),
+  scopeConfig({ configs: ymlConfigs, files: ${allYmlFiles} }),
+  scopeConfig({ configs: markdownConfigs, files: ${allMdFiles} }),
+  scopeConfig({ configs: jsonConfigs, files: ${allJsonFiles} }),
+  scopeConfig({ configs: jsoncConfigs, files: ${allJsoncFiles} }),
+  scopeConfig({ configs: json5Configs, files: ${allJson5Files} }),
+  // Do not specify a files directive. We want to cancel eslint rules for all types of files: *.js, *.ts, *.html...
+  eslintConfigPrettier,
+  {
+    files: ${allProjectJsFiles},
+    languageOptions: {
+      globals: {
+        ...${globals},
+      },
+    },
+  },
+]);
+
+export default _default;`;
