@@ -27,29 +27,39 @@ import tsConfigEsmBrowser from './tsconfigProjectBrowser.js';
 import tsConfigEsmLibrary from './tsconfigProjectLibrary.js';
 import tsConfigEsmNode from './tsconfigProjectNode.js';
 
-import type { Environment, ReadonlyStringRecord } from '../types.js';
+import type { ReadonlyStringRecord } from '../types.js';
 
-const environmentConfig = (environment: Environment) =>
-  environment === 'Browser' ?
-    {
-      // Used by the tscheck script
-      [tsConfigProjectFilename]: tsConfigEsmBrowser,
-      // Used by the lint script
-      [eslintConfigFilename]: eslintConfigBrowser,
-    }
-  : environment === 'Node' ?
-    {
+const environmentConfig = ({packageName, environment}:{readonly packageName: string; readonly environment: string}) =>
+{
+   if (environment === 'Browser')
+    return {
+        // Used by the tscheck script
+        [tsConfigProjectFilename]: tsConfigEsmBrowser,
+        // Used by the lint script
+        [eslintConfigFilename]: eslintConfigBrowser,
+      }
+
+         if (environment === 'Node')
+    return {
       // Used by the tscheck script
       [tsConfigProjectFilename]: tsConfigEsmNode,
       // Used by the lint script
       [eslintConfigFilename]: eslintConfigNode,
     }
-  : {
+
+             if (environment === 'Library')
+    return {
       // Used by the tscheck script
       [tsConfigProjectFilename]: tsConfigEsmLibrary,
       // Used by the lint script
       [eslintConfigFilename]: eslintConfigLibrary,
-    };
+    }
+
+    throw new Error(
+                  `'${packageName}': disallowed value for 'environment' parameter. Actual: '${environment}'`,
+                );
+
+}
 
 export default ({
   packageName,
@@ -59,7 +69,7 @@ export default ({
 }: {
   readonly packageName: string;
   readonly description: string;
-  readonly environment: Environment;
+  readonly environment: string;
   readonly scripts: ReadonlyStringRecord;
 }) => ({
   // Used by the format script
@@ -96,5 +106,5 @@ export default ({
     },
     devDependencies: baseDevDependencies,
   },
-  ...environmentConfig(environment),
+  ...environmentConfig({packageName, environment}),
 });

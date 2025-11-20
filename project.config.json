@@ -1,0 +1,9 @@
+{
+  "configName": "configOnePackageRepo",
+  "description": "Utility to generate configuration files in a repository",
+  "environment": "Node",
+  "buildMethod": "None",
+  "isPublished": false,
+  "hasDocGen": false,
+  "useEffectAsPeerDependency": false
+}

@@ -1,6 +1,6 @@
 /** This config is the one to be used in a standalone repo which is either a library or an executable */
 // This module must not import any external dependency. It must be runnable without a package.json
-import type { BuildMethod, Config, Environment, ReadonlyStringRecord } from '../types.js';
+import type { Config, ReadonlyStringArray, ReadonlyStringRecord } from '../types.js';
 import { deepMerge, makeConfigWithLocalInternalDependencies } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
 import configInternalPackage from './configInternalPackage.js';
@@ -19,19 +19,23 @@ export default ({
   isPublished,
   hasDocGen,
   keywords = [],
+  useEffectAsPeerDependency,
+  useEffectPlatform = 'No',
 }: {
   readonly packageName: string;
   readonly description: string;
   readonly dependencies?: ReadonlyStringRecord;
   readonly devDependencies?: ReadonlyStringRecord;
   readonly peerDependencies?: ReadonlyStringRecord;
-  readonly examples?: ReadonlyArray<string>;
+  readonly examples?: ReadonlyStringArray;
   readonly scripts?: ReadonlyStringRecord;
-  readonly environment: Environment;
-  readonly buildMethod: BuildMethod;
+  readonly environment: string;
+  readonly buildMethod: string;
   readonly isPublished: boolean;
   readonly hasDocGen: boolean;
-  readonly keywords?: ReadonlyArray<string>;
+  readonly keywords?: ReadonlyStringArray;
+  readonly useEffectAsPeerDependency: boolean;
+  readonly useEffectPlatform?: string;
 }): Config =>
   makeConfigWithLocalInternalDependencies({
     repoName: packageName,
@@ -45,6 +49,7 @@ export default ({
         environment,
         scripts: {
           'build-all': 'pnpm build',
+          ...scripts,
         },
       }),
       configInternalRepo({
@@ -64,6 +69,8 @@ export default ({
         isPublished,
         hasDocGen,
         keywords,
+        useEffectAsPeerDependency,
+        useEffectPlatform,
       }),
     ) as Config,
   });

@@ -97,6 +97,19 @@ export const deepMerge: {
     r3: R3,
     r4: R4,
   ): MergedRecord<MergedRecord<MergedRecord<R1, R2>, R3>, R4>;
+  <
+    R1 extends ReadonlyRecord,
+    R2 extends ReadonlyRecord,
+    R3 extends ReadonlyRecord,
+    R4 extends ReadonlyRecord,
+    R5 extends ReadonlyRecord,
+  >(
+    r1: R1,
+    r2: R2,
+    r3: R3,
+    r4: R4,
+    r5: R5,
+  ): MergedRecord<MergedRecord<MergedRecord<MergedRecord<R1, R2>, R3>, R4>, R5>;
 } = (...Rs: ReadonlyArray<ReadonlyRecord>) => Rs.reduce(deepMerge2, {} as never) as never;
 
 const toVersionControlSource = ({

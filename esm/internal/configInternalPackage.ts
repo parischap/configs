@@ -9,6 +9,7 @@ import {
   docgenConfigFilename,
   docGenDependencies,
   effectDependencies,
+  effectPlatformDependencies,
   examplesFolderName,
   madgeConfigFilename,
   owner,
@@ -25,7 +26,7 @@ import {
   versionControlService,
   viteConfigFilename,
 } from '../constants.js';
-import type { BuildMethod, ReadonlyStringRecord } from '../types.js';
+import type { ReadonlyStringRecord } from '../types.js';
 import { deepMerge } from '../utils.js';
 import docgenConfig from './docgenConfig.js';
 import madgeConfig from './madgeConfig.js';
@@ -35,12 +36,16 @@ import viteConfig from './viteConfig.js';
 const buildConfig = ({
   buildMethod,
   isPublished,
+  packageName,
 }: {
-  readonly buildMethod: BuildMethod;
+  readonly buildMethod: string;
   readonly isPublished: boolean;
-}) =>
-  buildMethod === 'Transpile' ?
-    {
+  readonly packageName: string;
+}) => {
+  if (buildMethod === 'None') return {};
+
+  if (buildMethod === 'Transpile')
+    return {
       [packageJsonFilename]: {
         sideEffects: [],
         scripts: {
@@ -55,8 +60,9 @@ const buildConfig = ({
             + ' && pnpm prodify-lib',
         },
       },
-    }
-  : {
+    };
+  if (buildMethod === 'Bundle')
+    return {
       [packageJsonFilename]: {
         module: `./${projectFolderName}/main.js`,
         scripts: {
@@ -66,6 +72,12 @@ const buildConfig = ({
       },
       [viteConfigFilename]: viteConfig(buildMethod),
     };
+
+  // 'BundleWithDeps' , 'AppClient'
+  throw new Error(
+    `'${packageName}': disallowed value for 'buildMethod' parameter. Actual: '${buildMethod}'`,
+  );
+};
 
 const visibilityConfig = ({
   repoName,
@@ -118,6 +130,30 @@ const docGenConfig = (hasDocGen: boolean) =>
     }
   : {};
 
+const platformConfig = ({
+  packageName,
+  useEffectPlatform,
+}: {
+  readonly packageName: string;
+  readonly useEffectPlatform: string;
+}) => {
+  if (useEffectPlatform === 'No') return {};
+
+  if (useEffectPlatform === 'AsDependency')
+    return {
+      dependencies: effectPlatformDependencies,
+    };
+
+  if (useEffectPlatform === 'AsPeerDependency')
+    return {
+      peerDependencies: effectPlatformDependencies,
+    };
+
+  throw new Error(
+    `'${packageName}': disallowed value for 'useEffectPlatform' parameter. Actual: '${useEffectPlatform}'`,
+  );
+};
+
 export default ({
   repoName,
   packageName,
@@ -129,6 +165,8 @@ export default ({
   isPublished,
   hasDocGen,
   keywords,
+  useEffectAsPeerDependency,
+  useEffectPlatform,
 }: {
   readonly repoName: string;
   readonly packageName: string;
@@ -136,10 +174,12 @@ export default ({
   readonly devDependencies: ReadonlyStringRecord;
   readonly peerDependencies: ReadonlyStringRecord;
   readonly examples: ReadonlyArray<string>;
-  readonly buildMethod: BuildMethod;
+  readonly buildMethod: string;
   readonly isPublished: boolean;
   readonly hasDocGen: boolean;
   readonly keywords: ReadonlyArray<string>;
+  readonly useEffectAsPeerDependency: boolean;
+  readonly useEffectPlatform: string;
 }) =>
   deepMerge(
     {
@@ -157,7 +197,7 @@ export default ({
           },
         },
         dependencies: {
-          ...effectDependencies,
+          ...(useEffectAsPeerDependency ? {} : effectDependencies),
           ...dependencies,
         },
         devDependencies: {
@@ -174,7 +214,10 @@ export default ({
           ...packageDevDependencies,
           ...devDependencies,
         },
-        peerDependencies,
+        peerDependencies: {
+          ...(useEffectAsPeerDependency ? effectDependencies : {}),
+          ...peerDependencies,
+        },
         scripts: {
           circular: `madge --extensions ts --circular --no-color --no-spinner ${projectFolderName}`,
           checks: 'pnpm circular && pnpm lint && pnpm tscheck && pnpm test',
@@ -203,7 +246,8 @@ export default ({
           + (packageName === repoName ? '' : `/tree/master/${packagesFolderName}/${packageName}`),
       },
     },
-    buildConfig({ buildMethod, isPublished }),
+    buildConfig({ packageName, buildMethod, isPublished }),
     visibilityConfig({ repoName, isPublished, keywords }),
     docGenConfig(hasDocGen),
+    platformConfig({ packageName, useEffectPlatform }),
   );

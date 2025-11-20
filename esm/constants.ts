@@ -23,7 +23,7 @@ export const tsConfigBaseFilename = `tsconfig.base.json`;
 export const tsConfigDocGenFilename = `tsconfig.${docgenMark}.json`;
 export const tsConfigProjectFilename = `tsconfig.${projectMark}.json`;
 export const tsConfigNonProjectFilename = `tsconfig.${nonProjectMark}.json`;
-export const configFilename = 'project.config.ts';
+export const configFilename = 'project.config.json';
 export const prettierConfigFilename = 'prettier.config.ts';
 export const eslintConfigFilename = 'eslint.config.ts';
 export const madgeConfigFilename = '.madgerc';
@@ -99,7 +99,6 @@ export const effectDependencies = {
   effect: '3.19.4',
 };
 
-
 export const effectPlatformDependencies = {
   '@effect/platform': '0.93.0',
   '@effect/platform-node': '0.100.0',
@@ -107,29 +106,6 @@ export const effectPlatformDependencies = {
   '@effect/rpc': '0.72.1',
   '@effect/sql': '0.48.0',
   '@effect/workflow': '0.12.2',
-};
-
-// Add here all dependencies used in the esm directory of configs package
-export const configsPackagePeerDependencies = {
-  globals: '16.4.0',
-  // Necessary because exports helpers such as defineConfig, globalIgnores...
-  eslint: '9.37.0',
-  '@eslint/js': '9.37.0',
-  '@eslint/json': '0.14.0',
-  '@eslint/markdown': '7.3.0',
-  '@html-eslint/eslint-plugin': '0.47.0',
-  // Used as peerDependency of '@html-eslint/eslint-plugin'
-  '@html-eslint/parser': '0.47.0',
-  'eslint-config-prettier': '10.1.8',
-  'eslint-plugin-functional': '9.0.2',
-  'eslint-plugin-import-x': '4.16.1',
-  // Used as peerDependency of 'eslint-plugin-import-x'
-  'eslint-import-resolver-typescript': '4.4.4',
-  'eslint-plugin-yml': '1.19.0',
-  'typescript-eslint': '8.45.0',
-  'prettier-plugin-jsdoc': '1.3.3',
-  ...effectDependencies,
-  ...effectPlatformDependencies,
 };
 
 export const docGenDependencies = {
@@ -146,10 +122,40 @@ export const testDependencies = {
 export const baseDevDependencies = {
   /* Import configs to generate configuration files. Used by the update-config-files script and all the eslint and prettier config files */
   [`${slashedScope}${configsPackageName}`]: 'sourceInDev=AUTO&buildStageInDev=DEV',
-  // Used by the configs package imported just above
-  ...configsPackagePeerDependencies,
-  // Used by the format script. Only imported as type by the configs package
+  // Used by the eslint.config.ts file
+  globals: '16.4.0',
+  // Used by the lint script and vscode and its plugins
+  eslint: '9.37.0',
+  // Used by the eslint.config.ts file
+  '@eslint/js': '9.37.0',
+  // Used by the eslint.config.ts file
+  '@eslint/json': '0.14.0',
+  // Used by the eslint.config.ts file
+  '@eslint/markdown': '7.3.0',
+  // Used by the eslint.config.ts file
+  '@html-eslint/eslint-plugin': '0.47.0',
+  // Used as peerDependency of '@html-eslint/eslint-plugin'
+  '@html-eslint/parser': '0.47.0',
+  // Used by the eslint.config.ts file
+  'eslint-config-prettier': '10.1.8',
+  // Used by the eslint.config.ts file
+  'eslint-plugin-functional': '9.0.2',
+  // Used by the eslint.config.ts file
+  'eslint-plugin-import-x': '4.16.1',
+  // Used as peerDependency of 'eslint-plugin-import-x'
+  'eslint-import-resolver-typescript': '4.4.4',
+  // Used by the eslint.config.ts file
+  'eslint-plugin-yml': '1.19.0',
+  // Used by the eslint.config.ts file
+  'typescript-eslint': '8.45.0',
+  // Used by the eslint.config.ts file
+  '@types/eslint': '^9.6.1',
+  // Used by the script format and by vscode and its plugins
   prettier: '3.6.2',
+  // Used by the prettier.config.ts file
+  'prettier-plugin-jsdoc': '1.3.3',
+  // Used by the prettier.config.ts file
+  '@types/eslint-config-prettier': '^6.11.3',
   // Used by tsconfig.base.json
   '@tsconfig/strictest': '2.0.6',
   // Used as plugin by tsconfig.base.json
@@ -158,7 +164,7 @@ export const baseDevDependencies = {
   '@types/node': '24.7.0',
   // Used by the update-config-files script
   'vite-node': '5.0.0',
-  // Used by the tscheck script
+  // Used by the tscheck script and by vscode and its plugins
   typescript: '5.9.3',
   // Used as peerDependency of eslint
   jiti: '2.6.1',
@@ -169,6 +175,7 @@ export const repoDevDependencies = {};
 
 // Add here all devDependencies used by configInternalPackage.ts, be it in scripts, github actions, installed config files...
 export const packageDevDependencies = {
+  // Used by the test script
   ...testDependencies,
   madge: '8.0.0',
   /* All packages use Effect and all may use @effect/experimental. @effect/experimental is included in the esm modules and should therefore be included as a dependency. But @effect/experimental is for debugging and performance optimization only. So the code that uses it must be removed or by-passed in prod. So this dependency must not be shipped in prod: it's a devDependency. */
@@ -185,6 +192,6 @@ export const packageDevDependencies = {
 
 // Add here all devDependencies used by configInternalTop.ts, be it in scripts, github actions, installed config files...
 export const topDevDependencies = {
-  // Needed by the vscode vitest plugin
+  // Used by the tscheck script and by vscode and its plugins
   ...testDependencies,
 };
