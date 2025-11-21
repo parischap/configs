@@ -4,7 +4,7 @@ export const devScope = scope + '-dev';
 export const slashedScope = scope + '/';
 export const slashedDevScope = devScope + '/';
 
-export const packageManager = `pnpm@10.22.0`;
+export const packageManager = `pnpm@10.23.0`;
 
 export const versionControlService = 'github.com';
 
@@ -79,21 +79,21 @@ export const jsoncExtensions = ['.jsonc'];
 export const json5Extensions = ['.json5'];
 export const ymlExtensions = ['.yml', '.yaml'];
 
+const fromExtensionsToPaths = (extensions: ReadonlyArray<string>, prefix: string): Array<string> =>
+  extensions.map((ext) => prefix + ext);
 export const allTsFiles = tsExtensions.map((ext) => allFiles + ext);
-export const allJsFiles = jsExtensions.map((ext) => allFiles + ext);
-export const allCjsFiles = cjsExtensions.map((ext) => allFiles + ext);
-export const allHtmlFiles = htmlExtensions.map((ext) => allFiles + ext);
-export const allMdFiles = mdExtensions.map((ext) => allFiles + ext);
-export const allJsonFiles = jsonExtensions.map((ext) => allFiles + ext);
-export const allJsoncFiles = jsoncExtensions.map((ext) => allFiles + ext);
-export const allJson5Files = json5Extensions.map((ext) => allFiles + ext);
-export const allYmlFiles = ymlExtensions.map((ext) => allFiles + ext);
-export const allProjectJsFiles = jsExtensions.map(
-  (ext) => `${projectFolderName}/${allFiles}${ext}`,
+export const allJsFiles = fromExtensionsToPaths(jsExtensions, allFiles);
+export const allHtmlFiles = fromExtensionsToPaths(htmlExtensions, allFiles);
+export const allMdFiles = fromExtensionsToPaths(mdExtensions, allFiles);
+export const allJsonFiles = fromExtensionsToPaths(jsonExtensions, allFiles);
+export const allJsoncFiles = fromExtensionsToPaths(jsoncExtensions, allFiles);
+export const allJson5Files = fromExtensionsToPaths(json5Extensions, allFiles);
+export const allYmlFiles = fromExtensionsToPaths(ymlExtensions, allFiles);
+export const allProjectJsFiles = fromExtensionsToPaths(
+  jsExtensions,
+  `${projectFolderName}/${allFiles}`,
 );
-export const allJsInMdFiles = jsExtensions.map((ext) => allFilesInMd + ext);
-
-export const topJsFiles = jsExtensions.map((ext) => '*' + ext);
+export const allJsInMdFiles = fromExtensionsToPaths(jsExtensions, allFilesInMd);
 
 /* Do not use carret at start of dependency versions because we could end up with different versions in the diverse projects. Set one version and update it regularly */
 
@@ -125,17 +125,17 @@ export const baseDevDependencies = {
   // Used by the eslint.config.ts file
   globals: '16.4.0',
   // Used by the lint script and vscode and its plugins
-  eslint: '9.37.0',
+  eslint: '9.39.1',
   // Used by the eslint.config.ts file
-  '@eslint/js': '9.37.0',
+  '@eslint/js': '9.39.1',
   // Used by the eslint.config.ts file
   '@eslint/json': '0.14.0',
   // Used by the eslint.config.ts file
-  '@eslint/markdown': '7.3.0',
+  '@eslint/markdown': '7.5.1',
   // Used by the eslint.config.ts file
-  '@html-eslint/eslint-plugin': '0.47.0',
+  '@html-eslint/eslint-plugin': '0.49.0',
   // Used as peerDependency of '@html-eslint/eslint-plugin'
-  '@html-eslint/parser': '0.47.0',
+  '@html-eslint/parser': '0.49.0',
   // Used by the eslint.config.ts file
   'eslint-config-prettier': '10.1.8',
   // Used by the eslint.config.ts file
@@ -147,21 +147,17 @@ export const baseDevDependencies = {
   // Used by the eslint.config.ts file
   'eslint-plugin-yml': '1.19.0',
   // Used by the eslint.config.ts file
-  'typescript-eslint': '8.45.0',
-  // Used by the eslint.config.ts file
-  '@types/eslint': '^9.6.1',
+  'typescript-eslint': '8.47.0',
   // Used by the script format and by vscode and its plugins
   prettier: '3.6.2',
   // Used by the prettier.config.ts file
-  'prettier-plugin-jsdoc': '1.3.3',
-  // Used by the prettier.config.ts file
-  '@types/eslint-config-prettier': '^6.11.3',
+  'prettier-plugin-jsdoc': '1.5.0',
   // Used by tsconfig.base.json
-  '@tsconfig/strictest': '2.0.6',
+  '@tsconfig/strictest': '2.0.8',
   // Used as plugin by tsconfig.base.json
   '@effect/language-service': '0.55.2',
   // Used by tsconfig.docgen.json and tsconfig.others.json
-  '@types/node': '24.7.0',
+  '@types/node': '24.10.1',
   // Used by the tscheck script and by vscode and its plugins
   typescript: '5.9.3',
   // Used as peerDependency of eslint, to run the examples scripts and by the update-config-files script
@@ -177,12 +173,12 @@ export const packageDevDependencies = {
   ...testDependencies,
   madge: '8.0.0',
   /* All packages use Effect and all may use @effect/experimental. @effect/experimental is included in the esm modules and should therefore be included as a dependency. But @effect/experimental is for debugging and performance optimization only. So the code that uses it must be removed or by-passed in prod. So this dependency must not be shipped in prod: it's a devDependency. */
-  '@effect/experimental': '0.57.0',
+  '@effect/experimental': '0.57.4',
   // At some point, rolldown will be default in vite. But not the case for the moment
   // Not necessary in all configurations but vite is installed by vitest in any case so better install it here
-  vite: 'npm:rolldown-vite@7.1.17',
+  vite: 'npm:rolldown-vite@7.2.7',
   // Not necessary in all configurations but best if shared when neeeded
-  '@babel/core': '7.28.4',
+  '@babel/core': '7.28.5',
   'babel-plugin-annotate-pure-calls': '0.5.0',
   '@babel/plugin-transform-export-namespace-from': '7.27.1',
   '@babel/plugin-transform-modules-commonjs': '7.27.1',

@@ -140,13 +140,13 @@ const platformConfig = ({
   if (useEffectPlatform === 'No') return {};
 
   if (useEffectPlatform === 'AsDependency')
-    return {
-      dependencies: effectPlatformDependencies,
+    return {[packageJsonFilename]: {
+      dependencies: effectPlatformDependencies,}
     };
 
   if (useEffectPlatform === 'AsPeerDependency')
-    return {
-      peerDependencies: effectPlatformDependencies,
+    return {[packageJsonFilename]: {
+      peerDependencies: effectPlatformDependencies,}
     };
 
   throw new Error(

@@ -112,9 +112,10 @@ const getConfigFromConfigFile = ({
         `'${packageName}': parameter 'description' of '${configFilename}' should be of type string'`,
       );
 
-    if (Object.entries(configParameters).length !== 2)
+      const extraKeys = Object.keys(configParameters).filter((key)=>!['configName','description'].includes(key))
+    if (extraKeys.length !== 0)
       throw new Error(
-        `'${packageName}': '${configFilename}' contains unexpected parameters for config '${configName}'`,
+        `'${packageName}': '${configFilename}' contains unexpected parameters for config '${configName}': '${extraKeys.join("', '")}'`,
       );
 
     if (configName === 'configMonoRepo') return configMonoRepo({ packageName, description });
@@ -201,9 +202,21 @@ const getConfigFromConfigFile = ({
         `'${packageName}': parameter 'useEffectPlatform' of '${configFilename}' should be of type string'`,
       );
 
-    if (Object.entries(configParameters).length !== 12)
+      const extraKeys = Object.keys(configParameters).filter((key)=>!['configName','description','dependencies',
+        'devDependencies',
+        'peerDependencies',
+        'examples',
+        'scripts',
+        'environment',
+        'buildMethod',
+        'isPublished',
+        'hasDocGen',
+        'keywords',
+        'useEffectAsPeerDependency',
+        'useEffectPlatform'].includes(key))
+    if (extraKeys.length !== 0)
       throw new Error(
-        `'${packageName}': '${configFilename}' contains unexpected parameters for config '${configName}'`,
+        `'${packageName}': '${configFilename}' contains unexpected parameters for config '${configName}': '${extraKeys.join("', '")}'`,
       );
 
     if (configName === 'configOnePackageRepo')
@@ -257,6 +270,7 @@ const applyConfig = async ({
   readonly repoName: string;
   readonly packageName: string;
 }) => {
+  try{
   const configPath = join(packagePath, configFilename);
 
   console.log(`'${packageName}': reading '${configFilename}'`);
@@ -309,6 +323,11 @@ const applyConfig = async ({
     /* eslint-disable-next-line functional/no-expression-statements*/
     await writeFile(targetFilename, contentToWrite);
   }
+}
+catch (e:unknown) {
+  console.log( `'${packageName}': Error rethrown`)
+  throw e;
+}
 };
 
 if (basename(resolve()) === configsPackageName) {
@@ -324,17 +343,14 @@ if (basename(resolve()) === configsPackageName) {
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name);
 
-  const repoApplyConfigPromises = repoNames.map(async (repoName) => {
-    const repoPath = join(topProjectsPath, repoName);
-    /* eslint-disable-next-line functional/no-expression-statements */
-    await applyConfig({
-      packagePath: repoPath,
+  /* eslint-disable-next-line functional/no-expression-statements*/
+  await Promise.all( repoNames.map( (repoName) => 
+     applyConfig({
+      packagePath: join(topProjectsPath, repoName),
       repoName,
       packageName: repoName,
-    });
-  });
-  /* eslint-disable-next-line functional/no-expression-statements*/
-  await Promise.all(repoApplyConfigPromises);
+    })
+  ));
   const subRepoApplyConfigPromises = (
     await Promise.all(
       repoNames.map(async (repoName) => {

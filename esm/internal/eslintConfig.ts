@@ -16,6 +16,23 @@ import {
   viteTimeStampFilenamePattern,
 } from '../constants.js';
 
+const allowedStatementPatternsInNonMdFiles = [
+  // process.exit returns never, not void
+  /process\.exit\(/.source,
+  // /super(/.source,
+  /[^\s]+\s+satisfies\s+.+/.source,
+  /Layer\.launch\(/.source,
+];
+
+const allowedStatementPatternsInNonProjectNonMdFiles = [
+  ...allowedStatementPatternsInNonMdFiles,
+  // /expect\(/.source,
+  /describe\(/.source,
+  /it\(/.source,
+  /TEUtils\./.source,
+  // /console\.log\(/.source
+];
+
 export default (globals: string) => `/**
  * See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-objects. Each
  * object applies to the files specified in its files property. If several objects apply to a file,
@@ -59,6 +76,7 @@ const javascriptPreConfig: ConfigArray = defineConfig(eslint.configs.recommended
   },
 });
 
+/* eslint-disable-next-line functional/prefer-immutable-types */
 const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
   // The typescript-eslint-parser requested by the functional plugin and the eslint-plugin-import-x is included in all typescript-eslint configs
   tseslint.configs.strictTypeChecked,
@@ -157,13 +175,7 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
         'error',
         {
           ignoreVoid: true,
-          ignoreCodePattern: [
-            // process.exit returns never, not void
-            'process\\.exit\\(',
-            //'super\\(',
-            '.+\n+satisfies\n+.+',
-            'Layer\\.launch\\(',
-          ],
+          ignoreCodePattern: ${JSON.stringify(allowedStatementPatternsInNonMdFiles)},
         },
       ],
       'functional/prefer-property-signatures': 'error',
@@ -201,18 +213,7 @@ const javascriptConfigForNonProjectNonMdFiles: ConfigArray = defineConfig({
       'error',
       {
         ignoreVoid: true,
-        ignoreCodePattern: [
-          //process.exit returns never, not void
-          'process\\.exit',
-          //'super\\(',
-          //'expect\\(',
-          'describe\\(',
-          'it\\(',
-          'TEUtils\\.',
-          //'console\\.log\\(',
-          '.+\n+satisfies\n+.+',
-          'Layer\\.launch\\(',
-        ],
+        ignoreCodePattern: ${JSON.stringify(allowedStatementPatternsInNonProjectNonMdFiles)},
       },
     ],
   },
@@ -251,7 +252,8 @@ const javascriptConfigForNonProjectFiles: ConfigArray = defineConfig({
 /* eslint-disable-next-line functional/prefer-immutable-types */
 const javascriptPostConfig: ConfigArray = defineConfig({
   name: 'javascriptPostConfig',
-  // Here, we mitigate rules that don't require type information.
+  // Here, we mitigate rules that don't require type information
+  /* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */
   rules: {
     'no-redeclare': 'off', // We want to allow types and variables with same names
     '@typescript-eslint/no-namespace': 'off', // We want to be able to use namespaces
@@ -275,6 +277,7 @@ const javascriptPostConfig: ConfigArray = defineConfig({
     // It's impossible I use a try without being aware. Would be useful in a team to enforce a code style
     'functional/no-try-statements': 'off',
     // Add html rules so we can lint template literals inside javascript code
+    // @ts-expect-error html.configs is defined
     ...html.configs.recommended.rules,
   },
 });
@@ -350,45 +353,45 @@ const scopeConfig = ({
     ignores: [...ignores],
   }));
 
-const _default: Config = defineConfig([
+const _default = defineConfig([
   // This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
   globalIgnores(
     [
-      ${prodFolderName} + '/',
-      ${packagesFolderName} + '/',
-      ${projectsFolderName} + '/',
-      ${viteTimeStampFilenamePattern},
+      '${prodFolderName + '/'}',
+      '${packagesFolderName + '/'}',
+      '${projectsFolderName + '/'}',
+      '${viteTimeStampFilenamePattern}',
     ],
     'ignoreConfig',
   ),
-  scopeConfig({ configs: javascriptPreConfig, files: ${allJsFiles} }),
+  scopeConfig({ configs: javascriptPreConfig, files: ${JSON.stringify(allJsFiles)} }),
   scopeConfig({
     configs: javascriptConfigForNonMdFiles,
-    files: ${allJsFiles},
-    ignores: ${allJsInMdFiles},
+    files: ${JSON.stringify(allJsFiles)},
+    ignores: ${JSON.stringify(allJsInMdFiles)},
   }),
   scopeConfig({
     configs: javascriptConfigForNonProjectNonMdFiles,
-    files: ${allJsFiles},
-    ignores: [${projectFolderName} + '/**', ...${allJsInMdFiles}],
+    files: ${JSON.stringify(allJsFiles)},
+    ignores: ${JSON.stringify([projectFolderName + '/**', ...allJsInMdFiles])},
   }),
-  scopeConfig({ configs: javascriptConfigForMdFiles, files: ${allJsInMdFiles} }),
+  scopeConfig({ configs: javascriptConfigForMdFiles, files: ${JSON.stringify(allJsInMdFiles)} }),
   scopeConfig({
     configs: javascriptConfigForNonProjectFiles,
-    files: ${allJsFiles},
-    ignores: [${projectFolderName} + '/**'],
+    files: ${JSON.stringify(allJsFiles)},
+    ignores: [${JSON.stringify(projectFolderName + '/**')}],
   }),
-  scopeConfig({ configs: javascriptPostConfig, files: ${allJsFiles} }),
-  scopeConfig({ configs: htmlConfigs, files: ${allHtmlFiles} }),
-  scopeConfig({ configs: ymlConfigs, files: ${allYmlFiles} }),
-  scopeConfig({ configs: markdownConfigs, files: ${allMdFiles} }),
-  scopeConfig({ configs: jsonConfigs, files: ${allJsonFiles} }),
-  scopeConfig({ configs: jsoncConfigs, files: ${allJsoncFiles} }),
-  scopeConfig({ configs: json5Configs, files: ${allJson5Files} }),
+  scopeConfig({ configs: javascriptPostConfig, files: ${JSON.stringify(allJsFiles)} }),
+  scopeConfig({ configs: htmlConfigs, files: ${JSON.stringify(allHtmlFiles)} }),
+  scopeConfig({ configs: ymlConfigs, files: ${JSON.stringify(allYmlFiles)} }),
+  scopeConfig({ configs: markdownConfigs, files: ${JSON.stringify(allMdFiles)} }),
+  scopeConfig({ configs: jsonConfigs, files: ${JSON.stringify(allJsonFiles)} }),
+  scopeConfig({ configs: jsoncConfigs, files: ${JSON.stringify(allJsoncFiles)} }),
+  scopeConfig({ configs: json5Configs, files: ${JSON.stringify(allJson5Files)} }),
   // Do not specify a files directive. We want to cancel eslint rules for all types of files: *.js, *.ts, *.html...
   eslintConfigPrettier,
   {
-    files: ${allProjectJsFiles},
+    files: ${JSON.stringify(allProjectJsFiles)},
     languageOptions: {
       globals: {
         ...${globals},
