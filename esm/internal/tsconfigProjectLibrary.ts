@@ -3,10 +3,8 @@ import type { ReadonlyRecord } from '../types.js';
 import { deepMerge } from '../utils.js';
 import tsConfigProject from './tsconfigProject.js';
 
-const _default: ReadonlyRecord = deepMerge(tsConfigProject, {
+export default deepMerge(tsConfigProject, {
   compilerOptions: {
     lib: ['ESNext'],
   },
-});
-
-export default _default;
+}) satisfies ReadonlyRecord;

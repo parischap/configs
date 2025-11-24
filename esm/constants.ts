@@ -14,6 +14,10 @@ export const docgenMark = 'docgen';
 
 export const tsExecuter = 'jiti';
 
+export const githubWorkflowsPublishFilename = 'publish.yml';
+export const githubWorkflowsPagesFilename = 'pages.yml';
+export const docsIndexMdFilename = 'index.md';
+export const docsConfigYmlFilename = '_config.yml';
 export const rmrfFilename = 'rmrf.ts';
 export const mkdirpFilename = 'mkdirp.ts';
 export const docgenConfigFilename = 'docgen.json';
@@ -98,16 +102,16 @@ export const allJsInMdFiles = fromExtensionsToPaths(jsExtensions, allFilesInMd);
 /* Do not use carret at start of dependency versions because we could end up with different versions in the diverse projects. Set one version and update it regularly */
 
 export const effectDependencies = {
-  effect: '3.19.4',
+  effect: '3.19.6',
 };
 
 export const effectPlatformDependencies = {
-  '@effect/platform': '0.93.0',
-  '@effect/platform-node': '0.100.0',
-  '@effect/cluster': '0.52.5',
-  '@effect/rpc': '0.72.1',
+  '@effect/platform': '0.93.3',
+  '@effect/platform-node': '0.101.1',
+  '@effect/cluster': '0.53.4',
+  '@effect/rpc': '0.72.2',
   '@effect/sql': '0.48.0',
-  '@effect/workflow': '0.12.2',
+  '@effect/workflow': '0.13.0',
 };
 
 export const docGenDependencies = {
@@ -141,9 +145,9 @@ export const baseDevDependencies = {
   // Used by the eslint.config.ts file
   'eslint-plugin-functional': '9.0.2',
   // Used by the eslint.config.ts file
-  'eslint-plugin-import-x': '4.16.1',
+  //'eslint-plugin-import-x': '4.16.1',
   // Used as peerDependency of 'eslint-plugin-import-x'
-  'eslint-import-resolver-typescript': '4.4.4',
+  //'eslint-import-resolver-typescript': '4.4.4',
   // Used by the eslint.config.ts file
   'eslint-plugin-yml': '1.19.0',
   // Used by the eslint.config.ts file
@@ -155,7 +159,7 @@ export const baseDevDependencies = {
   // Used by tsconfig.base.json
   '@tsconfig/strictest': '2.0.8',
   // Used as plugin by tsconfig.base.json
-  '@effect/language-service': '0.55.2',
+  '@effect/language-service': '0.56.0',
   // Used by tsconfig.docgen.json and tsconfig.others.json
   '@types/node': '24.10.1',
   // Used by the tscheck script and by vscode and its plugins
@@ -167,13 +171,15 @@ export const baseDevDependencies = {
 // Add here all devDependencies used by configInternalRepo.ts, be it in scripts, github actions, installed config files...
 export const repoDevDependencies = {};
 
-// Add here all devDependencies used by configInternalPackage.ts, be it in scripts, github actions, installed config files...
+// Add here all devDependencies used by configInternalProject.ts, be it in scripts, github actions, installed config files...
 export const packageDevDependencies = {
   // Used by the test script
   ...testDependencies,
   madge: '8.0.0',
   /* All packages use Effect and all may use @effect/experimental. @effect/experimental is included in the esm modules and should therefore be included as a dependency. But @effect/experimental is for debugging and performance optimization only. So the code that uses it must be removed or by-passed in prod. So this dependency must not be shipped in prod: it's a devDependency. */
   '@effect/experimental': '0.57.4',
+  // Used as peerDependency by @effect/experimental
+  ...effectPlatformDependencies,
   // At some point, rolldown will be default in vite. But not the case for the moment
   // Not necessary in all configurations but vite is installed by vitest in any case so better install it here
   vite: 'npm:rolldown-vite@7.2.7',

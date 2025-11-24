@@ -15,25 +15,48 @@ import {
   projectsFolderName,
   viteTimeStampFilenamePattern,
 } from '../constants.js';
+import { regExpEscape } from '../utils.js';
 
-const allowedStatementPatternsInNonMdFiles = [
+const allowedStatementPatternsInNonMdFiles: ReadonlyArray<string> = [
   // process.exit returns never, not void
-  /process\.exit\(/.source,
-  // /super(/.source,
-  /[^\s]+\s+satisfies\s+.+/.source,
-  /Layer\.launch\(/.source,
+  //'^' + regExpEscape('process.exit('),
+  // regExpEscape('super'),
+  //'satisfies',
+  //'^' + regExpEscape('Layer.launch('),
 ];
 
 const allowedStatementPatternsInNonProjectNonMdFiles = [
   ...allowedStatementPatternsInNonMdFiles,
-  // /expect\(/.source,
-  /describe\(/.source,
-  /it\(/.source,
-  /TEUtils\./.source,
-  // /console\.log\(/.source
+  // regExpEscape('expect('),
+  '^' + regExpEscape('describe('),
+  //'^' + regExpEscape('TEUtils.')
 ];
 
-export default (globals: string) => `/**
+export default (globalsString?: string) => {
+  const javascriptConfigForProjectFiles =
+    globalsString !== undefined ?
+      `
+      
+const javascriptConfigForProjectFiles: ConfigArray = defineConfig({
+  name: 'javascriptConfigForProjectFiles',
+  languageOptions: {
+    globals: {
+      ...${globalsString},
+    },
+  },
+});`
+    : '';
+
+  const javascriptConfigForProjectFilesScope =
+    globalsString !== undefined ?
+      `
+  scopeConfig({
+    configs: javascriptConfigForProjectFiles,
+    files: ${JSON.stringify(allProjectJsFiles)},
+  }),`
+    : ``;
+
+  return `/**
  * See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-objects. Each
  * object applies to the files specified in its files property. If several objects apply to a file,
  * properties of all applicable objects are merged. If the same property appears in several objects,
@@ -46,16 +69,14 @@ import markdown from '@eslint/markdown';
 import html from '@html-eslint/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import functional from 'eslint-plugin-functional';
-import { importX } from 'eslint-plugin-import-x';
+//import { importX } from 'eslint-plugin-import-x';
 import eslintPluginYml from 'eslint-plugin-yml';
 import { defineConfig, globalIgnores, type Config } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-/* eslint-disable-next-line functional/type-declaration-immutability */
 interface ConfigArray extends ReadonlyArray<Config> {}
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const javascriptPreConfig: ConfigArray = defineConfig(eslint.configs.recommended, {
   // Add no rules here because they might get overridden by the typedTypescriptConfig
   name: 'javascriptPreConfig',
@@ -76,27 +97,19 @@ const javascriptPreConfig: ConfigArray = defineConfig(eslint.configs.recommended
   },
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
   // The typescript-eslint-parser requested by the functional plugin and the eslint-plugin-import-x is included in all typescript-eslint configs
   tseslint.configs.strictTypeChecked,
   {
     name: 'javascriptConfigForNonMdFiles',
-    plugins: { 'import-x': importX as never },
+    //plugins: { 'import-x': importX as never },
     extends: [
       /* These rules are ts-eslint rules (not rules of the functional plugin) which the functional plugin recommends to activate because they make sense for a functional programmings style. They require typeChecking and are not cancelled by functional.configs.disableTypeChecked */
       functional.configs.externalTypeScriptRecommended as never,
     ],
     settings: {
-      immutability: {
+      /*immutability: {
         overrides: [
-          /* {
-              type: {
-                from: 'lib',
-                name: 'ReadonlyArray',
-              },
-              to: 'Immutable',
-            },*/
           {
             type: {
               from: 'lib',
@@ -104,8 +117,15 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
             },
             to: 'ReadonlyDeep',
           },
+          {
+            type: {
+              from: 'lib',
+              name: 'RegExp',
+            },
+            to: 'ReadonlyDeep',
+          },
         ],
-      },
+      },*/
     },
     languageOptions: {
       parserOptions: {
@@ -120,13 +140,11 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
     rules: {
       '@typescript-eslint/strict-boolean-expressions': 'error',
       '@typescript-eslint/no-confusing-void-expression': ['error', { ignoreArrowShorthand: true }],
-      '@typescript-eslint/restrict-template-expressions': [
-        'error',
-        { allowNumber: true, allowBoolean: true },
-      ],
+      // call the .toString() instead if necessary
+      '@typescript-eslint/restrict-template-expressions': 'error',
       '@typescript-eslint/no-unnecessary-type-parameters': 'off', // Useful to avoid using any
-      'import-x/export': 'error',
-      'import-x/no-extraneous-dependencies': [
+      //'import-x/export': 'error',
+      /*'import-x/no-extraneous-dependencies': [
         'error',
         {
           devDependencies: false,
@@ -134,14 +152,12 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
           optionalDependencies: false,
           bundledDependencies: false,
         },
-      ],
+      ],*/
       'functional/immutable-data': 'error',
-      /**
-       * I did not manage to make prefer-immutable-types work because Effect.Option and
-       * Effect.Either are mutable. I did note manage to use global settings to force these types to
-       * Immutable
-       */
-      'functional/prefer-immutable-types': [
+      /* Only activate these rules every now and again to check my work. It takes a lot of time and it triggers errors for Option's and Either's which I did not manage to silence */
+      'functional/prefer-immutable-types':'off',
+      'functional/type-declaration-immutability':'off',
+      /*'functional/prefer-immutable-types': [
         'error',
         {
           enforcement: 'None',
@@ -160,7 +176,8 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
           rules: [
             {
               identifiers: '^.+$',
-              /* Immutable is hard to reach because ReadonlyArray and Readonly tuples are not considered immutable. We can easily create an override to make ReadonlyArrays immutable, but the same is not true for readonly tuples */
+              //Immutability is hard to reach because ReadonlyArray and Readonly tuples are not considered immutable. We
+              // can easily create an override to make ReadonlyArrays immutable, but the same is not true for readonly tuples
               immutability: 'ReadonlyDeep',
               comparator: 'AtLeast',
               fixer: false,
@@ -169,8 +186,8 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
           ],
           ignoreInterfaces: false,
         },
-      ],
-      // We keep this rule because it can catch dead cause inserted to jump fast to the doc of a function
+      ],*/
+      // We keep this rule because it can catch dead code inserted to jump fast to the doc of a function
       'functional/no-expression-statements': [
         'error',
         {
@@ -194,12 +211,11 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
   },
 );
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const javascriptConfigForNonProjectNonMdFiles: ConfigArray = defineConfig({
   name: 'javascriptConfigForNonProjectNonMdFiles',
   // Here, we can mitigate rules defined in javascriptConfigForNonMdFiles specifically in non project files
   rules: {
-    'import-x/no-extraneous-dependencies': [
+    /*'import-x/no-extraneous-dependencies': [
       'error',
       {
         devDependencies: true,
@@ -207,7 +223,7 @@ const javascriptConfigForNonProjectNonMdFiles: ConfigArray = defineConfig({
         optionalDependencies: false,
         bundledDependencies: false,
       },
-    ],
+    ],*/
     // Let's allow console.log in setting files and assertions in test files
     'functional/no-expression-statements': [
       'error',
@@ -219,7 +235,6 @@ const javascriptConfigForNonProjectNonMdFiles: ConfigArray = defineConfig({
   },
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const javascriptConfigForMdFiles: ConfigArray = defineConfig(
   /**
    * We don't perform typed checks in js files inside md files because types are usually unavailable
@@ -239,7 +254,6 @@ const javascriptConfigForMdFiles: ConfigArray = defineConfig(
   },
 );
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const javascriptConfigForNonProjectFiles: ConfigArray = defineConfig({
   name: 'javascriptConfigForNonProjectFiles',
   languageOptions: {
@@ -247,9 +261,8 @@ const javascriptConfigForNonProjectFiles: ConfigArray = defineConfig({
       ...globals.nodeBuiltin,
     },
   },
-});
+});${javascriptConfigForProjectFiles}
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const javascriptPostConfig: ConfigArray = defineConfig({
   name: 'javascriptPostConfig',
   // Here, we mitigate rules that don't require type information
@@ -276,13 +289,14 @@ const javascriptPostConfig: ConfigArray = defineConfig({
     'functional/no-loop-statements': 'off',
     // It's impossible I use a try without being aware. Would be useful in a team to enforce a code style
     'functional/no-try-statements': 'off',
+    // It's impossible I use a let without being aware. Would be useful in a team to enforce a code style
+    'functional/no-let': 'off',
     // Add html rules so we can lint template literals inside javascript code
     // @ts-expect-error html.configs is defined
     ...html.configs.recommended.rules,
   },
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const htmlConfigs: ConfigArray = defineConfig({
   name: 'htmlConfig',
   plugins: {
@@ -295,7 +309,6 @@ const htmlConfigs: ConfigArray = defineConfig({
   },
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const ymlConfigs: ConfigArray = defineConfig(eslintPluginYml.configs['flat/recommended'] as never, {
   name: 'ymlConfig',
   rules: {
@@ -303,7 +316,6 @@ const ymlConfigs: ConfigArray = defineConfig(eslintPluginYml.configs['flat/recom
   },
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const markdownConfigs: ConfigArray = defineConfig([
   {
     name: 'mdConfig',
@@ -315,7 +327,6 @@ const markdownConfigs: ConfigArray = defineConfig([
   },
 ]);
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const jsonConfigs: ConfigArray = defineConfig({
   ignores: ['package-lock.json'],
   plugins: { json: json as never },
@@ -323,21 +334,18 @@ const jsonConfigs: ConfigArray = defineConfig({
   extends: ['json/recommended'],
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const jsoncConfigs: ConfigArray = defineConfig({
   plugins: { json: json as never },
   language: 'json/jsonc',
   extends: ['json/recommended'],
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const json5Configs: ConfigArray = defineConfig({
   plugins: { json: json as never },
   language: 'json/json5',
   extends: ['json/recommended'],
 });
 
-/* eslint-disable-next-line functional/prefer-immutable-types */
 const scopeConfig = ({
   configs,
   files,
@@ -353,7 +361,7 @@ const scopeConfig = ({
     ignores: [...ignores],
   }));
 
-const _default = defineConfig([
+export default defineConfig([
   // This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
   globalIgnores(
     [
@@ -380,7 +388,7 @@ const _default = defineConfig([
     configs: javascriptConfigForNonProjectFiles,
     files: ${JSON.stringify(allJsFiles)},
     ignores: [${JSON.stringify(projectFolderName + '/**')}],
-  }),
+  }),${javascriptConfigForProjectFilesScope}
   scopeConfig({ configs: javascriptPostConfig, files: ${JSON.stringify(allJsFiles)} }),
   scopeConfig({ configs: htmlConfigs, files: ${JSON.stringify(allHtmlFiles)} }),
   scopeConfig({ configs: ymlConfigs, files: ${JSON.stringify(allYmlFiles)} }),
@@ -390,14 +398,5 @@ const _default = defineConfig([
   scopeConfig({ configs: json5Configs, files: ${JSON.stringify(allJson5Files)} }),
   // Do not specify a files directive. We want to cancel eslint rules for all types of files: *.js, *.ts, *.html...
   eslintConfigPrettier,
-  {
-    files: ${JSON.stringify(allProjectJsFiles)},
-    languageOptions: {
-      globals: {
-        ...${globals},
-      },
-    },
-  },
-]);
-
-export default _default;`;
+]);`;
+};

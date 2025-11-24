@@ -8,7 +8,7 @@ import {
 } from '../constants.js';
 import type { ReadonlyRecord } from '../types.js';
 
-const _default: ReadonlyRecord = {
+export default {
   parseCompilerOptions: `./${tsConfigDocGenFilename}`,
   examplesCompilerOptions: `./${tsConfigDocGenFilename}`,
   srcDir: `./${projectFolderName}`,
@@ -19,6 +19,4 @@ const _default: ReadonlyRecord = {
   ],
   enforceDescriptions: true,
   enforceVersion: false,
-};
-
-export default _default;
+} satisfies ReadonlyRecord;

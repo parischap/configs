@@ -21,10 +21,7 @@ export default ({
       configInternalBase({
         packageName,
         description,
-        environment: 'Node',
         scripts: {
-          'update-all-config-files':
-            'pnpm -r -include-workspace-root=true --workspace-concurrency=1 update-config-files',
           'clean-all-node-modules': 'pnpm -r -include-workspace-root=true clean-node-modules',
           'clean-all-config-files': 'pnpm -r -include-workspace-root=true clean-config-files',
           'clean-all-prod': 'pnpm -r clean-prod',

@@ -2,12 +2,10 @@
 import { nonProjectMark, projectMark } from '../constants.js';
 import type { ReadonlyRecord } from '../types.js';
 
-const _default: ReadonlyRecord = {
+export default {
   include: [],
   references: [
     { path: `./tsconfig.${projectMark}.json` },
     { path: `./tsconfig.${nonProjectMark}.json` },
   ],
-};
-
-export default _default;
+} satisfies ReadonlyRecord;

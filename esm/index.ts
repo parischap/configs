@@ -19,7 +19,7 @@
  */
 // This module must not import any external dependency. It must be runnable without a package.json
 import { type Dirent } from 'node:fs';
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { basename, dirname, join, normalize, relative, resolve } from 'node:path';
 import {
   configFilename,
@@ -28,6 +28,7 @@ import {
   githubFolderName,
   packagesFolderName,
   pnpmLockFilename,
+  prodFolderName,
   projectsFolderName,
   readMeFilename,
   topPackageName,
@@ -112,7 +113,9 @@ const getConfigFromConfigFile = ({
         `'${packageName}': parameter 'description' of '${configFilename}' should be of type string'`,
       );
 
-      const extraKeys = Object.keys(configParameters).filter((key)=>!['configName','description'].includes(key))
+    const extraKeys = Object.keys(configParameters).filter(
+      (key) => !['configName', 'description'].includes(key),
+    );
     if (extraKeys.length !== 0)
       throw new Error(
         `'${packageName}': '${configFilename}' contains unexpected parameters for config '${configName}': '${extraKeys.join("', '")}'`,
@@ -202,18 +205,25 @@ const getConfigFromConfigFile = ({
         `'${packageName}': parameter 'useEffectPlatform' of '${configFilename}' should be of type string'`,
       );
 
-      const extraKeys = Object.keys(configParameters).filter((key)=>!['configName','description','dependencies',
-        'devDependencies',
-        'peerDependencies',
-        'examples',
-        'scripts',
-        'environment',
-        'buildMethod',
-        'isPublished',
-        'hasDocGen',
-        'keywords',
-        'useEffectAsPeerDependency',
-        'useEffectPlatform'].includes(key))
+    const extraKeys = Object.keys(configParameters).filter(
+      (key) =>
+        ![
+          'configName',
+          'description',
+          'dependencies',
+          'devDependencies',
+          'peerDependencies',
+          'examples',
+          'scripts',
+          'environment',
+          'buildMethod',
+          'isPublished',
+          'hasDocGen',
+          'keywords',
+          'useEffectAsPeerDependency',
+          'useEffectPlatform',
+        ].includes(key),
+    );
     if (extraKeys.length !== 0)
       throw new Error(
         `'${packageName}': '${configFilename}' contains unexpected parameters for config '${configName}': '${extraKeys.join("', '")}'`,
@@ -270,67 +280,67 @@ const applyConfig = async ({
   readonly repoName: string;
   readonly packageName: string;
 }) => {
-  try{
-  const configPath = join(packagePath, configFilename);
+  try {
+    const configPath = join(packagePath, configFilename);
 
-  console.log(`'${packageName}': reading '${configFilename}'`);
+    console.log(`'${packageName}': reading '${configFilename}'`);
 
-  const configFile = await readFile(configPath, 'utf8');
-  const config = getConfigFromConfigFile({ repoName, packageName, configFile });
+    const configFile = await readFile(configPath, 'utf8');
+    const config = getConfigFromConfigFile({ repoName, packageName, configFile });
 
-  // In project.config.ts, paths are posix-Style. Let's convert them to OS style
-  const filesToCreate = Object.keys(config).map(normalize);
-  console.log(`'${packageName}': Determining potential conflicting files`);
+    // In project.config.ts, paths are posix-Style. Let's convert them to OS style
+    const filesToCreate = Object.keys(config).map(normalize);
+    console.log(`'${packageName}': Determining potential conflicting files`);
 
-  const configFiles = (
-    await Promise.all([
-      readdir(packagePath, { withFileTypes: true }),
-      ...foldersToInclude.map((folderPath) =>
-        readDirEvenIfMissing({ path: join(packagePath, folderPath), recursive: true }),
-      ),
-    ])
-  ).flat();
+    const configFiles = (
+      await Promise.all([
+        readdir(packagePath, { withFileTypes: true }),
+        ...foldersToInclude.map((folderPath) =>
+          readDirEvenIfMissing({ path: join(packagePath, folderPath), recursive: true }),
+        ),
+      ])
+    ).flat();
 
-  const unexpectedConfigFiles = configFiles
-    .filter((dirent) => dirent.isFile())
-    .map((dirent) => relative(packagePath, join(dirent.parentPath, dirent.name)))
-    .filter((path) => !filesToCreate.includes(path) && !patternsToIgnoreRegExp.test(path));
+    const unexpectedConfigFiles = configFiles
+      .filter((dirent) => dirent.isFile())
+      .map((dirent) => relative(packagePath, join(dirent.parentPath, dirent.name)))
+      .filter((path) => !filesToCreate.includes(path) && !patternsToIgnoreRegExp.test(path));
 
-  if (unexpectedConfigFiles.length > 0)
-    throw new Error(
-      `'${packageName}': Following unexpected files where found in the package:\n`
-        + unexpectedConfigFiles.join(',\n'),
-    );
+    if (unexpectedConfigFiles.length > 0)
+      throw new Error(
+        `'${packageName}': Following unexpected files where found in the package:\n`
+          + unexpectedConfigFiles.join(',\n'),
+      );
 
-  console.log(`'${packageName}': Writing configuration files`);
-  for (const [filename, fileContent] of Object.entries(config)) {
-    const contentToWriteFunc =
-      getExtension(filename) === '.json' ? () => prettyStringify(fileContent)
-      : typeof fileContent === 'string' ? () => fileContent
-      : () => {
-          throw new Error(
-            `'${packageName}': Entry '${filename}' in '${configFilename}' must have value of type string`,
-          );
-        };
+    console.log(`'${packageName}': Writing configuration files`);
+    for (const [filename, fileContent] of Object.entries(config)) {
+      const contentToWriteFunc =
+        getExtension(filename) === '.json' ? () => prettyStringify(fileContent)
+        : typeof fileContent === 'string' ? () => fileContent
+        : () => {
+            throw new Error(
+              `'${packageName}': Entry '${filename}' in '${configFilename}' must have value of type string`,
+            );
+          };
 
-    const contentToWrite = contentToWriteFunc();
+      const contentToWrite = contentToWriteFunc();
 
-    const targetFilename = join(packagePath, filename);
-    // Create directory in case it does not exist
-    /* eslint-disable-next-line functional/no-expression-statements*/
-    await mkdir(dirname(targetFilename), { recursive: true });
+      const targetFilename = join(packagePath, filename);
+      // Create directory in case it does not exist
+      /* eslint-disable-next-line functional/no-expression-statements*/
+      await mkdir(dirname(targetFilename), { recursive: true });
 
-    /* eslint-disable-next-line functional/no-expression-statements*/
-    await writeFile(targetFilename, contentToWrite);
+      /* eslint-disable-next-line functional/no-expression-statements*/
+      await writeFile(targetFilename, contentToWrite);
+    }
+  } catch (e: unknown) {
+    console.log(`'${packageName}': Error rethrown`);
+    throw e;
   }
-}
-catch (e:unknown) {
-  console.log( `'${packageName}': Error rethrown`)
-  throw e;
-}
 };
 
 if (basename(resolve()) === configsPackageName) {
+  console.log('Creating configuration files at top level\n');
   const topPath = join('..', '..');
   /* eslint-disable-next-line functional/no-expression-statements*/
   await applyConfig({
@@ -343,15 +353,32 @@ if (basename(resolve()) === configsPackageName) {
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name);
 
+  /* Remove dist directories of one-package repos because the packages will need rebuilding and these directories might contain conflicting versions of imported packages */
+
+  console.log('\nRemoving dist directories of repos');
   /* eslint-disable-next-line functional/no-expression-statements*/
-  await Promise.all( repoNames.map( (repoName) => 
-     applyConfig({
-      packagePath: join(topProjectsPath, repoName),
-      repoName,
-      packageName: repoName,
-    })
-  ));
-  const subRepoApplyConfigPromises = (
+  await Promise.all(
+    repoNames.map(async (repoName) => {
+      const path = join(topProjectsPath, repoName, prodFolderName);
+      /* eslint-disable-next-line functional/no-expression-statements*/
+      await rm(path, { force: true, recursive: true });
+      console.log(`'Removed '${path}'`);
+    }),
+  );
+
+  console.log('\nCreating configuration files of repos');
+  /* eslint-disable-next-line functional/no-expression-statements*/
+  await Promise.all(
+    repoNames.map((repoName) =>
+      applyConfig({
+        packagePath: join(topProjectsPath, repoName),
+        repoName,
+        packageName: repoName,
+      }),
+    ),
+  );
+
+  const subRepos = (
     await Promise.all(
       repoNames.map(async (repoName) => {
         const dirents = await readDirEvenIfMissing({
@@ -371,16 +398,31 @@ if (basename(resolve()) === configsPackageName) {
           packagePath: join(subRepoDirent.parentPath, subRepoDirent.name),
         }));
     })
-    .flat()
-    .map(({ repoName, packageName, packagePath }) =>
+    .flat();
+
+  /* Remove dist directories of subrepos because the packages will need rebuilding and these directories might contain conflicting versions of imported packages */
+  console.log('\nRemoving dist directories of subrepos');
+  /* eslint-disable-next-line functional/no-expression-statements*/
+  await Promise.all(
+    subRepos.map(async ({ packagePath }) => {
+      const path = join(packagePath, prodFolderName);
+      /* eslint-disable-next-line functional/no-expression-statements*/
+      await rm(path, { force: true, recursive: true });
+      console.log(`'Removed '${path}'`);
+    }),
+  );
+
+  console.log('\nCreating configuration files of subrepos');
+  /* eslint-disable-next-line functional/no-expression-statements*/
+  await Promise.all(
+    subRepos.map(({ repoName, packageName, packagePath }) =>
       applyConfig({
         packagePath,
         repoName,
         packageName,
       }),
-    );
-  /* eslint-disable-next-line functional/no-expression-statements*/
-  await Promise.all(subRepoApplyConfigPromises);
+    ),
+  );
 } else throw new Error(`This bin can only be run in '${configsPackageName}' package.`);
 
 console.log('SUCCESS');

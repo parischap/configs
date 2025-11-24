@@ -36,10 +36,26 @@ const environmentConfig = ({
   environment,
 }: {
   readonly packageName: string;
-  readonly environment: string;
+  readonly environment: string | undefined;
 }) => {
+  if (environment === undefined)
+    return {
+      // Used by the tscheck script
+      [tsConfigFilename]: tsConfigNonProject,
+      // Used by the lint script
+      [eslintConfigFilename]: eslintConfig(),
+    };
+
+  const base = {
+    // Used by the tscheck script
+    [tsConfigNonProjectFilename]: tsConfigNonProject,
+    // Used by the tscheck script
+    [tsConfigFilename]: tsConfig,
+  };
+
   if (environment === 'Browser')
     return {
+      ...base,
       // Used by the tscheck script
       [tsConfigProjectFilename]: tsConfigEsmBrowser,
       // Used by the lint script
@@ -48,6 +64,7 @@ const environmentConfig = ({
 
   if (environment === 'Node')
     return {
+      ...base,
       // Used by the tscheck script
       [tsConfigProjectFilename]: tsConfigEsmNode,
       // Used by the lint script
@@ -56,6 +73,7 @@ const environmentConfig = ({
 
   if (environment === 'Library')
     return {
+      ...base,
       // Used by the tscheck script
       [tsConfigProjectFilename]: tsConfigEsmLibrary,
       // Used by the lint script
@@ -75,7 +93,7 @@ export default ({
 }: {
   readonly packageName: string;
   readonly description: string;
-  readonly environment: string;
+  readonly environment?: string;
   readonly scripts: ReadonlyStringRecord;
 }) => ({
   // Used by the rmrf script
@@ -88,10 +106,6 @@ export default ({
   [prettierIgnoreFilename]: prettierIgnore,
   // Used by the tscheck script
   [tsConfigBaseFilename]: tsconfigBase,
-  // Used by the tscheck script
-  [tsConfigNonProjectFilename]: tsConfigNonProject,
-  // Used by the tscheck script
-  [tsConfigFilename]: tsConfig,
   [packageJsonFilename]: {
     name: `${slashedDevScope}${packageName}`,
     // Needs to be present even at the top or root of a monorepo because there are some javascript config files
@@ -102,7 +116,12 @@ export default ({
     scripts: {
       tscheck: `tsc -b ${tsConfigFilename} --force --noEmit`,
       lint: 'eslint .',
+      'lint-and-analyze': 'eslint . --stats -f json > eslint-stats.json',
       'lint-rules': 'pnpx @eslint/config-inspector',
+      checks:
+        (environment !== undefined ? 'pnpm circular && ' : '')
+        + 'pnpm lint && pnpm tscheck'
+        + (environment !== undefined ? ' && pnpm test' : ''),
       format: 'prettier . --write',
       rmrf: 'node --experimental-transform-types rmrf.ts',
       mkdirp: 'node --experimental-transform-types mkdirp.ts',

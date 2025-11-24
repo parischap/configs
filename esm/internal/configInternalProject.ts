@@ -1,6 +1,6 @@
 /**
- * This config implements what is necessary in a package that needs building. It should not be used
- * directly. It is included by configSubRepo.ts and configOnePackageRepo.ts.
+ * This config implements what is necessary in a package that has code (an esm directory). It should
+ * not be used directly. It is included by configSubRepo.ts and configOnePackageRepo.ts.
  */
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
@@ -140,13 +140,17 @@ const platformConfig = ({
   if (useEffectPlatform === 'No') return {};
 
   if (useEffectPlatform === 'AsDependency')
-    return {[packageJsonFilename]: {
-      dependencies: effectPlatformDependencies,}
+    return {
+      [packageJsonFilename]: {
+        dependencies: effectPlatformDependencies,
+      },
     };
 
   if (useEffectPlatform === 'AsPeerDependency')
-    return {[packageJsonFilename]: {
-      peerDependencies: effectPlatformDependencies,}
+    return {
+      [packageJsonFilename]: {
+        peerDependencies: effectPlatformDependencies,
+      },
     };
 
   throw new Error(
@@ -220,7 +224,6 @@ export default ({
         },
         scripts: {
           circular: `madge --extensions ts --circular --no-color --no-spinner ${projectFolderName}`,
-          checks: 'pnpm circular && pnpm lint && pnpm tscheck && pnpm test',
           test: 'vitest run',
           'clean-prod': `pnpm rmrf ${prodFolderName} && pnpm mkdirp ${prodFolderName}`,
           build: 'pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..',

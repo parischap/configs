@@ -2,7 +2,7 @@
 import { allFiles, prodFolderName, projectFolderName, typesFolderName } from '../constants.js';
 import type { ReadonlyRecord } from '../types.js';
 
-const _default: ReadonlyRecord = {
+export default {
   extends: './tsconfig.base.json',
   include: [`${projectFolderName}/${allFiles}`],
   compilerOptions: {
@@ -13,6 +13,4 @@ const _default: ReadonlyRecord = {
     allowJs: true,
     checkJs: true,
   },
-};
-
-export default _default;
+} satisfies ReadonlyRecord;

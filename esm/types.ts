@@ -64,7 +64,6 @@ export type ReadonlyRecord<K extends string | symbol = string, V = unknown> = {
   readonly [k in K]: V;
 };
 
-/* eslint-disable-next-line functional/type-declaration-immutability */
 export interface StringRecord extends Record<string, string> {}
 
 export interface ReadonlyStringRecord extends ReadonlyRecord<string, string> {}

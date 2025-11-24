@@ -2,7 +2,7 @@
 import type { ReadonlyRecord } from '../types.js';
 import { deepMerge, prettyStringify } from '../utils.js';
 
-const _default = (buildMethod: string): string => {
+export default (buildMethod: string): string => {
   const baseConfig: ReadonlyRecord = {
     build: {
       outDir: '${prodFolderName}',
@@ -27,5 +27,3 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(${prettyStringify(config)});`;
 };
-
-export default _default;

@@ -2,7 +2,7 @@
 import { tsBuildInfoFolderName } from '../constants.js';
 import type { ReadonlyRecord } from '../types.js';
 
-const _default: ReadonlyRecord = {
+export default {
   $schema: 'https://json.schemastore.org/tsconfig',
   _version: '20.1.0',
   extends: ['@tsconfig/strictest/tsconfig.json'],
@@ -37,6 +37,4 @@ const _default: ReadonlyRecord = {
     ],
     tsBuildInfoFile: `${tsBuildInfoFolderName}/project.tsbuildinfo`,
   },
-};
-
-export default _default;
+} satisfies ReadonlyRecord;

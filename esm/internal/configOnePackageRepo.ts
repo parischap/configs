@@ -3,7 +3,7 @@
 import type { Config, ReadonlyStringArray, ReadonlyStringRecord } from '../types.js';
 import { deepMerge, makeConfigWithLocalInternalDependencies } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
-import configInternalPackage from './configInternalPackage.js';
+import configInternalProject from './configInternalProject.js';
 import configInternalRepo from './configInternalRepo.js';
 
 export default ({
@@ -58,7 +58,7 @@ export default ({
         hasDocGen,
         description,
       }),
-      configInternalPackage({
+      configInternalProject({
         packageName,
         repoName: packageName,
         dependencies,

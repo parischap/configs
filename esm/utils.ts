@@ -20,14 +20,16 @@ import {
   isRecord,
 } from './types.js';
 
+export const regExpEscape = (s: string): string =>
+  // @ts-expect-error Awaiting bug correction in typescript
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
+  RegExp.escape(s);
+
 export const getExtension = (filename: string): string => {
   const extPos = filename.lastIndexOf('.');
   if (extPos === -1) return '';
   return filename.substring(extPos);
 };
-
-/*export const fromOsPathToPosixPath = (p: string): string =>
-  path.sep === path.posix.sep ? p : p.replaceAll(path.sep, path.posix.sep);*/
 
 export const isSubPathOf =
   (target: string) =>
@@ -36,7 +38,6 @@ export const isSubPathOf =
     return !relPath.startsWith('..') && !isAbsolute(relPath);
   };
 
-//export const devWorkspaceLink = (packageName:string):string => `workspace:${slashedDevScope}${packageName}@*`;
 export const prettyStringify = (v: unknown): string => JSON.stringify(v, null, 2);
 
 type MergedRecord<R1, R2> =
@@ -112,7 +113,7 @@ export const deepMerge: {
   ): MergedRecord<MergedRecord<MergedRecord<MergedRecord<R1, R2>, R3>, R4>, R5>;
 } = (...Rs: ReadonlyArray<ReadonlyRecord>) => Rs.reduce(deepMerge2, {} as never) as never;
 
-const toVersionControlSource = ({
+export const toVersionControlSource = ({
   version = undefined,
   buildStage,
   importRepoName,
@@ -255,7 +256,7 @@ export const toInternalExternalDependencies = ({
     ]) => {
       if (buildStageInDev !== 'DEV' && buildStageInDev !== 'PROD')
         throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'DEV' or 'PROD' for 'buildStageInDev' parameter. Actual:'${buildStageInDev}'`,
+          `'${packageName}': dependency '${importName}' must have value 'DEV' or 'PROD' for 'buildStageInDev' parameter. Actual: ${JSON.stringify(buildStageInDev)}`,
         );
 
       if (sourceInDev === 'GITHUB')
@@ -297,7 +298,7 @@ export const toInternalExternalDependencies = ({
           ] as const;
       else
         throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'GITHUB', 'WORKSPACE' or 'AUTO' for 'sourceInDev' parameter. Actual:'${sourceInDev}'`,
+          `'${packageName}': dependency '${importName}' must have value 'GITHUB', 'WORKSPACE' or 'AUTO' for 'sourceInDev' parameter. Actual: ${JSON.stringify(sourceInDev)}`,
         );
     },
   );
@@ -340,12 +341,12 @@ export const toInternalExternalDependencies = ({
 
       if (buildStageInProd !== 'DEV' && buildStageInProd !== 'PROD')
         throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'DEV' or 'PROD' for 'buildStageInProd' parameter. Actual:'${buildStageInProd}'`,
+          `'${packageName}': dependency '${importName}' must have value 'DEV' or 'PROD' for 'buildStageInProd' parameter. Actual: ${JSON.stringify(buildStageInProd)}`,
         );
 
       if (sourceInProd !== 'GITHUB')
         throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'GITHUB' or 'NPM' for 'SourceInProd' parameter. Actual:'${sourceInProd}'`,
+          `'${packageName}': dependency '${importName}' must have value 'GITHUB' or 'NPM' for 'SourceInProd' parameter. Actual: ${JSON.stringify(sourceInProd)}`,
         );
 
       return [

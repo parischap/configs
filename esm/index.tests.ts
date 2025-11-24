@@ -1,3 +1,4 @@
+import * as constants from './constants.js';
 import * as utils from './utils.js';
 
-export { utils };
+export { constants, utils };

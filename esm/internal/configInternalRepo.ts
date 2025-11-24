@@ -4,10 +4,13 @@
  */
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
+  docsConfigYmlFilename,
   docsFolderName,
+  docsIndexMdFilename,
   githubFolderName,
+  githubWorkflowsPagesFilename,
+  githubWorkflowsPublishFilename,
   gitIgnoreFilename,
-  owner,
   packageJsonFilename,
   packageManager,
   pnpmWorkspaceFilename,
@@ -15,8 +18,9 @@ import {
   vitestConfigFilename,
   workflowsFolderName,
 } from '../constants.js';
-import githubWorkflowsPages from './githubWorkflowsPages.js';
-import githubWorkflowsPublish from './githubWorkflowsPublish.js';
+import docsConfigYmlConfig from './docsConfigYmlConfig.js';
+import githubWorkflowsPagesConfig from './githubWorkflowsPagesConfig.js';
+import githubWorkflowsPublishConfig from './githubWorkflowsPublishConfig.js';
 import repoGitIgnoreConfig from './repoGitIgnoreConfig.js';
 import repoPnpmWorkspaceConfig from './repoPnpmWorkspaceConfig.js';
 import repoVitestConfig from './repoVitestConfig.js';
@@ -33,27 +37,27 @@ export default ({
   readonly description: string;
 }) => ({
   ...(isPublished ?
-    /* Github actions need to be at the root of the github repo. This action calls a script `build-and-publish` but changes the working directory to the published package directory before calling them. So this script must be in configInternalPackage.ts.
+    /* Github actions need to be at the root of the github repo. This action calls a script `build-and-publish` but changes the working directory to the published package directory before calling them. So this script must be in configInternalProject.ts.
      */
-    { [`${githubFolderName}/${workflowsFolderName}/publish.yml`]: githubWorkflowsPublish }
+    {
+      [`${githubFolderName}/${workflowsFolderName}/${githubWorkflowsPublishFilename}`]:
+        githubWorkflowsPublishConfig,
+    }
   : {}),
   ...(hasDocGen ?
     {
       /* Github actions need to be at the root of the github repo. This action calls a script `prepare-docs'`  */
-      [`${githubFolderName}/${workflowsFolderName}/pages.yml`]: githubWorkflowsPages,
+      [`${githubFolderName}/${workflowsFolderName}/${githubWorkflowsPagesFilename}`]:
+        githubWorkflowsPagesConfig,
       // Used by the github pages.yml action
-      [`${docsFolderName}/index.md`]: description,
+      [`${docsFolderName}/${docsIndexMdFilename}`]: description,
       // Used by the github pages.yml action
-      [`${docsFolderName}/_config.yml`]: `remote_theme: mikearnaldi/just-the-docs
-search_enabled: true
-aux_links:
-  "GitHub":
-    - "//github.com/${owner}/${packageName}"`,
+      [`${docsFolderName}/${docsConfigYmlFilename}`]: docsConfigYmlConfig(packageName),
     }
   : {}),
   [gitIgnoreFilename]: repoGitIgnoreConfig,
   [pnpmWorkspaceFilename]: repoPnpmWorkspaceConfig,
-   [vitestConfigFilename]: repoVitestConfig(packageName),
+  [vitestConfigFilename]: repoVitestConfig(packageName),
   [packageJsonFilename]: {
     packageManager,
     devDependencies: repoDevDependencies,
