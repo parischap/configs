@@ -2,16 +2,6 @@ import { constants, utils } from '@parischap/configs/tests';
 import { pipe } from 'effect';
 import { describe, expect, it } from 'vitest';
 
-describe('utils', () => {
-  describe('getExtension', () => {
-    it('With no extension', () => {
-      expect(utils.getExtension('foo')).toBe('');
-    });
-    it('With extension', () => {
-      expect(utils.getExtension('foo.baz')).toBe('.baz');
-    });
-  });
-
   describe('isSubPathOf', () => {
     it('Subpath', () => {
       expect(pipe('/home/foo/bar', utils.isSubPathOf('/home/foo'))).toBe(true);

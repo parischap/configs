@@ -20,17 +20,13 @@ import {
   isRecord,
 } from './types.js';
 
+/** Escapes regular expression special characters */
 export const regExpEscape = (s: string): string =>
   // @ts-expect-error Awaiting bug correction in typescript
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
   RegExp.escape(s);
 
-export const getExtension = (filename: string): string => {
-  const extPos = filename.lastIndexOf('.');
-  if (extPos === -1) return '';
-  return filename.substring(extPos);
-};
-
+/** Returns true if `p` is a subpath of `target` */
 export const isSubPathOf =
   (target: string) =>
   (p: string): boolean => {
@@ -38,8 +34,20 @@ export const isSubPathOf =
     return !relPath.startsWith('..') && !isAbsolute(relPath);
   };
 
+/** Stringifies with indentation */
 export const prettyStringify = (v: unknown): string => JSON.stringify(v, null, 2);
 
+/**
+ * Type-level result of merging two record types R1 and R2 used by `deepMerge2` and `deepMerge`.
+ *
+ * Rules:
+ *
+ * - Keys exclusive to R1 or R2 are preserved.
+ * - Keys present in both:
+ *
+ *   - If both values are Records, the type is recursively merged (MergedRecord).
+ *   - Otherwise the value type comes from R2 (R2 overrides).
+ */
 type MergedRecord<R1, R2> =
   R1 extends Record ?
     R2 extends Record ?
@@ -53,6 +61,15 @@ type MergedRecord<R1, R2> =
     : R2
   : R2;
 
+/**
+ * Deeply merges two objects.
+ *
+ * Behavior:
+ *
+ * - If both values are plain objects (Records), they are merged recursively.
+ * - If both values are arrays, they are concatenated in order: [...first, ...second].
+ * - Keys only present in one objrct are preserved.
+ */
 export const deepMerge2 = <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>(
   first: R1,
   second: R2,
@@ -80,6 +97,12 @@ export const deepMerge2 = <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>
   return result as never;
 };
 
+/**
+ * Deep merge of multiple records.
+ *
+ * Wrapper over deepMerge2 which reduces an array of records into a single merged record. Supports
+ * merging 2..5 arguments with proper result typing
+ */
 export const deepMerge: {
   <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>(r1: R1, r2: R2): MergedRecord<R1, R2>;
   <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord, R3 extends ReadonlyRecord>(
@@ -113,6 +136,10 @@ export const deepMerge: {
   ): MergedRecord<MergedRecord<MergedRecord<MergedRecord<R1, R2>, R3>, R4>, R5>;
 } = (...Rs: ReadonlyArray<ReadonlyRecord>) => Rs.reduce(deepMerge2, {} as never) as never;
 
+/**
+ * Build a git+ssh URL for a repository and optional subrepo + version + path. See meaning of
+ * parameters in `toInternalExternalDependencies`
+ */
 export const toVersionControlSource = ({
   version = undefined,
   buildStage,
@@ -137,6 +164,10 @@ export const toVersionControlSource = ({
   return `git+ssh://${versionControlService}/${owner}/${importRepoName}${params === '' ? '' : '#' + params}`;
 };
 
+/**
+ * Build a workspace protocol dependency string. See meaning of parameters in
+ * `toInternalExternalDependencies`
+ */
 const toWorkspaceSource = ({
   buildStage,
   unscopedImportName,
@@ -256,7 +287,7 @@ export const toInternalExternalDependencies = ({
     ]) => {
       if (buildStageInDev !== 'DEV' && buildStageInDev !== 'PROD')
         throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'DEV' or 'PROD' for 'buildStageInDev' parameter. Actual: ${JSON.stringify(buildStageInDev)}`,
+          `'${packageName}': dependency '${importName}' must have value 'DEV' or 'PROD' for 'buildStageInDev' parameter. Actual:${JSON.stringify(buildStageInDev)}`,
         );
 
       if (sourceInDev === 'GITHUB')
@@ -298,7 +329,7 @@ export const toInternalExternalDependencies = ({
           ] as const;
       else
         throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'GITHUB', 'WORKSPACE' or 'AUTO' for 'sourceInDev' parameter. Actual: ${JSON.stringify(sourceInDev)}`,
+          `'${packageName}': dependency '${importName}' must have value 'GITHUB', 'WORKSPACE' or 'AUTO' for 'sourceInDev' parameter. Actual:${JSON.stringify(sourceInDev)}`,
         );
     },
   );
@@ -341,12 +372,12 @@ export const toInternalExternalDependencies = ({
 
       if (buildStageInProd !== 'DEV' && buildStageInProd !== 'PROD')
         throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'DEV' or 'PROD' for 'buildStageInProd' parameter. Actual: ${JSON.stringify(buildStageInProd)}`,
+          `'${packageName}': dependency '${importName}' must have value 'DEV' or 'PROD' for 'buildStageInProd' parameter. Actual:${JSON.stringify(buildStageInProd)}`,
         );
 
       if (sourceInProd !== 'GITHUB')
         throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'GITHUB' or 'NPM' for 'SourceInProd' parameter. Actual: ${JSON.stringify(sourceInProd)}`,
+          `'${packageName}': dependency '${importName}' must have value 'GITHUB' or 'NPM' for 'SourceInProd' parameter. Actual:${JSON.stringify(sourceInProd)}`,
         );
 
       return [
@@ -368,6 +399,15 @@ export const toInternalExternalDependencies = ({
   ];
 };
 
+/**
+ * Modifies a package.json config so that :
+ *
+ * - a dependency that appears both in dependenices and peerDependencies is kept only as a
+ *   peerDependency
+ * - intrnal dependencies are converted to their development version while their production version is
+ *   prepared in the publishConfig key (except for devDependencies which do not ship in the
+ *   production package)
+ */
 export const makeConfigWithLocalInternalDependencies = <C extends Config>({
   repoName,
   packageName,
