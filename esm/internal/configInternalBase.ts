@@ -1,99 +1,37 @@
 /**
- * This config implements what is necessary in all situations. It should not be used directly. It is
- * included by configMonoRepo.ts, configSubRepo.ts, configOnePackageRepo.ts and configTop.ts.
+ * This config implements what is necessary in all situations. A package is always composed of a
+ * configInternalBase and either of a configInternalProject or a configInternalNoProject. It should
+ * not be used directly. It is included by configMonoRepo.ts, configSubRepo.ts,
+ * configOnePackageRepo.ts and configTop.ts.
  */
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
   baseDevDependencies,
-  eslintConfigFilename,
   mkdirpFilename,
   packageJsonFilename,
   prettierConfigFilename,
   prettierIgnoreFilename,
   rmrfFilename,
-  slashedDevScope,
+  slashedScope,
   tsConfigBaseFilename,
   tsConfigFilename,
-  tsConfigNonProjectFilename,
-  tsConfigProjectFilename,
 } from '../constants.js';
-import eslintConfig from './eslintConfig.js';
+
 import mkdirpCommand from './mkdirpCommandConfig.js';
 import prettierConfig from './prettierConfig.js';
 import prettierIgnore from './prettierIgnoreConfig.js';
 import rmrfCommand from './rmrfCommandConfig.js';
-import tsConfig from './tsconfig.js';
 import tsconfigBase from './tsconfigBase.js';
-import tsConfigNonProject from './tsconfigNonProject.js';
-import tsConfigEsmBrowser from './tsconfigProjectBrowser.js';
-import tsConfigEsmLibrary from './tsconfigProjectLibrary.js';
-import tsConfigEsmNode from './tsconfigProjectNode.js';
 
 import type { ReadonlyStringRecord } from '../types.js';
-
-const environmentConfig = ({
-  packageName,
-  environment,
-}: {
-  readonly packageName: string;
-  readonly environment: string | undefined;
-}) => {
-  if (environment === undefined)
-    return {
-      // Used by the tscheck script
-      [tsConfigFilename]: tsConfigNonProject,
-      // Used by the lint script
-      [eslintConfigFilename]: eslintConfig(),
-    };
-
-  const base = {
-    // Used by the tscheck script
-    [tsConfigNonProjectFilename]: tsConfigNonProject,
-    // Used by the tscheck script
-    [tsConfigFilename]: tsConfig,
-  };
-
-  if (environment === 'Browser')
-    return {
-      ...base,
-      // Used by the tscheck script
-      [tsConfigProjectFilename]: tsConfigEsmBrowser,
-      // Used by the lint script
-      [eslintConfigFilename]: eslintConfig('globals.browser'),
-    };
-
-  if (environment === 'Node')
-    return {
-      ...base,
-      // Used by the tscheck script
-      [tsConfigProjectFilename]: tsConfigEsmNode,
-      // Used by the lint script
-      [eslintConfigFilename]: eslintConfig('globals.nodeBuiltin'),
-    };
-
-  if (environment === 'Library')
-    return {
-      ...base,
-      // Used by the tscheck script
-      [tsConfigProjectFilename]: tsConfigEsmLibrary,
-      // Used by the lint script
-      [eslintConfigFilename]: eslintConfig("globals['shared-node-browser']"),
-    };
-
-  throw new Error(
-    `'${packageName}': disallowed value for 'environment' parameter. Actual: '${environment}'`,
-  );
-};
 
 export default ({
   packageName,
   description,
-  environment,
   scripts,
 }: {
   readonly packageName: string;
   readonly description: string;
-  readonly environment?: string;
   readonly scripts: ReadonlyStringRecord;
 }) => ({
   // Used by the rmrf script
@@ -107,21 +45,19 @@ export default ({
   // Used by the tscheck script
   [tsConfigBaseFilename]: tsconfigBase,
   [packageJsonFilename]: {
-    name: `${slashedDevScope}${packageName}`,
+    name: `${slashedScope}${packageName}`,
     // Needs to be present even at the top or root of a monorepo because there are some javascript config files
     type: 'module',
     description,
     author: 'Jérôme MARTIN',
     license: 'MIT',
     scripts: {
+      // tests can be run at all levels, even at non project levels because there are vitest projects
+      test: 'vitest run',
       tscheck: `tsc -b ${tsConfigFilename} --force --noEmit`,
       lint: 'eslint .',
       'lint-and-analyze': 'eslint . --stats -f json > eslint-stats.json',
       'lint-rules': 'pnpx @eslint/config-inspector',
-      checks:
-        (environment !== undefined ? 'pnpm circular && ' : '')
-        + 'pnpm lint && pnpm tscheck'
-        + (environment !== undefined ? ' && pnpm test' : ''),
       format: 'prettier . --write',
       rmrf: 'node --experimental-transform-types rmrf.ts',
       mkdirp: 'node --experimental-transform-types mkdirp.ts',
@@ -133,5 +69,4 @@ export default ({
     },
     devDependencies: baseDevDependencies,
   },
-  ...environmentConfig({ packageName, environment }),
 });

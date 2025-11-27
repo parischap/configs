@@ -13,17 +13,13 @@ import {
   gitIgnoreFilename,
   packageJsonFilename,
   packageManager,
-  pnpmWorkspaceFilename,
   repoDevDependencies,
-  vitestConfigFilename,
   workflowsFolderName,
 } from '../constants.js';
 import docsConfigYmlConfig from './docsConfigYmlConfig.js';
 import githubWorkflowsPagesConfig from './githubWorkflowsPagesConfig.js';
 import githubWorkflowsPublishConfig from './githubWorkflowsPublishConfig.js';
-import repoGitIgnoreConfig from './repoGitIgnoreConfig.js';
-import repoPnpmWorkspaceConfig from './repoPnpmWorkspaceConfig.js';
-import repoVitestConfig from './repoVitestConfig.js';
+import gitIgnoreConfig from './gitIgnoreConfig.js';
 
 export default ({
   packageName,
@@ -55,9 +51,7 @@ export default ({
       [`${docsFolderName}/${docsConfigYmlFilename}`]: docsConfigYmlConfig(packageName),
     }
   : {}),
-  [gitIgnoreFilename]: repoGitIgnoreConfig,
-  [pnpmWorkspaceFilename]: repoPnpmWorkspaceConfig,
-  [vitestConfigFilename]: repoVitestConfig(packageName),
+  [gitIgnoreFilename]: gitIgnoreConfig,
   [packageJsonFilename]: {
     packageManager,
     devDependencies: repoDevDependencies,

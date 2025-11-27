@@ -12,7 +12,6 @@ import {
   packagesFolderName,
   prodFolderName,
   projectFolderName,
-  projectsFolderName,
   viteTimeStampFilenamePattern,
 } from '../constants.js';
 import { regExpEscape } from '../utils.js';
@@ -362,12 +361,13 @@ const scopeConfig = ({
   }));
 
 export default defineConfig([
-  // This is a global ignore, files are ignored in all other config objects. node_modules files and .git are also ignored.
+  // This is a global ignore, files are ignored in all other config objects
+  // node_modules files and .git are also ignored.
+  // Must work at all levels (top, monorepo, one-package repo, and subrepo)
   globalIgnores(
     [
       '${prodFolderName + '/'}',
       '${packagesFolderName + '/'}',
-      '${projectsFolderName + '/'}',
       '${viteTimeStampFilenamePattern}',
     ],
     'ignoreConfig',

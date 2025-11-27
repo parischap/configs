@@ -29,7 +29,6 @@ import {
   packagesFolderName,
   pnpmLockFilename,
   prodFolderName,
-  projectsFolderName,
   readMeFilename,
   topPackageName,
   viteTimeStampFilenamePattern,
@@ -83,7 +82,7 @@ const readDirEvenIfMissing = async ({
   try {
     return await readdir(path, { recursive, withFileTypes: true });
   } catch (e: unknown) {
-    if (typeof e === 'object' && e !== null && 'code' in e && e.code === 'ENOENT') return [];
+    if (e instanceof Error && 'code' in e && e.code === 'ENOENT') return [];
     throw e;
   }
 };
@@ -92,12 +91,26 @@ const getConfigFromConfigFile = async ({
   repoName,
   packageName,
   packagePath,
+  isTop,
 }: {
   readonly repoName: string;
   readonly packageName: string;
   readonly packagePath: string;
+  readonly isTop: boolean;
 }): Promise<Config> => {
-  const configFile = await readFile(join(packagePath, configFilename), 'utf8');
+  let configFile: string;
+  try {
+    /* eslint-disable-next-line functional/no-expression-statements */
+    configFile = await readFile(join(packagePath, configFilename), 'utf8');
+  } catch (e: unknown) {
+    if (isTop && e instanceof Error && 'code' in e && e.code === 'ENOENT')
+      /* eslint-disable-next-line functional/no-expression-statements */
+      configFile = `{
+  "configName": "configTop",
+  "description": "Top repo of my developments"
+}`;
+    else throw e;
+  }
 
   const configParameters: unknown = JSON.parse(configFile);
 
@@ -286,15 +299,17 @@ const applyConfig = async ({
   packagePath,
   repoName,
   packageName,
+  isTop,
 }: {
   readonly packagePath: string;
   readonly repoName: string;
   readonly packageName: string;
+  readonly isTop: boolean;
 }) => {
   try {
     console.log(`'${packageName}': reading '${configFilename}'`);
 
-    const config = await getConfigFromConfigFile({ repoName, packageName, packagePath });
+    const config = await getConfigFromConfigFile({ repoName, packageName, packagePath, isTop });
 
     // In project.config.ts, paths are posix-Style. Let's convert them to OS style
     const filesToCreate = Object.keys(config).map(normalize);
@@ -353,9 +368,10 @@ if (basename(process.cwd()) === configsPackageName) {
     packagePath: topPath,
     repoName: topPackageName,
     packageName: topPackageName,
+    isTop: true,
   });
-  const topProjectsPath = join(topPath, projectsFolderName);
-  const repoNames = (await readdir(topProjectsPath, { withFileTypes: true }))
+  const topPackagesPath = join(topPath, packagesFolderName);
+  const repoNames = (await readdir(topPackagesPath, { withFileTypes: true }))
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name);
 
@@ -365,7 +381,7 @@ if (basename(process.cwd()) === configsPackageName) {
   /* eslint-disable-next-line functional/no-expression-statements*/
   await Promise.all(
     repoNames.map(async (repoName) => {
-      const path = join(topProjectsPath, repoName, prodFolderName);
+      const path = join(topPackagesPath, repoName, prodFolderName);
       /* eslint-disable-next-line functional/no-expression-statements*/
       await rm(path, { force: true, recursive: true });
       console.log(`'Removed '${path}'`);
@@ -377,9 +393,10 @@ if (basename(process.cwd()) === configsPackageName) {
   await Promise.all(
     repoNames.map((repoName) =>
       applyConfig({
-        packagePath: join(topProjectsPath, repoName),
+        packagePath: join(topPackagesPath, repoName),
         repoName,
         packageName: repoName,
+        isTop: false,
       }),
     ),
   );
@@ -388,7 +405,7 @@ if (basename(process.cwd()) === configsPackageName) {
     await Promise.all(
       repoNames.map(async (repoName) => {
         const dirents = await readDirEvenIfMissing({
-          path: join(topProjectsPath, repoName, packagesFolderName),
+          path: join(topPackagesPath, repoName, packagesFolderName),
           recursive: false,
         });
         return [repoName, dirents] as const;
@@ -426,6 +443,7 @@ if (basename(process.cwd()) === configsPackageName) {
         packagePath,
         repoName,
         packageName,
+        isTop: false,
       }),
     ),
   );

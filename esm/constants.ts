@@ -63,7 +63,6 @@ export const npmFolderName = 'node_modules';
 export const vscodeFolderName = '.vscode';
 export const gitFolderName = '.git';
 export const packagesFolderName = 'packages';
-export const projectsFolderName = 'projects';
 export const starterFolderName = 'init';
 export const githubFolderName = '.github';
 export const workflowsFolderName = 'workflows';
@@ -122,10 +121,6 @@ export const docGenDependencies = {
   tsx: '4.20.6',
 };
 
-export const testDependencies = {
-  vitest: '4.0.7',
-};
-
 // Add here all devDependencies used by configInternalBase.ts, be it in scripts, github actions, installed config files...
 export const baseDevDependencies = {
   // Used by the eslint.config.ts file
@@ -168,15 +163,15 @@ export const baseDevDependencies = {
   typescript: '5.9.3',
   // Used as peerDependency of eslint, to run the examples scripts and by the update-config-files script
   jiti: '2.6.1',
+  // Used by the test script
+  vitest: '4.0.7',
 };
 
 // Add here all devDependencies used by configInternalRepo.ts, be it in scripts, github actions, installed config files...
 export const repoDevDependencies = {};
 
 // Add here all devDependencies used by configInternalProject.ts, be it in scripts, github actions, installed config files...
-export const packageDevDependencies = {
-  // Used by the test script
-  ...testDependencies,
+export const projectDevDependencies = {
   madge: '8.0.0',
   /* All packages use Effect and all may use @effect/experimental. @effect/experimental is included in the esm modules and should therefore be included as a dependency. But @effect/experimental is for debugging and performance optimization only. So the code that uses it must be removed or by-passed in prod. So this dependency must not be shipped in prod: it's a devDependency. */
   '@effect/experimental': '0.57.4',
@@ -190,10 +185,4 @@ export const packageDevDependencies = {
   'babel-plugin-annotate-pure-calls': '0.5.0',
   '@babel/plugin-transform-export-namespace-from': '7.27.1',
   '@babel/plugin-transform-modules-commonjs': '7.27.1',
-};
-
-// Add here all devDependencies used by configInternalTop.ts, be it in scripts, github actions, installed config files...
-export const topDevDependencies = {
-  // Used by the tscheck script and by vscode and its plugins
-  ...testDependencies,
 };

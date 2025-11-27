@@ -101,7 +101,7 @@ export const deepMerge2 = <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>
  * Deep merge of multiple records.
  *
  * Wrapper over deepMerge2 which reduces an array of records into a single merged record. Supports
- * merging 2..5 arguments with proper result typing
+ * merging 2..6 arguments with proper result typing
  */
 export const deepMerge: {
   <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>(r1: R1, r2: R2): MergedRecord<R1, R2>;
@@ -134,6 +134,21 @@ export const deepMerge: {
     r4: R4,
     r5: R5,
   ): MergedRecord<MergedRecord<MergedRecord<MergedRecord<R1, R2>, R3>, R4>, R5>;
+  <
+    R1 extends ReadonlyRecord,
+    R2 extends ReadonlyRecord,
+    R3 extends ReadonlyRecord,
+    R4 extends ReadonlyRecord,
+    R5 extends ReadonlyRecord,
+    R6 extends ReadonlyRecord,
+  >(
+    r1: R1,
+    r2: R2,
+    r3: R3,
+    r4: R4,
+    r5: R5,
+    r6: R6,
+  ): MergedRecord<MergedRecord<MergedRecord<MergedRecord<MergedRecord<R1, R2>, R3>, R4>, R5>, R6>;
 } = (...Rs: ReadonlyArray<ReadonlyRecord>) => Rs.reduce(deepMerge2, {} as never) as never;
 
 /**
@@ -409,16 +424,12 @@ export const toInternalExternalDependencies = ({
  *   production package)
  */
 export const makeConfigWithLocalInternalDependencies = <C extends Config>({
-  repoName,
   packageName,
   onlyAllowDevDependencies,
-  allowWorkspaceSources,
   config,
 }: {
-  readonly repoName: string;
   readonly packageName: string;
   readonly onlyAllowDevDependencies: boolean;
-  readonly allowWorkspaceSources: boolean;
   readonly config: C;
 }): C => {
   const packageJsonConfig = config[packageJsonFilename];
@@ -426,14 +437,6 @@ export const makeConfigWithLocalInternalDependencies = <C extends Config>({
   const peerDependencies = packageJsonConfig['peerDependencies'] ?? {};
   if (onlyAllowDevDependencies && Object.keys(peerDependencies).length > 0)
     throw new Error(`'${packageName}': peerDependencies are not allowed in this package`);
-  const [internalPeerDependenciesInDev, internalPeerDependenciesInProd, externalPeerDependencies] =
-    toInternalExternalDependencies({
-      repoName,
-      packageName,
-      dependencies: peerDependencies,
-      allowWorkspaceSources,
-      isDevDependencies: false,
-    });
 
   const dependencies = Object.fromEntries(
     Object.entries(packageJsonConfig['dependencies'] ?? {}).filter(
@@ -442,6 +445,21 @@ export const makeConfigWithLocalInternalDependencies = <C extends Config>({
   );
   if (onlyAllowDevDependencies && Object.keys(dependencies).length > 0)
     throw new Error(`'${packageName}': dependencies are not allowed in this package`);
+
+  const devDependencies = Object.fromEntries(
+    Object.entries(packageJsonConfig['devDependencies'] ?? {}).filter(
+      ([packageName]) => !(packageName in peerDependencies) && !(packageName in dependencies),
+    ),
+  );
+
+  /* const [internalPeerDependenciesInDev, internalPeerDependenciesInProd, externalPeerDependencies] =
+    toInternalExternalDependencies({
+      repoName,
+      packageName,
+      dependencies: peerDependencies,
+      allowWorkspaceSources,
+      isDevDependencies: false,
+    });
 
   const [internalDependenciesInDev, internalDependenciesInProd, externalDependencies] =
     toInternalExternalDependencies({
@@ -452,62 +470,50 @@ export const makeConfigWithLocalInternalDependencies = <C extends Config>({
       isDevDependencies: false,
     });
 
-  const devDependencies = Object.fromEntries(
-    Object.entries(packageJsonConfig['devDependencies'] ?? {}).filter(
-      ([packageName]) => !(packageName in peerDependencies) && !(packageName in dependencies),
-    ),
-  );
-
   const [internalDevDependenciesInDev, , externalDevDependencies] = toInternalExternalDependencies({
     repoName,
     packageName,
     dependencies: devDependencies,
     allowWorkspaceSources,
     isDevDependencies: true,
-  });
+  });*/
 
   const newPackageJsonConfig = {
     ...packageJsonConfig,
-    dependencies: { ...internalDependenciesInDev, ...externalDependencies },
-    devDependencies: { ...internalDevDependenciesInDev, ...externalDevDependencies },
-    peerDependencies: { ...internalPeerDependenciesInDev, ...externalPeerDependencies },
-    publishConfig: {
+    dependencies /*: { ...internalDependenciesInDev, ...externalDependencies }*/,
+    devDependencies /*: { ...internalDevDependenciesInDev, ...externalDevDependencies }*/,
+    /*peerDependencies : { ...internalPeerDependenciesInDev, ...externalPeerDependencies }*/
+    /*publishConfig: {
       dependencies: internalDependenciesInProd,
       peerDependencies: internalPeerDependenciesInProd,
-    },
+    },*/
   };
 
   if (Object.keys(newPackageJsonConfig.dependencies).length === 0)
-    // @ts-expect-error - This is not functional
     // eslint-disable-next-line functional/immutable-data, functional/no-expression-statements
     delete newPackageJsonConfig.dependencies;
 
   if (Object.keys(newPackageJsonConfig.devDependencies).length === 0)
-    // @ts-expect-error - This is not functional
     // eslint-disable-next-line functional/immutable-data, functional/no-expression-statements
     delete newPackageJsonConfig.devDependencies;
 
   if (Object.keys(newPackageJsonConfig.peerDependencies).length === 0)
-    // @ts-expect-error - This is not functional
     // eslint-disable-next-line functional/immutable-data, functional/no-expression-statements
     delete newPackageJsonConfig.peerDependencies;
 
-  const publishConfig = newPackageJsonConfig.publishConfig;
+  /*const publishConfig = newPackageJsonConfig.publishConfig;
 
   if (Object.keys(publishConfig.dependencies).length === 0)
-    // @ts-expect-error - This is not functional
     // eslint-disable-next-line functional/immutable-data, functional/no-expression-statements
     delete publishConfig.dependencies;
 
   if (Object.keys(publishConfig.peerDependencies).length === 0)
-    // @ts-expect-error - This is not functional
     // eslint-disable-next-line functional/immutable-data, functional/no-expression-statements
     delete publishConfig.peerDependencies;
 
   if (Object.keys(publishConfig).length === 0)
-    // @ts-expect-error - This is not functional
     // eslint-disable-next-line functional/immutable-data, functional/no-expression-statements
-    delete newPackageJsonConfig.publishConfig;
+    delete newPackageJsonConfig.publishConfig;*/
 
   return {
     ...config,

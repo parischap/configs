@@ -4,24 +4,18 @@ import { topPackageName } from '../constants.js';
 import { type Config } from '../types.js';
 import { deepMerge, makeConfigWithLocalInternalDependencies } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
-import configInternalTop from './configInternalTop.js';
+import configInternalNoProject from './configInternalNoProject.js';
 
 export default ({ description }: { readonly description: string }): Config =>
   makeConfigWithLocalInternalDependencies({
-    repoName: topPackageName,
     packageName: topPackageName,
     onlyAllowDevDependencies: true,
-    allowWorkspaceSources: false,
     config: deepMerge(
       configInternalBase({
         packageName: topPackageName,
         description,
-        scripts: {
-          'clean-all-node-modules': 'pnpm -r -include-workspace-root=true clean-node-modules',
-          'clean-all-config-files': 'pnpm -r -include-workspace-root=true clean-config-files',
-          'build-all': 'pnpm -r build-all',
-        },
+        scripts: {},
       }),
-      configInternalTop,
+      configInternalNoProject,
     ),
   });

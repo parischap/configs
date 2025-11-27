@@ -5,11 +5,11 @@ import {
   packagesFolderName,
   prodFolderName,
   projectFolderName,
-  projectsFolderName,
   viteTimeStampFilenamePattern,
 } from '../constants.js';
 import type { ReadonlyRecord } from '../types.js';
 
+// Must work at all levels: top, monorepo, one-package repo, subrepo
 export default {
   extends: './tsconfig.base.json',
   exclude: [
@@ -17,7 +17,6 @@ export default {
     npmFolderName,
     prodFolderName,
     packagesFolderName,
-    projectsFolderName,
     viteTimeStampFilenamePattern,
   ],
   compilerOptions: {

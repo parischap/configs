@@ -3,6 +3,7 @@
 import { type Config } from '../types.js';
 import { deepMerge, makeConfigWithLocalInternalDependencies } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
+import configInternalNoProject from './configInternalNoProject.js';
 import configInternalRepo from './configInternalRepo.js';
 
 export default ({
@@ -13,20 +14,13 @@ export default ({
   readonly description: string;
 }): Config =>
   makeConfigWithLocalInternalDependencies({
-    repoName: packageName,
     packageName,
     onlyAllowDevDependencies: true,
-    allowWorkspaceSources: true,
     config: deepMerge(
       configInternalBase({
         packageName,
         description,
-        scripts: {
-          'clean-all-node-modules': 'pnpm -r -include-workspace-root=true clean-node-modules',
-          'clean-all-config-files': 'pnpm -r -include-workspace-root=true clean-config-files',
-          'clean-all-prod': 'pnpm -r clean-prod',
-          'build-all': 'pnpm -r build',
-        },
+        scripts: {},
       }),
       configInternalRepo({
         packageName,
@@ -36,5 +30,6 @@ export default ({
         hasDocGen: true,
         description,
       }),
+      configInternalNoProject,
     ),
   });
