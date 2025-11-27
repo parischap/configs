@@ -1,6 +1,6 @@
 /**
  * This config implements what is necessary at the root of a github repo. It should not be used
- * directly. It is included by configMonoRepo.ts and configOnePackageRepo.ts.
+ * directly. It is included by configTop.ts, configMonoRepo.ts, configOnePackageRepo.ts.
  */
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
@@ -22,15 +22,11 @@ import githubWorkflowsPublishConfig from './githubWorkflowsPublishConfig.js';
 import gitIgnoreConfig from './gitIgnoreConfig.js';
 
 export default ({
-  packageName,
-  hasDocGen,
+  docGenParameters,
   isPublished,
-  description,
 }: {
-  readonly packageName: string;
-  readonly hasDocGen: boolean;
+  readonly docGenParameters?: { readonly packageName: string; readonly description: string };
   readonly isPublished: boolean;
-  readonly description: string;
 }) => ({
   ...(isPublished ?
     /* Github actions need to be at the root of the github repo. This action calls a script `build-and-publish` but changes the working directory to the published package directory before calling them. So this script must be in configInternalProject.ts.
@@ -40,22 +36,24 @@ export default ({
         githubWorkflowsPublishConfig,
     }
   : {}),
-  ...(hasDocGen ?
+  ...(docGenParameters !== undefined ?
     {
       /* Github actions need to be at the root of the github repo. This action calls a script `prepare-docs'`  */
       [`${githubFolderName}/${workflowsFolderName}/${githubWorkflowsPagesFilename}`]:
         githubWorkflowsPagesConfig,
       // Used by the github pages.yml action
-      [`${docsFolderName}/${docsIndexMdFilename}`]: description,
+      [`${docsFolderName}/${docsIndexMdFilename}`]: docGenParameters.description,
       // Used by the github pages.yml action
-      [`${docsFolderName}/${docsConfigYmlFilename}`]: docsConfigYmlConfig(packageName),
+      [`${docsFolderName}/${docsConfigYmlFilename}`]: docsConfigYmlConfig(
+        docGenParameters.packageName,
+      ),
     }
   : {}),
   [gitIgnoreFilename]: gitIgnoreConfig,
   [packageJsonFilename]: {
     packageManager,
     devDependencies: repoDevDependencies,
-    ...(hasDocGen ?
+    ...(docGenParameters !== undefined ?
       {
         scripts: {
           'prepare-docs':

@@ -5,8 +5,8 @@ export default defineConfig({
     projects: [
       {
         test: {
-          include: ['**/tests/*.ts'],
-          exclude: ['**/node_modules/**'],
+          include: ['tests/*.ts'],
+          exclude: ['node_modules/**'],
           name: 'Repo configs',
           isolate: false,
           fileParallelism: false,

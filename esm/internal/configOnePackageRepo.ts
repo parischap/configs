@@ -49,10 +49,8 @@ export default ({
         scripts,
       }),
       configInternalRepo({
-        packageName,
+        ...(hasDocGen ? { docGenParameters: { packageName, description } } : {}),
         isPublished,
-        hasDocGen,
-        description,
       }),
       configInternalProject({
         packageName,

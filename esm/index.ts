@@ -91,26 +91,12 @@ const getConfigFromConfigFile = async ({
   repoName,
   packageName,
   packagePath,
-  isTop,
 }: {
   readonly repoName: string;
   readonly packageName: string;
   readonly packagePath: string;
-  readonly isTop: boolean;
 }): Promise<Config> => {
-  let configFile: string;
-  try {
-    /* eslint-disable-next-line functional/no-expression-statements */
-    configFile = await readFile(join(packagePath, configFilename), 'utf8');
-  } catch (e: unknown) {
-    if (isTop && e instanceof Error && 'code' in e && e.code === 'ENOENT')
-      /* eslint-disable-next-line functional/no-expression-statements */
-      configFile = `{
-  "configName": "configTop",
-  "description": "Top repo of my developments"
-}`;
-    else throw e;
-  }
+  const configFile = await readFile(join(packagePath, configFilename), 'utf8');
 
   const configParameters: unknown = JSON.parse(configFile);
 
@@ -299,17 +285,15 @@ const applyConfig = async ({
   packagePath,
   repoName,
   packageName,
-  isTop,
 }: {
   readonly packagePath: string;
   readonly repoName: string;
   readonly packageName: string;
-  readonly isTop: boolean;
 }) => {
   try {
     console.log(`'${packageName}': reading '${configFilename}'`);
 
-    const config = await getConfigFromConfigFile({ repoName, packageName, packagePath, isTop });
+    const config = await getConfigFromConfigFile({ repoName, packageName, packagePath });
 
     // In project.config.ts, paths are posix-Style. Let's convert them to OS style
     const filesToCreate = Object.keys(config).map(normalize);
@@ -368,7 +352,6 @@ if (basename(process.cwd()) === configsPackageName) {
     packagePath: topPath,
     repoName: topPackageName,
     packageName: topPackageName,
-    isTop: true,
   });
   const topPackagesPath = join(topPath, packagesFolderName);
   const repoNames = (await readdir(topPackagesPath, { withFileTypes: true }))
@@ -396,7 +379,6 @@ if (basename(process.cwd()) === configsPackageName) {
         packagePath: join(topPackagesPath, repoName),
         repoName,
         packageName: repoName,
-        isTop: false,
       }),
     ),
   );
@@ -443,7 +425,6 @@ if (basename(process.cwd()) === configsPackageName) {
         packagePath,
         repoName,
         packageName,
-        isTop: false,
       }),
     ),
   );

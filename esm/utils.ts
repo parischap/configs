@@ -479,27 +479,22 @@ export const makeConfigWithLocalInternalDependencies = <C extends Config>({
   });*/
 
   const newPackageJsonConfig = {
-    ...packageJsonConfig,
-    dependencies /*: { ...internalDependenciesInDev, ...externalDependencies }*/,
-    devDependencies /*: { ...internalDevDependenciesInDev, ...externalDevDependencies }*/,
-    /*peerDependencies : { ...internalPeerDependenciesInDev, ...externalPeerDependencies }*/
-    /*publishConfig: {
+    ...Object.fromEntries(
+      Object.entries(packageJsonConfig).filter(
+        ([key]) => !['dependencies', 'devDependencies', 'peerDependencies'].includes(key),
+      ),
+    ),
+    ...(Object.keys(dependencies).length === 0 ? {} : { dependencies }),
+    ...(Object.keys(devDependencies).length === 0 ? {} : { devDependencies }),
+    ...(Object.keys(peerDependencies).length === 0 ? {} : { peerDependencies }),
+    /*dependencies: { ...internalDependenciesInDev, ...externalDependencies },
+    devDependencies : { ...internalDevDependenciesInDev, ...externalDevDependencies },
+    peerDependencies : { ...internalPeerDependenciesInDev, ...externalPeerDependencies },
+    publishConfig: {
       dependencies: internalDependenciesInProd,
       peerDependencies: internalPeerDependenciesInProd,
     },*/
   };
-
-  if (Object.keys(newPackageJsonConfig.dependencies).length === 0)
-    // eslint-disable-next-line functional/immutable-data, functional/no-expression-statements
-    delete newPackageJsonConfig.dependencies;
-
-  if (Object.keys(newPackageJsonConfig.devDependencies).length === 0)
-    // eslint-disable-next-line functional/immutable-data, functional/no-expression-statements
-    delete newPackageJsonConfig.devDependencies;
-
-  if (Object.keys(newPackageJsonConfig.peerDependencies).length === 0)
-    // eslint-disable-next-line functional/immutable-data, functional/no-expression-statements
-    delete newPackageJsonConfig.peerDependencies;
 
   /*const publishConfig = newPackageJsonConfig.publishConfig;
 

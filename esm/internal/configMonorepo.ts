@@ -23,12 +23,10 @@ export default ({
         scripts: {},
       }),
       configInternalRepo({
-        packageName,
+        // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
+        docGenParameters: { packageName, description },
         // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
         isPublished: true,
-        // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
-        hasDocGen: true,
-        description,
       }),
       configInternalNoProject,
     ),
