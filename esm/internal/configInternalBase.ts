@@ -59,9 +59,9 @@ export default ({
       'lint-and-analyze': 'eslint . --stats -f json > eslint-stats.json',
       'lint-rules': 'pnpx @eslint/config-inspector',
       format: 'prettier . --write',
-      rmrf: 'node --experimental-transform-types rmrf.ts',
-      mkdirp: 'node --experimental-transform-types mkdirp.ts',
-      'clean-node-modules': 'rm node  node_modules',
+      rmrf: 'node rmrf.ts',
+      mkdirp: 'node mkdirp.ts',
+      'clean-node-modules': 'pnpm rmrf node_modules',
       // Suppress package.json after because once suppressed the rmrf script no longer exists
       'clean-config-files': `pnpm rmrf ${tsConfigFilename} && pnpm rmrf ${packageJsonFilename}`,
       'reinstall-all-dependencies': 'pnpm i --force',

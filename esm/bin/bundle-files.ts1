@@ -15,7 +15,7 @@ import {
   internalFolderName,
   packageJsonFilename,
   prodFolderName,
-  projectFolderName,
+  sourceFolderName,
 } from '../constants.js';
 import { isSubPathOf } from '../utils.js';
 
@@ -63,10 +63,10 @@ const program = Effect.gen(function* () {
 
   const rootPath = path.resolve();
   const packageJsonPath = path.join(rootPath, packageJsonFilename);
-  const projectPath = path.join(rootPath, projectFolderName);
+  const projectPath = path.join(rootPath, sourceFolderName);
   const prodPath = path.join(rootPath, prodFolderName);
   const internalImportsGlob = allTsFiles.map((p) => path.join(projectPath, internalFolderName, p));
-  const esmOutDir = path.join(prodFolderName, projectFolderName);
+  const esmOutDir = path.join(prodFolderName, sourceFolderName);
 
   /* yield* Effect.log('Copying static files');
   const staticFilesPath = path.join(rootPath, constants.staticFolderName);
@@ -148,7 +148,7 @@ const program = Effect.gen(function* () {
   );
 
   yield* Effect.log(`Moving ${binariesFolderName} files`);
-  const srcBinPath = path.join(prodPath, projectFolderName, binariesFolderName);
+  const srcBinPath = path.join(prodPath, sourceFolderName, binariesFolderName);
   const binExists = yield* fs.exists(srcBinPath);
   if (binExists) yield* fs.rename(srcBinPath, path.join(prodPath, binariesFolderName));
 });

@@ -39,24 +39,21 @@ import configOnePackageRepo from './internal/configOnePackageRepo.js';
 import configSubRepo from './internal/configSubRepo.js';
 import configTop from './internal/configTop.js';
 import { isReadonlyStringArray, isReadonlyStringRecord, isRecord, type Config } from './types.js';
-import { prettyStringify } from './utils.js';
+import { prettyStringify, regExpEscape } from './utils.js';
 
+const fromPatternsToRegExp = (patterns: ReadonlyArray<string>): RegExp =>
+  new RegExp(
+    '^'
+      + patterns.map((pattern) => regExpEscape(pattern).replace(/\*/g, '[^\\/]*')).join('|')
+      + '$',
+  );
 // List of configuration files for which an error must not be reported if they are present in the package and not overridden by project.config.js
-const patternsToIgnore = [
-  readMeFilename,
-  configFilename,
-  viteTimeStampFilenamePattern,
-  pnpmLockFilename,
-  vscodeWorkspaceFilenamePattern,
-];
+const patternsToIgnore = [readMeFilename, configFilename, viteTimeStampFilenamePattern];
+const patternsToIgnoreRegExp = fromPatternsToRegExp(patternsToIgnore);
 
-const patternsToIgnoreRegExp = new RegExp(
-  '^'
-    + patternsToIgnore
-      .map((pattern) => pattern.replace(/[/\\^$+?.()|[\]{}]/g, '\\$&').replace(/\*/g, '[^\\/]*'))
-      .join('|')
-    + '$',
-);
+// more pattens added to patternsToIgnore only for the top repo
+const topPatternsToIgnore = [pnpmLockFilename, vscodeWorkspaceFilenamePattern];
+const topPatternsToIgnoreRegExp = fromPatternsToRegExp(topPatternsToIgnore);
 
 // List of folders where configuration files might be found
 const foldersToInclude = [githubFolderName, docsFolderName];
@@ -285,10 +282,12 @@ const applyConfig = async ({
   packagePath,
   repoName,
   packageName,
+  isTop,
 }: {
   readonly packagePath: string;
   readonly repoName: string;
   readonly packageName: string;
+  readonly isTop: boolean;
 }) => {
   try {
     console.log(`'${packageName}': reading '${configFilename}'`);
@@ -311,7 +310,12 @@ const applyConfig = async ({
     const unexpectedConfigFiles = configFiles
       .filter((dirent) => dirent.isFile())
       .map((dirent) => relative(packagePath, join(dirent.parentPath, dirent.name)))
-      .filter((path) => !filesToCreate.includes(path) && !patternsToIgnoreRegExp.test(path));
+      .filter(
+        (path) =>
+          !filesToCreate.includes(path)
+          && !patternsToIgnoreRegExp.test(path)
+          && !(isTop || topPatternsToIgnoreRegExp.test(path)),
+      );
 
     if (unexpectedConfigFiles.length > 0)
       throw new Error(

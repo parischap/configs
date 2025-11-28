@@ -39,7 +39,7 @@ import {
   licenseFilename,
   packageJsonFilename,
   prodFolderName,
-  projectFolderName,
+  sourceFolderName,
   readMeFilename,
   slashedDevScope,
   slashedScope,
@@ -68,8 +68,8 @@ const program = Effect.gen(function* () {
 
   const srcPackageJsonPath = path.join(rootPath, packageJsonFilename);
   const prodPath = path.join(rootPath, prodFolderName);
-  const projectPath = path.join(rootPath, projectFolderName);
-  const prodProjectPath = path.join(prodPath, projectFolderName);
+  const projectPath = path.join(rootPath, sourceFolderName);
+  const prodProjectPath = path.join(prodPath, sourceFolderName);
   const prodCommonJsPath = path.join(prodPath, commonJsFolderName);
 
   const prodPackageJsonPath = path.join(prodPath, packageJsonFilename);
@@ -210,7 +210,7 @@ const program = Effect.gen(function* () {
       pipe(
         baseProdPackageJson,
         Record.set('main', `../${commonJsFolderName}/${exportFilename}.js`),
-        Record.set('module', `../${projectFolderName}/${exportFilename}.js`),
+        Record.set('module', `../${sourceFolderName}/${exportFilename}.js`),
         Record.set('types', `../${typesFolderName}/${exportFilename}.d.ts`),
         Json.stringify,
       ),

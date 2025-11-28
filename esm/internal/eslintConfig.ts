@@ -1,34 +1,30 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
   allHtmlFiles,
-  allJsFiles,
+  allJavaScriptFiles,
   allJsInMdFiles,
   allJson5Files,
   allJsoncFiles,
   allJsonFiles,
   allMdFiles,
-  allProjectJsFiles,
+  allProjectFiles,
   allYmlFiles,
   packagesFolderName,
+  pnpmLockFilename,
   prodFolderName,
-  projectFolderName,
   viteTimeStampFilenamePattern,
+  vscodeFolderName,
+  vscodeWorkspaceFilenamePattern,
 } from '../constants.js';
 import { regExpEscape } from '../utils.js';
 
 const allowedStatementPatternsInNonMdFiles: ReadonlyArray<string> = [
+  '^' + regExpEscape('describe('),
   // process.exit returns never, not void
   //'^' + regExpEscape('process.exit('),
   // regExpEscape('super'),
   //'satisfies',
   //'^' + regExpEscape('Layer.launch('),
-];
-
-const allowedStatementPatternsInNonProjectNonMdFiles = [
-  ...allowedStatementPatternsInNonMdFiles,
-  // regExpEscape('expect('),
-  '^' + regExpEscape('describe('),
-  //'^' + regExpEscape('TEUtils.')
 ];
 
 export default (globalsString?: string) => {
@@ -51,7 +47,7 @@ const javascriptConfigForProjectFiles: ConfigArray = defineConfig({
       `
   scopeConfig({
     configs: javascriptConfigForProjectFiles,
-    files: ${JSON.stringify(allProjectJsFiles)},
+    files: ${JSON.stringify(allProjectFiles)},
   }),`
     : ``;
 
@@ -106,8 +102,8 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
       /* These rules are ts-eslint rules (not rules of the functional plugin) which the functional plugin recommends to activate because they make sense for a functional programmings style. They require typeChecking and are not cancelled by functional.configs.disableTypeChecked */
       functional.configs.externalTypeScriptRecommended as never,
     ],
-    settings: {
-      /*immutability: {
+    /*settings: {
+      immutability: {
         overrides: [
           {
             type: {
@@ -124,8 +120,8 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
             to: 'ReadonlyDeep',
           },
         ],
-      },*/
-    },
+      },
+    },*/
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -191,7 +187,14 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
         'error',
         {
           ignoreVoid: true,
-          ignoreCodePattern: ${JSON.stringify(allowedStatementPatternsInNonMdFiles)},
+          ignoreCodePattern: ${JSON.stringify([
+            '^' + regExpEscape('describe('),
+            // process.exit returns never, not void
+            //'^' + regExpEscape('process.exit('),
+            // regExpEscape('super'),
+            //'satisfies',
+            //'^' + regExpEscape('Layer.launch('),
+          ])},
         },
       ],
       'functional/prefer-property-signatures': 'error',
@@ -210,11 +213,11 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
   },
 );
 
-const javascriptConfigForNonProjectNonMdFiles: ConfigArray = defineConfig({
+/*const javascriptConfigForNonProjectNonMdFiles: ConfigArray = defineConfig({
   name: 'javascriptConfigForNonProjectNonMdFiles',
   // Here, we can mitigate rules defined in javascriptConfigForNonMdFiles specifically in non project files
   rules: {
-    /*'import-x/no-extraneous-dependencies': [
+    'import-x/no-extraneous-dependencies': [
       'error',
       {
         devDependencies: true,
@@ -222,17 +225,9 @@ const javascriptConfigForNonProjectNonMdFiles: ConfigArray = defineConfig({
         optionalDependencies: false,
         bundledDependencies: false,
       },
-    ],*/
-    // Let's allow console.log in setting files and assertions in test files
-    'functional/no-expression-statements': [
-      'error',
-      {
-        ignoreVoid: true,
-        ignoreCodePattern: ${JSON.stringify(allowedStatementPatternsInNonProjectNonMdFiles)},
-      },
     ],
   },
-});
+});*/
 
 const javascriptConfigForMdFiles: ConfigArray = defineConfig(
   /**
@@ -369,27 +364,30 @@ export default defineConfig([
       '${prodFolderName + '/'}',
       '${packagesFolderName + '/'}',
       '${viteTimeStampFilenamePattern}',
+      '${vscodeWorkspaceFilenamePattern}',
+      '**/${vscodeFolderName}+'/',
+      '${pnpmLockFilename}'
     ],
     'ignoreConfig',
   ),
-  scopeConfig({ configs: javascriptPreConfig, files: ${JSON.stringify(allJsFiles)} }),
+  scopeConfig({ configs: javascriptPreConfig, files: ${JSON.stringify(allJavaScriptFiles)} }),
   scopeConfig({
     configs: javascriptConfigForNonMdFiles,
-    files: ${JSON.stringify(allJsFiles)},
+    files: ${JSON.stringify(allJavaScriptFiles)},
     ignores: ${JSON.stringify(allJsInMdFiles)},
   }),
-  scopeConfig({
+  /*scopeConfig({
     configs: javascriptConfigForNonProjectNonMdFiles,
-    files: ${JSON.stringify(allJsFiles)},
-    ignores: ${JSON.stringify([projectFolderName + '/**', ...allJsInMdFiles])},
-  }),
+    files: ${JSON.stringify(allJavaScriptFiles)},
+    ignores: ${JSON.stringify([...allProjectFiles, ...allJsInMdFiles])},
+  }),*/
   scopeConfig({ configs: javascriptConfigForMdFiles, files: ${JSON.stringify(allJsInMdFiles)} }),
   scopeConfig({
     configs: javascriptConfigForNonProjectFiles,
-    files: ${JSON.stringify(allJsFiles)},
-    ignores: [${JSON.stringify(projectFolderName + '/**')}],
+    files: ${JSON.stringify(allJavaScriptFiles)},
+    ignores: ${JSON.stringify(allProjectFiles)},
   }),${javascriptConfigForProjectFilesScope}
-  scopeConfig({ configs: javascriptPostConfig, files: ${JSON.stringify(allJsFiles)} }),
+  scopeConfig({ configs: javascriptPostConfig, files: ${JSON.stringify(allJavaScriptFiles)} }),
   scopeConfig({ configs: htmlConfigs, files: ${JSON.stringify(allHtmlFiles)} }),
   scopeConfig({ configs: ymlConfigs, files: ${JSON.stringify(allYmlFiles)} }),
   scopeConfig({ configs: markdownConfigs, files: ${JSON.stringify(allMdFiles)} }),

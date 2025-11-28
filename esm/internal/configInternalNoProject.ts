@@ -17,13 +17,13 @@ import nonProjectVitestConfig from './nonProjectVitestConfig.js';
 import pnpmWorkspaceConfig from './pnpmWorkspaceConfig.js';
 import tsConfigNonProject from './tsconfigNonProject.js';
 
-export default {
+export default ({ isTop }: { readonly isTop: boolean }) => ({
   // Used by the checks script
   [tsConfigFilename]: tsConfigNonProject,
   // Used by the checks script
   [eslintConfigFilename]: eslintConfig(),
   // Used by all scripts to define scope of -r flag
-  [pnpmWorkspaceFilename]: pnpmWorkspaceConfig,
+  [pnpmWorkspaceFilename]: pnpmWorkspaceConfig(isTop),
   // Used by the test script
   [vitestConfigFilename]: nonProjectVitestConfig,
   [packageJsonFilename]: {
@@ -31,9 +31,12 @@ export default {
       checks: 'pnpm lint && pnpm tscheck',
       'clean-all-node-modules': 'pnpm -r -include-workspace-root=true --reverse clean-node-modules',
       'clean-all-config-files': 'pnpm -r -include-workspace-root=true --reverse clean-config-files',
-      'clean-all-prod': 'pnpm --if-present -r --parallel clean-prod',
+      'clean-all-prod': 'pnpm -r --parallel --aggregate-output clean-prod',
+      // --if-present is necessary because it is possible that no package in the workspace has a build script
       'build-all': 'pnpm --if-present -r build',
-      'auto-generate-index-for-all': 'pnpm --if-present -r --parallel auto-generate-index',
+      // --if-present is necessary because it is possible that no package in the workspace has a auto-generate-index script
+      'auto-generate-index-for-all':
+        'pnpm --if-present -r --parallel --aggregate-output auto-generate-index',
       'tscheck-all': 'pnpm -r -include-workspace-root=true tscheck',
       'lint-all': 'pnpm -r -include-workspace-root=true lint',
       'checks-all': 'pnpm -r -include-workspace-root=true checks',
@@ -47,4 +50,4 @@ export default {
         },
       },*/
   },
-};
+});

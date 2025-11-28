@@ -8,8 +8,8 @@ export const packageManager = `pnpm@10.23.0`;
 
 export const versionControlService = 'github.com';
 
-export const nonProjectMark = 'others';
-export const projectMark = 'esm';
+export const nonProjectMark = 'nonproject';
+export const projectMark = 'project';
 export const docgenMark = 'docgen';
 
 export const tsExecuter = 'jiti';
@@ -51,8 +51,7 @@ export const topPackageName = 'myeffectdevs';
 
 export const internalFolderName = 'internal';
 export const tsBuildInfoFolderName = '.tsbuildinfo';
-export const projectFolderName = projectMark;
-export const othersFolderName = 'others';
+export const sourceFolderName = 'esm';
 export const examplesFolderName = 'examples';
 export const testsFolderName = 'tests';
 export const prodFolderName = 'dist';
@@ -71,12 +70,11 @@ export const docsFolderName = 'docs';
 export const docgenFolderName = 'modules';
 export const readmeAssetsFolderName = 'readme-assets';
 
-export const allFiles = '**/*';
-const allFilesInMd = allFiles + '.md/*';
+export const allFilesPattern = '**/*';
+const allFilesInMd = allFilesPattern + '.md/*';
 
 export const tsExtensions = ['.ts', '.mts', '.cts'];
-export const jsExtensions = [...tsExtensions, '.js', '.mjs', '.cjs'];
-export const cjsExtensions = ['cts', '.cjs'];
+export const javaScriptExtensions = [...tsExtensions, '.js', '.mjs', '.cjs'];
 export const htmlExtensions = ['.html', '.htm'];
 export const mdExtensions = ['.md'];
 export const jsonExtensions = ['.json'];
@@ -84,21 +82,34 @@ export const jsoncExtensions = ['.jsonc'];
 export const json5Extensions = ['.json5'];
 export const ymlExtensions = ['.yml', '.yaml'];
 
-const fromExtensionsToPaths = (extensions: ReadonlyArray<string>, prefix: string): Array<string> =>
-  extensions.map((ext) => prefix + ext);
-export const allTsFiles = tsExtensions.map((ext) => allFiles + ext);
-export const allJsFiles = fromExtensionsToPaths(jsExtensions, allFiles);
-export const allHtmlFiles = fromExtensionsToPaths(htmlExtensions, allFiles);
-export const allMdFiles = fromExtensionsToPaths(mdExtensions, allFiles);
-export const allJsonFiles = fromExtensionsToPaths(jsonExtensions, allFiles);
-export const allJsoncFiles = fromExtensionsToPaths(jsoncExtensions, allFiles);
-export const allJson5Files = fromExtensionsToPaths(json5Extensions, allFiles);
-export const allYmlFiles = fromExtensionsToPaths(ymlExtensions, allFiles);
-export const allProjectJsFiles = fromExtensionsToPaths(
-  jsExtensions,
-  `${projectFolderName}/${allFiles}`,
+const prefixWith =
+  (prefix: string) =>
+  (as: ReadonlyArray<string>): Array<string> =>
+    as.map((a) => prefix + a);
+const prefixWithAllFilePatterns = prefixWith(allFilesPattern);
+const suffixWith =
+  (suffix: string) =>
+  (as: ReadonlyArray<string>): Array<string> =>
+    as.map((a) => a + suffix);
+
+export const allProjectFolders = [sourceFolderName, testsFolderName, examplesFolderName];
+export const allProjectFilesWithoutExtensions = suffixWith(`/${allFilesPattern}`)(
+  allProjectFolders,
 );
-export const allJsInMdFiles = fromExtensionsToPaths(jsExtensions, allFilesInMd);
+
+export const allProjectFiles = javaScriptExtensions
+  .map((extension) => suffixWith(extension)(allProjectFilesWithoutExtensions))
+  .flat();
+
+export const allTsFiles = prefixWithAllFilePatterns(tsExtensions);
+export const allJavaScriptFiles = prefixWithAllFilePatterns(javaScriptExtensions);
+export const allHtmlFiles = prefixWithAllFilePatterns(htmlExtensions);
+export const allMdFiles = prefixWithAllFilePatterns(mdExtensions);
+export const allJsonFiles = prefixWithAllFilePatterns(jsonExtensions);
+export const allJsoncFiles = prefixWithAllFilePatterns(jsoncExtensions);
+export const allJson5Files = prefixWithAllFilePatterns(json5Extensions);
+export const allYmlFiles = prefixWithAllFilePatterns(ymlExtensions);
+export const allJsInMdFiles = prefixWith(allFilesInMd)(javaScriptExtensions);
 
 /* Do not use carret at start of dependency versions because we could end up with different versions in the diverse projects. Set one version and update it regularly */
 

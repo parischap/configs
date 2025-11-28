@@ -56,8 +56,9 @@ export default ({
     ...(docGenParameters !== undefined ?
       {
         scripts: {
+          // --if-present is necessary because it is possible that no package in the workspace has a docgen script
           'prepare-docs':
-            'pnpm -r --if-present -include-workspace-root=true --parallel docgen && compile-docs',
+            'pnpm -r --if-present -include-workspace-root=true --parallel --aggregate-output docgen && compile-docs',
         },
       }
     : {}),

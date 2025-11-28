@@ -2,13 +2,13 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import { topPackageName } from '../constants.js';
 import { type Config } from '../types.js';
-import { deepMerge, makeConfigWithLocalInternalDependencies } from '../utils.js';
+import { cleanDependencies, deepMerge } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
 import configInternalNoProject from './configInternalNoProject.js';
 import configInternalRepo from './configInternalRepo.js';
 
 export default ({ description }: { readonly description: string }): Config =>
-  makeConfigWithLocalInternalDependencies({
+  cleanDependencies({
     packageName: topPackageName,
     onlyAllowDevDependencies: true,
     config: deepMerge(
@@ -20,6 +20,6 @@ export default ({ description }: { readonly description: string }): Config =>
       configInternalRepo({
         isPublished: false,
       }),
-      configInternalNoProject,
+      configInternalNoProject({ isTop: true }),
     ),
   });

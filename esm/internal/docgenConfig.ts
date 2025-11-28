@@ -3,7 +3,7 @@ import {
   allTsFiles,
   docsFolderName,
   internalFolderName,
-  projectFolderName,
+  sourceFolderName,
   tsConfigDocGenFilename,
 } from '../constants.js';
 import type { ReadonlyRecord } from '../types.js';
@@ -11,11 +11,11 @@ import type { ReadonlyRecord } from '../types.js';
 export default {
   parseCompilerOptions: `./${tsConfigDocGenFilename}`,
   examplesCompilerOptions: `./${tsConfigDocGenFilename}`,
-  srcDir: `./${projectFolderName}`,
+  srcDir: `./${sourceFolderName}`,
   outDir: docsFolderName,
   exclude: [
-    ...allTsFiles.map((ext) => `${projectFolderName}/${internalFolderName}/${ext}`),
-    `${projectFolderName}/index.ts`,
+    ...allTsFiles.map((ext) => `${sourceFolderName}/${internalFolderName}/${ext}`),
+    `${sourceFolderName}/index.ts`,
   ],
   enforceDescriptions: true,
   enforceVersion: false,

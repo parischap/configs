@@ -4,11 +4,12 @@ import {
   packagesFolderName,
   prodFolderName,
   tsBuildInfoFolderName,
+  viteTimeStampFilenamePattern,
 } from '../constants.js';
 
 // Must work for top, monorepos and one-package repos
 export default `/${prodFolderName}/
 /${tsBuildInfoFolderName}/
-/vite.config.ts.timestamp-*.mjs
+/${viteTimeStampFilenamePattern}
 /${packagesFolderName}/
 /${npmFolderName}/`;

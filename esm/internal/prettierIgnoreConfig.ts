@@ -2,14 +2,21 @@
 import {
   npmFolderName,
   packagesFolderName,
+  pnpmLockFilename,
   prodFolderName,
   tsBuildInfoFolderName,
+  viteTimeStampFilenamePattern,
+  vscodeFolderName,
+  vscodeWorkspaceFilenamePattern,
 } from '../constants.js';
 
 // The way to specify ignored files in prettier is the same as in git
 // Must work at all levels: top, monorepo, one-package repo and subrepo
 export default `/${prodFolderName}/
 /${tsBuildInfoFolderName}/
-/vite.config.ts.timestamp-*.mjs
+/${viteTimeStampFilenamePattern}
 /${packagesFolderName}/
-/${npmFolderName}/`;
+/${npmFolderName}/,
+/${vscodeWorkspaceFilenamePattern},
+${vscodeFolderName}/
+/${pnpmLockFilename}`;

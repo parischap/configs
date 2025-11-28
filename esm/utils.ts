@@ -1,24 +1,7 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import { isAbsolute, relative } from 'node:path';
-import { parse } from 'node:querystring';
-import {
-  owner,
-  packageJsonFilename,
-  packagesFolderName,
-  prodFolderName,
-  slashedDevScope,
-  slashedScope,
-  versionControlService,
-} from './constants.js';
-import {
-  Config,
-  type ReadonlyRecord,
-  type ReadonlyStringRecord,
-  type Record,
-  type StringRecord,
-  isArray,
-  isRecord,
-} from './types.js';
+import { packageJsonFilename } from './constants.js';
+import { Config, type ReadonlyRecord, type Record, isArray, isRecord } from './types.js';
 
 /** Escapes regular expression special characters */
 export const regExpEscape = (s: string): string =>
@@ -152,278 +135,15 @@ export const deepMerge: {
 } = (...Rs: ReadonlyArray<ReadonlyRecord>) => Rs.reduce(deepMerge2, {} as never) as never;
 
 /**
- * Build a git+ssh URL for a repository and optional subrepo + version + path. See meaning of
- * parameters in `toInternalExternalDependencies`
- */
-export const toVersionControlSource = ({
-  version = undefined,
-  buildStage,
-  importRepoName,
-  importSubRepoName,
-}: {
-  readonly version?: string | undefined;
-  readonly buildStage: 'PROD' | 'DEV';
-  readonly importRepoName: string;
-  readonly importSubRepoName: string | undefined;
-}): string => {
-  const buildPath = buildStage === 'DEV' ? '' : prodFolderName;
-  const subRepoPath =
-    importSubRepoName === undefined ? buildPath : (
-      `${packagesFolderName}/${importSubRepoName}/${buildPath}`
-    );
-  const params = [
-    ...(version === undefined ? [] : [version]),
-    ...(subRepoPath === '' ? [] : [`path:${subRepoPath}`]),
-  ].join('&');
-  // Use ssh protocol so the sshkey can be used to access private github repos
-  return `git+ssh://${versionControlService}/${owner}/${importRepoName}${params === '' ? '' : '#' + params}`;
-};
-
-/**
- * Build a workspace protocol dependency string. See meaning of parameters in
- * `toInternalExternalDependencies`
- */
-const toWorkspaceSource = ({
-  buildStage,
-  unscopedImportName,
-}: {
-  readonly buildStage: 'PROD' | 'DEV';
-  readonly unscopedImportName: string;
-}): string =>
-  buildStage === 'DEV' ? `workspace:${slashedDevScope}${unscopedImportName}@*` : 'workspace:*';
-
-/**
- * Takes a list of dependencies with their name and source. Returns:
- *
- * - the external dependencies unchanged (externalDependencies)
- * - a development version of the internal dependencies (internalDependenciesInDev)
- * - a production version of the internal dependencies (internalDependenciesInProd)
- *
- * Internal dependencies are those that start with '@parischap'.
- *
- * Internal dependencies' sources must be passed in the following format:
- * sourceInProd='value'&versionInProd='value'&buildTypeInProd='value'&sourceInDev='value'&buildTypeInDev='value'&parent='value';
- *
- * Parameters can be passed in any order. Here is a description of their meaning:
- *
- * - SourceInProd: indicates where to get the dependency from in the production version of the package
- *   that uses it. Allowed values are `NPM` or `GITHUB`. This parameter must not be used for a
- *   devDependency because it will get removed in production.
- * - versionInProd: indicates the version of the dependency to use in the production version of the
- *   package that uses it. If sourceInProd is GITHUB, the version is the release tag (e.g.
- *   effect-lib@0.11.0). This parameter must not be used for a devDependency because it will get
- *   removed in production. If omitted, the version defaults to latest published version for NPM and
- *   the latest commit for GITHUB.
- * - buildStageInProd: this parameter must only be used if SourceInProd is GITHUB. It indicates the
- *   build stage of the dependency to use in the production version of the package that uses it. If
- *   sourceInProd is GITHUB, you can use 'DEV' to use the development version of the dependency (the
- *   one under `./esm`) and 'PROD' to use the production version of the dependency (the one under
- *   `dist/esm`). This parameter must not be used for a devDependency because it will get removed in
- *   production.
- * - SourceInDev: indicates where to get the dependency from in the development version of the package
- *   that uses it. Allowed values are `WORKSPACE` (uses the workspace protocol, errors if the
- *   dependency is not in the same workspace as the package that uses it), `GITHUB` (uses the github
- *   scheme) or `AUTO` (uses the workspace protocol if possible, the gityhub scheme otherwise).
- * - buildStageInDev: this parameter indicates the build stage of the dependency to use in the
- *   development version of the package that uses it. Allowed values are 'DEV' to use the
- *   development version of the dependency (the one under `.`) and 'PROD' to use the production
- *   version of the dependency (the one under `dist`).
- * - parent: optional argument which indicates the dependency's parent monorepo. Must only be used for
- *   internal dependencies that are subrepos
- */
-
-export const toInternalExternalDependencies = ({
-  repoName,
-  packageName,
-  dependencies,
-  allowWorkspaceSources,
-  isDevDependencies,
-}: {
-  readonly repoName: string;
-  readonly packageName: string;
-  readonly dependencies: ReadonlyStringRecord;
-  readonly allowWorkspaceSources: boolean;
-  readonly isDevDependencies: boolean;
-}): [
-  internalDependenciesInDev: StringRecord,
-  internalDependenciesInProd: StringRecord,
-  externalDependencies: StringRecord,
-] => {
-  type DependencyEntry = readonly [packageName: string, packageSource: string];
-  interface DependencyEntries extends ReadonlyArray<DependencyEntry> {}
-
-  const [internalDependencies, externalDependencies] = Object.entries(dependencies).reduce(
-    ([internalDependencies, externalDependencies], entry) =>
-      entry[0].startsWith(slashedScope) ?
-        [internalDependencies.concat([entry]), externalDependencies]
-      : [internalDependencies, externalDependencies.concat([entry])],
-    [[] as DependencyEntries, [] as DependencyEntries],
-  );
-
-  const decodedInternalDependencies = internalDependencies.map(([importName, importSource]) => {
-    const { sourceInProd, versionInProd, buildStageInProd, sourceInDev, buildStageInDev, parent } =
-      parse(importSource);
-
-    if (
-      Array.isArray(sourceInProd)
-      || Array.isArray(versionInProd)
-      || Array.isArray(buildStageInProd)
-      || Array.isArray(sourceInDev)
-      || Array.isArray(buildStageInDev)
-      || Array.isArray(parent)
-    )
-      throw new Error(
-        `'${packageName}': dependency '${importName}' cannot use parameters of type Array`,
-      );
-
-    const unscopedImportName = importName.substring(slashedScope.length);
-    const [importRepoName, importSubRepoName] =
-      parent === undefined ? [unscopedImportName, undefined] : [parent, unscopedImportName];
-
-    return [
-      importName,
-      {
-        sourceInProd,
-        versionInProd,
-        buildStageInProd,
-        sourceInDev,
-        buildStageInDev,
-        importRepoName,
-        importSubRepoName,
-        unscopedImportName,
-      },
-    ] as const;
-  });
-
-  const internalDependenciesInDev = decodedInternalDependencies.map(
-    ([
-      importName,
-      { sourceInDev, buildStageInDev, importRepoName, importSubRepoName, unscopedImportName },
-    ]) => {
-      if (buildStageInDev !== 'DEV' && buildStageInDev !== 'PROD')
-        throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'DEV' or 'PROD' for 'buildStageInDev' parameter. Actual:${JSON.stringify(buildStageInDev)}`,
-        );
-
-      if (sourceInDev === 'GITHUB')
-        return [
-          importName,
-          toVersionControlSource({
-            buildStage: buildStageInDev,
-            importRepoName,
-            importSubRepoName,
-          }),
-        ] as const;
-      else if (sourceInDev === 'WORKSPACE')
-        if (repoName === importRepoName && allowWorkspaceSources)
-          return [
-            importName,
-            toWorkspaceSource({ buildStage: buildStageInDev, unscopedImportName }),
-          ] as const;
-        else
-          throw new Error(
-            `'${packageName}': dependency '${importName}' is not allowed to use 'WORKSPACE' for 'SourceInDev' parameter`
-              + (allowWorkspaceSources ?
-                ` because '${packageName}' belongs to repo '${repoName}' and '${importName}' belongs to repo ${importRepoName}`
-              : ''),
-          );
-      else if (sourceInDev === 'AUTO')
-        if (repoName === importRepoName && allowWorkspaceSources)
-          return [
-            importName,
-            toWorkspaceSource({ buildStage: buildStageInDev, unscopedImportName }),
-          ] as const;
-        else
-          return [
-            importName,
-            toVersionControlSource({
-              buildStage: buildStageInDev,
-              importRepoName,
-              importSubRepoName,
-            }),
-          ] as const;
-      else
-        throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'GITHUB', 'WORKSPACE' or 'AUTO' for 'sourceInDev' parameter. Actual:${JSON.stringify(sourceInDev)}`,
-        );
-    },
-  );
-
-  if (isDevDependencies) {
-    decodedInternalDependencies.forEach(
-      ([importName, { sourceInProd, versionInProd, buildStageInProd }]) => {
-        if (sourceInProd !== undefined)
-          throw new Error(
-            `'${packageName}': devDependency '${importName}' will get removed in production and cannot specify 'sourceInProd' parameter`,
-          );
-        if (versionInProd !== undefined)
-          throw new Error(
-            `'${packageName}': devDependency '${importName}' will get removed in production and cannot specify 'versionInProd' parameter`,
-          );
-        if (buildStageInProd !== undefined)
-          throw new Error(
-            `'${packageName}': devDependency '${importName}' will get removed in production and cannot specify 'buildStageInProd' parameter`,
-          );
-      },
-    );
-    return [
-      Object.fromEntries(internalDependenciesInDev),
-      {},
-      Object.fromEntries(externalDependencies),
-    ];
-  }
-
-  const internalDependenciesInProd = decodedInternalDependencies.map(
-    ([
-      importName,
-      { sourceInProd, versionInProd, buildStageInProd, importRepoName, importSubRepoName },
-    ]) => {
-      if (sourceInProd === 'NPM')
-        if (buildStageInProd !== undefined)
-          throw new Error(
-            `'${packageName}': dependency '${importName}' cannot define a value for 'buildStageInProd' parameter because it uses source 'NPM'. Actual:'${buildStageInProd}'`,
-          );
-        else return [importName, versionInProd ?? 'latest'] as const;
-
-      if (buildStageInProd !== 'DEV' && buildStageInProd !== 'PROD')
-        throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'DEV' or 'PROD' for 'buildStageInProd' parameter. Actual:${JSON.stringify(buildStageInProd)}`,
-        );
-
-      if (sourceInProd !== 'GITHUB')
-        throw new Error(
-          `'${packageName}': dependency '${importName}' must have value 'GITHUB' or 'NPM' for 'SourceInProd' parameter. Actual:${JSON.stringify(sourceInProd)}`,
-        );
-
-      return [
-        importName,
-        toVersionControlSource({
-          version: versionInProd,
-          buildStage: buildStageInProd,
-          importRepoName,
-          importSubRepoName,
-        }),
-      ] as const;
-    },
-  );
-
-  return [
-    Object.fromEntries(internalDependenciesInDev),
-    Object.fromEntries(internalDependenciesInProd),
-    Object.fromEntries(externalDependencies),
-  ];
-};
-
-/**
  * Modifies a package.json config so that :
  *
- * - a dependency that appears both in dependenices and peerDependencies is kept only as a
+ * - a dependency that appears both in dependencies and peerDependencies is kept only as a
  *   peerDependency
- * - intrnal dependencies are converted to their development version while their production version is
- *   prepared in the publishConfig key (except for devDependencies which do not ship in the
- *   production package)
+ * - a dependency that appears in devDependencies and dependencies or peerDependencies is kept only as
+ *   a dependency or peerDependency
+ * - removes empty dependencies, devDependencies and peerDependencies keys
  */
-export const makeConfigWithLocalInternalDependencies = <C extends Config>({
+export const cleanDependencies = <C extends Config>({
   packageName,
   onlyAllowDevDependencies,
   config,
@@ -452,32 +172,6 @@ export const makeConfigWithLocalInternalDependencies = <C extends Config>({
     ),
   );
 
-  /* const [internalPeerDependenciesInDev, internalPeerDependenciesInProd, externalPeerDependencies] =
-    toInternalExternalDependencies({
-      repoName,
-      packageName,
-      dependencies: peerDependencies,
-      allowWorkspaceSources,
-      isDevDependencies: false,
-    });
-
-  const [internalDependenciesInDev, internalDependenciesInProd, externalDependencies] =
-    toInternalExternalDependencies({
-      repoName,
-      packageName,
-      dependencies,
-      allowWorkspaceSources,
-      isDevDependencies: false,
-    });
-
-  const [internalDevDependenciesInDev, , externalDevDependencies] = toInternalExternalDependencies({
-    repoName,
-    packageName,
-    dependencies: devDependencies,
-    allowWorkspaceSources,
-    isDevDependencies: true,
-  });*/
-
   const newPackageJsonConfig = {
     ...Object.fromEntries(
       Object.entries(packageJsonConfig).filter(
@@ -487,28 +181,7 @@ export const makeConfigWithLocalInternalDependencies = <C extends Config>({
     ...(Object.keys(dependencies).length === 0 ? {} : { dependencies }),
     ...(Object.keys(devDependencies).length === 0 ? {} : { devDependencies }),
     ...(Object.keys(peerDependencies).length === 0 ? {} : { peerDependencies }),
-    /*dependencies: { ...internalDependenciesInDev, ...externalDependencies },
-    devDependencies : { ...internalDevDependenciesInDev, ...externalDevDependencies },
-    peerDependencies : { ...internalPeerDependenciesInDev, ...externalPeerDependencies },
-    publishConfig: {
-      dependencies: internalDependenciesInProd,
-      peerDependencies: internalPeerDependenciesInProd,
-    },*/
   };
-
-  /*const publishConfig = newPackageJsonConfig.publishConfig;
-
-  if (Object.keys(publishConfig.dependencies).length === 0)
-    // eslint-disable-next-line functional/immutable-data, functional/no-expression-statements
-    delete publishConfig.dependencies;
-
-  if (Object.keys(publishConfig.peerDependencies).length === 0)
-    // eslint-disable-next-line functional/immutable-data, functional/no-expression-statements
-    delete publishConfig.peerDependencies;
-
-  if (Object.keys(publishConfig).length === 0)
-    // eslint-disable-next-line functional/immutable-data, functional/no-expression-statements
-    delete newPackageJsonConfig.publishConfig;*/
 
   return {
     ...config,

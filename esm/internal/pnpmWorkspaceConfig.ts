@@ -1,18 +1,24 @@
 // This module must not import any external dependency. It must be runnable without a package.json
-import { packagesFolderName } from '../constants.js';
 
-//  - '${projectsFolderName}/*/${prodFolderName}'
-//  - '${projectsFolderName}/*/${packagesFolderName}/*/${prodFolderName}'
-/* overrides:
-  '@parischap/ansi-styles': 'workspace:@parischap-dev/ansi-styles@*'
-  '@parischap/conversions': 'workspace:@parischap-dev/conversions@*'
-  '@parischap/effect-lib': 'workspace:@parischap-dev/effect-lib@*'
-  '@parischap/effect-report': 'workspace:@parischap-dev/effect-report@*'
-  '@parischap/node-effect-lib': 'workspace:@parischap-dev/node-effect-lib@*'
-  '@parischap/pretty-print': 'workspace:@parischap-dev/pretty-print@*'
-  '@parischap/test-utils': 'workspace:@parischap-dev/test-utils@*'
-*/
+import { packagesFolderName, slashedScope, testUtilsPackageName } from '../constants.js';
 
-export default `packages:
+const topConfig = (isTop: boolean) =>
+  isTop ?
+    `  
+
+overrides:
+  '${slashedScope}${testUtilsPackageName}': 'workspace:*'
+  '${slashedScope}ansi-styles': 'workspace:*'
+  '${slashedScope}conversions': 'workspace:*'
+  '${slashedScope}effect-lib': 'workspace:*'
+  '${slashedScope}effect-report': 'workspace:*'
+  '${slashedScope}node-effect-lib': 'workspace:*'
+  '${slashedScope}pretty-print': 'workspace:*'
+  
+trustPolicy: no-downgrade`
+  : ``;
+
+/* We use overrides instead of linkWorkspacePackages or preferWorkspacePackages because it works even if the workspace package's version does not match the package.json specifier*/
+export default (isTop: boolean) => `packages:
   - '${packagesFolderName}/*'
-  - '${packagesFolderName}/*/${packagesFolderName}/*'`;
+  - '${packagesFolderName}/*/${packagesFolderName}/*'${topConfig(isTop)}`;
