@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "test": "vitest run",
-    "tscheck": "tsc -b tsconfig.json --force --noEmit",
+    "tscheck": "tsc -b tsconfig.json --force",
     "lint": "eslint .",
     "lint-and-analyze": "eslint . --stats -f json > eslint-stats.json",
     "lint-rules": "pnpx @eslint/config-inspector",
@@ -19,28 +19,9 @@
     "update-config-files": "pnpx jiti esm/index.ts",
     "circular": "madge --extensions ts --circular --no-color --no-spinner esm",
     "clean-prod": "pnpm rmrf dist && pnpm mkdirp dist",
-    "checks": "pnpm circular && pnpm lint && pnpm tscheck && pnpm test",
+    "checks": "pnpm circular && pnpm tscheck && pnpm lint && pnpm test",
     "build": "pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..",
     "examples": ""
-  },
-  "packageManager": "pnpm@10.23.0",
-  "module": "./esm/index.js",
-  "exports": {
-    ".": {
-      "import": "./esm/index.js"
-    },
-    "./tests": {
-      "import": "./esm/index.tests.js"
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/parischap/configs.git"
-  },
-  "homepage": "https://github.com/parischap/configs",
-  "private": true,
-  "dependencies": {
-    "effect": "3.19.6"
   },
   "devDependencies": {
     "globals": "16.4.0",
@@ -75,5 +56,24 @@
     "babel-plugin-annotate-pure-calls": "0.5.0",
     "@babel/plugin-transform-export-namespace-from": "7.27.1",
     "@babel/plugin-transform-modules-commonjs": "7.27.1"
-  }
+  },
+  "packageManager": "pnpm@10.23.0",
+  "module": "./esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./esm/index.js"
+    },
+    "./tests": {
+      "import": "./esm/index.tests.js"
+    }
+  },
+  "dependencies": {
+    "effect": "3.19.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parischap/configs.git"
+  },
+  "homepage": "https://github.com/parischap/configs",
+  "private": true
 }

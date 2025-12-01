@@ -18,5 +18,5 @@ export default `/${prodFolderName}/
 /${packagesFolderName}/
 /${npmFolderName}/,
 /${vscodeWorkspaceFilenamePattern},
-${vscodeFolderName}/
+/${vscodeFolderName}/
 /${pnpmLockFilename}`;

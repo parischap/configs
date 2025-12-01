@@ -356,6 +356,7 @@ if (basename(process.cwd()) === configsPackageName) {
     packagePath: topPath,
     repoName: topPackageName,
     packageName: topPackageName,
+    isTop: true,
   });
   const topPackagesPath = join(topPath, packagesFolderName);
   const repoNames = (await readdir(topPackagesPath, { withFileTypes: true }))
@@ -383,6 +384,7 @@ if (basename(process.cwd()) === configsPackageName) {
         packagePath: join(topPackagesPath, repoName),
         repoName,
         packageName: repoName,
+        isTop: false,
       }),
     ),
   );
@@ -429,6 +431,7 @@ if (basename(process.cwd()) === configsPackageName) {
         packagePath,
         repoName,
         packageName,
+        isTop: false,
       }),
     ),
   );

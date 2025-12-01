@@ -1,10 +1,11 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import type { ReadonlyRecord } from '../types.js';
 import { deepMerge } from '../utils.js';
-import tsConfigProject from './tsconfigProject.js';
+import tsConfigSrc from './tsconfigSrc.js';
 
-export default deepMerge(tsConfigProject, {
+export default deepMerge(tsConfigSrc, {
   compilerOptions: {
-    lib: ['ESNext'],
+    types: [],
+    lib: ['DOM', 'DOM.Iterable'],
   },
 }) satisfies ReadonlyRecord;

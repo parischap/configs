@@ -1,7 +1,6 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import { isAbsolute, relative } from 'node:path';
-import { packageJsonFilename } from './constants.js';
-import { Config, type ReadonlyRecord, type Record, isArray, isRecord } from './types.js';
+import { type ReadonlyRecord, type Record, isArray, isRecord } from './types.js';
 
 /** Escapes regular expression special characters */
 export const regExpEscape = (s: string): string =>
@@ -133,58 +132,3 @@ export const deepMerge: {
     r6: R6,
   ): MergedRecord<MergedRecord<MergedRecord<MergedRecord<MergedRecord<R1, R2>, R3>, R4>, R5>, R6>;
 } = (...Rs: ReadonlyArray<ReadonlyRecord>) => Rs.reduce(deepMerge2, {} as never) as never;
-
-/**
- * Modifies a package.json config so that :
- *
- * - a dependency that appears both in dependencies and peerDependencies is kept only as a
- *   peerDependency
- * - a dependency that appears in devDependencies and dependencies or peerDependencies is kept only as
- *   a dependency or peerDependency
- * - removes empty dependencies, devDependencies and peerDependencies keys
- */
-export const cleanDependencies = <C extends Config>({
-  packageName,
-  onlyAllowDevDependencies,
-  config,
-}: {
-  readonly packageName: string;
-  readonly onlyAllowDevDependencies: boolean;
-  readonly config: C;
-}): C => {
-  const packageJsonConfig = config[packageJsonFilename];
-
-  const peerDependencies = packageJsonConfig['peerDependencies'] ?? {};
-  if (onlyAllowDevDependencies && Object.keys(peerDependencies).length > 0)
-    throw new Error(`'${packageName}': peerDependencies are not allowed in this package`);
-
-  const dependencies = Object.fromEntries(
-    Object.entries(packageJsonConfig['dependencies'] ?? {}).filter(
-      ([packageName]) => !(packageName in peerDependencies),
-    ),
-  );
-  if (onlyAllowDevDependencies && Object.keys(dependencies).length > 0)
-    throw new Error(`'${packageName}': dependencies are not allowed in this package`);
-
-  const devDependencies = Object.fromEntries(
-    Object.entries(packageJsonConfig['devDependencies'] ?? {}).filter(
-      ([packageName]) => !(packageName in peerDependencies) && !(packageName in dependencies),
-    ),
-  );
-
-  const newPackageJsonConfig = {
-    ...Object.fromEntries(
-      Object.entries(packageJsonConfig).filter(
-        ([key]) => !['dependencies', 'devDependencies', 'peerDependencies'].includes(key),
-      ),
-    ),
-    ...(Object.keys(dependencies).length === 0 ? {} : { dependencies }),
-    ...(Object.keys(devDependencies).length === 0 ? {} : { devDependencies }),
-    ...(Object.keys(peerDependencies).length === 0 ? {} : { peerDependencies }),
-  };
-
-  return {
-    ...config,
-    [packageJsonFilename]: newPackageJsonConfig,
-  };
-};

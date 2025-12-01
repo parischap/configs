@@ -8,8 +8,11 @@ export const packageManager = `pnpm@10.23.0`;
 
 export const versionControlService = 'github.com';
 
-export const nonProjectMark = 'nonproject';
-export const projectMark = 'project';
+export const srcMark = 'esm';
+export const testsMark = 'tests';
+export const examplesMark = 'examples';
+export const othersMark = 'others';
+
 export const docgenMark = 'docgen';
 
 export const tsExecuter = 'jiti';
@@ -29,8 +32,10 @@ export const packageJsonFilename = 'package.json';
 export const tsConfigFilename = 'tsconfig.json';
 export const tsConfigBaseFilename = `tsconfig.base.json`;
 export const tsConfigDocGenFilename = `tsconfig.${docgenMark}.json`;
-export const tsConfigProjectFilename = `tsconfig.${projectMark}.json`;
-export const tsConfigNonProjectFilename = `tsconfig.${nonProjectMark}.json`;
+export const tsConfigSrcFilename = `tsconfig.${srcMark}.json`;
+export const tsConfigTestsFilename = `tsconfig.${testsMark}.json`;
+export const tsConfigExamplesFilename = `tsconfig.${examplesMark}.json`;
+export const tsConfigOthersFilename = `tsconfig.${othersMark}.json`;
 export const configFilename = 'project.config.json';
 export const prettierConfigFilename = 'prettier.config.ts';
 export const eslintConfigFilename = 'eslint.config.ts';
@@ -51,9 +56,10 @@ export const topPackageName = 'myeffectdevs';
 
 export const internalFolderName = 'internal';
 export const tsBuildInfoFolderName = '.tsbuildinfo';
-export const sourceFolderName = 'esm';
-export const examplesFolderName = 'examples';
-export const testsFolderName = 'tests';
+export const sourceFolderName = srcMark;
+export const examplesFolderName = examplesMark;
+export const testsFolderName = testsMark;
+export const othersFolderName = othersMark;
 export const prodFolderName = 'dist';
 export const typesFolderName = 'dts';
 export const commonJsFolderName = 'cjs';
@@ -82,25 +88,20 @@ export const jsoncExtensions = ['.jsonc'];
 export const json5Extensions = ['.json5'];
 export const ymlExtensions = ['.yml', '.yaml'];
 
+export const tsConfigStyleIncludeForSourceFiles = `${sourceFolderName}/${allFilesPattern}`;
+export const tsConfigStyleIncludeForTestsFiles = `${testsFolderName}/${allFilesPattern}`;
+export const tsConfigStyleIncludeForExampleFiles = `${examplesFolderName}/${allFilesPattern}`;
+
+export const eslintStyleIncludeForSourceFiles = javaScriptExtensions.map(
+  (extension) => `${sourceFolderName}/${allFilesPattern}${extension}`,
+);
+export const eslintStyleExcludeForSourceFiles = `${sourceFolderName}/**`;
+
 const prefixWith =
   (prefix: string) =>
   (as: ReadonlyArray<string>): Array<string> =>
     as.map((a) => prefix + a);
 const prefixWithAllFilePatterns = prefixWith(allFilesPattern);
-const suffixWith =
-  (suffix: string) =>
-  (as: ReadonlyArray<string>): Array<string> =>
-    as.map((a) => a + suffix);
-
-export const allProjectFolders = [sourceFolderName, testsFolderName, examplesFolderName];
-export const allProjectFilesWithoutExtensions = suffixWith(`/${allFilesPattern}`)(
-  allProjectFolders,
-);
-
-export const allProjectFiles = javaScriptExtensions
-  .map((extension) => suffixWith(extension)(allProjectFilesWithoutExtensions))
-  .flat();
-
 export const allTsFiles = prefixWithAllFilePatterns(tsExtensions);
 export const allJavaScriptFiles = prefixWithAllFilePatterns(javaScriptExtensions);
 export const allHtmlFiles = prefixWithAllFilePatterns(htmlExtensions);
@@ -177,9 +178,6 @@ export const baseDevDependencies = {
   // Used by the test script
   vitest: '4.0.7',
 };
-
-// Add here all devDependencies used by configInternalRepo.ts, be it in scripts, github actions, installed config files...
-export const repoDevDependencies = {};
 
 // Add here all devDependencies used by configInternalProject.ts, be it in scripts, github actions, installed config files...
 export const projectDevDependencies = {

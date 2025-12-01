@@ -27,9 +27,11 @@ export default {
     incremental: true,
     removeComments: false,
     stripInternal: true,
-    lib: [],
-    // Do not use types (in particular node types) unless included explicitely
-    types: [],
+    lib: ['ESNext'],
+    types: ['node'],
+    allowJs: true,
+    checkJs: true,
+    noEmit: true,
     plugins: [
       {
         name: '@effect/language-service',

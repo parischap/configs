@@ -13,7 +13,6 @@ import {
   gitIgnoreFilename,
   packageJsonFilename,
   packageManager,
-  repoDevDependencies,
   workflowsFolderName,
 } from '../constants.js';
 import docsConfigYmlConfig from './docsConfigYmlConfig.js';
@@ -52,7 +51,6 @@ export default ({
   [gitIgnoreFilename]: gitIgnoreConfig,
   [packageJsonFilename]: {
     packageManager,
-    devDependencies: repoDevDependencies,
     ...(docGenParameters !== undefined ?
       {
         scripts: {

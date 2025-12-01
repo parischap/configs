@@ -15,7 +15,7 @@ import {
 import eslintConfig from './eslintConfig.js';
 import nonProjectVitestConfig from './nonProjectVitestConfig.js';
 import pnpmWorkspaceConfig from './pnpmWorkspaceConfig.js';
-import tsConfigNonProject from './tsconfigNonProject.js';
+import tsConfigNonProject from './tsconfigOthers.js';
 
 export default ({ isTop }: { readonly isTop: boolean }) => ({
   // Used by the checks script
@@ -28,7 +28,7 @@ export default ({ isTop }: { readonly isTop: boolean }) => ({
   [vitestConfigFilename]: nonProjectVitestConfig,
   [packageJsonFilename]: {
     scripts: {
-      checks: 'pnpm lint && pnpm tscheck',
+      checks: 'pnpm tscheck && pnpm lint',
       'clean-all-node-modules': 'pnpm -r -include-workspace-root=true --reverse clean-node-modules',
       'clean-all-config-files': 'pnpm -r -include-workspace-root=true --reverse clean-config-files',
       'clean-all-prod': 'pnpm -r --parallel --aggregate-output clean-prod',
