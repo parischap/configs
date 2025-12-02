@@ -7,20 +7,21 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import {
   baseDevDependencies,
-  mkdirpFilename,
+  binariesPath,
+  configsPackageName,
+  configsPeerDependencies,
+  owner,
   packageJsonFilename,
   prettierConfigFilename,
   prettierIgnoreFilename,
-  rmrfFilename,
   slashedScope,
   tsConfigBaseFilename,
   tsConfigFilename,
+  versionControlService,
 } from '../constants.js';
 
-import mkdirpCommand from './mkdirpCommandConfig.js';
 import prettierConfig from './prettierConfig.js';
 import prettierIgnore from './prettierIgnoreConfig.js';
-import rmrfCommand from './rmrfCommandConfig.js';
 import tsconfigBase from './tsconfigBase.js';
 
 import type { ReadonlyStringRecord } from '../types.js';
@@ -29,15 +30,13 @@ export default ({
   packageName,
   description,
   scripts,
+  isConfigsPackage,
 }: {
   readonly packageName: string;
   readonly description: string;
   readonly scripts: ReadonlyStringRecord;
+  readonly isConfigsPackage: boolean;
 }) => ({
-  // Used by the rmrf script
-  [rmrfFilename]: rmrfCommand,
-  // Used by the mkdirp script
-  [mkdirpFilename]: mkdirpCommand,
   // Used by the format script
   [prettierConfigFilename]: prettierConfig,
   // Used by the format script
@@ -54,19 +53,28 @@ export default ({
     scripts: {
       // tests can be run at all levels, even at non project levels because there are vitest projects
       test: 'vitest run',
-      tscheck: `tsc -b ${tsConfigFilename} --force --noEmit`,
+      tscheck: `tsc -b ${tsConfigFilename} --force`,
       lint: 'eslint .',
       'lint-and-analyze': 'eslint . --stats -f json > eslint-stats.json',
       'lint-rules': 'pnpx @eslint/config-inspector',
       format: 'prettier . --write',
-      rmrf: 'node rmrf.ts',
-      mkdirp: 'node mkdirp.ts',
+      'generate-configs': `node ${binariesPath(isConfigsPackage)}/generate-configs.ts`,
+      rmrf: `node ${binariesPath(isConfigsPackage)}/rmrf.ts`,
+      mkdirp: `node ${binariesPath(isConfigsPackage)}/mkdirp.ts`,
       'clean-node-modules': 'pnpm rmrf node_modules',
       // Suppress package.json after because once suppressed the rmrf script no longer exists
       'clean-config-files': `pnpm rmrf ${tsConfigFilename} && pnpm rmrf ${packageJsonFilename}`,
       'reinstall-all-dependencies': 'pnpm i --force',
       ...scripts,
     },
-    devDependencies: baseDevDependencies,
+    devDependencies:
+      isConfigsPackage ? baseDevDependencies : (
+        {
+          ...baseDevDependencies,
+          ...configsPeerDependencies,
+          [`${slashedScope}${configsPackageName}`]: `git+ssh://${versionControlService}/${owner}/${configsPackageName}`,
+        }
+      ),
+    ...(isConfigsPackage ? { peerDependencies: configsPeerDependencies } : {}),
   },
 });

@@ -13,9 +13,10 @@ export default ({ description }: { readonly description: string }): Config =>
       packageName: topPackageName,
       description,
       scripts: {},
+      isConfigsPackage: false,
     }),
     configInternalRepo({
       isPublished: false,
     }),
-    configInternalNoProject({ isTop: true }),
+    configInternalNoProject({ isTopPackage: true }),
   );

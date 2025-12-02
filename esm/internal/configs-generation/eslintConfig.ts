@@ -34,7 +34,6 @@ const javascriptConfigForSourceFiles: ConfigArray = defineConfig({
   },
 });`
     : '';
-
   const javascriptConfigForSourceFilesScope =
     globalsString !== undefined ?
       `

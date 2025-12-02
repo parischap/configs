@@ -18,6 +18,7 @@ export default ({
       packageName,
       description,
       scripts: {},
+      isConfigsPackage: false,
     }),
     configInternalRepo({
       // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
@@ -25,5 +26,5 @@ export default ({
       // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
       isPublished: true,
     }),
-    configInternalNoProject({ isTop: false }),
+    configInternalNoProject({ isTopPackage: false }),
   );

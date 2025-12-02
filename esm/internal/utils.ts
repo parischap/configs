@@ -1,5 +1,7 @@
 // This module must not import any external dependency. It must be runnable without a package.json
-import { isAbsolute, relative } from 'node:path';
+import { readdir } from 'node:fs/promises';
+import { extname, isAbsolute, relative } from 'node:path';
+import { normalize as posixNormalize } from 'node:path/posix';
 import { type ReadonlyRecord, type Record, isArray, isRecord } from './types.js';
 
 /** Escapes regular expression special characters */
@@ -132,3 +134,61 @@ export const deepMerge: {
     r6: R6,
   ): MergedRecord<MergedRecord<MergedRecord<MergedRecord<MergedRecord<R1, R2>, R3>, R4>, R5>, R6>;
 } = (...Rs: ReadonlyArray<ReadonlyRecord>) => Rs.reduce(deepMerge2, {} as never) as never;
+
+/**
+ * Reads the contents of the `path` folder, recursively if `recursive === true`. Keeps only files or
+ * folders according to the `keepFilesOrFolders` param. For each contained element returns:
+ *
+ * - name: the name of the file with extension
+ * - bareName: the name of the file without extension
+ * - extension: the extension of the name
+ * - parentPath: the path to the file expressed relatively to CWD
+ * - relativePath : the path to the file expressed relatively to `path`
+ *
+ * Does not fail if the path folder does not exist
+ */
+export const simpleGlob = async ({
+  path,
+  recursive,
+  keepFilesOrFolders,
+}: {
+  readonly path: string;
+  readonly recursive: boolean;
+  readonly keepFilesOrFolders: 'Files' | 'Folders';
+}): Promise<
+  ReadonlyArray<{
+    name: string;
+    bareName: string;
+    extension: string;
+    parentPath: string;
+    relativePath: string;
+  }>
+> => {
+  try {
+    return (
+      await readdir(path, {
+        recursive,
+        withFileTypes: true,
+      })
+    )
+      .filter((dirent) =>
+        recursive ? keepFilesOrFolders === 'Files'
+        : keepFilesOrFolders === 'Files' ? dirent.isFile()
+        : dirent.isDirectory(),
+      )
+      .map(({ name, parentPath }) => {
+        const extension = extname(name);
+        const bareName = name.substring(0, name.length - extension.length);
+        return {
+          name,
+          bareName,
+          extension,
+          parentPath,
+          relativePath: posixNormalize(relative(path, parentPath)),
+        };
+      });
+  } catch (e: unknown) {
+    if (e instanceof Error && 'code' in e && e.code === 'ENOENT') return [];
+    throw e;
+  }
+};

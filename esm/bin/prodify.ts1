@@ -68,7 +68,7 @@ const program = Effect.gen(function* () {
 
   const srcPackageJsonPath = path.join(rootPath, packageJsonFilename);
   const prodPath = path.join(rootPath, prodFolderName);
-  const projectPath = path.join(rootPath, sourceFolderName);
+  const sourcePath = path.join(rootPath, sourceFolderName);
   const prodProjectPath = path.join(prodPath, sourceFolderName);
   const prodCommonJsPath = path.join(prodPath, commonJsFolderName);
 
@@ -181,7 +181,7 @@ const program = Effect.gen(function* () {
   const baseProdPackageJson = Record.filter(prodPackageJson, (_, k) => k === 'sideEffects');
 
   yield* Effect.log('Determining list of exported files');
-  const indexContents = yield* fs.readFileString(path.join(projectPath, 'index.ts'), 'utf-8');
+  const indexContents = yield* fs.readFileString(path.join(sourcePath, 'index.ts'), 'utf-8');
 
   // Remove './tests' entry
   const exports = Array.unfold(

@@ -48,6 +48,17 @@ const PlatformNodeFsLive = PlatformNodeFs.layer;
 
 const live = pipe(PlatformNodePathLive, Layer.merge(PlatformNodeFsLive));
 
+/*publishConfig: {
+      main: `./${commonJsFolderName}/index.js`,
+      types: `./${typesFolderName}/index.d.ts`,
+      exports: {
+        '.': {
+          types: `./${typesFolderName}/index.d.ts`,
+          default: `./${commonJsFolderName}/index.js`,
+        },
+      },
+    },*/
+    
 const dependencyKeys = (pkg: Record.ReadonlyRecord<string, unknown>, key: string): Array<string> =>
   pipe(
     pkg,
@@ -63,9 +74,9 @@ const program = Effect.gen(function* () {
 
   const rootPath = path.resolve();
   const packageJsonPath = path.join(rootPath, packageJsonFilename);
-  const projectPath = path.join(rootPath, sourceFolderName);
+  const sourcePath = path.join(rootPath, sourceFolderName);
   const prodPath = path.join(rootPath, prodFolderName);
-  const internalImportsGlob = allTsFiles.map((p) => path.join(projectPath, internalFolderName, p));
+  const internalImportsGlob = allTsFiles.map((p) => path.join(sourcePath, internalFolderName, p));
   const esmOutDir = path.join(prodFolderName, sourceFolderName);
 
   /* yield* Effect.log('Copying static files');
@@ -96,7 +107,7 @@ const program = Effect.gen(function* () {
   const target = yield* pipe(Config.string('TARGET'), Config.withDefault(''));
 
   const dirContents =
-    target === '' ? yield* fs.readDirectory(projectPath, { recursive: true }) : Array.of(target);
+    target === '' ? yield* fs.readDirectory(sourcePath, { recursive: true }) : Array.of(target);
 
   yield* pipe(
     dirContents,
@@ -109,7 +120,7 @@ const program = Effect.gen(function* () {
       ),
     ),
     Array.map((filename) => {
-      const source = path.join(projectPath, filename);
+      const source = path.join(sourcePath, filename);
       const target = path.join(esmOutDir, path.dirname(filename));
 
       return pipe(
