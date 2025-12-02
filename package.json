@@ -11,12 +11,12 @@
     "lint-and-analyze": "eslint . --stats -f json > eslint-stats.json",
     "lint-rules": "pnpx @eslint/config-inspector",
     "format": "prettier . --write",
-    "rmrf": "node utils/rmrf.ts",
-    "mkdirp": "node utils/mkdirp.ts",
+    "generate-configs": "node esm/bin/generate-configs.ts",
+    "rmrf": "node esm/bin/rmrf.ts",
+    "mkdirp": "node esm/bin/mkdirp.ts",
     "clean-node-modules": "pnpm rmrf node_modules",
     "clean-config-files": "pnpm rmrf tsconfig.json && pnpm rmrf package.json",
     "reinstall-all-dependencies": "pnpm i --force",
-    "update-config-files": "pnpx jiti esm/index.ts",
     "circular": "madge --extensions ts --circular --no-color --no-spinner esm",
     "clean-prod": "pnpm rmrf dist && pnpm mkdirp dist",
     "checks": "pnpm circular && pnpm tscheck && pnpm lint && pnpm test",
@@ -24,19 +24,7 @@
     "examples": ""
   },
   "devDependencies": {
-    "globals": "16.4.0",
-    "eslint": "9.39.1",
-    "@eslint/js": "9.39.1",
-    "@eslint/json": "0.14.0",
-    "@eslint/markdown": "7.5.1",
-    "@html-eslint/eslint-plugin": "0.49.0",
-    "@html-eslint/parser": "0.49.0",
-    "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-functional": "9.0.2",
-    "eslint-plugin-yml": "1.19.0",
-    "typescript-eslint": "8.47.0",
     "prettier": "3.6.2",
-    "prettier-plugin-jsdoc": "1.5.0",
     "@tsconfig/strictest": "2.0.8",
     "@effect/language-service": "0.56.0",
     "@types/node": "24.10.1",
@@ -57,18 +45,30 @@
     "@babel/plugin-transform-export-namespace-from": "7.27.1",
     "@babel/plugin-transform-modules-commonjs": "7.27.1"
   },
+  "peerDependencies": {
+    "@eslint/js": "9.39.1",
+    "@eslint/json": "0.14.0",
+    "@eslint/markdown": "7.5.1",
+    "@html-eslint/eslint-plugin": "0.49.0",
+    "@html-eslint/parser": "0.49.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-functional": "9.0.2",
+    "eslint-plugin-yml": "1.19.0",
+    "eslint": "9.39.1",
+    "globals": "16.4.0",
+    "typescript-eslint": "8.47.0",
+    "prettier-plugin-jsdoc": "1.5.0",
+    "effect": "3.19.6"
+  },
   "packageManager": "pnpm@10.24.0",
   "module": "./esm/index.js",
   "exports": {
     ".": {
-      "import": "./esm/index.js"
+      "import": "./esm/index.ts"
     },
     "./tests": {
-      "import": "./esm/index.tests.js"
+      "import": "./esm/index.tests.ts"
     }
-  },
-  "dependencies": {
-    "effect": "3.19.6"
   },
   "repository": {
     "type": "git",

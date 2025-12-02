@@ -4,8 +4,8 @@ import { topPackageName } from '../constants.js';
 import { type Config } from '../types.js';
 import { deepMerge } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
-import configInternalNoProject from './configInternalNoProject.js';
 import configInternalRepo from './configInternalRepo.js';
+import configInternalWithoutSource from './configInternalWithoutSource.js';
 
 export default ({ description }: { readonly description: string }): Config =>
   deepMerge(
@@ -18,5 +18,5 @@ export default ({ description }: { readonly description: string }): Config =>
     configInternalRepo({
       isPublished: false,
     }),
-    configInternalNoProject({ isTopPackage: true }),
+    configInternalWithoutSource({ isTopPackage: true }),
   );

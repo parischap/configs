@@ -9,8 +9,7 @@ import {
 
 import { readFile, watch, writeFile } from 'node:fs/promises';
 import { dirname, extname, join } from 'node:path';
-import { join as posixJoin } from 'node:path/posix';
-import { simpleGlob } from '../internal/utils.js';
+import { fromOSPathToPosixPath, simpleGlob } from '../internal/utils.js';
 
 const capitalizeFirstLetter = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -41,9 +40,9 @@ const action = async ({
     const sourceFiles = (
       await simpleGlob({ path: sourceFolderName, recursive: true, keepFilesOrFolders: 'Files' })
     ).filter(
-      ({ name, extension, relativePath }) =>
+      ({ name, extension, relativeParentPath }) =>
         javaScriptExtensions.includes(extension)
-        && !dirname(relativePath).startsWith(internalFolderName)
+        && !dirname(relativeParentPath).startsWith(internalFolderName)
         && name !== indexTsFilename,
     );
 
@@ -55,8 +54,9 @@ const action = async ({
         + sourceFiles
           // path.join removes upfront './' but typescript requires them so we must add them
           .map(
-            ({ bareName, relativePath }) =>
-              `export * as ${packagePrefix}${capitalizeFirstLetter(bareName)} from './${posixJoin(relativePath, bareName)}.js';`,
+            ({ bareName, relativeParentPath }) =>
+              `export * as ${packagePrefix}${capitalizeFirstLetter(bareName)} from \
+'./${fromOSPathToPosixPath(join(relativeParentPath, bareName))}.js';`,
           )
           .join('\n'),
     );

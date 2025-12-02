@@ -134,40 +134,41 @@ export const docGenDependencies = {
 };
 
 // Add here all dependencies used by modules inside the internal/exported-utils folder...
-export const configsPeerDependencies = {};
-
-// Add here all devDependencies used by configInternalBase.ts, be it in scripts, github actions, installed config files...
-export const baseDevDependencies = {
-  // Used by the eslint.config.ts file
-  globals: '16.4.0',
-  // Used by the lint script and vscode and its plugins
-  eslint: '9.39.1',
-  // Used by the eslint.config.ts file
+export const configsPeerDependencies = {
+  // Used by the eslintConfig.ts file
   '@eslint/js': '9.39.1',
-  // Used by the eslint.config.ts file
+  // Used by the eslintConfig.ts file
   '@eslint/json': '0.14.0',
-  // Used by the eslint.config.ts file
+  // Used by the eslintConfig.ts file
   '@eslint/markdown': '7.5.1',
-  // Used by the eslint.config.ts file
+  // Used by the eslintConfig.ts file
   '@html-eslint/eslint-plugin': '0.49.0',
   // Used as peerDependency of '@html-eslint/eslint-plugin'
   '@html-eslint/parser': '0.49.0',
-  // Used by the eslint.config.ts file
+  // Used by the eslintConfig.ts file
   'eslint-config-prettier': '10.1.8',
-  // Used by the eslint.config.ts file
+  // Used by the eslintConfig.ts file
   'eslint-plugin-functional': '9.0.2',
-  // Used by the eslint.config.ts file
+  // Used by the eslintConfig.ts file
   //'eslint-plugin-import-x': '4.16.1',
   // Used as peerDependency of 'eslint-plugin-import-x'
   //'eslint-import-resolver-typescript': '4.4.4',
-  // Used by the eslint.config.ts file
+  // Used by the eslintConfig.ts file
   'eslint-plugin-yml': '1.19.0',
-  // Used by the eslint.config.ts file
+  // Used by the lint script, vscode and its plugins
+  eslint: '9.39.1',
+  // Used by the eslintConfig file
+  globals: '16.4.0',
+  // Used by the eslintConfig file
   'typescript-eslint': '8.47.0',
+  // Used by the prettierConfig.ts file
+  'prettier-plugin-jsdoc': '1.5.0',
+};
+
+// Add here all devDependencies used by configInternalBase.ts, be it in scripts, github actions, installed config files...
+export const baseDevDependencies = {
   // Used by the script format and by vscode and its plugins
   prettier: '3.6.2',
-  // Used by the prettier.config.ts file
-  'prettier-plugin-jsdoc': '1.5.0',
   // Used by tsconfig.base.json
   '@tsconfig/strictest': '2.0.8',
   // Used as plugin by tsconfig.base.json

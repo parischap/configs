@@ -1,4 +1,3 @@
-// This module must not import any external dependency. It must be runnable without a package.json
 import {
   allHtmlFiles,
   allJavaScriptFiles,
@@ -20,36 +19,6 @@ import {
 } from '../constants.js';
 import { regExpEscape } from '../utils.js';
 
-export default (globalsString?: string) => {
-  const javascriptConfigForSourceFiles =
-    globalsString !== undefined ?
-      `
-      
-const javascriptConfigForSourceFiles: ConfigArray = defineConfig({
-  name: 'javascriptConfigForSourceFiles',
-  languageOptions: {
-    globals: {
-      ...${globalsString},
-    },
-  },
-});`
-    : '';
-  const javascriptConfigForSourceFilesScope =
-    globalsString !== undefined ?
-      `
-  scopeConfig({
-    configs: javascriptConfigForSourceFiles,
-    files: ${JSON.stringify(eslintStyleIncludeForSourceFiles)},
-  }),`
-    : ``;
-
-  return `/**
- * See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-objects. Each
- * object applies to the files specified in its files property. If several objects apply to a file,
- * properties of all applicable objects are merged. If the same property appears in several objects,
- * the latest one prevails.
- */
-
 import eslint from '@eslint/js';
 import json from '@eslint/json';
 import markdown from '@eslint/markdown';
@@ -61,6 +30,7 @@ import eslintPluginYml from 'eslint-plugin-yml';
 import { defineConfig, globalIgnores, type Config } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import { type ReadonlyRecord } from '../types.js';
 
 interface ConfigArray extends ReadonlyArray<Config> {}
 
@@ -84,17 +54,22 @@ const javascriptPreConfig: ConfigArray = defineConfig(eslint.configs.recommended
   },
 });
 
-const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
-  // The typescript-eslint-parser requested by the functional plugin and the eslint-plugin-import-x is included in all typescript-eslint configs
-  tseslint.configs.strictTypeChecked,
-  {
-    name: 'javascriptConfigForNonMdFiles',
-    //plugins: { 'import-x': importX as never },
-    extends: [
-      /* These rules are ts-eslint rules (not rules of the functional plugin) which the functional plugin recommends to activate because they make sense for a functional programmings style. They require typeChecking and are not cancelled by functional.configs.disableTypeChecked */
-      functional.configs.externalTypeScriptRecommended as never,
-    ],
-    /*settings: {
+const javascriptConfigForNonMdFiles = ({
+  tsconfigRootDir,
+}: {
+  readonly tsconfigRootDir: string;
+}): ConfigArray =>
+  defineConfig(
+    // The typescript-eslint-parser requested by the functional plugin and the eslint-plugin-import-x is included in all typescript-eslint configs
+    tseslint.configs.strictTypeChecked,
+    {
+      name: 'javascriptConfigForNonMdFiles',
+      //plugins: { 'import-x': importX as never },
+      extends: [
+        /* These rules are ts-eslint rules (not rules of the functional plugin) which the functional plugin recommends to activate because they make sense for a functional programmings style. They require typeChecking and are not cancelled by functional.configs.disableTypeChecked */
+        functional.configs.externalTypeScriptRecommended as never,
+      ],
+      /*settings: {
       immutability: {
         overrides: [
           {
@@ -114,24 +89,27 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
         ],
       },
     },*/
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
+      languageOptions: {
+        parserOptions: {
+          projectService: true,
+          tsconfigRootDir,
+        },
       },
-    },
-    /**
-     * Rules that require type-information can only be modified in that config (type information is
-     * unavailable in other configs)
-     */
-    rules: {
-      '@typescript-eslint/strict-boolean-expressions': 'error',
-      '@typescript-eslint/no-confusing-void-expression': ['error', { ignoreArrowShorthand: true }],
-      // call the .toString() instead if necessary
-      '@typescript-eslint/restrict-template-expressions': 'error',
-      '@typescript-eslint/no-unnecessary-type-parameters': 'off', // Useful to avoid using any
-      //'import-x/export': 'error',
-      /*'import-x/no-extraneous-dependencies': [
+      /**
+       * Rules that require type-information can only be modified in that config (type information
+       * is unavailable in other configs)
+       */
+      rules: {
+        '@typescript-eslint/strict-boolean-expressions': 'error',
+        '@typescript-eslint/no-confusing-void-expression': [
+          'error',
+          { ignoreArrowShorthand: true },
+        ],
+        // call the .toString() instead if necessary
+        '@typescript-eslint/restrict-template-expressions': 'error',
+        '@typescript-eslint/no-unnecessary-type-parameters': 'off', // Useful to avoid using any
+        //'import-x/export': 'error',
+        /*'import-x/no-extraneous-dependencies': [
         'error',
         {
           devDependencies: false,
@@ -140,11 +118,11 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
           bundledDependencies: false,
         },
       ],*/
-      'functional/immutable-data': 'error',
-      /* Only activate these rules every now and again to check my work. It takes a lot of time and it triggers errors for Option's and Either's which I did not manage to silence */
-      'functional/prefer-immutable-types':'off',
-      'functional/type-declaration-immutability':'off',
-      /*'functional/prefer-immutable-types': [
+        'functional/immutable-data': 'error',
+        /* Only activate these rules every now and again to check my work. It takes a lot of time and it triggers errors for Option's and Either's which I did not manage to silence */
+        'functional/prefer-immutable-types': 'off',
+        'functional/type-declaration-immutability': 'off',
+        /*'functional/prefer-immutable-types': [
         'error',
         {
           enforcement: 'None',
@@ -174,36 +152,36 @@ const javascriptConfigForNonMdFiles: ConfigArray = defineConfig(
           ignoreInterfaces: false,
         },
       ],*/
-      // We keep this rule because it can catch dead code inserted to jump fast to the doc of a function
-      'functional/no-expression-statements': [
-        'error',
-        {
-          ignoreVoid: true,
-          ignoreCodePattern: ${JSON.stringify([
-            '^' + regExpEscape('describe('),
-            // process.exit returns never, not void
-            //'^' + regExpEscape('process.exit('),
-            // regExpEscape('super'),
-            //'satisfies',
-            //'^' + regExpEscape('Layer.launch('),
-          ])},
-        },
-      ],
-      'functional/prefer-property-signatures': 'error',
-      'functional/prefer-tacit': 'error',
-      'functional/functional-parameters': [
-        'error',
-        { allowRestParameter: true, allowArgumentsKeyword: false, enforceParameterCount: false },
-      ],
-      'functional/no-return-void': 'off',
-      'functional/no-conditional-statements': 'off',
-      'functional/no-mixed-types': 'off',
-      'functional/readonly-type': ['error', 'keyword'],
-      // It's impossible I use a throw without being aware. Would be useful in a team to enforce a code style
-      'functional/no-throw-statements': 'off',
+        // We keep this rule because it can catch dead code inserted to jump fast to the doc of a function
+        'functional/no-expression-statements': [
+          'error',
+          {
+            ignoreVoid: true,
+            ignoreCodePattern: [
+              '^' + regExpEscape('describe('),
+              // process.exit returns never, not void
+              //'^' + regExpEscape('process.exit('),
+              // regExpEscape('super'),
+              //'satisfies',
+              //'^' + regExpEscape('Layer.launch('),
+            ],
+          },
+        ],
+        'functional/prefer-property-signatures': 'error',
+        'functional/prefer-tacit': 'error',
+        'functional/functional-parameters': [
+          'error',
+          { allowRestParameter: true, allowArgumentsKeyword: false, enforceParameterCount: false },
+        ],
+        'functional/no-return-void': 'off',
+        'functional/no-conditional-statements': 'off',
+        'functional/no-mixed-types': 'off',
+        'functional/readonly-type': ['error', 'keyword'],
+        // It's impossible I use a throw without being aware. Would be useful in a team to enforce a code style
+        'functional/no-throw-statements': 'off',
+      },
     },
-  },
-);
+  );
 
 const javascriptConfigForMdFiles: ConfigArray = defineConfig(
   /**
@@ -219,7 +197,7 @@ const javascriptConfigForMdFiles: ConfigArray = defineConfig(
   tseslint.configs.strict,
   {
     name: 'javascriptConfigForMdFiles',
-    // Deactivate rules that require type information that was activated in javascriptPreSetting
+    // Deactivate rules that require type information that were activated in javascriptPreSetting
     extends: [functional.configs.disableTypeChecked as never],
   },
 );
@@ -231,7 +209,19 @@ const javascriptConfigForNonSourceFiles: ConfigArray = defineConfig({
       ...globals.nodeBuiltin,
     },
   },
-});${javascriptConfigForSourceFiles}
+});
+
+const javascriptConfigForSourceFiles = ({
+  globals,
+}: {
+  readonly globals: ReadonlyRecord;
+}): ConfigArray =>
+  defineConfig({
+    name: 'javascriptConfigForSourceFiles',
+    languageOptions: {
+      globals,
+    },
+  });
 
 const javascriptPostConfig: ConfigArray = defineConfig({
   name: 'javascriptPostConfig',
@@ -331,43 +321,71 @@ const scopeConfig = ({
     ignores: [...ignores],
   }));
 
-export default defineConfig([
-  // This is a global ignore, files are ignored in all other config objects
-  // node_modules files and .git are also ignored.
-  // Must work at all levels (top, monorepo, one-package repo, and subrepo)
+/**
+ * See https://eslint.org/docs/latest/use/configure/configuration-files#configuration-objects. Each
+ * object applies to the files specified in its files property. If several objects apply to a file,
+ * properties of all applicable objects are merged. If the same property appears in several objects,
+ * the latest one prevails.
+ */
 
-  globalIgnores(
-    [
-      '${prodFolderName + '/'}',
-      '${tsBuildInfoFolderName + '/'}',
-      '${viteTimeStampFilenamePattern}',
-      '${packagesFolderName + '/'}',
-      '${vscodeWorkspaceFilenamePattern}',
-      '${vscodeFolderName + '/'}',
-      '${pnpmLockFilename}'
-    ],
-    'ignoreConfig',
-  ),
-  scopeConfig({ configs: javascriptPreConfig, files: ${JSON.stringify(allJavaScriptFiles)} }),
-  scopeConfig({
-    configs: javascriptConfigForNonMdFiles,
-    files: ${JSON.stringify(allJavaScriptFiles)},
-    ignores: ${JSON.stringify(allJsInMdFiles)},
-  }),
-  scopeConfig({ configs: javascriptConfigForMdFiles, files: ${JSON.stringify(allJsInMdFiles)} }),
-  scopeConfig({
-    configs: javascriptConfigForNonSourceFiles,
-    files: ${JSON.stringify(allJavaScriptFiles)},
-    ignores: ['${eslintStyleExcludeForSourceFiles}'],
-  }),${javascriptConfigForSourceFilesScope}
-  scopeConfig({ configs: javascriptPostConfig, files: ${JSON.stringify(allJavaScriptFiles)} }),
-  scopeConfig({ configs: htmlConfigs, files: ${JSON.stringify(allHtmlFiles)} }),
-  scopeConfig({ configs: ymlConfigs, files: ${JSON.stringify(allYmlFiles)} }),
-  scopeConfig({ configs: markdownConfigs, files: ${JSON.stringify(allMdFiles)} }),
-  scopeConfig({ configs: jsonConfigs, files: ${JSON.stringify(allJsonFiles)} }),
-  scopeConfig({ configs: jsoncConfigs, files: ${JSON.stringify(allJsoncFiles)} }),
-  scopeConfig({ configs: json5Configs, files: ${JSON.stringify(allJson5Files)} }),
-  // Do not specify a files directive. We want to cancel eslint rules for all types of files: *.js, *.ts, *.html...
-  eslintConfigPrettier,
-]);`;
-};
+const baseConfig = (params: {
+  readonly tsconfigRootDir: string;
+  readonly globals?: ReadonlyRecord;
+}) =>
+  defineConfig([
+    // This is a global ignore, files are ignored in all other config objects
+    // node_modules files and .git are also ignored.
+    // Must work at all levels (top, monorepo, one-package repo, and subrepo)
+
+    globalIgnores(
+      [
+        prodFolderName + '/',
+        tsBuildInfoFolderName + '/',
+        viteTimeStampFilenamePattern,
+        packagesFolderName + '/',
+        vscodeWorkspaceFilenamePattern,
+        vscodeFolderName + '/',
+        pnpmLockFilename,
+      ],
+      'ignoreConfig',
+    ),
+    scopeConfig({ configs: javascriptPreConfig, files: allJavaScriptFiles }),
+    scopeConfig({
+      configs: javascriptConfigForNonMdFiles(params),
+      files: allJavaScriptFiles,
+      ignores: allJsInMdFiles,
+    }),
+    scopeConfig({ configs: javascriptConfigForMdFiles, files: allJsInMdFiles }),
+    scopeConfig({
+      configs: javascriptConfigForNonSourceFiles,
+      files: allJavaScriptFiles,
+      ignores: [eslintStyleExcludeForSourceFiles],
+    }),
+    ...(params.globals === undefined ?
+      []
+    : [
+        scopeConfig({
+          configs: javascriptConfigForSourceFiles({ globals: params.globals }),
+          files: eslintStyleIncludeForSourceFiles,
+        }),
+      ]),
+    scopeConfig({ configs: javascriptPostConfig, files: allJavaScriptFiles }),
+    scopeConfig({ configs: htmlConfigs, files: allHtmlFiles }),
+    scopeConfig({ configs: ymlConfigs, files: allYmlFiles }),
+    scopeConfig({ configs: markdownConfigs, files: allMdFiles }),
+    scopeConfig({ configs: jsonConfigs, files: allJsonFiles }),
+    scopeConfig({ configs: jsoncConfigs, files: allJsoncFiles }),
+    scopeConfig({ configs: json5Configs, files: allJson5Files }),
+    // Do not specify a files directive. We want to cancel eslint rules for all types of files: *.js, *.ts, *.html...
+    eslintConfigPrettier,
+  ]);
+
+export const plainEslintConfig = ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }) =>
+  baseConfig({ tsconfigRootDir });
+
+export const nodeEslintConfig = ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }) =>
+  baseConfig({ tsconfigRootDir, globals: globals.nodeBuiltin });
+
+/* We don't use any dom specifities in our client code because it must run on the server. It's all hidden away in preact */
+export const browserEslintConfig = ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }) =>
+  baseConfig({ tsconfigRootDir });

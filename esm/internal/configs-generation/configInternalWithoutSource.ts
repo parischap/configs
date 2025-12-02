@@ -12,16 +12,16 @@ import {
   tsConfigFilename,
   vitestConfigFilename,
 } from '../constants.js';
-import eslintConfig from './eslintConfig.js';
+import eslintConfigOthers from './eslintConfigOthers.js';
 import nonProjectVitestConfig from './nonProjectVitestConfig.js';
 import pnpmWorkspaceConfig from './pnpmWorkspaceConfig.js';
-import tsConfigNonProject from './tsconfigOthers.js';
+import tsConfigOthers from './tsconfigOthers.js';
 
 export default ({ isTopPackage }: { readonly isTopPackage: boolean }) => ({
   // Used by the checks script
-  [tsConfigFilename]: tsConfigNonProject,
+  [tsConfigFilename]: tsConfigOthers({isConfigsPackage:false}),
   // Used by the checks script
-  [eslintConfigFilename]: eslintConfig(),
+  [eslintConfigFilename]: eslintConfigOthers,
   // Used by all scripts to define scope of -r flag
   [pnpmWorkspaceFilename]: pnpmWorkspaceConfig(isTopPackage),
   // Used by the test script

@@ -3,8 +3,8 @@
 import { type Config } from '../types.js';
 import { deepMerge } from '../utils.js';
 import configInternalBase from './configInternalBase.js';
-import configInternalNoProject from './configInternalNoProject.js';
 import configInternalRepo from './configInternalRepo.js';
+import configInternalWithoutSource from './configInternalWithoutSource.js';
 
 export default ({
   packageName,
@@ -26,5 +26,5 @@ export default ({
       // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
       isPublished: true,
     }),
-    configInternalNoProject({ isTopPackage: false }),
+    configInternalWithoutSource({ isTopPackage: false }),
   );

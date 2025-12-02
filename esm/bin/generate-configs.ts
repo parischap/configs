@@ -9,7 +9,7 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json. It must only use Typescript syntax understandable by Node with the --experimental-transform-types flag */
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { basename, dirname, extname, join, normalize } from 'node:path';
+import { basename, dirname, extname, join } from 'node:path';
 import configMonoRepo from '../internal/configs-generation/configMonoRepo.js';
 import configOnePackageRepo from '../internal/configs-generation/configOnePackageRepo.js';
 import configSubRepo from '../internal/configs-generation/configSubRepo.js';
@@ -33,7 +33,12 @@ import {
   isRecord,
   type Config,
 } from '../internal/types.js';
-import { prettyStringify, regExpEscape, simpleGlob } from '../internal/utils.js';
+import {
+  fromPosixPathToOSPath,
+  prettyStringify,
+  regExpEscape,
+  simpleGlob,
+} from '../internal/utils.js';
 
 const fromPatternsToRegExp = (patterns: ReadonlyArray<string>): RegExp =>
   new RegExp(
@@ -257,14 +262,15 @@ const applyConfig = async ({
   readonly packageName: string;
   readonly isTop: boolean;
 }) => {
+  const packageTag = `  '${packageName}': `;
   try {
-    console.log(`'${packageName}': reading '${configFilename}'`);
+    console.log(`${packageTag}reading '${configFilename}'`);
 
     const config = await getConfigFromConfigFile({ repoName, packageName, packagePath });
 
     // In project.config.ts, paths are posix-Style. Let's convert them to OS style
-    const filesToCreate = Object.keys(config).map(normalize);
-    console.log(`'${packageName}': Determining potential conflicting files`);
+    const filesToCreate = Object.keys(config).map(fromPosixPathToOSPath);
+    console.log(`${packageTag}Determining potential conflicting files`);
 
     const configFiles = (
       await Promise.all([
@@ -274,19 +280,20 @@ const applyConfig = async ({
             path: join(packagePath, folderPath),
             recursive: true,
             keepFilesOrFolders: 'Files',
+            relativePathSource: packagePath,
           }),
         ),
       ])
     ).flat();
 
     const unexpectedConfigFiles = configFiles
-      .map(({ relativePath, name }) => join(relativePath, name))
       .filter(
-        (path) =>
-          !filesToCreate.includes(path)
-          && !patternsToIgnoreRegExp.test(path)
-          && !(isTop || topPatternsToIgnoreRegExp.test(path)),
-      );
+        ({ relativePath }) =>
+          !filesToCreate.includes(relativePath)
+          && !patternsToIgnoreRegExp.test(relativePath)
+          && !(isTop || topPatternsToIgnoreRegExp.test(relativePath)),
+      )
+      .map(({ name }) => name);
 
     if (unexpectedConfigFiles.length > 0)
       throw new Error(
@@ -294,7 +301,7 @@ const applyConfig = async ({
           + unexpectedConfigFiles.join(',\n'),
       );
 
-    console.log(`'${packageName}': Writing configuration files`);
+    console.log(`${packageTag}Writing configuration files`);
     for (const [filename, fileContent] of Object.entries(config)) {
       const contentToWriteFunc =
         extname(filename) === '.json' ? () => prettyStringify(fileContent)
@@ -323,7 +330,7 @@ const packagePath = process.cwd();
 const packageName = basename(packagePath);
 
 if (packageName === configsPackageName) {
-  console.log('Creating configuration files at top level\n');
+  console.log('Creating configuration files at top level');
   const topPath = join('..', '..');
   /* eslint-disable-next-line functional/no-expression-statements*/
   await applyConfig({
@@ -346,7 +353,6 @@ if (packageName === configsPackageName) {
       const path = join(topPackagesPath, repoName, prodFolderName);
       /* eslint-disable-next-line functional/no-expression-statements*/
       await rm(path, { force: true, recursive: true });
-      console.log(`'Removed '${path}'`);
     }),
   );
 
@@ -363,51 +369,38 @@ if (packageName === configsPackageName) {
     ),
   );
 
-  const subRepos = (
-    await Promise.all(
-      repoNames.map(async (repoName) => {
-        const dirents = await readDirEvenIfMissing({
-          path: join(topPackagesPath, repoName, packagesFolderName),
-          recursive: false,
-        });
-        return [repoName, dirents] as const;
-      }),
-    )
-  )
-    .map(([repoName, subRepoDirents]) => {
-      return subRepoDirents
-        .filter((subRepoDirent) => subRepoDirent.isDirectory())
-        .map((subRepoDirent) => ({
-          repoName,
-          packageName: subRepoDirent.name,
-          packagePath: join(subRepoDirent.parentPath, subRepoDirent.name),
-        }));
-    })
-    .flat();
-
-  /* Remove dist directories of subrepos because the packages will need rebuilding and these directories might contain conflicting versions of imported packages */
-  console.log('\nRemoving dist directories of subrepos');
   /* eslint-disable-next-line functional/no-expression-statements*/
   await Promise.all(
-    subRepos.map(async ({ packagePath }) => {
-      const path = join(packagePath, prodFolderName);
+    repoNames.map(async (repoName) => {
+      console.log(`\nHandling subrepos of '${repoName}'`);
+
+      const subRepos = await simpleGlob({
+        path: join(topPackagesPath, repoName, packagesFolderName),
+        recursive: false,
+        keepFilesOrFolders: 'Folders',
+      });
+
+      /* Remove dist directories of subrepos because the packages will need rebuilding and these directories might contain conflicting versions of imported packages */
       /* eslint-disable-next-line functional/no-expression-statements*/
-      await rm(path, { force: true, recursive: true });
-      console.log(`'Removed '${path}'`);
-    }),
-  );
+      await Promise.all(
+        subRepos.map(({ name, path }) => {
+          console.log(`  '${name}': Removing dist directory`);
+          return rm(join(path, prodFolderName), { force: true, recursive: true });
+        }),
+      );
 
-  console.log('\nCreating configuration files of subrepos');
-  /* eslint-disable-next-line functional/no-expression-statements*/
-  await Promise.all(
-    subRepos.map(({ repoName, packageName, packagePath }) =>
-      applyConfig({
-        packagePath,
-        repoName,
-        packageName,
-        isTop: false,
-      }),
-    ),
+      /* eslint-disable-next-line functional/no-expression-statements*/
+      await Promise.all(
+        subRepos.map(({ name, path }) =>
+          applyConfig({
+            packagePath: path,
+            repoName,
+            packageName: name,
+            isTop: false,
+          }),
+        ),
+      );
+    }),
   );
 } else {
   console.log('Creating configuration files at top level\n');

@@ -13,6 +13,11 @@
     ".vscode",
     "pnpm-lock.yaml"
   ],
+  "references": [
+    {
+      "path": "tsconfig.esm.json"
+    }
+  ],
   "compilerOptions": {
     "tsBuildInfoFile": ".tsbuildinfo/others.tsbuildinfo",
     "rootDir": ".",

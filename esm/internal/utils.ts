@@ -1,7 +1,7 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import { readdir } from 'node:fs/promises';
-import { extname, isAbsolute, relative } from 'node:path';
-import { normalize as posixNormalize } from 'node:path/posix';
+import { sep as OSSep, extname, isAbsolute, join, relative } from 'node:path';
+import { sep as posixSep } from 'node:path/posix';
 import { type ReadonlyRecord, type Record, isArray, isRecord } from './types.js';
 
 /** Escapes regular expression special characters */
@@ -9,6 +9,14 @@ export const regExpEscape = (s: string): string =>
   // @ts-expect-error Awaiting bug correction in typescript
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
   RegExp.escape(s);
+
+/** Converts an OS path to a posix path */
+export const fromOSPathToPosixPath =
+  OSSep === posixSep ? (path: string) => path : (path: string) => path.replaceAll(OSSep, posixSep);
+
+/** Converts a posix path to an OS path */
+export const fromPosixPathToOSPath =
+  OSSep === posixSep ? (path: string) => path : (path: string) => path.replaceAll(posixSep, OSSep);
 
 /** Returns true if `p` is a subpath of `target` */
 export const isSubPathOf =
@@ -139,11 +147,15 @@ export const deepMerge: {
  * Reads the contents of the `path` folder, recursively if `recursive === true`. Keeps only files or
  * folders according to the `keepFilesOrFolders` param. For each contained element returns:
  *
- * - name: the name of the file with extension
- * - bareName: the name of the file without extension
- * - extension: the extension of the name
- * - parentPath: the path to the file expressed relatively to CWD
- * - relativePath : the path to the file expressed relatively to `path`
+ * - name: the name of the element with extension
+ * - bareName: the name of the element without extension
+ * - extension: the extension of the element
+ * - parentPath: the path to the folder containing the element expressed relatively to CWD
+ * - path: the path to the element expressed relatively to CWD
+ * - relativeParentPath : the path to the folder containing the element expressed relatively to
+ *   `relativePathSource` which is by default taken equal to `path`
+ * - relativePath : the path to the the element expressed relatively to `relativePathSource` which is
+ *   by default taken equal to `path`
  *
  * Does not fail if the path folder does not exist
  */
@@ -151,16 +163,20 @@ export const simpleGlob = async ({
   path,
   recursive,
   keepFilesOrFolders,
+  relativePathSource = path,
 }: {
   readonly path: string;
   readonly recursive: boolean;
   readonly keepFilesOrFolders: 'Files' | 'Folders';
+  readonly relativePathSource?: string;
 }): Promise<
   ReadonlyArray<{
     name: string;
     bareName: string;
     extension: string;
+    path: string;
     parentPath: string;
+    relativeParentPath: string;
     relativePath: string;
   }>
 > => {
@@ -171,20 +187,19 @@ export const simpleGlob = async ({
         withFileTypes: true,
       })
     )
-      .filter((dirent) =>
-        recursive ? keepFilesOrFolders === 'Files'
-        : keepFilesOrFolders === 'Files' ? dirent.isFile()
-        : dirent.isDirectory(),
-      )
+      .filter((dirent) => (keepFilesOrFolders === 'Files' ? dirent.isFile() : dirent.isDirectory()))
       .map(({ name, parentPath }) => {
         const extension = extname(name);
         const bareName = name.substring(0, name.length - extension.length);
+        const relativeParentPath = relative(relativePathSource, parentPath);
         return {
           name,
           bareName,
           extension,
           parentPath,
-          relativePath: posixNormalize(relative(path, parentPath)),
+          path: join(parentPath, name),
+          relativeParentPath,
+          relativePath: join(relativeParentPath, name),
         };
       });
   } catch (e: unknown) {

@@ -10,6 +10,7 @@ import {
   sourceFolderName,
   testsFolderName,
   tsBuildInfoFolderName,
+  tsConfigSrcFilename,
   typesFolderName,
   viteTimeStampFilenamePattern,
   vscodeFolderName,
@@ -18,7 +19,7 @@ import {
 import type { ReadonlyRecord } from '../types.js';
 
 // Must work at all levels: top, monorepo, one-package repo, subrepo
-export default {
+export default ({isConfigsPackage}:{readonly isConfigsPackage:boolean})=>({
   extends: './tsconfig.base.json',
   exclude: [
     sourceFolderName,
@@ -33,6 +34,8 @@ export default {
     vscodeFolderName,
     pnpmLockFilename,
   ],
+  // The others project of the configs package needs to import the source project for eslintConfig and prettierConfig
+    ...(isConfigsPackage ? {references: [{ path: tsConfigSrcFilename }]}:{}),
   /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
   compilerOptions: {
     tsBuildInfoFile: `.tsbuildinfo/${othersMark}.tsbuildinfo`,
@@ -41,4 +44,4 @@ export default {
     declarationDir: `${prodFolderName}/${othersFolderName}/${typesFolderName}`,
     //declarationMap: true
   },
-} satisfies ReadonlyRecord;
+}) satisfies ReadonlyRecord;

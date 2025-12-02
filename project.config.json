@@ -1,9 +1,6 @@
 {
   "configName": "configOnePackageRepo",
   "description": "Utility to generate configuration files in a repository",
-  "scripts": {
-    "update-config-files": "pnpx jiti esm/index.ts"
-  },
   "environment": "Node",
   "buildMethod": "None",
   "isPublished": false,

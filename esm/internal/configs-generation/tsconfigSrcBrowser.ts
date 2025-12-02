@@ -6,6 +6,7 @@ import tsConfigSrc from './tsconfigSrc.js';
 export default deepMerge(tsConfigSrc, {
   compilerOptions: {
     types: [],
-    lib: ['DOM', 'DOM.Iterable'],
+    /* We don't use any dom specifities in our client code because it must run on the server. It's all hidden away in preact */
+    //lib: ['DOM', 'DOM.Iterable'],
   },
 }) satisfies ReadonlyRecord;

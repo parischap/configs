@@ -218,8 +218,6 @@ In all configuration files (`package.json`, `tsconfig.json`, `eslint.config.ts`.
 
 However, when using file system functions, it's best to use directly paths understandable by the operating system. For instance, `path.posix.resolve()` skips the initial `C:\` for Windows paths and this leads to issues when using path.relative.
 
-`path.normalize` can be used to convert POSIX-style paths to OS paths.
-
 # 6 - Vite and Vitest
 
 Although it is possible to have the vitest configuration inside the vite configuration files, this is not a good idea in our case because we do not have a vite configuration in all repos whereas all repos need a testing configuration. So it's good to keep matters separate.
