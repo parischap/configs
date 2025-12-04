@@ -18,13 +18,13 @@ import {
   tsConfigBaseFilename,
   tsConfigFilename,
   versionControlService,
-} from '../constants.js';
+} from '../shared-utils/constants.js';
 
 import prettierConfig from './prettierConfig.js';
 import prettierIgnore from './prettierIgnoreConfig.js';
 import tsconfigBase from './tsconfigBase.js';
 
-import type { ReadonlyStringRecord } from '../types.js';
+import type { ReadonlyStringRecord } from '../shared-utils/types.js';
 
 export default ({
   packageName,

@@ -26,19 +26,19 @@ import {
   topPackageName,
   viteTimeStampFilenamePattern,
   vscodeWorkspaceFilenamePattern,
-} from '../internal/constants.js';
+} from '../internal/shared-utils/constants.js';
 import {
   isReadonlyStringArray,
   isReadonlyStringRecord,
   isRecord,
   type Config,
-} from '../internal/types.js';
+} from '../internal/shared-utils/types.js';
 import {
   fromPosixPathToOSPath,
   prettyStringify,
   regExpEscape,
   simpleGlob,
-} from '../internal/utils.js';
+} from '../internal/shared-utils/utils.js';
 
 const fromPatternsToRegExp = (patterns: ReadonlyArray<string>): RegExp =>
   new RegExp(
@@ -72,7 +72,7 @@ const getConfigFromConfigFile = async ({
 
   if (!isRecord(configParameters))
     throw new Error(
-      `'${packageName}': '${configFilename}' must contain the json representation of a non-null object`,
+      `'${configFilename}' must contain the json representation of a non-null object`,
     );
 
   const configName = configParameters['configName'];
@@ -81,7 +81,7 @@ const getConfigFromConfigFile = async ({
     const description = configParameters['description'];
     if (typeof description !== 'string')
       throw new Error(
-        `'${packageName}': parameter 'description' of '${configFilename}' should be of type string'`,
+        `Parameter 'description' of '${configFilename}' should be of type string'`,
       );
 
     const extraKeys = Object.keys(configParameters).filter(
@@ -89,7 +89,7 @@ const getConfigFromConfigFile = async ({
     );
     if (extraKeys.length !== 0)
       throw new Error(
-        `'${packageName}': '${configFilename}' contains unexpected parameters for config '${configName}': '${extraKeys.join("', '")}'`,
+        `'${configFilename}' contains unexpected parameters for config '${configName}': '${extraKeys.join("', '")}'`,
       );
 
     if (configName === 'configMonoRepo') return configMonoRepo({ packageName, description });
@@ -101,85 +101,85 @@ const getConfigFromConfigFile = async ({
     const description = configParameters['description'];
     if (typeof description !== 'string')
       throw new Error(
-        `'${packageName}': parameter 'description' of '${configFilename}' should be of type string'`,
+        `Parameter 'description' of '${configFilename}' should be of type string'`,
       );
 
     const dependencies = configParameters['dependencies'] ?? {};
     if (!isReadonlyStringRecord(dependencies))
       throw new Error(
-        `'${packageName}': parameter 'dependencies' of '${configFilename}' should be of type ReadonlyStringRecord'`,
+        `Parameter 'dependencies' of '${configFilename}' should be of type ReadonlyStringRecord'`,
       );
 
     const devDependencies = configParameters['devDependencies'] ?? {};
     if (!isReadonlyStringRecord(devDependencies))
       throw new Error(
-        `'${packageName}': parameter 'devDependencies' of '${configFilename}' should be of type ReadonlyStringRecord'`,
+        `Parameter 'devDependencies' of '${configFilename}' should be of type ReadonlyStringRecord'`,
       );
 
     const peerDependencies = configParameters['peerDependencies'] ?? {};
     if (!isReadonlyStringRecord(peerDependencies))
       throw new Error(
-        `'${packageName}': parameter 'peerDependencies' of '${configFilename}' should be of type ReadonlyStringRecord'`,
+        `Parameter 'peerDependencies' of '${configFilename}' should be of type ReadonlyStringRecord'`,
       );
 
     const examples = configParameters['examples'] ?? [];
     if (!isReadonlyStringArray(examples))
       throw new Error(
-        `'${packageName}': parameter 'examples' of '${configFilename}' should be of type ReadonlyStringArray'`,
+        `Parameter 'examples' of '${configFilename}' should be of type ReadonlyStringArray'`,
       );
 
     const scripts = configParameters['scripts'] ?? {};
     if (!isReadonlyStringRecord(scripts))
       throw new Error(
-        `'${packageName}': parameter 'scripts' of '${configFilename}' should be of type ReadonlyStringRecord'`,
+        `Parameter 'scripts' of '${configFilename}' should be of type ReadonlyStringRecord'`,
       );
 
     const environment = configParameters['environment'];
     if (typeof environment !== 'string')
       throw new Error(
-        `'${packageName}': parameter 'environment' of '${configFilename}' should be of type string'`,
+        `Parameter 'environment' of '${configFilename}' should be of type string'`,
       );
 
     const buildMethod = configParameters['buildMethod'];
     if (typeof buildMethod !== 'string')
       throw new Error(
-        `'${packageName}': parameter 'buildMethod' of '${configFilename}' should be of type string'`,
+        `Parameter 'buildMethod' of '${configFilename}' should be of type string'`,
       );
 
     const isPublished = configParameters['isPublished'];
     if (typeof isPublished !== 'boolean')
       throw new Error(
-        `'${packageName}': parameter 'isPublished' of '${configFilename}' should be of type boolean'`,
+        `Parameter 'isPublished' of '${configFilename}' should be of type boolean'`,
       );
 
     const hasDocGen = configParameters['hasDocGen'];
     if (typeof hasDocGen !== 'boolean')
       throw new Error(
-        `'${packageName}': parameter 'hasDocGen' of '${configFilename}' should be of type boolean'`,
+        `Parameter 'hasDocGen' of '${configFilename}' should be of type boolean'`,
       );
 
     const keywords = configParameters['keywords'] ?? [];
     if (!isReadonlyStringArray(keywords))
       throw new Error(
-        `'${packageName}': parameter 'keywords' of '${configFilename}' should be of type ReadonlyStringArray'`,
+        `Parameter 'keywords' of '${configFilename}' should be of type ReadonlyStringArray'`,
       );
 
     const useEffectAsPeerDependency = configParameters['useEffectAsPeerDependency'];
     if (typeof useEffectAsPeerDependency !== 'boolean')
       throw new Error(
-        `'${packageName}': parameter 'useEffectAsPeerDependency' of '${configFilename}' should be of type boolean'`,
+        `Parameter 'useEffectAsPeerDependency' of '${configFilename}' should be of type boolean'`,
       );
 
     const useEffectPlatform = configParameters['useEffectPlatform'] ?? 'No';
     if (typeof useEffectPlatform !== 'string')
       throw new Error(
-        `'${packageName}': parameter 'useEffectPlatform' of '${configFilename}' should be of type string'`,
+        `Parameter 'useEffectPlatform' of '${configFilename}' should be of type string'`,
       );
 
     const prefixForAutogeneratedIndex = configParameters['prefixForAutogeneratedIndex'];
     if (typeof prefixForAutogeneratedIndex !== 'string')
       throw new Error(
-        `'${packageName}': parameter 'prefixForAutogeneratedIndex' of '${configFilename}' should be of type string'`,
+        `Parameter 'prefixForAutogeneratedIndex' of '${configFilename}' should be of type string'`,
       );
 
     const extraKeys = Object.keys(configParameters).filter(
@@ -204,7 +204,7 @@ const getConfigFromConfigFile = async ({
     );
     if (extraKeys.length !== 0)
       throw new Error(
-        `'${packageName}': '${configFilename}' contains unexpected parameters for config '${configName}': '${extraKeys.join("', '")}'`,
+        `'${configFilename}' contains unexpected parameters for config '${configName}': '${extraKeys.join("', '")}'`,
       );
 
     if (configName === 'configOnePackageRepo')
@@ -247,7 +247,7 @@ const getConfigFromConfigFile = async ({
   }
 
   throw new Error(
-    `'${packageName}': '${configFilename}' contains unexpected value for configName parameter`,
+    `'${configFilename}' contains unexpected value for configName parameter`,
   );
 };
 
@@ -262,67 +262,63 @@ const applyConfig = async ({
   readonly packageName: string;
   readonly isTop: boolean;
 }) => {
-  const packageTag = `  '${packageName}': `;
-  try {
-    console.log(`${packageTag}reading '${configFilename}'`);
+  console.log(`\nCreating configuration files for '${packageName}'`);
 
-    const config = await getConfigFromConfigFile({ repoName, packageName, packagePath });
+  console.log(`  Reading '${configFilename}'`);
 
-    // In project.config.ts, paths are posix-Style. Let's convert them to OS style
-    const filesToCreate = Object.keys(config).map(fromPosixPathToOSPath);
-    console.log(`${packageTag}Determining potential conflicting files`);
+  const config = await getConfigFromConfigFile({ repoName, packageName, packagePath });
 
-    const configFiles = (
-      await Promise.all([
-        simpleGlob({ path: packagePath, recursive: false, keepFilesOrFolders: 'Files' }),
-        ...foldersToInclude.map((folderPath) =>
-          simpleGlob({
-            path: join(packagePath, folderPath),
-            recursive: true,
-            keepFilesOrFolders: 'Files',
-            relativePathSource: packagePath,
-          }),
-        ),
-      ])
-    ).flat();
+  // In project.config.ts, paths are posix-Style. Let's convert them to OS style
+  const filesToCreate = Object.keys(config).map(fromPosixPathToOSPath);
+  console.log('  Determining potential conflicting files');
 
-    const unexpectedConfigFiles = configFiles
-      .filter(
-        ({ relativePath }) =>
-          !filesToCreate.includes(relativePath)
-          && !patternsToIgnoreRegExp.test(relativePath)
-          && !(isTop || topPatternsToIgnoreRegExp.test(relativePath)),
-      )
-      .map(({ name }) => name);
+  const configFiles = (
+    await Promise.all([
+      simpleGlob({ path: packagePath, recursive: false, keepFilesOrFolders: 'Files' }),
+      ...foldersToInclude.map((folderPath) =>
+        simpleGlob({
+          path: join(packagePath, folderPath),
+          recursive: true,
+          keepFilesOrFolders: 'Files',
+          relativePathSource: packagePath,
+        }),
+      ),
+    ])
+  ).flat();
 
-    if (unexpectedConfigFiles.length > 0)
-      throw new Error(
-        `'${packageName}': Following unexpected files where found in the package:\n`
-          + unexpectedConfigFiles.join(',\n'),
-      );
+  const unexpectedConfigFiles = configFiles
+    .filter(
+      ({ relativePath }) =>
+        !filesToCreate.includes(relativePath)
+        && !patternsToIgnoreRegExp.test(relativePath)
+        && !(isTop || topPatternsToIgnoreRegExp.test(relativePath)),
+    )
+    .map(({ name }) => name);
 
-    console.log(`${packageTag}Writing configuration files`);
-    for (const [filename, fileContent] of Object.entries(config)) {
-      const contentToWriteFunc =
-        extname(filename) === '.json' ? () => prettyStringify(fileContent)
-        : typeof fileContent === 'string' ? () => fileContent
-        : () => {
-            throw new Error(
-              `'${packageName}': Entry '${filename}' in '${configFilename}' must have value of type string`,
-            );
-          };
+  if (unexpectedConfigFiles.length > 0)
+    throw new Error(
+      'Following unexpected files where found in the package:\n'
+        + unexpectedConfigFiles.join(',\n'),
+    );
 
-      const targetFilename = join(packagePath, filename);
-      // Create directory in case it does not exist
-      /* eslint-disable-next-line functional/no-expression-statements*/
-      await mkdir(dirname(targetFilename), { recursive: true });
+  console.log('  Writing configuration files');
+  for (const [filename, fileContent] of Object.entries(config)) {
+    const contentToWriteFunc =
+      extname(filename) === '.json' ? () => prettyStringify(fileContent)
+      : typeof fileContent === 'string' ? () => fileContent
+      : () => {
+          throw new Error(
+            `Entry '${filename}' in '${configFilename}' must have value of type string`,
+          );
+        };
 
-      /* eslint-disable-next-line functional/no-expression-statements*/
-      await writeFile(targetFilename, contentToWriteFunc());
-    }
-  } catch (e: unknown) {
-    console.log(`'${packageName}': Error rethrown`);
-    throw e;
+    const targetFilename = join(packagePath, filename);
+    // Create directory in case it does not exist
+    /* eslint-disable-next-line functional/no-expression-statements*/
+    await mkdir(dirname(targetFilename), { recursive: true });
+
+    /* eslint-disable-next-line functional/no-expression-statements*/
+    await writeFile(targetFilename, contentToWriteFunc());
   }
 };
 
@@ -330,7 +326,8 @@ const packagePath = process.cwd();
 const packageName = basename(packagePath);
 
 if (packageName === configsPackageName) {
-  console.log('Creating configuration files at top level');
+  console.log('Creating configuration files and updating imports for all packages');
+
   const topPath = join('..', '..');
   /* eslint-disable-next-line functional/no-expression-statements*/
   await applyConfig({
@@ -339,31 +336,19 @@ if (packageName === configsPackageName) {
     packageName: topPackageName,
     isTop: true,
   });
+
+  console.log('\nHandling repo level');
   const topPackagesPath = join(topPath, packagesFolderName);
-  const repoNames = (
-    await simpleGlob({ path: topPackagesPath, recursive: false, keepFilesOrFolders: 'Folders' })
-  ).map(({ name }) => name);
+  const repoNames =
+    await simpleGlob({ path: topPackagesPath, recursive: false, keepFilesOrFolders: 'Folders' });
 
-  /* Remove dist directories of one-package repos because the packages will need rebuilding and these directories might contain conflicting versions of imported packages */
-
-  console.log('\nRemoving dist directories of repos');
   /* eslint-disable-next-line functional/no-expression-statements*/
   await Promise.all(
-    repoNames.map(async (repoName) => {
-      const path = join(topPackagesPath, repoName, prodFolderName);
-      /* eslint-disable-next-line functional/no-expression-statements*/
-      await rm(path, { force: true, recursive: true });
-    }),
-  );
-
-  console.log('\nCreating configuration files of repos');
-  /* eslint-disable-next-line functional/no-expression-statements*/
-  await Promise.all(
-    repoNames.map((repoName) =>
+    repoNames.map(({name, path}) =>
       applyConfig({
-        packagePath: join(topPackagesPath, repoName),
-        repoName,
-        packageName: repoName,
+        packagePath: path,
+        repoName:name,
+        packageName: name,
         isTop: false,
       }),
     ),
@@ -372,13 +357,25 @@ if (packageName === configsPackageName) {
   /* eslint-disable-next-line functional/no-expression-statements*/
   await Promise.all(
     repoNames.map(async (repoName) => {
-      console.log(`\nHandling subrepos of '${repoName}'`);
+        const repoPath = join(topPackagesPath, repoName);
+        const subRepos = await simpleGlob({
+          path: join(repoPath, packagesFolderName),
+          recursive: false,
+          keepFilesOrFolders: 'Folders',
+        });
 
-      const subRepos = await simpleGlob({
-        path: join(topPackagesPath, repoName, packagesFolderName),
-        recursive: false,
-        keepFilesOrFolders: 'Folders',
-      });
+      const isMonoRepo = subRepos.length === 0;
+
+      console.log(`\nHandling ${isMonoRepo ? 'monorepo' : 'one-package repo'} '${repoName}'`);
+
+      if (!isMonoRepo) {
+          /* Remove dist directories of one-package repos because the packages will need rebuilding and these directories might contain conflicting versions of imported packages */
+          console.log('  Removing dist directory');
+          /* eslint-disable-next-line functional/no-expression-statements*/
+          await rm(join(repoPath, prodFolderName), { force: true, recursive: true });
+      }
+      
+      console.log(`\nHandling subrepos of '${repoName}'`);
 
       /* Remove dist directories of subrepos because the packages will need rebuilding and these directories might contain conflicting versions of imported packages */
       /* eslint-disable-next-line functional/no-expression-statements*/
@@ -403,7 +400,7 @@ if (packageName === configsPackageName) {
     }),
   );
 } else {
-  console.log('Creating configuration files at top level\n');
+  console.log('Creating configuration files and updating imports');
 
   const [isTop, repoName] =
     packageName === topPackageName ?

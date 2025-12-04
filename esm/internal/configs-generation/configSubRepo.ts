@@ -1,7 +1,7 @@
 /** This config is the one to be used in the sub-package of a monorepo. */
 // This module must not import any external dependency. It must be runnable without a package.json
-import type { Config, ReadonlyStringArray, ReadonlyStringRecord } from '../types.js';
-import { deepMerge } from '../utils.js';
+import type { Config, ReadonlyStringArray, ReadonlyStringRecord } from '../shared-utils/types.js';
+import { deepMerge } from '../shared-utils/utils.js';
 import configInternalBase from './configInternalBase.js';
 import configInternalWithSource from './configInternalWithSource.js';
 

@@ -11,7 +11,7 @@ import {
   pnpmWorkspaceFilename,
   tsConfigFilename,
   vitestConfigFilename,
-} from '../constants.js';
+} from '../shared-utils/constants.js';
 import eslintConfigOthers from './eslintConfigOthers.js';
 import nonProjectVitestConfig from './nonProjectVitestConfig.js';
 import pnpmWorkspaceConfig from './pnpmWorkspaceConfig.js';
@@ -34,11 +34,11 @@ export default ({ isTopPackage }: { readonly isTopPackage: boolean }) => ({
       'clean-all-prod': 'pnpm -r --parallel --aggregate-output clean-prod',
       // --if-present is necessary because it is possible that no package in the workspace has a build script
       'build-all': 'pnpm --if-present -r build',
-      // --if-present is necessary because it is possible that no package in the workspace has an auto-generate-index script
-      'auto-generate-index-for-all':
-        'pnpm --if-present -r --parallel --aggregate-output auto-generate-index',
-      // --if-present is necessary because it is possible that no package in the workspace has a generate-index script
-      'generate-index-for-all': 'pnpm --if-present -r --parallel --aggregate-output generate-index',
+      // --if-present is necessary because it is possible that no package in the workspace has an auto-update-imports script
+      'auto-update-imports-for-all':
+        'pnpm --if-present -r --parallel --aggregate-output auto-update-imports',
+      // --if-present is necessary because it is possible that no package in the workspace has an update-imports script
+      'update-imports-for-all': 'pnpm --if-present -r --parallel --aggregate-output update-imports',
       'generate-all-configs': 'pnpm -r --parallel --aggregate-output generate-configs',
       'tscheck-all': 'pnpm -r -include-workspace-root=true tscheck',
       'lint-all': 'pnpm -r -include-workspace-root=true lint',

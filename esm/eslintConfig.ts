@@ -16,8 +16,8 @@ import {
   viteTimeStampFilenamePattern,
   vscodeFolderName,
   vscodeWorkspaceFilenamePattern,
-} from '../constants.js';
-import { regExpEscape } from '../utils.js';
+} from './internal/shared-utils/constants.js';
+import { regExpEscape } from './internal/shared-utils/utils.js';
 
 import eslint from '@eslint/js';
 import json from '@eslint/json';
@@ -30,7 +30,7 @@ import eslintPluginYml from 'eslint-plugin-yml';
 import { defineConfig, globalIgnores, type Config } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
-import { type ReadonlyRecord } from '../types.js';
+import { type ReadonlyRecord } from './internal/shared-utils/types.js';
 
 interface ConfigArray extends ReadonlyArray<Config> {}
 

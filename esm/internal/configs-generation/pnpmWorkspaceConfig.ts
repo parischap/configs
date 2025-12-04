@@ -1,6 +1,6 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 
-import { configsPackageName, packagesFolderName, slashedScope } from '../constants.js';
+import { configsPackageName, packagesFolderName, slashedScope } from '../shared-utils/constants.js';
 
 const topConfig = (isTop: boolean) =>
   isTop ?

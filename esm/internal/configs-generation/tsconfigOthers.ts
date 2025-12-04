@@ -15,8 +15,8 @@ import {
   viteTimeStampFilenamePattern,
   vscodeFolderName,
   vscodeWorkspaceFilenamePattern,
-} from '../constants.js';
-import type { ReadonlyRecord } from '../types.js';
+} from '../shared-utils/constants.js';
+import type { ReadonlyRecord } from '../shared-utils/types.js';
 
 // Must work at all levels: top, monorepo, one-package repo, subrepo
 export default ({isConfigsPackage}:{readonly isConfigsPackage:boolean})=>({

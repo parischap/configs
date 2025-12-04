@@ -1,3 +1,4 @@
+// This module must not import any external dependency. It must be runnable without a package.json
 export const owner = 'parischap';
 export const scope = '@' + owner;
 export const devScope = scope + '-dev';
@@ -133,7 +134,7 @@ export const docGenDependencies = {
   tsx: '4.20.6',
 };
 
-// Add here all dependencies used by modules inside the internal/exported-utils folder...
+// Add here all dependencies used by modules exported in index.ts.
 export const configsPeerDependencies = {
   // Used by the eslintConfig.ts file
   '@eslint/js': '9.39.1',

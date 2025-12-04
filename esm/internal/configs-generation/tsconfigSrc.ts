@@ -4,8 +4,8 @@ import {
   srcMark,
   tsConfigStyleIncludeForSourceFiles,
   typesFolderName,
-} from '../constants.js';
-import type { ReadonlyRecord } from '../types.js';
+} from '../shared-utils/constants.js';
+import type { ReadonlyRecord } from '../shared-utils/types.js';
 
 export default {
   extends: './tsconfig.base.json',

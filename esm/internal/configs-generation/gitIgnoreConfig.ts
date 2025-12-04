@@ -5,7 +5,7 @@ import {
   prodFolderName,
   tsBuildInfoFolderName,
   viteTimeStampFilenamePattern,
-} from '../constants.js';
+} from '../shared-utils/constants.js';
 
 // Must work for top, monorepos and one-package repos
 export default `/${prodFolderName}/

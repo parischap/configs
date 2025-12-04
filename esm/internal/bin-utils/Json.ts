@@ -1,6 +1,6 @@
 import { Effect } from 'effect';
-import * as PortError from './PortError.js';
-import { prettyStringify } from './utils.js';
+import * as PortError from '../shared-utils/PortError.js';
+import { prettyStringify } from '../shared-utils/utils.js';
 
 /** Port of Json stringify */
 export const stringify = (value: unknown) =>

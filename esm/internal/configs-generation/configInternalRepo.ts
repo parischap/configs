@@ -14,7 +14,7 @@ import {
   packageJsonFilename,
   packageManager,
   workflowsFolderName,
-} from '../constants.js';
+} from '../shared-utils/constants.js';
 import docsConfigYmlConfig from './docsConfigYmlConfig.js';
 import githubWorkflowsPagesConfig from './githubWorkflowsPagesConfig.js';
 import githubWorkflowsPublishConfig from './githubWorkflowsPublishConfig.js';

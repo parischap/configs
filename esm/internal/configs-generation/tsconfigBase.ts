@@ -1,6 +1,6 @@
 // This module must not import any external dependency. It must be runnable without a package.json
-import { tsBuildInfoFolderName } from '../constants.js';
-import type { ReadonlyRecord } from '../types.js';
+import { tsBuildInfoFolderName } from '../shared-utils/constants.js';
+import type { ReadonlyRecord } from '../shared-utils/types.js';
 
 export default {
   $schema: 'https://json.schemastore.org/tsconfig',
