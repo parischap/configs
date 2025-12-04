@@ -23,13 +23,13 @@ export const updateImports = async ({
   packageName,
   packagePath,
   packagePrefix,
+  indent
 }: {
   readonly packageName: string,
   readonly packagePath: string,
   readonly packagePrefix: string;
+  readonly indent:string
 }) => {
-  console.log(`\nUpdating imports for '${packageName}'`);
-
   const sourcePath = join(packagePath, sourceFolderName);
   const sourceFiles = (
       await simpleGlob({ path: sourcePath, recursive: true, keepFilesOrFolders: 'Files' })
@@ -41,7 +41,7 @@ export const updateImports = async ({
         && name !== indexTsFilename,
     );
 
-  console.log(`  Regenerating '${indexTsFilename}'`);
+  console.log(`${indent}Regenerating '${indexTsFilename}'`);
   const indexTsPath = join(sourcePath, indexTsFilename);
   let noIndexTs = false;
   let indexTsContent = '';
@@ -79,7 +79,7 @@ export const updateImports = async ({
     throw new Error(`Could not autogenerate '${indexTsFilename}' because the file already exists\
  and does not start with predefined warning comment`);
 
-console.log(`  Regenerating namespace exports in '${packageJsonFilename}'`);
+console.log(`${indent}Regenerating namespace exports in '${packageJsonFilename}'`);
 const packageJsonPath = join(sourcePath, indexTsFilename);
 /* eslint-disable-next-line functional/no-expression-statements */
 const packageJsonContent = await readFile(packageJsonPath, 'utf8');

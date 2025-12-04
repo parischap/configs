@@ -16,11 +16,11 @@ const packagePrefix = process.argv[4];
 
 if (packageName === undefined) throw new Error("Expected 'packageName' argument");
 
-if (packagePrefix === undefined) throw new Error("Expected 'packagePrefix' argument");
+if (packagePrefix === undefined) throw new Error(`Expected 'packagePrefix' argument for package '${packageName}'`);
 
 if (command === 'run')
   /* eslint-disable-next-line functional/no-expression-statements */
-  await updateImports({ packageName, packagePath:'.', packagePrefix });
+  await updateImports({ packageName, packagePath:'.', packagePrefix, indent:'' });
 else if (command === 'watch') {
   let lastEventTime = Date.now();
   const watcher = watch(sourceFolderName, { recursive: true });
@@ -31,16 +31,16 @@ else if (command === 'watch') {
       const changeFilename = event.filename;
 
       if (changeFilename === null)
-        throw new Error(`${packageNameTag}Watch event does not include filename on this platform`);
+        throw new Error('Watch event does not include filename on this platform');
       if (
         changeFilename !== indexTsFilename
         && javaScriptExtensions.includes(extname(changeFilename))
       ) {
         /* eslint-disable-next-line functional/no-expression-statements */
-        await updateImports({ packageName, packagePath:'.', packagePrefix });
+        await updateImports({ packageName, packagePath:'.', packagePrefix, indent:'' });
       }
     }
     /* eslint-disable-next-line functional/no-expression-statements */
     lastEventTime = currentEventTime;
   }
-} else throw new Error(`${packageNameTag}Expected argument 'run' or 'watch'. Actual: '${command}'`);
+} else throw new Error(`Expected argument 'run' or 'watch'. Actual: '${command}'`);
