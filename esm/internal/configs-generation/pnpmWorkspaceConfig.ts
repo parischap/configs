@@ -2,8 +2,8 @@
 
 import { configsPackageName, packagesFolderName, slashedScope } from '../shared-utils/constants.js';
 
-const topConfig = (isTop: boolean) =>
-  isTop ?
+const topConfig = (isTopPackage: boolean) =>
+  isTopPackage ?
     `  
 
 overrides:
@@ -20,6 +20,6 @@ shellEmulator: true`
   : ``;
 
 /* We use overrides instead of linkWorkspacePackages or preferWorkspacePackages because it works even if the workspace package's version does not match the package.json specifier*/
-export default (isTop: boolean) => `packages:
+export default (isTopPackage: boolean) => `packages:
   - '${packagesFolderName}/*'
-  - '${packagesFolderName}/*/${packagesFolderName}/*'${topConfig(isTop)}`;
+  - '${packagesFolderName}/*/${packagesFolderName}/*'${topConfig(isTopPackage)}`;

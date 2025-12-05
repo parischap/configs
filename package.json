@@ -62,14 +62,6 @@
   },
   "packageManager": "pnpm@10.24.0",
   "module": "./esm/index.js",
-  "exports": {
-    ".": {
-      "import": "./esm/index.ts"
-    },
-    "./tests": {
-      "import": "./esm/index.tests.ts"
-    }
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/parischap/configs.git"

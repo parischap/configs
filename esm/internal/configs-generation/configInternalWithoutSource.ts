@@ -11,11 +11,13 @@ import {
   pnpmWorkspaceFilename,
   tsConfigFilename,
   vitestConfigFilename,
+  vscodeWorkspaceFilename,
 } from '../shared-utils/constants.js';
 import eslintConfigOthers from './eslintConfigOthers.js';
 import nonProjectVitestConfig from './nonProjectVitestConfig.js';
 import pnpmWorkspaceConfig from './pnpmWorkspaceConfig.js';
 import tsConfigOthers from './tsconfigOthers.js';
+import vscodeWorkspaceConfig from './vscodeWorkspaceConfig.js';
 
 export default ({ isTopPackage }: { readonly isTopPackage: boolean }) => ({
   // Used by the checks script
@@ -26,6 +28,8 @@ export default ({ isTopPackage }: { readonly isTopPackage: boolean }) => ({
   [pnpmWorkspaceFilename]: pnpmWorkspaceConfig(isTopPackage),
   // Used by the test script
   [vitestConfigFilename]: nonProjectVitestConfig,
+  // Used by vscode
+  ...(isTopPackage ? {[vscodeWorkspaceFilename]:vscodeWorkspaceConfig}:{}),
   [packageJsonFilename]: {
     scripts: {
       checks: 'pnpm tscheck && pnpm lint',

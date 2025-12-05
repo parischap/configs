@@ -1,5 +1,6 @@
 /* This module must only use Typescript syntax understandable by Node with the --experimental-transform-types flag */
 import {
+  configsPackageName,
   indexTsFilename,
   javaScriptExtensions,
   sourceFolderName
@@ -18,9 +19,11 @@ if (packageName === undefined) throw new Error("Expected 'packageName' argument"
 
 if (packagePrefix === undefined) throw new Error(`Expected 'packagePrefix' argument for package '${packageName}'`);
 
+const isConfigsPackage = packageName === configsPackageName;
+
 if (command === 'run')
   /* eslint-disable-next-line functional/no-expression-statements */
-  await updateImports({ packageName, packagePath:'.', packagePrefix, indent:'' });
+  await updateImports({ packagePath:'.', packagePrefix, keepFileExtensions:isConfigsPackage, indent:'' });
 else if (command === 'watch') {
   let lastEventTime = Date.now();
   const watcher = watch(sourceFolderName, { recursive: true });
@@ -37,7 +40,7 @@ else if (command === 'watch') {
         && javaScriptExtensions.includes(extname(changeFilename))
       ) {
         /* eslint-disable-next-line functional/no-expression-statements */
-        await updateImports({ packageName, packagePath:'.', packagePrefix, indent:'' });
+        await updateImports({ packagePath:'.', packagePrefix, keepFileExtensions:isConfigsPackage, indent:'' });
       }
     }
     /* eslint-disable-next-line functional/no-expression-statements */

@@ -15,7 +15,7 @@ import {
   tsBuildInfoFolderName,
   viteTimeStampFilenamePattern,
   vscodeFolderName,
-  vscodeWorkspaceFilenamePattern,
+  vscodeWorkspaceFilename,
 } from './internal/shared-utils/constants.js';
 import { regExpEscape } from './internal/shared-utils/utils.js';
 
@@ -343,7 +343,7 @@ const baseConfig = (params: {
         tsBuildInfoFolderName + '/',
         viteTimeStampFilenamePattern,
         packagesFolderName + '/',
-        vscodeWorkspaceFilenamePattern,
+        vscodeWorkspaceFilename,
         vscodeFolderName + '/',
         pnpmLockFilename,
       ],
