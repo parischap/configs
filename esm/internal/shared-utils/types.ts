@@ -15,6 +15,23 @@ export interface ReadonlyStringRecord extends ReadonlyRecord<string, string> {}
 
 export interface ReadonlyStringArray extends ReadonlyArray<string> {}
 
+export interface PackageWithSourceConfigParameters {
+  readonly description: string;
+  readonly dependencies?: ReadonlyStringRecord;
+  readonly devDependencies?: ReadonlyStringRecord;
+  readonly peerDependencies?: ReadonlyStringRecord;
+  readonly examples?: ReadonlyStringArray;
+  readonly scripts?: ReadonlyStringRecord;
+  readonly environment: string;
+  readonly buildMethod: string;
+  readonly isPublished: boolean;
+  readonly hasDocGen: boolean;
+  readonly keywords?: ReadonlyStringArray;
+  readonly useEffectAsPeerDependency: boolean;
+  readonly useEffectPlatform?: string;
+  readonly packagePrefix: string;
+}
+
 export interface Config {
   readonly [key: string]: string | ReadonlyRecord;
   readonly [packageJsonFilename]: {

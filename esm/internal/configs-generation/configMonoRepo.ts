@@ -7,22 +7,22 @@ import configInternalRepo from './configInternalRepo.js';
 import configInternalWithoutSource from './configInternalWithoutSource.js';
 
 export default ({
-  packageName,
+  repoName,
   description,
 }: {
-  readonly packageName: string;
+  readonly repoName: string;
   readonly description: string;
 }): Config =>
   deepMerge(
     configInternalBase({
-      packageName,
+      packageName: repoName,
       description,
       scripts: {},
       isConfigsPackage: false,
     }),
     configInternalRepo({
       // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
-      docGenParameters: { packageName, description },
+      docGenParameters: { packageName: repoName, description },
       // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
       isPublished: true,
     }),

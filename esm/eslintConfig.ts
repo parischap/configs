@@ -9,13 +9,8 @@ import {
   allYmlFiles,
   eslintStyleExcludeForSourceFiles,
   eslintStyleIncludeForSourceFiles,
-  packagesFolderName,
-  pnpmLockFilename,
-  prodFolderName,
-  tsBuildInfoFolderName,
-  viteTimeStampFilenamePattern,
-  vscodeFolderName,
-  vscodeWorkspaceFilename,
+  filesGeneratedByThirdParties,
+  foldersGeneratedByThirdParties
 } from './internal/shared-utils/constants.js';
 import { regExpEscape } from './internal/shared-utils/utils.js';
 
@@ -338,15 +333,8 @@ const baseConfig = (params: {
     // Must work at all levels (top, monorepo, one-package repo, and subrepo)
 
     globalIgnores(
-      [
-        prodFolderName + '/',
-        tsBuildInfoFolderName + '/',
-        viteTimeStampFilenamePattern,
-        packagesFolderName + '/',
-        vscodeWorkspaceFilename,
-        vscodeFolderName + '/',
-        pnpmLockFilename,
-      ],
+       [...foldersGeneratedByThirdParties.map((folderName)=>`${folderName}/`),
+          ...filesGeneratedByThirdParties],
       'ignoreConfig',
     ),
     scopeConfig({ configs: javascriptPreConfig, files: allJavaScriptFiles }),

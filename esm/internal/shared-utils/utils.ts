@@ -183,7 +183,23 @@ export const readFolders = async ({
   Array<string>
 > => {
   const contents = await readDir({path, recursive:false,dontFailOnInexistentPath})
-  return contents.filter((dirent)=>dirent.isDirectory).map(({name})=>name);
+  return contents.filter((dirent)=>dirent.isDirectory()).map(({name})=>name);
+}
+
+/**
+ * Returns the names of the files of `path`
+ */
+export const readFiles = async ({
+  path,
+  dontFailOnInexistentPath
+}: {
+  readonly path: string;
+  readonly dontFailOnInexistentPath:boolean
+}): Promise<
+  Array<string>
+> => {
+  const contents = await readDir({path, recursive:false,dontFailOnInexistentPath})
+  return contents.filter((dirent)=>dirent.isFile()).map(({name})=>name);
 }
 
 /**
