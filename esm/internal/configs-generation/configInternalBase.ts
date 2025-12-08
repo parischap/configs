@@ -24,7 +24,7 @@ import prettierConfig from './prettierConfig.js';
 import prettierIgnore from './prettierIgnoreConfig.js';
 import tsconfigBase from './tsconfigBase.js';
 
-import type { ReadonlyStringRecord } from '../shared-utils/types.js';
+import type { StringRecord } from '../shared-utils/types.js';
 
 export default ({
   packageName,
@@ -34,7 +34,7 @@ export default ({
 }: {
   readonly packageName: string;
   readonly description: string;
-  readonly scripts: ReadonlyStringRecord;
+  readonly scripts: StringRecord;
   readonly isConfigsPackage: boolean;
 }) => ({
   // Used by the format script

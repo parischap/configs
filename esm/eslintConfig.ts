@@ -10,7 +10,7 @@ import {
   eslintStyleExcludeForSourceFiles,
   eslintStyleIncludeForSourceFiles,
   filesGeneratedByThirdParties,
-  foldersGeneratedByThirdParties
+  foldersGeneratedByThirdParties,
 } from './internal/shared-utils/constants.js';
 import { regExpEscape } from './internal/shared-utils/utils.js';
 
@@ -333,8 +333,10 @@ const baseConfig = (params: {
     // Must work at all levels (top, monorepo, one-package repo, and subrepo)
 
     globalIgnores(
-       [...foldersGeneratedByThirdParties.map((folderName)=>`${folderName}/`),
-          ...filesGeneratedByThirdParties],
+      [
+        ...foldersGeneratedByThirdParties.map((folderName) => `${folderName}/`),
+        ...filesGeneratedByThirdParties,
+      ],
       'ignoreConfig',
     ),
     scopeConfig({ configs: javascriptPreConfig, files: allJavaScriptFiles }),

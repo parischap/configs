@@ -8,27 +8,20 @@
 import {
   eslintConfigFilename,
   packageJsonFilename,
-  pnpmWorkspaceFilename,
   tsConfigFilename,
-  vitestConfigFilename
+  vitestConfigFilename,
 } from '../shared-utils/constants.js';
 import eslintConfigOthers from './eslintConfigOthers.js';
 import nonProjectVitestConfig from './nonProjectVitestConfig.js';
-import pnpmWorkspaceConfig from './pnpmWorkspaceConfig.js';
 import tsConfigOthers from './tsconfigOthers.js';
-import vscodeWorkspaceConfig from './vscodeWorkspaceConfig.js';
 
-export default ({ isTopPackage }: { readonly isTopPackage: boolean }) => ({
+export default {
   // Used by the checks script
-  [tsConfigFilename]: tsConfigOthers({isConfigsPackage:false}),
+  [tsConfigFilename]: tsConfigOthers({ isConfigsPackage: false }),
   // Used by the checks script
   [eslintConfigFilename]: eslintConfigOthers,
-  // Used by all scripts to define scope of -r flag
-  [pnpmWorkspaceFilename]: pnpmWorkspaceConfig(isTopPackage),
   // Used by the test script
   [vitestConfigFilename]: nonProjectVitestConfig,
-  // Used by vscode
-  ...(isTopPackage ? {[`${topPackageName}.code-workspace`]:vscodeWorkspaceConfig}:{}),
   [packageJsonFilename]: {
     scripts: {
       checks: 'pnpm tscheck && pnpm lint',
@@ -56,4 +49,4 @@ export default ({ isTopPackage }: { readonly isTopPackage: boolean }) => ({
         },
       },*/
   },
-});
+};

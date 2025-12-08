@@ -1,37 +1,15 @@
-export default `{
-  "folders": [
-    {
-      "path": ".",
-    },
-    {
-      "path": "packages/configs",
-    },
-    {
-      "path": "packages/effect-libs",
-    },
-    {
-      "path": "packages/effect-libs/packages/ansi-styles",
-    },
-    {
-      "path": "packages/effect-libs/packages/conversions",
-    },
-    {
-      "path": "packages/effect-libs/packages/effect-lib",
-    },
-    {
-      "path": "packages/effect-libs/packages/effect-report",
-    },
-    {
-      "path": "packages/effect-libs/packages/node-effect-lib",
-    },
-    {
-      "path": "packages/effect-libs/packages/playground",
-    },
-    {
-      "path": "packages/effect-libs/packages/pretty-print",
-    },
-  ],
+import { npmFolderName } from '../shared-utils/constants.js';
+import { prettyStringify } from '../shared-utils/utils.js';
+
+export default ({
+  topRepoName,
+  allPackages,
+}: {
+  readonly topRepoName: string;
+  allPackages: ReadonlyArray<readonly [packageName: string, packagePath: string]>;
+}) => `{
   "settings": {
-    "typescript.tsdk": "myeffectdevs/node_modules/typescript/lib",
+    "typescript.tsdk": "${topRepoName}/${npmFolderName}/typescript/lib",
   },
-}`
+  ${prettyStringify({ folders: [[topRepoName, '.'], ...allPackages].map(([_, packagePath]) => ({ path: packagePath })) })}
+}`;

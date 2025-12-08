@@ -1,10 +1,12 @@
 /** This config is the one to be used at the root (top) of a monorepo. */
 // This module must not import any external dependency. It must be runnable without a package.json
+import { pnpmWorkspaceFilename } from '../shared-utils/constants.js';
 import { type Config } from '../shared-utils/types.js';
 import { deepMerge } from '../shared-utils/utils.js';
 import configInternalBase from './configInternalBase.js';
 import configInternalRepo from './configInternalRepo.js';
 import configInternalWithoutSource from './configInternalWithoutSource.js';
+import pnpmWorkspaceConfig from './pnpmWorkspaceConfig.js';
 
 export default ({
   repoName,
@@ -26,5 +28,9 @@ export default ({
       // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
       isPublished: true,
     }),
-    configInternalWithoutSource({ isTopPackage: false }),
+    configInternalWithoutSource,
+    {
+      // Used by all scripts to define scope of -r flag
+      [pnpmWorkspaceFilename]: pnpmWorkspaceConfig([]),
+    },
   );
