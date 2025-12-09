@@ -1,15 +1,19 @@
+import { relative } from 'path';
 import { npmFolderName } from '../shared-utils/constants.js';
+import { Package } from '../shared-utils/types.js';
 import { prettyStringify } from '../shared-utils/utils.js';
 
 export default ({
   topRepoName,
+  topRepoPath,
   allPackages,
 }: {
   readonly topRepoName: string;
-  allPackages: ReadonlyArray<readonly [packageName: string, packagePath: string]>;
+  readonly topRepoPath: string;
+  allPackages: ReadonlyArray<Package>;
 }) => `{
   "settings": {
     "typescript.tsdk": "${topRepoName}/${npmFolderName}/typescript/lib",
   },
-  ${prettyStringify({ folders: [[topRepoName, '.'], ...allPackages].map(([_, packagePath]) => ({ path: packagePath })) })}
+  ${prettyStringify({ folders: allPackages.map(({ absolutePath }) => ({ path: relative(topRepoPath, absolutePath) })) })}
 }`;

@@ -1,5 +1,4 @@
 {
-  "configName": "configOnePackageRepo",
   "description": "Utility to generate configuration files in a repository",
   "environment": "Node",
   "buildMethod": "None",

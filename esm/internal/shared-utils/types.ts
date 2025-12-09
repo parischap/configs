@@ -53,3 +53,24 @@ export const isStringRecord = (v: unknown): v is StringRecord =>
 
 export const isStringArray = (v: unknown): v is StringArray =>
   isArray(v) && v.filter((value) => typeof value !== 'string').length === 0;
+
+interface RepoBase {
+  readonly name: string;
+  readonly absolutePath: string;
+}
+
+interface PackageWithoutSource extends RepoBase {
+  readonly type: 'TopRepo' | 'MonoRepo';
+}
+
+interface OnePackageRepo extends RepoBase {
+  readonly type: 'OnePackageRepo';
+  readonly isConfigsPackage: boolean;
+}
+
+interface SubRepo extends RepoBase {
+  readonly type: 'SubRepo';
+  readonly repoName: string;
+}
+
+export type Package = PackageWithoutSource | OnePackageRepo | SubRepo;
