@@ -18,13 +18,13 @@
  * `project.config.js` file itself, the `README.md` file... see `patternsToIgnore` below).
  */
 /* This module must not import any external dependency. It must be runnable without a package.json. It must only use Typescript syntax understandable by Node with the --experimental-transform-types flag */
-import { mkdir, readFile, rm } from 'node:fs/promises';
+import { mkdir, rm } from 'node:fs/promises';
 import { dirname, extname, join } from 'node:path';
 import { generateImports } from '../internal/bin-utils/generate-imports.js';
 import configMonoRepo from '../internal/configs-generation/configMonoRepo.js';
 import configOnePackageRepo from '../internal/configs-generation/configOnePackageRepo.js';
-import configSubRepo from '../internal/configs-generation/configSubRepo.js';
-import configTop from '../internal/configs-generation/configTop.js';
+import configSubPackage from '../internal/configs-generation/configSubPackage.js';
+import configTopPackage from '../internal/configs-generation/configTopPackage.js';
 import {
   configFilename,
   configsPackageName,
@@ -38,7 +38,6 @@ import {
   viteTimeStampFilenamePattern,
 } from '../internal/shared-utils/constants.js';
 import {
-  isRecord,
   isStringArray,
   isStringRecord,
   Package,
@@ -76,26 +75,6 @@ const patternsToIgnoreInOtherPackages = [
   viteTimeStampFilenamePattern,
 ];
 const patternsToIgnoreInOtherPackagesRegExp = fromPatternsToRegExp(patternsToIgnoreInOtherPackages);
-
-const readConfigFile = async ({
-  path,
-  tag,
-}: {
-  readonly path: string;
-  readonly tag: string;
-}): Promise<Record> => {
-  console.log(`${tag}reading configuration file`);
-
-  const configFile = await readFile(join(path, configFilename), 'utf8');
-
-  const configObject: unknown = JSON.parse(configFile);
-
-  if (!isRecord(configObject))
-    throw new Error(
-      `${tag}'${configFilename}' must contain the json representation of a non-null object`,
-    );
-  return configObject;
-};
 
 type TypeFromTypeName<T> =
   [T] extends ['string'] ? string
@@ -239,7 +218,7 @@ const getConfig = async ({
   readonly tag: string;
 }): Config => {
   if (p.type === 'TopRepo')
-    return configTop({
+    return configTopPackage({
       topRepoName: p.name,
       topRepoPath: p.absolutePath,
       description: 'Top repo of my developments',
@@ -413,7 +392,7 @@ const getConfig = async ({
         isConfigsPackage: p.isConfigsPackage,
         ...withImports,
       })
-    : configSubRepo({ repoName: p.repoName, subRepoName, ...params });
+    : configSubPackage({ repoName: p.repoName, subRepoName, ...params });
 };
 
 const allPackages = await getAllPackages();
@@ -504,7 +483,11 @@ const allPackages1: ReadonlyArray<readonly [packageName: string, packagePath: st
   )
 ).flat();
 
-const config = configTop({ topRepoName, description: 'Top repo of my developments', allPackages });
+const config = configTopPackage({
+  topRepoName,
+  description: 'Top repo of my developments',
+  allPackages,
+});
 await checkUselessFiles({ config, packagePath: topRepoPath, isTopPackage: true, tag: topRepoTag });
 await saveConfig({ config, packagePath: topRepoPath, tag: topRepoTag });
 await cleanProd({ packagePath: topRepoPath, tag: topRepoTag });

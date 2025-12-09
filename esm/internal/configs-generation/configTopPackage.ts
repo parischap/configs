@@ -4,7 +4,7 @@ import { pnpmWorkspaceFilename } from '../shared-utils/constants.js';
 import { Package, type Config } from '../shared-utils/types.js';
 import { deepMerge } from '../shared-utils/utils.js';
 import configInternalBase from './configInternalBase.js';
-import configInternalWithoutSource from './configInternalWithoutSource.js';
+import configInternalNoSourcePackage from './configInternalNoSourcePackage.js';
 import pnpmWorkspaceConfig from './pnpmWorkspaceConfig.js';
 import vscodeWorkspaceConfig from './vscodeWorkspaceConfig.js';
 
@@ -26,7 +26,7 @@ export default ({
       scripts: {},
       isConfigsPackage: false,
     }),
-    configInternalWithoutSource,
+    configInternalNoSourcePackage,
   ),
   // Used by all scripts to define scope of -r flag
   [pnpmWorkspaceFilename]: pnpmWorkspaceConfig(allPackages),
