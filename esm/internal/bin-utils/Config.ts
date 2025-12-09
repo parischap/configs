@@ -1,16 +1,23 @@
 // This module must not import any external dependency. It must be runnable without a package.json
 import { readFileSync } from 'node:fs';
 import {
+  allFilesPattern,
+  allTsFiles,
   baseDevDependencies,
   binariesPath,
   commonJsFolderName,
   configsPackageName,
   configsPeerDependencies,
+  docgenConfigFilename,
+  docGenDependencies,
   docsConfigYmlFilename,
   docsFolderName,
   docsIndexMdFilename,
   effectDependencies,
+  effectPlatformDependencies,
   eslintConfigFilename,
+  examplesFolderName,
+  examplesMark,
   filesGeneratedByThirdParties,
   foldersGeneratedByThirdParties,
   foldersWithoutConfigFiles,
@@ -18,6 +25,7 @@ import {
   githubWorkflowsPagesFilename,
   githubWorkflowsPublishFilename,
   gitIgnoreFilename,
+  internalFolderName,
   othersFolderName,
   othersMark,
   owner,
@@ -29,10 +37,20 @@ import {
   prodFolderName,
   slashedScope,
   sourceFolderName,
+  srcMark,
+  testsFolderName,
+  testsMark,
   tsBuildInfoFolderName,
   tsConfigBaseFilename,
+  tsConfigDocGenFilename,
+  tsConfigExamplesFilename,
   tsConfigFilename,
+  tsConfigOthersFilename,
   tsConfigSrcFilename,
+  tsConfigStyleIncludeForExampleFiles,
+  tsConfigStyleIncludeForSourceFiles,
+  tsConfigStyleIncludeForTestsFiles,
+  tsConfigTestsFilename,
   typesFolderName,
   versionControlService,
   viteConfigFilename,
@@ -111,6 +129,62 @@ const TSCONFIG_BASE: ReadonlyRecord = {
   },
 };
 
+const TSCONFIG: ReadonlyRecord = {
+  include: [],
+  references: [
+    { path: tsConfigSrcFilename },
+    { path: tsConfigExamplesFilename },
+    { path: tsConfigTestsFilename },
+    { path: tsConfigOthersFilename },
+  ],
+};
+
+const TSCONFIG_CODE = {
+  extends: './tsconfig.base.json',
+  include: [tsConfigStyleIncludeForSourceFiles],
+  /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
+  compilerOptions: {
+    tsBuildInfoFile: `.tsbuildinfo/${srcMark}.tsbuildinfo`,
+    rootDir: '.',
+    outDir: prodFolderName,
+    declarationDir: `${prodFolderName}/${typesFolderName}`,
+    // For some reason, Typescript needs to Emit declarations of this project referenced by the tests and examples projects
+    noEmit: false,
+    emitDeclarationOnly: true,
+    //declarationMap: true,
+  },
+};
+
+const TSCONFIG_EXAMPLES: ReadonlyRecord = {
+  extends: './tsconfig.base.json',
+  include: [tsConfigStyleIncludeForExampleFiles],
+  // The tests project needs to import the source project. The other possibility would be to create a package.json in the examples folder
+  references: [{ path: tsConfigSrcFilename }],
+  /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
+  compilerOptions: {
+    tsBuildInfoFile: `.tsbuildinfo/${examplesMark}.tsbuildinfo`,
+    rootDir: '.',
+    outDir: prodFolderName,
+    declarationDir: `${prodFolderName}/${examplesFolderName}/${typesFolderName}`,
+    //declarationMap: true
+  },
+};
+
+const TSCONFIG_TESTS: ReadonlyRecord = {
+  extends: './tsconfig.base.json',
+  include: [tsConfigStyleIncludeForTestsFiles],
+  // The tests project needs to import the source project. The other possibility would be to create a package.json in the tests folder
+  references: [{ path: tsConfigSrcFilename }],
+  /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
+  compilerOptions: {
+    tsBuildInfoFile: `.tsbuildinfo/${testsMark}.tsbuildinfo`,
+    rootDir: '.',
+    outDir: prodFolderName,
+    declarationDir: `${prodFolderName}/${testsFolderName}/${typesFolderName}`,
+    //declarationMap: true,
+  },
+};
+
 // Must work at all levels: top, monorepo, one-package repo, subrepo
 const TSCONFIG_OTHERS: ReadonlyRecord = {
   extends: './tsconfig.base.json',
@@ -125,10 +199,19 @@ const TSCONFIG_OTHERS: ReadonlyRecord = {
   },
 };
 
-const TSCONFIG_OTHERS_FOR_CONFIGS_PACKAGE = {
+const TSCONFIG_OTHERS_FOR_CONFIGS_PACKAGE: ReadonlyRecord = {
   ...TSCONFIG_OTHERS,
   // The others project of the configs package needs to import the source project for eslintConfig and prettierConfig
   references: [{ path: tsConfigSrcFilename }],
+};
+
+const TSCONFIG_DOCGEN: ReadonlyRecord = {
+  extends: './tsconfig.base.json',
+  include: `${sourceFolderName}/${allFilesPattern}`,
+  compilerOptions: {
+    allowJs: false,
+    checkJs: false,
+  },
 };
 
 const GIT_IGNORE = [
@@ -156,6 +239,19 @@ export default defineConfig();`;
 
 const GITHUB_WORKFLOWS_PUBLISH_SCRIPT = readFileSync('./assets/githubWorkflowsPublish.yml', 'utf8');
 const GITHUB_WORKFLOWS_PAGES_SCRIPT = readFileSync('./assets/githubWorkflowsPages.yml', 'utf8');
+
+const DOCGEN_CONFIG: ReadonlyRecord = {
+  parseCompilerOptions: `./${tsConfigDocGenFilename}`,
+  examplesCompilerOptions: `./${tsConfigDocGenFilename}`,
+  srcDir: `./${sourceFolderName}`,
+  outDir: docsFolderName,
+  exclude: [
+    ...allTsFiles.map((ext) => `${sourceFolderName}/${internalFolderName}/${ext}`),
+    `${sourceFolderName}/index.ts`,
+  ],
+  enforceDescriptions: true,
+  enforceVersion: false,
+};
 
 const JUST_THE_DOCS_CONFIG = (packageName: string) => `remote_theme: mikearnaldi/just-the-docs
 search_enabled: true
@@ -265,12 +361,12 @@ const noCodePackage = {
  * This package is also a workspace.
  */
 /*
- * For a one-package repo, subRepoName and repoName are the same. For a subRepo, subRepoName is the
- * name of the subRepo and repo name the name of the repo that contains it.
+ * For a one-package repo, subPackageName and parentName are the same. For a sub package, subPackageName is the
+ * name of the sub package and parentName the name of the monorepo that contains it.
  */
 const codePackage = ({
-  repoName,
-  subRepoName,
+  parentName,
+  subPackageName,
   dependencies,
   devDependencies,
   peerDependencies,
@@ -287,8 +383,8 @@ const codePackage = ({
   autogeneratedIndexTs,
   autogeneratedImports,
 }: {
-  readonly repoName: string;
-  readonly subRepoName: string;
+  readonly parentName: string;
+  readonly subPackageName: string;
   readonly dependencies: StringRecord;
   readonly devDependencies: StringRecord;
   readonly peerDependencies: StringRecord;
@@ -335,7 +431,7 @@ const codePackage = ({
       return {
         [viteConfigFilename]: VITE_CONFIG_BUNDLE,
         [packageJsonFilename]: {
-          module: `./${sourceFolderName}/main.js`,
+          module: `./${sourceFolderName}/index.js`,
           scripts: {
             bundle: 'bundle-files',
             compile: `pnpm bundle && pnpm prodify-bundle`,
@@ -345,16 +441,16 @@ const codePackage = ({
 
     // 'BundleWithDeps' , 'AppClient'
     throw new Error(
-      `'${subRepoName}': disallowed value for 'buildMethod' parameter. Actual: '${buildMethod}'`,
+      `'${subPackageName}': disallowed value for 'buildMethod' parameter. Actual: '${buildMethod}'`,
     );
   };
 
   const visibilityConfig = ({
-    repoName,
+    parentName,
     isPublished,
     keywords,
   }: {
-    readonly repoName: string;
+    readonly parentName: string;
     readonly isPublished: boolean;
     readonly keywords: ReadonlyArray<string>;
   }) =>
@@ -362,7 +458,7 @@ const codePackage = ({
       {
         [packageJsonFilename]: {
           bugs: {
-            url: `https://github.com/${owner}/${repoName}/issues`,
+            url: `https://github.com/${owner}/${parentName}/issues`,
           },
           funding: [
             {
@@ -395,16 +491,16 @@ const codePackage = ({
           },
           devDependencies: docGenDependencies,
         },
-        [tsConfigDocGenFilename]: tsconfigDocgen,
-        [docgenConfigFilename]: docgenConfig,
+        [tsConfigDocGenFilename]: TSCONFIG_DOCGEN,
+        [docgenConfigFilename]: DOCGEN_CONFIG,
       }
     : {};
 
   const platformConfig = ({
-    subRepoName,
+    subPackageName,
     useEffectPlatform,
   }: {
-    readonly subRepoName: string;
+    readonly subPackageName: string;
     readonly useEffectPlatform: string;
   }) => {
     if (useEffectPlatform === 'No') return {};
@@ -424,24 +520,25 @@ const codePackage = ({
       };
 
     throw new Error(
-      `'${subRepoName}': disallowed value for 'useEffectPlatform' parameter. Actual: '${useEffectPlatform}'`,
+      `'${subPackageName}': disallowed value for 'useEffectPlatform' parameter. Actual: '${useEffectPlatform}'`,
     );
   };
 
   const environmentConfig = ({
-    subRepoName,
+    subPackageName,
     environment,
     isConfigsPackage,
   }: {
-    readonly subRepoName: string;
+    readonly subPackageName: string;
     readonly environment: string;
     readonly isConfigsPackage: boolean;
   }) => {
     const base = {
       // Used by the tscheck script
-      [tsConfigFilename]: tsConfig,
+      [tsConfigFilename]: TSCONFIG,
       // Used by the tsConfig file
-      [tsConfigOthersFilename]: tsConfigOthers({ isConfigsPackage }),
+      [tsConfigOthersFilename]:
+        isConfigsPackage ? TSCONFIG_OTHERS_FOR_CONFIGS_PACKAGE : TSCONFIG_OTHERS,
       // Used by the tsConfig file
       [tsConfigExamplesFilename]: tsConfigExamples,
       // Used by the tsConfig file
@@ -477,7 +574,7 @@ const codePackage = ({
       };
 
     throw new Error(
-      `'${subRepoName}': disallowed value for 'environment' parameter. Actual: '${environment}'`,
+      `'${subPackageName}': disallowed value for 'environment' parameter. Actual: '${environment}'`,
     );
   };
 
@@ -486,7 +583,7 @@ const codePackage = ({
       // Used by the circular script
       [madgeConfigFilename]: madgeConfig,
       // Used by the test script
-      [vitestConfigFilename]: projectVitestConfig(subRepoName),
+      [vitestConfigFilename]: projectVitestConfig(subPackageName),
       ...(packagePrefix === '' ? {} : { [indexTsFilename]: autogeneratedIndexTs }),
       [packageJsonFilename]: {
         module: `./${sourceFolderName}/index.js`,
@@ -522,25 +619,27 @@ const codePackage = ({
         repository: {
           type: 'git',
           // Use git+https protocol as specified in npm documentation
-          url: `git+https://${versionControlService}/${owner}/${repoName}.git`,
-          ...(subRepoName === repoName ?
+          url: `git+https://${versionControlService}/${owner}/${parentName}.git`,
+          ...(subPackageName === parentName ?
             {}
           : {
-              directory: `${packagesFolderName}/${subRepoName}`,
+              directory: `${packagesFolderName}/${subPackageName}`,
             }),
         },
         // Must be present even for private packages as it can be used for instance by docgen
         homepage:
           // Use https protocol as specified in npm documentation
-          `https://${versionControlService}/${owner}/${repoName}`
-          + (subRepoName === repoName ? '' : `/tree/master/${packagesFolderName}/${subRepoName}`),
+          `https://${versionControlService}/${owner}/${parentName}`
+          + (subPackageName === parentName ? '' : (
+            `/tree/master/${packagesFolderName}/${subPackageName}`
+          )),
       },
     },
-    buildConfig({ subRepoName, buildMethod, isPublished }),
-    visibilityConfig({ repoName, isPublished, keywords }),
+    buildConfig({ subRepoName: subPackageName, buildMethod, isPublished }),
+    visibilityConfig({ repoName: parentName, isPublished, keywords }),
     docGenConfig(hasDocGen),
-    platformConfig({ subRepoName, useEffectPlatform }),
-    environmentConfig({ subRepoName, environment, isConfigsPackage }),
+    platformConfig({ subRepoName: subPackageName, useEffectPlatform }),
+    environmentConfig({ subRepoName: subPackageName, environment, isConfigsPackage }),
   );
 };
 
