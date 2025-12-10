@@ -23,8 +23,8 @@ Inversely, a `repo` that contains no source code and serves solely as container 
 
 Packages can be split in:
 
-- packages that contain code called `code packages`: one-package repos and sub-packages
-- packages that contain no code called `no code packages`: top package and monorepos
+- packages that contain source code called `source packages`: one-package repos and sub-packages
+- packages that contain no source code called `no source packages`: top package and monorepos
 
 # Project structure
 
@@ -35,7 +35,7 @@ A `project` is a collection of repos gathered under a `top package`. This `top p
 - allows me to work with a single instance of `vscode` (instead of one per repo). This entails that tools used by `vscode` and its plugins for the whole project, like `Typescript`, `vitest`, `eslint`, `prettier`, ... must be installed in the top package. However, as these tools must also work in `github`, they must also be installed at lower levels where they are useful.
 
 ```
-topPackage
+topPackage (no source package)
 │
 └───package.json
 └───myeffectdevs.code-workspace (vscode workspace)
@@ -44,23 +44,23 @@ topPackage
 │
 └───packages
     |
-    └───configs (one-package repo)
+    └───configs (one-package repo, source package)
     |   │
     |   └───package.json
     |   └───vitest.config.ts (local vitest settings)
     │
-    └───effectlibs (monorepo)
+    └───effectlibs (monorepo, no source package)
         └───package.json
         └───pnpm-workspace.yaml (pnpm workspace without overrides englobing only its sub-packages)
         └───vitest.config.ts (vitest project refering to the contained vitest projects)
         │
         └───packages
             |
-            └───effect-lib (sub-package)
+            └───effect-lib (sub-package, source package)
             |   │
             |   └───package.json
             |   └───vitest.config.ts (local vitest settings)
-            └───conversions (sub-package)
+            └───conversions (sub-package, source package)
             ...
 ```
 

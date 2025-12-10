@@ -201,8 +201,8 @@ export const baseDevDependencies = {
   vitest: '4.0.7',
 };
 
-// Add here all devDependencies used by configInternalProject.ts, be it in scripts, github actions, installed config files...
-export const projectDevDependencies = {
+// Add here all devDependencies used by the sourcePackage Config instance, be it in scripts, github actions, installed config files...
+export const sourceDevDependencies = {
   madge: '8.0.0',
   /* All packages use Effect and all may use @effect/experimental. @effect/experimental is included in the esm modules and should therefore be included as a dependency. But @effect/experimental is for debugging and performance optimization only. So the code that uses it must be removed or by-passed in prod. So this dependency must not be shipped in prod: it's a devDependency. */
   '@effect/experimental': '0.57.4',

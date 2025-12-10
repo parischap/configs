@@ -12,6 +12,9 @@ import {
 } from './constants.js';
 import { type ReadonlyRecord, type Record, isArray, isRecord } from './types.js';
 
+/** Returns a copy of `s` with the first character capitalized */
+export const capitalizeFirstLetter = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 /** Escapes regular expression special characters */
 export const regExpEscape = (s: string): string =>
   // @ts-expect-error Awaiting bug correction in typescript
@@ -150,6 +153,17 @@ export const deepMerge: {
     r6: R6,
   ): MergedRecord<MergedRecord<MergedRecord<MergedRecord<MergedRecord<R1, R2>, R3>, R4>, R5>, R6>;
 } = (...Rs: ReadonlyArray<ReadonlyRecord>) => Rs.reduce(deepMerge2, {} as never) as never;
+
+/**
+ * Turns an array of path patterns into a regular expression. In the patterns, `*` can be used to
+ * represent any number of characters except `/`
+ */
+export const toMiniGlobRegExp = (patterns: ReadonlyArray<string>): RegExp =>
+  new RegExp(
+    '^'
+      + patterns.map((pattern) => regExpEscape(pattern).replace(/\*/g, '[^\\/]*')).join('|')
+      + '$',
+  );
 
 /**
  * Same as node readdir but always returns Dirents. If `dontFailOnInexistentPath` is true, will not
