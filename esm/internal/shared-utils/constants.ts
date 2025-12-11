@@ -86,6 +86,7 @@ export const foldersWithoutConfigFiles = [
   sourceFolderName,
   examplesFolderName,
   testsFolderName,
+  readmeAssetsFolderName,
 ];
 
 export const filesGeneratedByThirdParties = [viteTimeStampFilenamePattern, pnpmLockFilename];

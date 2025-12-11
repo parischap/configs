@@ -13,21 +13,32 @@
  *
  * Finally, it cleans all prod directories of all packages.
  */
-/* This module must not import any external dependency. It must be runnable without a package.json. It must only use Typescript syntax understandable by Node with the --experimental-transform-types flag */
+
+import { join } from 'path';
 import * as Package from '../internal/bin-utils/Package.js';
 import * as Project from '../internal/bin-utils/Project.js';
 
-const project = await Project.make();
+const option = process.argv[2];
+const activePackageOnly = option !== undefined && option === '-activePackageOnly';
+
+const project = await Project.make(activePackageOnly);
 
 await Promise.all(
-  project.map(async (currentPackage) => {
-    const uselessFilesChecker = Package.toUselessFilesChecker(currentPackage);
-    const packageFileSaver = Package.toPackageFileSaver(currentPackage);
-    const packageFiles = await Package.toPackageFiles(currentPackage);
-    await uselessFilesChecker(packageFiles);
-    await packageFileSaver(packageFiles);
-    /* Remove prod directories because the packages will need rebuilding and these directories might contain conflicting versions of imported packages. We do it also in packages with no source, just in case... */
-    await Package.cleanProd(currentPackage);
+  project.packages.map(async (currentPackage) => {
+    try {
+      const allConfigurationFiles = await Package.allConfigurationFiles(currentPackage);
+
+      /* eslint-disable-next-line functional/no-expression-statements*/
+      await Promise.all(
+        allConfigurationFiles.map(
+          (relativeFilepath) => console.log(join(currentPackage.path, relativeFilepath)),
+          //rm(join(currentPackage.path, relativeFilepath), { force: true, recursive: true }),
+        ),
+      );
+    } catch (e: unknown) {
+      console.log(`Package '${currentPackage.name}': error rethrown`);
+      throw e;
+    }
   }),
 );
 

@@ -4,21 +4,48 @@
  */
 // This module must not import any external dependency. It must be runnable without a package.json
 
-import { join, sep } from 'path';
+import { join, relative, sep } from 'path';
 import { configsPackageName, packagesFolderName } from '../shared-utils/constants.js';
 import { readFolders } from '../shared-utils/utils.js';
 import * as Package from './Package.js';
 
+/**
+ * Module tag
+ *
+ * @category Module markers
+ */
+const _moduleTag = '@parischap/configs/internal/bin-utils/Project/';
+const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
+type _TypeId = typeof _TypeId;
+
 /** Type of a Project */
-export type Type = ReadonlyArray<Package.Type>;
+export interface Type {
+  /** Array of the packages constituting the project */
+  readonly packages: ReadonlyArray<Package.Type>;
+  /** @internal */
+  readonly [_TypeId]: _TypeId;
+}
+
+/**
+ * Type guard
+ *
+ * @category Guards
+ */
+export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
+
+/** _prototype */
+const _proto = {
+  [_TypeId]: _TypeId,
+};
 
 /**
  * Constructor that returns all the packages of the Project that contains the current path
  *
  * @category Constructors
  */
-export const make = async (): Promise<Type> => {
-  const splitPath = process.cwd().split(sep);
+export const make = async (activePackageOnly = false): Promise<Type> => {
+  const currentPath = process.cwd();
+  const splitPath = currentPath.split(sep);
   const firstPackagesIndex = splitPath.findIndex((split) => split === packagesFolderName);
   if (firstPackagesIndex <= 0) throw new Error('Could not find project root');
   const topPackagePath = join(...splitPath.slice(0, firstPackagesIndex));
@@ -67,7 +94,7 @@ export const make = async (): Promise<Type> => {
   const allSourcePackages = allPackagesButTop.filter(Package.isSourcePackage).map(Package.name);
   const allPackagesPaths = ['.', ...allPackagesButTop.map(Package.path)];
 
-  const allPackages: Type = [
+  const packages = [
     Package.TopPackage.make({
       name: topPackageName,
       path: topPackagePath,
@@ -75,8 +102,10 @@ export const make = async (): Promise<Type> => {
       allPackagesPaths,
     }),
     ...allPackagesButTop,
-  ];
+  ].filter(
+    (currentPackage) => !activePackageOnly || relative(currentPath, currentPackage.path) === '',
+  );
 
-  console.log(`Number of packages in scope: ${allPackages.length}`);
-  return allPackages;
+  console.log(`Number of packages in scope: ${packages.length}`);
+  return Object.assign(Object.create(_proto), { packages });
 };

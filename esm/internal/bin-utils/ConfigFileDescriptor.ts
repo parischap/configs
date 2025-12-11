@@ -17,7 +17,7 @@ import {
  *
  * @category Module markers
  */
-const _moduleTag = '@parischap/configs/ConfigFileDescriptor/';
+const _moduleTag = '@parischap/configs/internal/bin-utils/ConfigFileDescriptor/';
 const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
 
@@ -46,7 +46,7 @@ namespace ParamDescriptor {
     /** Expected type of the parameter */
     readonly expectedType: E;
     /** Default value of the parameter if any */
-    readonly optionalValue?: _TypeFromTypeName<E>;
+    readonly defaultValue?: _TypeFromTypeName<E>;
 
     /** @internal */
     readonly [_TypeId]: _TypeId;
@@ -72,7 +72,7 @@ namespace ParamDescriptor {
    */
   export const make = <const E extends AllTypeNames>(data: {
     readonly expectedType: E;
-    readonly optionalValue?: _TypeFromTypeName<E>;
+    readonly defaultValue?: _TypeFromTypeName<E>;
   }): Type<E> => Object.assign(Object.create(_proto), data);
 }
 
@@ -107,46 +107,49 @@ export const make = <
 
 /**
  * Returns a decoder that takes as input a configurationFileObject (object representing the JSON
- * value of a configuration file) and a tag. This decoder checks that no unexpected parameters are
- * present, returns the default value for missing optional parameters and checks the type of the
- * value of the other parameters
+ * value of a configuration file), checks that no unexpected parameters are present, that all
+ * required parameters are present, that the type of the value of the other parameters is correct
+ * and feeds the default value of missing optional parameters
  *
  * @category Destructors
  */
 export const toDecoder =
   <ParamDescriptors extends ReadonlyRecord<string, ParamDescriptor.Type<AllTypeNames>>>(
     self: Type<ParamDescriptors>,
-  ): (({
-    configurationFileObject,
-    tag,
-  }: {
-    readonly configurationFileObject: Record;
-    readonly tag: string;
-  }) => {
+  ): ((configurationFileObject: Record) => {
     [k in keyof ParamDescriptors]: ParamDescriptor.ExpectedType<ParamDescriptors[k]>;
-  }) =>
-  ({ configurationFileObject, tag }) =>
-    Object.fromEntries(
-      Object.entries(configurationFileObject).map(([key, value]) => {
-        const descriptor = self.paramDescriptors[key];
-        if (descriptor === undefined)
-          throw new Error(`${tag}unexpected parameter '${key}' in '${configFilename}'`);
+  } & { warnings: Array<string> }) =>
+  (configurationFileObject) => {
+    const paramDescriptors = self.paramDescriptors;
+    const extraKeys = Object.keys(configurationFileObject).filter(
+      (key) => !(key in paramDescriptors),
+    );
 
-        const { optionalValue, expectedType } = descriptor;
+    return {
+      ...Object.fromEntries(
+        Object.entries(paramDescriptors).map(([key, descriptor]) => {
+          const value = configurationFileObject[key];
 
-        if (optionalValue !== undefined && value === undefined) return [key, optionalValue];
-        if (
-          (expectedType === 'string' && typeof value !== 'string')
-          || (expectedType === 'boolean' && typeof value !== 'boolean')
-          || (expectedType === 'record' && !isStringRecord(value))
-          || (expectedType === 'array' && !isStringArray(value))
-        )
-          throw new Error(
-            `${tag}parameter '${key}' of '${configFilename}' should be of type '${expectedType}'. Actual: ${typeof value}`,
-          );
-        return [key, value];
-      }),
-    ) as never;
+          const { defaultValue, expectedType } = descriptor;
+          if (defaultValue !== undefined && value === undefined) return [key, defaultValue];
+          if (
+            (expectedType === 'string' && typeof value !== 'string')
+            || (expectedType === 'boolean' && typeof value !== 'boolean')
+            || (expectedType === 'record' && !isStringRecord(value))
+            || (expectedType === 'array' && !isStringArray(value))
+          )
+            throw new Error(
+              `Parameter '${key}' of '${configFilename}' should be of type '${expectedType}'. Actual: ${typeof value}`,
+            );
+          return [key, value];
+        }),
+      ),
+      warnings: extraKeys.map(
+        (extraKey) =>
+          `parameters '${extraKey}' was unexpectedly found in '${configFilename}' (WARNING)`,
+      ),
+    } as never;
+  };
 
 /** ConfigFileDescriptor instance for a no source package */
 export const noSourcePackage = make({
@@ -159,18 +162,18 @@ export const noSourcePackage = make({
 export const sourcePackage = make({
   paramDescriptors: {
     description: ParamDescriptor.make({ expectedType: 'string' }),
-    dependencies: ParamDescriptor.make({ expectedType: 'record', optionalValue: {} }),
-    devDependencies: ParamDescriptor.make({ expectedType: 'record', optionalValue: {} }),
-    peerDependencies: ParamDescriptor.make({ expectedType: 'record', optionalValue: {} }),
-    examples: ParamDescriptor.make({ expectedType: 'array', optionalValue: [] }),
-    scripts: ParamDescriptor.make({ expectedType: 'record', optionalValue: {} }),
+    dependencies: ParamDescriptor.make({ expectedType: 'record', defaultValue: {} }),
+    devDependencies: ParamDescriptor.make({ expectedType: 'record', defaultValue: {} }),
+    peerDependencies: ParamDescriptor.make({ expectedType: 'record', defaultValue: {} }),
+    examples: ParamDescriptor.make({ expectedType: 'array', defaultValue: [] }),
+    scripts: ParamDescriptor.make({ expectedType: 'record', defaultValue: {} }),
     environment: ParamDescriptor.make({ expectedType: 'string' }),
     buildMethod: ParamDescriptor.make({ expectedType: 'string' }),
     isPublished: ParamDescriptor.make({ expectedType: 'boolean' }),
     hasDocGen: ParamDescriptor.make({ expectedType: 'boolean' }),
-    keywords: ParamDescriptor.make({ expectedType: 'array', optionalValue: [] }),
+    keywords: ParamDescriptor.make({ expectedType: 'array', defaultValue: [] }),
     useEffectAsPeerDependency: ParamDescriptor.make({ expectedType: 'boolean' }),
-    useEffectPlatform: ParamDescriptor.make({ expectedType: 'string', optionalValue: 'No' }),
+    useEffectPlatform: ParamDescriptor.make({ expectedType: 'string', defaultValue: 'No' }),
     packagePrefix: ParamDescriptor.make({ expectedType: 'string' }),
   },
 });
