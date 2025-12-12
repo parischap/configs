@@ -161,6 +161,12 @@ export default plainEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 
 const TSCONFIG_BASE = readFileSync(join(import.meta.dirname, 'assets/tsconfigBase.json'), 'utf8');
 
+/* General tsconfig.json file. It references four sub-projects, each with its own environments (node available or not):
+- the source sub-project where the package modules are located.
+- the examples sub-project where example modules are located. The examples sub-project will usually use the node environment. Even if the examples sub-project has the exact same configuration as the source sub-project, they must be seperated because building the source project can always be necessary.
+- the tests sub-project where test modules are located. The tests sub-project will usually use the node environment. Even if the tests sub-project has the exact same configuration as the source sub-project, they must be seperated because building the source project can always be necessary.
+- the others sub-project which covers all configuration modules (eslint.config.ts, prettier.config.ts, vitest.config.ts,...). The others sub-project uses the node environment.
+*/
 const TSCONFIG: ReadonlyRecord = {
   include: [],
   references: [
@@ -190,7 +196,7 @@ const TSCONFIG_SOURCE = {
 const TSCONFIG_BROWSER_SOURCE: ReadonlyRecord = deepMerge(TSCONFIG_SOURCE, {
   compilerOptions: {
     types: [],
-    /* We don't use any dom specifities in our client code because it must run on the server. It's all hidden away in preact */
+    /* We don't use any dom specifities in our client code because it must runnable on the server. DOM manipulation is taken care of by preact */
     //lib: ['DOM', 'DOM.Iterable'],
   },
 });
@@ -203,10 +209,12 @@ const TSCONFIG_PLAIN_SOURCE: ReadonlyRecord = deepMerge(TSCONFIG_SOURCE, {
   },
 });
 
+/*
+Although node allows importing a package from itself (see https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name), it does not work well with Typescript because it will not consider the imported package as a seperate one. In particular, it will complain that the imported file is not defined in the include field of the tsconfig.json. For that reason, we need to reference the source sub-project from the examples sub-project 
+ */
 const TSCONFIG_EXAMPLES: ReadonlyRecord = {
   extends: './tsconfig.base.json',
   include: [tsConfigStyleIncludeForExampleFiles],
-  // The tests project needs to import the source project. The other possibility would be to create a package.json in the examples folder
   references: [{ path: tsConfigSrcFilename }],
   /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
   compilerOptions: {
@@ -218,6 +226,9 @@ const TSCONFIG_EXAMPLES: ReadonlyRecord = {
   },
 };
 
+/*
+Although node allows importing a package from itself (see https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name), it does not work well with Typescript because it will not consider the imported package as a seperate one. In particular, it will complain that the imported file is not defined in the include field of the tsconfig.json. For that reason, we need to reference the source sub-project from the tests sub-project 
+ */
 const TSCONFIG_TESTS: ReadonlyRecord = {
   extends: './tsconfig.base.json',
   include: [tsConfigStyleIncludeForTestsFiles],
@@ -249,10 +260,14 @@ const TSCONFIG_OTHERS: ReadonlyRecord = {
 
 const TSCONFIG_OTHERS_FOR_CONFIGS_PACKAGE: ReadonlyRecord = {
   ...TSCONFIG_OTHERS,
-  // The others project of the configs package needs to import the source project for eslintConfig and prettierConfig
+  // The others project of the configs package needs to import the source project for eslintConfig and prettierConfig. See comment about TSCONFIG_TESTS for more details
   references: [{ path: tsConfigSrcFilename }],
 };
 
+/**
+ * Specific tsconfig used by docgen. Some examples can be provided as jsdoc comments and these
+ * examples usually require the node environment
+ */
 const TSCONFIG_DOCGEN: ReadonlyRecord = {
   extends: './tsconfig.base.json',
   include: `${sourceFolderName}/${allFilesPattern}`,
@@ -267,6 +282,7 @@ const GIT_IGNORE = [
   ...filesGeneratedByThirdParties.map((fileName) => `/${fileName}`),
 ].join('\n');
 
+/*Although it is possible to have the vitest configuration inside the vite configuration files, this is usually not a good idea. The vite configuration is useful for bundling whereas the vitest configuration is useful for testing */
 const VITEST_CONFIG_SOURCE = (name: string) => `import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -332,10 +348,19 @@ const VSCODE_WORKSPACE_CONFIG = ({
       'typescript.tsdk': `${name}/${npmFolderName}/typescript/lib`,
     },
   });
+
+/**
+ * Publishes a sub-package or a one-package repo to npm. Can be started manually. In that case, it
+ * uses the release number of the last issued release. It can be useful if the publish action has
+ * failed and no modification to the code is necessary. If a modification to the code is
+ * necessary, a new release will have to be issued.
+ */
 const GITHUB_WORKFLOWS_PUBLISH_SCRIPT = readFileSync(
   join(import.meta.dirname, 'assets/githubWorkflowsPublish.yml'),
   'utf8',
 );
+
+/** Creates the documentation for the package. Must be started manually. */
 const GITHUB_WORKFLOWS_PAGES_SCRIPT = readFileSync(
   join(import.meta.dirname, 'assets/githubWorkflowsPages.yml'),
   'utf8',
@@ -431,12 +456,12 @@ const anyPackage = ({
       'lint-and-analyze': 'eslint . --stats -f json > eslint-stats.json',
       'lint-rules': 'pnpx @eslint/config-inspector',
       format: 'prettier . --write',
-      'generate-config-files': `jiti ${binariesPath(isConfigsPackage)}/generate-config-files.ts -activePackageOnly`,
+      'generate-config-files': `${tsExecuter} ${binariesPath(isConfigsPackage)}/generate-config-files.ts -activePackageOnly`,
       rmrf: `node ${binariesPath(isConfigsPackage)}/rmrf.ts`,
       mkdirp: `node ${binariesPath(isConfigsPackage)}/mkdirp.ts`,
-      'clean-node-modules': 'pnpm rmrf node_modules',
+      'clean-node-modules': `${tsExecuter} ${binariesPath(isConfigsPackage)}/clean-node-modules.ts -activePackageOnly`,
       // Suppress package.json after because once suppressed the rmrf script no longer exists
-      'clean-config-files': `jiti ${binariesPath(isConfigsPackage)}/clean-config-files.ts -activePackageOnly`,
+      'clean-config-files': `${tsExecuter} ${binariesPath(isConfigsPackage)}/clean-config-files.ts -activePackageOnly`,
       'reinstall-all-dependencies': 'pnpm i --force',
       ...scripts,
     },
@@ -694,7 +719,7 @@ const sourcePackage = ({
       [madgeConfigFilename]: MADGE_CONFIG,
       // Used by the test script
       [vitestConfigFilename]: VITEST_CONFIG_SOURCE(name),
-      ...(packagePrefix === undefined ?
+      ...(packagePrefix === undefined || indexTsContents === '' ?
         {}
       : { [join(sourceFolderName, indexTsFilename)]: indexTsContents }),
       [packageJsonFilename]: {
