@@ -22,7 +22,7 @@ const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
 
 /** All allowed parameter types */
-type AllTypeNames = 'string' | 'boolean' | 'record' | 'array';
+type AllTypeNames = 'string' | 'stringOrUndefined'|'boolean' | 'record' | 'array';
 
 /** Namespace of a ParamDescriptor */
 namespace ParamDescriptor {
@@ -32,6 +32,7 @@ namespace ParamDescriptor {
 
   type _TypeFromTypeName<T extends AllTypeNames> =
     T extends 'string' ? string
+    : T extends 'stringOrUndefined' ? string | undefined
     : T extends 'boolean' ? boolean
     : T extends 'record' ? StringRecord
     : T extends 'array' ? StringArray
@@ -132,9 +133,11 @@ export const toDecoder =
 
           const { defaultValue, expectedType } = descriptor;
           if (defaultValue !== undefined && value === undefined) return [key, defaultValue];
+          const valueType = typeof value
           if (
-            (expectedType === 'string' && typeof value !== 'string')
-            || (expectedType === 'boolean' && typeof value !== 'boolean')
+            (expectedType === 'string' && valueType !== 'string')
+            || (expectedType === 'stringOrUndefined' && valueType !== 'string' && valueType !== 'undefined')
+            || (expectedType === 'boolean' && valueType !== 'boolean')
             || (expectedType === 'record' && !isStringRecord(value))
             || (expectedType === 'array' && !isStringArray(value))
           )
@@ -174,6 +177,6 @@ export const sourcePackage = make({
     keywords: ParamDescriptor.make({ expectedType: 'array', defaultValue: [] }),
     useEffectAsPeerDependency: ParamDescriptor.make({ expectedType: 'boolean' }),
     useEffectPlatform: ParamDescriptor.make({ expectedType: 'string', defaultValue: 'No' }),
-    packagePrefix: ParamDescriptor.make({ expectedType: 'string' }),
+    packagePrefix: ParamDescriptor.make({ expectedType: 'stringOrUndefined', defaultValue: undefined }),
   },
 });

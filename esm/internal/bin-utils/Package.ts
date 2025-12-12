@@ -7,7 +7,7 @@ import {
   binariesFolderName,
   configFilename,
   foldersWithoutConfigFiles,
-  indexTsFilename,
+  indexBareName,
   internalFolderName,
   javaScriptExtensions,
   packagesFolderName,
@@ -15,8 +15,9 @@ import {
   prodFolderName,
   readMeFilename,
   sourceFolderName,
+  testsIndexBaseName,
   tsBuildInfoFolderName,
-  viteTimeStampFilenamePattern,
+  viteTimeStampFilenamePattern
 } from '../shared-utils/constants.js';
 import { isRecord, Record } from '../shared-utils/types.js';
 import {
@@ -142,14 +143,14 @@ export const generateImports = async (
 ): Promise<{ indexTsContents: string; packageJsonExports: Record }> => {
   const basePackageJsonExports = {
     '.': {
-      import: `./${sourceFolderName}/index.js`,
+      import: `./${sourceFolderName}/${indexBareName}.js`,
     },
     './tests': {
-      import: `./${sourceFolderName}/index.tests.js`,
+      import: `./${sourceFolderName}/${testsIndexBaseName}.js`,
     },
   };
 
-  if (packagePrefix === '')
+  if (packagePrefix === undefined)
     return { indexTsContents: '', packageJsonExports: basePackageJsonExports };
   const keepFileExtensions = OnePackageRepo.has(self) && self.isConfigsPackage;
   const sourceFiles = (
@@ -160,13 +161,14 @@ export const generateImports = async (
     })
   )
     .filter(
-      ({ extension, name }) => name !== indexTsFilename && javaScriptExtensions.includes(extension),
+      ({ extension, bareName   }) => bareName !== indexBareName && javaScriptExtensions.includes(extension),
     )
     .map(({ bareName, relativeParentPath, extension }) => {
       const barePath = fromOSPathToPosixPath(join(relativeParentPath, bareName));
       return {
-        namespaceExportName: `./${packagePrefix}${barePath.split('/').map(capitalizeFirstLetter).join('')}`,
-        exportPath: `./${barePath}.${keepFileExtensions ? extension : 'js'}`,
+        namespaceExportName: `${packagePrefix}${barePath.split(/[\/\.]/).map(capitalizeFirstLetter).join('')}`,
+        barePath,
+        extension
       };
     });
 
@@ -174,17 +176,17 @@ export const generateImports = async (
     indexTsContents: sourceFiles
       // path.join removes upfront './' but typescript requires them so we must add them
       .map(
-        ({ exportPath, namespaceExportName }) =>
-          `export * as ${namespaceExportName} from '${exportPath}';`,
+        ({ barePath, namespaceExportName }) =>
+          `export * as ${namespaceExportName} from './${barePath}.js';`,
       )
       .join('\n'),
     packageJsonExports: {
       ...Object.fromEntries(
-        sourceFiles.map(({ exportPath, namespaceExportName }) => {
+        sourceFiles.map(({ barePath, namespaceExportName, extension }) => {
           return [
             `./${namespaceExportName}`,
             {
-              import: exportPath,
+              import: `./${sourceFolderName}/${barePath}${keepFileExtensions ? extension : '.js'}`,
             },
           ] as const;
         }),

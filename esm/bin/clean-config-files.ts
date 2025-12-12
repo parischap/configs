@@ -14,6 +14,7 @@
  * Finally, it cleans all prod directories of all packages.
  */
 
+import { rm } from 'fs/promises';
 import { join } from 'path';
 import * as Package from '../internal/bin-utils/Package.js';
 import * as Project from '../internal/bin-utils/Project.js';
@@ -30,9 +31,8 @@ await Promise.all(
 
       /* eslint-disable-next-line functional/no-expression-statements*/
       await Promise.all(
-        allConfigurationFiles.map(
-          (relativeFilepath) => console.log(join(currentPackage.path, relativeFilepath)),
-          //rm(join(currentPackage.path, relativeFilepath), { force: true, recursive: true }),
+        allConfigurationFiles.map((relativeFilepath) =>
+          rm(join(currentPackage.path, relativeFilepath), { force: true, recursive: true }),
         ),
       );
     } catch (e: unknown) {

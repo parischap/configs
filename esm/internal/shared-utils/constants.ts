@@ -5,7 +5,7 @@ export const devScope = scope + '-dev';
 export const slashedScope = scope + '/';
 export const slashedDevScope = devScope + '/';
 
-export const packageManager = `pnpm@10.24.0`;
+export const packageManager = `pnpm@10.25.0`;
 
 export const versionControlService = 'github.com';
 
@@ -20,12 +20,14 @@ export const tsExecuter = 'jiti';
 
 export const configsPackageName = 'configs';
 
-export const indexBaseName = 'index';
+export const indexBareName = 'index';
+export const testsIndexBaseName = `${indexBareName}.tests`;
 
 export const githubWorkflowsPublishFilename = 'publish.yml';
 export const githubWorkflowsPagesFilename = 'pages.yml';
-export const docsIndexMdFilename = `${indexBaseName}.md`;
-export const indexTsFilename = `${indexBaseName}.ts`;
+export const docsIndexMdFilename = `${indexBareName}.md`;
+export const indexTsFilename = `${indexBareName}.ts`;
+export const testsIndexFilename = `${testsIndexBaseName}.ts`;
 export const docsConfigYmlFilename = '_config.yml';
 export const docgenConfigFilename = 'docgen.json';
 export const gitIgnoreFilename = '.gitignore';

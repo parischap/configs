@@ -34,7 +34,7 @@ await Promise.all(
 
       const allConfigurationFiles = await Package.allConfigurationFiles(currentPackage);
       // In project.config.ts, paths are posix-Style. Let's convert them to OS style
-      const filesToCreate = Object.keys(packageFiles).map(fromPosixPathToOSPath);
+      const filesToCreate = Object.keys(packageFiles.configurationFiles).map(fromPosixPathToOSPath);
       const unexpectedConfigFiles = allConfigurationFiles.filter(
         (relativePath) => !filesToCreate.includes(relativePath),
       );

@@ -135,12 +135,12 @@ export interface SourcePackagesPackageFilesParameters {
   readonly keywords: Readonly<StringArray>;
   readonly useEffectAsPeerDependency: boolean;
   readonly useEffectPlatform: string;
-  readonly packagePrefix: string;
+  readonly packagePrefix: string | undefined;
   readonly indexTsContents: string;
   readonly packageJsonExports: ReadonlyRecord;
 }
 
-const PRETTIER_CONFIG = `import { prettierConfig } from '@parischap/configs';
+const PRETTIER_CONFIG = `import prettierConfig from '@parischap/configs/PrettierConfig';
 export default prettierConfig`;
 
 const PRETTIER_IGNORE: string = [
@@ -148,16 +148,16 @@ const PRETTIER_IGNORE: string = [
   ...filesGeneratedByThirdParties.map((fileName) => `/${fileName}`),
 ].join('\n');
 
-const ESLINT_CONFIG_BROWSER_SOURCE = `import { eslintConfig } from '@parischap/configs';
+const ESLINT_CONFIG_BROWSER_SOURCE = `import eslintConfig from '@parischap/configs/EslintConfig';
 export default eslintConfig.browserEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 
-const ESLINT_CONFIG_NODE_SOURCE = `import { eslintConfig } from '@parischap/configs';
+const ESLINT_CONFIG_NODE_SOURCE = `import eslintConfig from '@parischap/configs/EslintConfig';
 export default eslintConfig.nodeEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 
-const ESLINT_CONFIG_PLAIN_SOURCE = `import { eslintConfig } from '@parischap/configs';
+const ESLINT_CONFIG_PLAIN_SOURCE = `import eslintConfig from '@parischap/configs/EslintConfig';
 export default eslintConfig.plainEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 
-const ESLINT_CONFIG_OTHERS = `import { eslintConfig } from '@parischap/configs';
+const ESLINT_CONFIG_OTHERS = `import eslintConfig from '@parischap/configs/EslintConfig';
 export default eslintConfig.plainEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 
 const TSCONFIG_BASE: ReadonlyRecord = {
@@ -363,13 +363,13 @@ const VSCODE_WORKSPACE_CONFIG = ({
 }: {
   readonly name: string;
   allPackagesPaths: ReadonlyArray<string>;
-}) => `{
-  "settings": {
-    "typescript.tsdk": "${name}/${npmFolderName}/typescript/lib",
-  },
-  ${prettyStringify({ folders: allPackagesPaths.map((path) => ({ path })) })}
-}`;
-
+}) =>
+  prettyStringify({
+    folders: allPackagesPaths.map((path) => ({ path })),
+    settings: {
+      'typescript.tsdk': `${name}/${npmFolderName}/typescript/lib`,
+    },
+  });
 const GITHUB_WORKFLOWS_PUBLISH_SCRIPT = readFileSync(
   join(import.meta.dirname, 'assets/githubWorkflowsPublish.yml'),
   'utf8',
@@ -570,7 +570,7 @@ const sourcePackage = ({
   readonly keywords: ReadonlyArray<string>;
   readonly useEffectAsPeerDependency: boolean;
   readonly useEffectPlatform: string;
-  readonly packagePrefix: string;
+  readonly packagePrefix: string | undefined;
   readonly isConfigsPackage: boolean;
   readonly indexTsContents: string | undefined;
   readonly packageJsonExports: ReadonlyRecord | undefined;
@@ -732,7 +732,9 @@ const sourcePackage = ({
       [madgeConfigFilename]: MADGE_CONFIG,
       // Used by the test script
       [vitestConfigFilename]: VITEST_CONFIG_SOURCE(name),
-      ...(packagePrefix === '' ? {} : { [indexTsFilename]: indexTsContents }),
+      ...(packagePrefix === undefined ?
+        {}
+      : { [join(sourceFolderName, indexTsFilename)]: indexTsContents }),
       [packageJsonFilename]: {
         module: `./${sourceFolderName}/index.js`,
         exports: packageJsonExports,
@@ -756,7 +758,7 @@ const sourcePackage = ({
           examples: examples
             .map((exampleName) => `${tsExecuter} ${examplesFolderName}/${exampleName}`)
             .join('&&'),
-          ...(packagePrefix === '' ?
+          ...(packagePrefix === undefined ?
             {}
           : {
               'update-imports': `node ${binariesPath(isConfigsPackage)}/update-imports.ts run ${packagePrefix}`,
@@ -903,7 +905,7 @@ export const topPackage = ({
         + (allSourcePackages.length !== 0 ?
           `
 overrides:
-${allSourcePackages.map((packageName) => `  '${slashedScope}${packageName}': 'workspace:*'`)}`
+${allSourcePackages.map((packageName) => `  '${slashedScope}${packageName}': 'workspace:*'`).join('\n')}`
         : ''),
       // Used by vscode
       [`${name}.code-workspace`]: VSCODE_WORKSPACE_CONFIG({

@@ -1,4 +1,4 @@
-import { TEUtils } from '@parischap/configs';
+import * as TEUtils from '@parischap/configs/TestUtils';
 import { Array, Either, Equal, Option } from 'effect';
 import { describe, expect, it } from 'vitest';
 

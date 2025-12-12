@@ -1,10 +1,4 @@
-import type { Config } from 'prettier';
+// ************** This file was automatically generated. DO NOT MODIFY ************************
 
-export default {
-  printWidth: 100,
-  singleQuote: true,
-  experimentalTernaries: true,
-  experimentalOperatorPosition: 'start',
-  jsdocCapitalizeDescription: false,
-  plugins: ['prettier-plugin-jsdoc'],
-} satisfies Config;
+import prettierConfig from '@parischap/configs/PrettierConfig';
+export default prettierConfig

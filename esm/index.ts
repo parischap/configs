@@ -1,5 +1,6 @@
-import * as eslintConfig from './eslintConfig.js';
-import * as TEUtils from './internal/exported-utils/test-utils.js';
-import prettierConfig from './prettierConfig.js';
+// ************** This file was automatically generated. DO NOT MODIFY ************************
 
-export { eslintConfig, prettierConfig, TEUtils };
+export * as EslintConfig from './eslintConfig.js';
+export * as IndexTests from './index.tests.js';
+export * as PrettierConfig from './prettierConfig.js';
+export * as TestUtils from './testUtils.js';

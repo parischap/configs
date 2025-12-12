@@ -1,27 +1,27 @@
 {
   "extends": "./tsconfig.base.json",
   "exclude": [
+    ".git",
+    "dist",
+    ".tsbuildinfo",
+    "node_modules",
+    "packages",
     "esm",
     "examples",
     "tests",
-    "dist",
-    ".tsbuildinfo",
+    "readme-assets",
     "vite.config.ts.timestamp-*.mjs",
-    "packages",
-    "node_modules",
-    "*.code-workspace",
-    ".vscode",
     "pnpm-lock.yaml"
-  ],
-  "references": [
-    {
-      "path": "tsconfig.esm.json"
-    }
   ],
   "compilerOptions": {
     "tsBuildInfoFile": ".tsbuildinfo/others.tsbuildinfo",
     "rootDir": ".",
     "outDir": "dist/others",
     "declarationDir": "dist/others/dts"
-  }
+  },
+  "references": [
+    {
+      "path": "tsconfig.esm.json"
+    }
+  ]
 }
