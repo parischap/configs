@@ -135,8 +135,11 @@ export const allJson5Files = prefixWithAllFilePatterns(json5Extensions);
 export const allYmlFiles = prefixWithAllFilePatterns(ymlExtensions);
 export const allJsInMdFiles = prefixWith(allFilesInMd)(allJavaScriptExtensions);
 
-/* Do not use carret at start of dependency versions because we could end up with different versions in the diverse projects. Set one version and update it regularly */
+export const activePackageOnlyFlag = '-activePackageOnly';
+export const packagePrefixFlag = '-packagePrefix';
+export const watchFlag = '-watch';
 
+/* Do not use carret at start of dependency versions because we could end up with different versions in the diverse projects. Set one version and update it regularly */
 export const effectDependencies = {
   effect: '3.19.6',
 };
@@ -186,6 +189,8 @@ export const configsPeerDependencies = {
   'typescript-eslint': '8.47.0',
   // Used by the prettierConfig.ts file
   'prettier-plugin-jsdoc': '1.5.0',
+  // Used by the test script
+  vitest: '4.0.7',
 };
 
 // Add here all devDependencies used by configInternalBase.ts, be it in scripts, github actions, installed config files...
@@ -202,8 +207,6 @@ export const baseDevDependencies = {
   typescript: '5.9.3',
   // Used as peerDependency of eslint, to run the examples scripts and by the update-config-files script
   jiti: '2.6.1',
-  // Used by the test script
-  vitest: '4.0.7',
 };
 
 // Add here all devDependencies used by the sourcePackage Config instance, be it in scripts, github actions, installed config files...

@@ -133,3 +133,7 @@ The following fields may be used:
 ### README.md
 
 Mandatory package documentation
+
+# Usage
+
+If no package.json exists, run `pnpx jiti esm/bin/generate-config-files.ts`. Otherwise, run `pnpm generate--all-config-files`

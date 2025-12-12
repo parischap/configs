@@ -8,11 +8,12 @@
 
 import * as Package from '../internal/bin-utils/Package.js';
 import * as Project from '../internal/bin-utils/Project.js';
+import { activePackageOnlyFlag } from '../internal/shared-utils/constants.js';
 
-const option = process.argv[2];
-const activePackageOnly = option !== undefined && option === '-activePackageOnly';
+const arg1 = process.argv[2];
+const isActivePackageOnly = arg1 === activePackageOnlyFlag;
 
-const project = await Project.make(activePackageOnly);
+const project = await Project.make(isActivePackageOnly);
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(

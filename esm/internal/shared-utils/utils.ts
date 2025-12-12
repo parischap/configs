@@ -106,7 +106,7 @@ export const deepMerge2 = <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>
  * Wrapper over deepMerge2 which reduces an array of records into a single merged record. Supports
  * merging 2..6 arguments with proper result typing
  */
-export const deepMerge: {
+/*export const deepMerge: {
   <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>(r1: R1, r2: R2): MergedRecord<R1, R2>;
   <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord, R3 extends ReadonlyRecord>(
     r1: R1,
@@ -152,7 +152,7 @@ export const deepMerge: {
     r5: R5,
     r6: R6,
   ): MergedRecord<MergedRecord<MergedRecord<MergedRecord<MergedRecord<R1, R2>, R3>, R4>, R5>, R6>;
-} = (...Rs: ReadonlyArray<ReadonlyRecord>) => Rs.reduce(deepMerge2, {} as never) as never;
+} = (...Rs: ReadonlyArray<ReadonlyRecord>) => Rs.reduce(deepMerge2, {} as never) as never;*/
 
 /**
  * Turns an array of path patterns into a regular expression. In the patterns, `*` can be used to

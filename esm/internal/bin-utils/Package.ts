@@ -4,29 +4,17 @@
 import { readFile, rm } from 'fs/promises';
 import { join } from 'path';
 import {
-  allJavaScriptExtensions,
-  binariesFolderName,
   configFilename,
   foldersWithoutConfigFiles,
-  indexBareName,
-  internalFolderName,
   packagesFolderName,
   pnpmLockFilename,
   prodFolderName,
   readMeFilename,
-  sourceFolderName,
-  testsIndexBaseName,
   tsBuildInfoFolderName,
   viteTimeStampFilenamePattern,
 } from '../shared-utils/constants.js';
 import { isRecord, Record } from '../shared-utils/types.js';
-import {
-  capitalizeFirstLetter,
-  fromOSPathToPosixPath,
-  readFiles,
-  readFilesRecursively,
-  toMiniGlobRegExp,
-} from '../shared-utils/utils.js';
+import { readFiles, readFilesRecursively, toMiniGlobRegExp } from '../shared-utils/utils.js';
 import * as ConfigFileDescriptor from './ConfigFileDescriptor.js';
 import * as PackageFiles from './PackageFiles.js';
 
@@ -129,76 +117,6 @@ export const readConfigFile = async (self: Type): Promise<Record> => {
       `'${configFilename}' must contain the json representation of a non-null object`,
     );
   return configFile;
-};
-
-/**
- * Reads the contents of the source directory of `self`. Produces the contents of the index.ts file
- * and of the exports field of the `package.json` (namespace exports)
- *
- * @category Destructors
- */
-export const generateImports = async (
-  self: SourceType,
-  packagePrefix: string | undefined,
-): Promise<{ indexTsContents: string; packageJsonExports: Record }> => {
-  const basePackageJsonExports = {
-    '.': {
-      import: `./${sourceFolderName}/${indexBareName}.js`,
-    },
-    './tests': {
-      import: `./${sourceFolderName}/${testsIndexBaseName}.js`,
-    },
-  };
-
-  if (packagePrefix === undefined)
-    return { indexTsContents: '', packageJsonExports: basePackageJsonExports };
-  /* We need to keep the original extensions for prettier that uses node with the `--experimental-transform-types` flag to read its configuration file when it has a `.ts` extension. Now node is unable to transform `.js` extensions into `.ts` extensions as TypeScript does */
-  const keepFileExtensions = OnePackageRepo.has(self) && self.isConfigsPackage;
-  const sourceFiles = (
-    await readFilesRecursively({
-      path: join(self.path, sourceFolderName),
-      foldersToExclude: [internalFolderName, binariesFolderName],
-      dontFailOnInexistentPath: false,
-    })
-  )
-    .filter(
-      ({ bareName, extension }) =>
-        bareName !== indexBareName && allJavaScriptExtensions.includes(extension),
-    )
-    .map(({ bareName, relativeParentPath, extension }) => {
-      const barePath = fromOSPathToPosixPath(join(relativeParentPath, bareName));
-      return {
-        namespaceExportName: `${packagePrefix}${barePath
-          .split(/[/.]/)
-          .map(capitalizeFirstLetter)
-          .join('')}`,
-        barePath,
-        extension,
-      };
-    });
-
-  return {
-    indexTsContents: sourceFiles
-      // path.join removes upfront './' but typescript requires them so we must add them
-      .map(
-        ({ barePath, namespaceExportName }) =>
-          `export * as ${namespaceExportName} from './${barePath}.js';`,
-      )
-      .join('\n'),
-    packageJsonExports: {
-      ...basePackageJsonExports,
-      ...Object.fromEntries(
-        sourceFiles.map(({ barePath, namespaceExportName, extension }) => {
-          return [
-            `./${namespaceExportName}`,
-            {
-              import: `./${sourceFolderName}/${barePath}${keepFileExtensions ? extension : '.js'}`,
-            },
-          ] as const;
-        }),
-      ),
-    },
-  };
 };
 
 /**
@@ -393,7 +311,9 @@ export namespace OnePackageRepo {
       const configFileParams = sourcePackageConfigFileDecoder(configurationFileObject);
       for (const warning of configFileParams.warnings)
         console.log(`Package '${this.name}': ${warning}`);
-      const importsParams = await generateImports(this, configFileParams.packagePrefix);
+      /* We need to keep the original extensions for prettier that uses node with the `--experimental-transform-types` flag to read its configuration file when it has a `.ts` extension. Now node is unable to transform `.js` extensions into `.ts` extensions as TypeScript does */
+      const keepFileExtensions = OnePackageRepo.has(self) && self.isConfigsPackage;
+      const importsParams = await generateExports(this, configFileParams.packagePrefix);
       return PackageFiles.onePackageRepo({
         ...this,
         ...configFileParams,
@@ -450,7 +370,7 @@ export namespace SubPackage {
       const configFileParams = sourcePackageConfigFileDecoder(configurationFileObject);
       for (const warning of configFileParams.warnings)
         console.log(`Package '${this.name}': ${warning}`);
-      const importsParams = await generateImports(this, configFileParams.packagePrefix);
+      const importsParams = await generateExports(this, configFileParams.packagePrefix);
       return PackageFiles.subPackage({
         ...this,
         ...configFileParams,
