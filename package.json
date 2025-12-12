@@ -65,6 +65,12 @@
   "packageManager": "pnpm@10.25.0",
   "module": "./esm/index.js",
   "exports": {
+    ".": {
+      "import": "./esm/index.js"
+    },
+    "./tests": {
+      "import": "./esm/index.tests.js"
+    },
     "./EslintConfig": {
       "import": "./esm/eslintConfig.ts"
     },
@@ -76,12 +82,6 @@
     },
     "./TestUtils": {
       "import": "./esm/testUtils.ts"
-    },
-    ".": {
-      "import": "./esm/index.js"
-    },
-    "./tests": {
-      "import": "./esm/index.tests.js"
     }
   },
   "repository": {

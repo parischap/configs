@@ -1,6 +1,8 @@
 /**
- * This binary generates the configuration files of all Packages of a Project (see ReadMe.md). It
- * can be launched at any level under the project root.
+ * This binary generates the configuration files of all packages in the active Project or of the
+ * active Package if used with the -activePackageOnly flag (see README.md for the definition of a
+ * Project and of a Package). The active Project is the one that contains the path from which this
+ * binary is executed. The active Package is the one in whose root this binary is executed.
  *
  * Each Package, except the top package, must contain a `project.config.json` file that contains the
  * parameters of that package. The parameters of the top package are stored in Package.ts, so that
@@ -14,7 +16,7 @@
  * Finally, it cleans all prod directories of all packages.
  */
 
-// This module must not import any external dependency. It must be runnable without a package.json
+/* This module must not import any external dependency. It must be runnable without a package.json because it is used at the very start of a project */
 
 import * as Package from '../internal/bin-utils/Package.js';
 import * as PackageFiles from '../internal/bin-utils/PackageFiles.js';
@@ -26,10 +28,13 @@ const activePackageOnly = option !== undefined && option === '-activePackageOnly
 
 const project = await Project.make(activePackageOnly);
 
+/* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
   project.packages.map(async (currentPackage) => {
     try {
       const packageFiles = await Package.toPackageFiles(currentPackage);
+
+      /* eslint-disable-next-line functional/no-expression-statements*/
       await PackageFiles.save(packageFiles);
 
       const allConfigurationFiles = await Package.allConfigurationFiles(currentPackage);
@@ -44,6 +49,7 @@ await Promise.all(
         );
 
       /* Remove prod directories because the packages will need rebuilding and these directories might contain conflicting versions of imported packages. We do it also in packages with no source, just in case... */
+      /* eslint-disable-next-line functional/no-expression-statements*/
       await Package.cleanProd(currentPackage);
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);

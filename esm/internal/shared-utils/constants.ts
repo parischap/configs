@@ -100,20 +100,22 @@ export const binariesPath = (isConfigsPackage: boolean) =>
 export const allFilesPattern = '**/*';
 const allFilesInMd = allFilesPattern + '.md/*';
 
+export const jsExtensions = ['.js', '.mjs', '.cjs'];
 export const tsExtensions = ['.ts', '.mts', '.cts'];
-export const javaScriptExtensions = [...tsExtensions, '.js', '.mjs', '.cjs'];
+export const allJavaScriptExtensions = [...jsExtensions, ...tsExtensions];
 export const htmlExtensions = ['.html', '.htm'];
 export const mdExtensions = ['.md'];
 export const jsonExtensions = ['.json'];
 export const jsoncExtensions = ['.jsonc'];
 export const json5Extensions = ['.json5'];
+export const allJsonExtensions = [...jsonExtensions, ...jsoncExtensions, ...json5Extensions];
 export const ymlExtensions = ['.yml', '.yaml'];
 
 export const tsConfigStyleIncludeForSourceFiles = `${sourceFolderName}/${allFilesPattern}`;
 export const tsConfigStyleIncludeForTestsFiles = `${testsFolderName}/${allFilesPattern}`;
 export const tsConfigStyleIncludeForExampleFiles = `${examplesFolderName}/${allFilesPattern}`;
 
-export const eslintStyleIncludeForSourceFiles = javaScriptExtensions.map(
+export const eslintStyleIncludeForSourceFiles = allJavaScriptExtensions.map(
   (extension) => `${sourceFolderName}/${allFilesPattern}${extension}`,
 );
 export const eslintStyleExcludeForSourceFiles = `${sourceFolderName}/**`;
@@ -124,14 +126,14 @@ const prefixWith =
     as.map((a) => prefix + a);
 const prefixWithAllFilePatterns = prefixWith(allFilesPattern);
 export const allTsFiles = prefixWithAllFilePatterns(tsExtensions);
-export const allJavaScriptFiles = prefixWithAllFilePatterns(javaScriptExtensions);
+export const allJavaScriptFiles = prefixWithAllFilePatterns(allJavaScriptExtensions);
 export const allHtmlFiles = prefixWithAllFilePatterns(htmlExtensions);
 export const allMdFiles = prefixWithAllFilePatterns(mdExtensions);
 export const allJsonFiles = prefixWithAllFilePatterns(jsonExtensions);
 export const allJsoncFiles = prefixWithAllFilePatterns(jsoncExtensions);
 export const allJson5Files = prefixWithAllFilePatterns(json5Extensions);
 export const allYmlFiles = prefixWithAllFilePatterns(ymlExtensions);
-export const allJsInMdFiles = prefixWith(allFilesInMd)(javaScriptExtensions);
+export const allJsInMdFiles = prefixWith(allFilesInMd)(allJavaScriptExtensions);
 
 /* Do not use carret at start of dependency versions because we could end up with different versions in the diverse projects. Set one version and update it regularly */
 

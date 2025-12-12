@@ -2,8 +2,7 @@
  * This module represents an object whose keys are the names of the configuration files of a package
  * and the values the contents of these files
  */
-
-// This module must not import any external dependency. It must be runnable without a package.json
+/* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 import { readFileSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { dirname, extname, join } from 'node:path';
@@ -93,8 +92,8 @@ export interface Type {
   /**
    * Record of all the configuration files of a package. The keys are the names of the configuration
    * files and the values the contents of these files. If the key has a `json` extension, the
-   * associated value is an object that will be converted to a json string with JSON.stringfy.
-   * Otherwise, the associated value must be a string.
+   * associated value is converted to a json string with JSON.stringfy unless it is already a
+   * string. Otherwise, the associated value must be a string.
    */
   readonly configurationFiles: ReadonlyRecord;
   /** Package whose configuration files are described by self */
@@ -140,64 +139,27 @@ export interface SourcePackagesPackageFilesParameters {
   readonly packageJsonExports: ReadonlyRecord;
 }
 
-const PRETTIER_CONFIG = `import prettierConfig from '@parischap/configs/PrettierConfig';
-export default prettierConfig`;
+const PRETTIER_CONFIG = `import {config} from '@parischap/configs/PrettierConfig';
+export default config`;
 
 const PRETTIER_IGNORE: string = [
   ...foldersGeneratedByThirdParties.map((folderName) => `/${folderName}/`),
   ...filesGeneratedByThirdParties.map((fileName) => `/${fileName}`),
 ].join('\n');
 
-const ESLINT_CONFIG_BROWSER_SOURCE = `import eslintConfig from '@parischap/configs/EslintConfig';
-export default eslintConfig.browserEslintConfig({tsconfigRootDir:import.meta.dirname})`;
+const ESLINT_CONFIG_BROWSER_SOURCE = `import {browserEslintConfig} from '@parischap/configs/EslintConfig';
+export default browserEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 
-const ESLINT_CONFIG_NODE_SOURCE = `import eslintConfig from '@parischap/configs/EslintConfig';
-export default eslintConfig.nodeEslintConfig({tsconfigRootDir:import.meta.dirname})`;
+const ESLINT_CONFIG_NODE_SOURCE = `import {nodeEslintConfig} from '@parischap/configs/EslintConfig';
+export default nodeEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 
-const ESLINT_CONFIG_PLAIN_SOURCE = `import eslintConfig from '@parischap/configs/EslintConfig';
-export default eslintConfig.plainEslintConfig({tsconfigRootDir:import.meta.dirname})`;
+const ESLINT_CONFIG_PLAIN_SOURCE = `import {plainEslintConfig} from '@parischap/configs/EslintConfig';
+export default plainEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 
-const ESLINT_CONFIG_OTHERS = `import eslintConfig from '@parischap/configs/EslintConfig';
-export default eslintConfig.plainEslintConfig({tsconfigRootDir:import.meta.dirname})`;
+const ESLINT_CONFIG_OTHERS = `import {plainEslintConfig} from '@parischap/configs/EslintConfig';
+export default plainEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 
-const TSCONFIG_BASE: ReadonlyRecord = {
-  $schema: 'https://json.schemastore.org/tsconfig',
-  _version: '20.1.0',
-  extends: ['@tsconfig/strictest/tsconfig.json'],
-  compilerOptions: {
-    moduleDetection: 'force',
-    composite: true,
-    resolveJsonModule: true,
-    esModuleInterop: false,
-    declaration: true,
-    skipLibCheck: true,
-    emitDecoratorMetadata: true,
-    experimentalDecorators: true,
-    moduleResolution: 'NodeNext',
-    isolatedModules: true,
-    sourceMap: true,
-    declarationMap: true,
-    noEmitOnError: false,
-    noErrorTruncation: true,
-    // This will be used only when transpiling libraries which might get used in older browsers
-    target: 'ES2022',
-    module: 'NodeNext',
-    incremental: true,
-    removeComments: false,
-    stripInternal: true,
-    lib: ['ESNext'],
-    types: ['node'],
-    allowJs: true,
-    checkJs: true,
-    noEmit: true,
-    plugins: [
-      {
-        name: '@effect/language-service',
-      },
-    ],
-    tsBuildInfoFile: `${tsBuildInfoFolderName}/project.tsbuildinfo`,
-  },
-};
+const TSCONFIG_BASE = readFileSync(join(import.meta.dirname, 'assets/tsconfigBase.json'), 'utf8');
 
 const TSCONFIG: ReadonlyRecord = {
   include: [],
@@ -214,7 +176,7 @@ const TSCONFIG_SOURCE = {
   include: [tsConfigStyleIncludeForSourceFiles],
   /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
   compilerOptions: {
-    tsBuildInfoFile: `.tsbuildinfo/${srcMark}.tsbuildinfo`,
+    tsBuildInfoFile: `${tsBuildInfoFolderName}/${srcMark}.tsbuildinfo`,
     rootDir: '.',
     outDir: prodFolderName,
     declarationDir: `${prodFolderName}/${typesFolderName}`,
@@ -406,7 +368,7 @@ aux_links:
 export const make = (data: {
   readonly configurationFiles: ReadonlyRecord;
   readonly linkedPackage: Package.Type;
-}): Type => Object.assign(Object.create(_proto), data);
+}): Type => Object.assign(Object.create(_proto), data) as never;
 
 /**
  * Returns a function that takes configuration files and saves them in self
@@ -418,8 +380,8 @@ export const save = async (self: Type) => {
 
   for (const [filename, fileContent] of Object.entries(self.configurationFiles)) {
     const contentToWriteFunc =
-      extname(filename) === '.json' ? () => prettyStringify(fileContent)
-      : typeof fileContent === 'string' ? () => fileContent
+      typeof fileContent === 'string' ? () => fileContent
+      : extname(filename) === '.json' ? () => prettyStringify(fileContent)
       : () => {
           throw new Error(
             `Entry '${filename}' in '${configFilename}' must have value of type string`,
@@ -469,12 +431,12 @@ const anyPackage = ({
       'lint-and-analyze': 'eslint . --stats -f json > eslint-stats.json',
       'lint-rules': 'pnpx @eslint/config-inspector',
       format: 'prettier . --write',
-      'generate-configs': `node ${binariesPath(isConfigsPackage)}/generate-configs.ts`,
+      'generate-config-files': `jiti ${binariesPath(isConfigsPackage)}/generate-config-files.ts -activePackageOnly`,
       rmrf: `node ${binariesPath(isConfigsPackage)}/rmrf.ts`,
       mkdirp: `node ${binariesPath(isConfigsPackage)}/mkdirp.ts`,
       'clean-node-modules': 'pnpm rmrf node_modules',
       // Suppress package.json after because once suppressed the rmrf script no longer exists
-      'clean-config-files': `pnpm rmrf ${tsConfigFilename} && pnpm rmrf ${packageJsonFilename}`,
+      'clean-config-files': `jiti ${binariesPath(isConfigsPackage)}/clean-config-files.ts -activePackageOnly`,
       'reinstall-all-dependencies': 'pnpm i --force',
       ...scripts,
     },

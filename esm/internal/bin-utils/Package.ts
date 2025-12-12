@@ -1,15 +1,15 @@
-/** Module that represents a Package (see ReadMe.md). */
-// This module must not import any external dependency. It must be runnable without a package.json
+/** Module that represents a Package (see README.md). */
+/* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import { readFile, rm } from 'fs/promises';
 import { join } from 'path';
 import {
+  allJavaScriptExtensions,
   binariesFolderName,
   configFilename,
   foldersWithoutConfigFiles,
   indexBareName,
   internalFolderName,
-  javaScriptExtensions,
   packagesFolderName,
   pnpmLockFilename,
   prodFolderName,
@@ -17,7 +17,7 @@ import {
   sourceFolderName,
   testsIndexBaseName,
   tsBuildInfoFolderName,
-  viteTimeStampFilenamePattern
+  viteTimeStampFilenamePattern,
 } from '../shared-utils/constants.js';
 import { isRecord, Record } from '../shared-utils/types.js';
 import {
@@ -68,7 +68,7 @@ interface _InternalBase {
    */
   readonly filesNotGeneratedByConfigsPackage: RegExp;
   /** Generates the PackageFiles for `self` */
-  toPackageFiles(): Promise<PackageFiles.Type>;
+  readonly toPackageFiles: () => Promise<PackageFiles.Type>;
 }
 
 /**
@@ -93,7 +93,7 @@ type NoSourceType = TopPackage.Type | MonoRepo.Type;
 export type Type = NoSourceType | SourceType;
 
 /**
- * Returns true if `self` is a source package (see ReadMe.md)
+ * Returns true if `self` is a source package (see README.md)
  *
  * @category Predicates
  */
@@ -139,7 +139,7 @@ export const readConfigFile = async (self: Type): Promise<Record> => {
  */
 export const generateImports = async (
   self: SourceType,
-  packagePrefix: string,
+  packagePrefix: string | undefined,
 ): Promise<{ indexTsContents: string; packageJsonExports: Record }> => {
   const basePackageJsonExports = {
     '.': {
@@ -152,6 +152,7 @@ export const generateImports = async (
 
   if (packagePrefix === undefined)
     return { indexTsContents: '', packageJsonExports: basePackageJsonExports };
+  /* We need to keep the original extensions for prettier that uses node with the `--experimental-transform-types` flag to read its configuration file when it has a `.ts` extension. Now node is unable to transform `.js` extensions into `.ts` extensions as TypeScript does */
   const keepFileExtensions = OnePackageRepo.has(self) && self.isConfigsPackage;
   const sourceFiles = (
     await readFilesRecursively({
@@ -161,14 +162,18 @@ export const generateImports = async (
     })
   )
     .filter(
-      ({ extension, bareName   }) => bareName !== indexBareName && javaScriptExtensions.includes(extension),
+      ({ bareName, extension }) =>
+        bareName !== indexBareName && allJavaScriptExtensions.includes(extension),
     )
     .map(({ bareName, relativeParentPath, extension }) => {
       const barePath = fromOSPathToPosixPath(join(relativeParentPath, bareName));
       return {
-        namespaceExportName: `${packagePrefix}${barePath.split(/[\/\.]/).map(capitalizeFirstLetter).join('')}`,
+        namespaceExportName: `${packagePrefix}${barePath
+          .split(/[/.]/)
+          .map(capitalizeFirstLetter)
+          .join('')}`,
         barePath,
-        extension
+        extension,
       };
     });
 
@@ -181,6 +186,7 @@ export const generateImports = async (
       )
       .join('\n'),
     packageJsonExports: {
+      ...basePackageJsonExports,
       ...Object.fromEntries(
         sourceFiles.map(({ barePath, namespaceExportName, extension }) => {
           return [
@@ -191,7 +197,6 @@ export const generateImports = async (
           ] as const;
         }),
       ),
-      ...basePackageJsonExports,
     },
   };
 };
@@ -274,12 +279,14 @@ export namespace TopPackage {
   const _proto = {
     [_TypeId]: _TypeId,
     filesNotGeneratedByConfigsPackage: toMiniGlobRegExp([readMeFilename, pnpmLockFilename]),
-    async toPackageFiles(this: Type): Promise<PackageFiles.Type> {
-      return PackageFiles.topPackage({
-        ...this,
-        description: 'Top repo of my developments',
-        linkedPackage: this,
-      });
+    toPackageFiles(this: Type): Promise<PackageFiles.Type> {
+      return Promise.resolve(
+        PackageFiles.topPackage({
+          ...this,
+          description: 'Top repo of my developments',
+          linkedPackage: this,
+        }),
+      );
     },
   };
 
@@ -293,7 +300,7 @@ export namespace TopPackage {
       readonly allSourcePackages: ReadonlyArray<string>;
       readonly allPackagesPaths: ReadonlyArray<string>;
     },
-  ): Type => Object.assign(Object.create(_proto), data);
+  ): Type => Object.assign(Object.create(_proto), data) as never;
 }
 
 /**
@@ -345,7 +352,7 @@ export namespace MonoRepo {
    *
    * @category Constructors
    */
-  export const make = (data: _Base): Type => Object.assign(Object.create(_proto), data);
+  export const make = (data: _Base): Type => Object.assign(Object.create(_proto), data) as never;
 }
 
 /**
@@ -402,7 +409,7 @@ export namespace OnePackageRepo {
    * @category Constructors
    */
   export const make = (data: _Base & { readonly isConfigsPackage: boolean }): Type =>
-    Object.assign(Object.create(_proto), data);
+    Object.assign(Object.create(_proto), data) as never;
 }
 
 /**
@@ -459,5 +466,5 @@ export namespace SubPackage {
    * @category Constructors
    */
   export const make = (data: _Base & { readonly parentName: string }): Type =>
-    Object.assign(Object.create(_proto), data);
+    Object.assign(Object.create(_proto), data) as never;
 }

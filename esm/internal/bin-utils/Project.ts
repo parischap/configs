@@ -1,8 +1,8 @@
 /**
- * Module that represents a Project (see ReadMe.md). Pacakages are stored linearly in an Array, not
+ * Module that represents a Project (see README.md). Pacakages are stored linearly in an Array, not
  * in a tree.
  */
-// This module must not import any external dependency. It must be runnable without a package.json
+/* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import { join, relative, sep } from 'path';
 import { configsPackageName, packagesFolderName } from '../shared-utils/constants.js';
@@ -106,6 +106,6 @@ export const make = async (activePackageOnly = false): Promise<Type> => {
     (currentPackage) => !activePackageOnly || relative(currentPath, currentPackage.path) === '',
   );
 
-  console.log(`Number of packages in scope: ${packages.length}`);
-  return Object.assign(Object.create(_proto), { packages });
+  console.log(`Number of packages in scope: ${packages.length.toString()}`);
+  return Object.assign(Object.create(_proto), { packages }) as never;
 };

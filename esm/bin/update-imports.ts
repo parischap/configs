@@ -1,8 +1,8 @@
 /* This module must only use Typescript syntax understandable by Node with the --experimental-transform-types flag */
 import {
+  allJavaScriptExtensions,
   configsPackageName,
   indexTsFilename,
-  javaScriptExtensions,
   packageJsonFilename,
   sourceFolderName,
 } from '../internal/shared-utils/constants.js';
@@ -88,7 +88,7 @@ else if (mode === 'watch') {
         throw new Error('${tag]watch event does not include filename on this platform');
       if (
         changeFilename !== indexTsFilename
-        && javaScriptExtensions.includes(extname(changeFilename))
+        && allJavaScriptExtensions.includes(extname(changeFilename))
       ) {
         /* eslint-disable-next-line functional/no-expression-statements */
         await updateImports({

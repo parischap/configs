@@ -2,6 +2,7 @@
  * Module that represents the allowed parameters of a configuratyion file with their type and
  * optional default value
  */
+/* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 import { configFilename } from '../shared-utils/constants.js';
 import {
   isStringArray,
@@ -22,7 +23,7 @@ const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
 
 /** All allowed parameter types */
-type AllTypeNames = 'string' | 'stringOrUndefined'|'boolean' | 'record' | 'array';
+type AllTypeNames = 'string' | 'stringOrUndefined' | 'boolean' | 'record' | 'array';
 
 /** Namespace of a ParamDescriptor */
 namespace ParamDescriptor {
@@ -74,7 +75,7 @@ namespace ParamDescriptor {
   export const make = <const E extends AllTypeNames>(data: {
     readonly expectedType: E;
     readonly defaultValue?: _TypeFromTypeName<E>;
-  }): Type<E> => Object.assign(Object.create(_proto), data);
+  }): Type<E> => Object.assign(Object.create(_proto), data) as never;
 }
 
 /** Type of a ConfigFileDescriptor */
@@ -104,7 +105,7 @@ export const make = <
   const ParamDescriptors extends ReadonlyRecord<string, ParamDescriptor.Type<AllTypeNames>>,
 >(data: {
   readonly paramDescriptors: ParamDescriptors;
-}): Type<ParamDescriptors> => Object.assign(Object.create(_proto), data);
+}): Type<ParamDescriptors> => Object.assign(Object.create(_proto), data) as never;
 
 /**
  * Returns a decoder that takes as input a configurationFileObject (object representing the JSON
@@ -133,10 +134,12 @@ export const toDecoder =
 
           const { defaultValue, expectedType } = descriptor;
           if (defaultValue !== undefined && value === undefined) return [key, defaultValue];
-          const valueType = typeof value
+          const valueType = typeof value;
           if (
             (expectedType === 'string' && valueType !== 'string')
-            || (expectedType === 'stringOrUndefined' && valueType !== 'string' && valueType !== 'undefined')
+            || (expectedType === 'stringOrUndefined'
+              && valueType !== 'string'
+              && valueType !== 'undefined')
             || (expectedType === 'boolean' && valueType !== 'boolean')
             || (expectedType === 'record' && !isStringRecord(value))
             || (expectedType === 'array' && !isStringArray(value))
@@ -177,6 +180,9 @@ export const sourcePackage = make({
     keywords: ParamDescriptor.make({ expectedType: 'array', defaultValue: [] }),
     useEffectAsPeerDependency: ParamDescriptor.make({ expectedType: 'boolean' }),
     useEffectPlatform: ParamDescriptor.make({ expectedType: 'string', defaultValue: 'No' }),
-    packagePrefix: ParamDescriptor.make({ expectedType: 'stringOrUndefined', defaultValue: undefined }),
+    packagePrefix: ParamDescriptor.make({
+      expectedType: 'stringOrUndefined',
+      defaultValue: undefined,
+    }),
   },
 });

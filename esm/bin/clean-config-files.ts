@@ -1,17 +1,8 @@
 /**
- * This binary generates the configuration files of all Packages of a Project (see ReadMe.md). It
- * can be launched at any level under the project root.
- *
- * Each Package, except the top package, must contain a `project.config.json` file that contains the
- * parameters of that package. The parameters of the top package are stored in Package.ts, so that
- * the top package does not need to be saved on github. Based on the parameters, this binary creates
- * a configuration object whose keys are the names of the files to create and values the contents of
- * these files.
- *
- * It then saves this configuration files and checks that no useless configuration files are present
- * in the package.
- *
- * Finally, it cleans all prod directories of all packages.
+ * This binary cleans the configuration files of all packages in the active Project or of the active
+ * Package if used with the -activePackageOnly flag (see README.md for the definition of a Project
+ * and of a Package). The active Project is the one that contains the path from which this binary is
+ * executed. The active Package is the one in whose root this binary is executed.
  */
 
 import { rm } from 'fs/promises';
@@ -24,6 +15,7 @@ const activePackageOnly = option !== undefined && option === '-activePackageOnly
 
 const project = await Project.make(activePackageOnly);
 
+/* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
   project.packages.map(async (currentPackage) => {
     try {
