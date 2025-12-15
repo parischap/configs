@@ -25,9 +25,9 @@ import { activePackageOnlyFlag } from '../internal/shared-utils/constants.js';
 import { fromPosixPathToOSPath } from '../internal/shared-utils/utils.js';
 
 const arg1 = process.argv[2];
-const isActivePackageOnly = arg1 === activePackageOnlyFlag;
+const activePackageOnly = arg1 === activePackageOnlyFlag;
 
-const project = await Project.make(isActivePackageOnly);
+const project = await Project.make(activePackageOnly);
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(

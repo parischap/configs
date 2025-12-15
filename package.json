@@ -11,30 +11,32 @@
     "lint-and-analyze": "eslint . --stats -f json > eslint-stats.json",
     "lint-rules": "pnpx @eslint/config-inspector",
     "format": "prettier . --write",
-    "clean-config-files": "jiti esm/bin/clean-config-files.ts -activePackageOnly",
-    "clean-node-modules": "jiti esm/bin/clean-node-modules.ts -activePackageOnly",
+    "clean-config-files": "jiti node_modules/@parischap/configs/esm/bin/clean-config-files.ts -activePackageOnly",
+    "clean-node-modules": "jiti node_modules/@parischap/configs/esm/bin/clean-node-modules.ts -activePackageOnly",
     "clean-prod": "pnpm rmrf dist && pnpm mkdirp dist",
-    "generate-config-files": "jiti esm/bin/generate-config-files.ts -activePackageOnly",
-    "clean-all-config-files": "jiti esm/bin/clean-config-files.ts",
-    "clean-all-node-modules": "jiti esm/bin/clean-node-modules.ts",
-    "clean-all-prod": "jiti esm/bin/clean-prod.ts",
-    "generate-all-config-files": "jiti esm/bin/generate-config-files.ts",
+    "generate-config-files": "jiti node_modules/@parischap/configs/esm/bin/generate-config-files.ts -activePackageOnly",
+    "clean-all-config-files": "jiti node_modules/@parischap/configs/esm/bin/clean-config-files.ts",
+    "clean-all-node-modules": "jiti node_modules/@parischap/configs/esm/bin/clean-node-modules.ts",
+    "clean-all-prod": "jiti node_modules/@parischap/configs/esm/bin/clean-prod.ts",
+    "generate-all-config-files": "jiti node_modules/@parischap/configs/esm/bin/generate-config-files.ts",
     "reinstall-all-dependencies": "pnpm i --force",
     "circular": "madge --extensions ts --circular --no-color --no-spinner esm",
     "checks": "pnpm circular && pnpm tscheck && pnpm lint && pnpm test",
     "build": "pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..",
     "examples": "",
-    "update-imports": "node esm/bin/update-imports.ts run ",
-    "auto-update-imports": "node esm/bin/update-imports.ts watch "
+    "update-imports": "node node_modules/@parischap/configs/esm/bin/update-imports.ts run ",
+    "auto-update-imports": "node node_modules/@parischap/configs/esm/bin/update-imports.ts watch "
   },
   "devDependencies": {
+    "@parischap/configs": "git+ssh://github.com/parischap/configs",
+    "eslint": "9.39.1",
+    "prettier-plugin-jsdoc": "1.5.0",
+    "vitest": "4.0.7",
     "prettier": "3.6.2",
-    "@tsconfig/strictest": "2.0.8",
     "@effect/language-service": "0.56.0",
     "@types/node": "24.10.1",
     "typescript": "5.9.3",
     "jiti": "2.6.1",
-    "vitest": "4.0.7",
     "madge": "8.0.0",
     "@effect/experimental": "0.57.4",
     "@effect/platform": "0.93.3",
@@ -49,7 +51,52 @@
     "@babel/plugin-transform-export-namespace-from": "7.27.1",
     "@babel/plugin-transform-modules-commonjs": "7.27.1"
   },
+  "packageManager": "pnpm@10.25.0",
+  "module": "./esm/index.js",
   "peerDependencies": {
+    "effect": "3.19.6",
+    "eslint": "9.39.1",
+    "prettier-plugin-jsdoc": "1.5.0",
+    "vitest": "4.0.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parischap/configs.git"
+  },
+  "homepage": "https://github.com/parischap/configs",
+  "private": true,
+  "exports": {
+    ".": {
+      "default": "./esm/index.js"
+    },
+    "./tests": {
+      "default": "./esm/index.tests.js"
+    },
+    "./EslintConfig": {
+      "default": "./esm/eslintConfig.ts"
+    },
+    "./IndexTests": {
+      "default": "./esm/index.tests.ts"
+    },
+    "./PrettierConfig": {
+      "default": "./esm/prettierConfig.ts"
+    },
+    "./TestUtils": {
+      "default": "./esm/testUtils.ts"
+    },
+    "./TsconfigBase": {
+      "default": "./esm/tsconfigBase.json"
+    },
+    "./VitestConfigNoSource": {
+      "default": "./esm/vitestConfigNoSource.ts"
+    },
+    "./VitestConfigSource": {
+      "default": "./esm/vitestConfigSource.ts"
+    }
+  },
+  "dependencies": {
+    "globals": "16.4.0",
+    "@tsconfig/strictest": "2.0.8",
     "@eslint/js": "9.39.1",
     "@eslint/json": "0.14.0",
     "@eslint/markdown": "7.5.1",
@@ -58,38 +105,6 @@
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-functional": "9.0.2",
     "eslint-plugin-yml": "1.19.0",
-    "eslint": "9.39.1",
-    "globals": "16.4.0",
-    "typescript-eslint": "8.47.0",
-    "prettier-plugin-jsdoc": "1.5.0",
-    "effect": "3.19.6"
-  },
-  "packageManager": "pnpm@10.25.0",
-  "module": "./esm/index.js",
-  "exports": {
-    ".": {
-      "import": "./esm/index.js"
-    },
-    "./tests": {
-      "import": "./esm/index.tests.js"
-    },
-    "./EslintConfig": {
-      "import": "./esm/eslintConfig.ts"
-    },
-    "./IndexTests": {
-      "import": "./esm/index.tests.ts"
-    },
-    "./PrettierConfig": {
-      "import": "./esm/prettierConfig.ts"
-    },
-    "./TestUtils": {
-      "import": "./esm/testUtils.ts"
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/parischap/configs.git"
-  },
-  "homepage": "https://github.com/parischap/configs",
-  "private": true
+    "typescript-eslint": "8.47.0"
+  }
 }

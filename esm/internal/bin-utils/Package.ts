@@ -56,7 +56,7 @@ interface _InternalBase {
    */
   readonly filesNotGeneratedByConfigsPackage: RegExp;
   /** Generates the PackageFiles for `self` */
-  readonly toPackageFiles: () => Promise<PackageFiles.Type>;
+  readonly toPackageFiles: (exportsFilesOnly: boolean) => Promise<PackageFiles.Type>;
 }
 
 /**
@@ -160,7 +160,10 @@ export const cleanProd = async (self: Type): Promise<void> => {
  *
  * @categrory Destructors
  */
-export const toPackageFiles = (self: Type): Promise<PackageFiles.Type> => self.toPackageFiles();
+export const toPackageFiles = (
+  self: Type,
+  { exportsFilesOnly = false }: { readonly exportsFilesOnly?: boolean } = {},
+): Promise<PackageFiles.Type> => self.toPackageFiles(exportsFilesOnly);
 
 /**
  * Namespace of a TopPackage
@@ -179,7 +182,7 @@ export namespace TopPackage {
    */
   export interface Type extends _Base, _InternalBase {
     /** Array of the names of all the source packages of the Project whose TopPackage is `self` */
-    readonly allSourcePackages: ReadonlyArray<string>;
+    readonly allSourcePackagesNames: ReadonlyArray<string>;
     /** Array of the paths to all the packages of the Project whose TopPackage is `self` */
     readonly allPackagesPaths: ReadonlyArray<string>;
     /** @internal */
@@ -197,13 +200,14 @@ export namespace TopPackage {
   const _proto = {
     [_TypeId]: _TypeId,
     filesNotGeneratedByConfigsPackage: toMiniGlobRegExp([readMeFilename, pnpmLockFilename]),
-    toPackageFiles(this: Type): Promise<PackageFiles.Type> {
+    toPackageFiles(this: Type, exportsFilesOnly: boolean): Promise<PackageFiles.Type> {
       return Promise.resolve(
-        PackageFiles.topPackage({
-          ...this,
-          description: 'Top repo of my developments',
-          linkedPackage: this,
-        }),
+        exportsFilesOnly ?
+          PackageFiles.empty
+        : PackageFiles.topPackage({
+            ...this,
+            description: 'Top repo of my developments',
+          }),
       );
     },
   };
@@ -215,7 +219,7 @@ export namespace TopPackage {
    */
   export const make = (
     data: _Base & {
-      readonly allSourcePackages: ReadonlyArray<string>;
+      readonly allSourcePackagesNames: ReadonlyArray<string>;
       readonly allPackagesPaths: ReadonlyArray<string>;
     },
   ): Type => Object.assign(Object.create(_proto), data) as never;
@@ -252,7 +256,9 @@ export namespace MonoRepo {
   const _proto = {
     [_TypeId]: _TypeId,
     filesNotGeneratedByConfigsPackage: filesNotGeneratedByConfigsPackageDefault,
-    async toPackageFiles(this: Type): Promise<PackageFiles.Type> {
+    async toPackageFiles(this: Type, exportsFilesOnly: boolean): Promise<PackageFiles.Type> {
+      if (exportsFilesOnly) return PackageFiles.empty;
+
       const configurationFileObject = await readConfigFile(this);
       const configFileParams = noSourcePackageConfigFileDecoder(configurationFileObject);
       for (const warning of configFileParams.warnings)
@@ -260,7 +266,6 @@ export namespace MonoRepo {
       return PackageFiles.monorepo({
         ...this,
         ...configFileParams,
-        linkedPackage: this,
       });
     },
   };
@@ -306,20 +311,20 @@ export namespace OnePackageRepo {
   const _proto = {
     [_TypeId]: _TypeId,
     filesNotGeneratedByConfigsPackage: filesNotGeneratedByConfigsPackageDefault,
-    async toPackageFiles(this: Type): Promise<PackageFiles.Type> {
+    async toPackageFiles(this: Type, exportsFilesOnly: boolean): Promise<PackageFiles.Type> {
       const configurationFileObject = await readConfigFile(this);
       const configFileParams = sourcePackageConfigFileDecoder(configurationFileObject);
       for (const warning of configFileParams.warnings)
         console.log(`Package '${this.name}': ${warning}`);
-      /* We need to keep the original extensions for prettier that uses node with the `--experimental-transform-types` flag to read its configuration file when it has a `.ts` extension. Now node is unable to transform `.js` extensions into `.ts` extensions as TypeScript does */
-      const keepFileExtensions = OnePackageRepo.has(self) && self.isConfigsPackage;
-      const importsParams = await generateExports(this, configFileParams.packagePrefix);
-      return PackageFiles.onePackageRepo({
-        ...this,
-        ...configFileParams,
-        ...importsParams,
-        linkedPackage: this,
-      });
+      return await (exportsFilesOnly ?
+        PackageFiles.sourcePackageExports({
+          ...this,
+          ...configFileParams,
+        })
+      : PackageFiles.onePackageRepo({
+          ...this,
+          ...configFileParams,
+        }));
     },
   };
 
@@ -365,18 +370,20 @@ export namespace SubPackage {
   const _proto = {
     [_TypeId]: _TypeId,
     filesNotGeneratedByConfigsPackage: filesNotGeneratedByConfigsPackageDefault,
-    async toPackageFiles(this: Type): Promise<PackageFiles.Type> {
+    async toPackageFiles(this: Type, exportsFilesOnly: boolean): Promise<PackageFiles.Type> {
       const configurationFileObject = await readConfigFile(this);
       const configFileParams = sourcePackageConfigFileDecoder(configurationFileObject);
       for (const warning of configFileParams.warnings)
         console.log(`Package '${this.name}': ${warning}`);
-      const importsParams = await generateExports(this, configFileParams.packagePrefix);
-      return PackageFiles.subPackage({
-        ...this,
-        ...configFileParams,
-        ...importsParams,
-        linkedPackage: this,
-      });
+      return await (exportsFilesOnly ?
+        PackageFiles.sourcePackageExports({
+          ...this,
+          ...configFileParams,
+        })
+      : PackageFiles.subPackage({
+          ...this,
+          ...configFileParams,
+        }));
     },
   };
 

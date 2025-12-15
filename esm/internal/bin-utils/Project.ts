@@ -38,12 +38,18 @@ const _proto = {
   [_TypeId]: _TypeId,
 };
 
+export const _make = (data: { readonly packages: ReadonlyArray<Package.Type> }) =>
+  Object.assign(Object.create(_proto), data) as never;
+
 /**
- * Constructor that returns all the packages of the Project that contains the current path
+ * Constructor that returns all the packages in the active Project or only the active Package if
+ * used with the `activePackageOnly` flag (see README.md for the definition of a Project and of a
+ * Package). The active Project is the one that contains the path from which this binary is
+ * executed. The active Package is the one in whose root this binary is executed.
  *
  * @category Constructors
  */
-export const make = async (activePackageOnly = false): Promise<Type> => {
+export const make = async (activePackageOnly: boolean): Promise<Type> => {
   const currentPath = process.cwd();
   const splitPath = currentPath.split(sep);
   const firstPackagesIndex = splitPath.findIndex((split) => split === packagesFolderName);
@@ -91,15 +97,14 @@ export const make = async (activePackageOnly = false): Promise<Type> => {
     )
   ).flat();
 
-  const allSourcePackages = allPackagesButTop.filter(Package.isSourcePackage).map(Package.name);
-  const allPackagesPaths = ['.', ...allPackagesButTop.map(Package.path)];
+  const allSourcePackages = allPackagesButTop.filter(Package.isSourcePackage);
 
   const packages = [
     Package.TopPackage.make({
       name: topPackageName,
       path: topPackagePath,
-      allSourcePackages,
-      allPackagesPaths,
+      allSourcePackagesNames: allSourcePackages.map(Package.name),
+      allPackagesPaths: ['.', ...allPackagesButTop.map(Package.path)],
     }),
     ...allPackagesButTop,
   ].filter(
@@ -107,5 +112,5 @@ export const make = async (activePackageOnly = false): Promise<Type> => {
   );
 
   console.log(`Number of packages in scope: ${packages.length.toString()}`);
-  return Object.assign(Object.create(_proto), { packages }) as never;
+  return _make({ packages: packages });
 };

@@ -9,12 +9,15 @@ import { dirname, extname, join } from 'node:path';
 import {
   allFilesPattern,
   allJavaScriptExtensions,
+  allJsonExtensions,
   allTsFiles,
   baseDevDependencies,
   binariesFolderName,
   binariesPath,
+  binUtilsAssetsFolderName,
   commonJsFolderName,
   configFilename,
+  configsDependencies,
   configsPackageName,
   configsPeerDependencies,
   docgenConfigFilename,
@@ -30,9 +33,8 @@ import {
   filesGeneratedByThirdParties,
   foldersGeneratedByThirdParties,
   foldersWithoutConfigFiles,
-  githubFolderName,
-  githubWorkflowsPagesFilename,
-  githubWorkflowsPublishFilename,
+  githubWorkflowsPagesPath,
+  githubWorkflowsPublishPath,
   gitIgnoreFilename,
   indexBareName,
   indexTsFilename,
@@ -57,7 +59,7 @@ import {
   testsIndexBaseName,
   testsMark,
   tsBuildInfoFolderName,
-  tsConfigBaseFilename,
+  tsconfigBasePath,
   tsConfigDocGenFilename,
   tsConfigExamplesFilename,
   tsConfigFilename,
@@ -72,7 +74,6 @@ import {
   versionControlService,
   viteConfigFilename,
   vitestConfigFilename,
-  workflowsFolderName,
 } from '../shared-utils/constants.js';
 import type { ReadonlyRecord, StringArray, StringRecord } from '../shared-utils/types.js';
 import {
@@ -127,7 +128,7 @@ const _proto = {
  *
  * @category Models
  */
-export interface SourcePackagesPackageFilesParameters {
+export interface SourcePackagesConfigParameters {
   readonly name: string;
   readonly description: string;
   readonly dependencies: Readonly<StringRecord>;
@@ -164,8 +165,6 @@ export default plainEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 const ESLINT_CONFIG_OTHERS = `import {plainEslintConfig} from '@parischap/configs/EslintConfig';
 export default plainEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 
-const TSCONFIG_BASE = readFileSync(join(import.meta.dirname, 'assets/tsconfigBase.json'), 'utf8');
-
 /* General tsconfig.json file. It references four sub-projects, each with its own environments (node available or not):
 - the source sub-project where the package modules are located.
 - the examples sub-project where example modules are located. The examples sub-project will usually use the node environment. Even if the examples sub-project has the exact same configuration as the source sub-project, they must be seperated because building the source project can always be necessary.
@@ -183,7 +182,7 @@ const TSCONFIG: ReadonlyRecord = {
 };
 
 const TSCONFIG_SOURCE = {
-  extends: './tsconfig.base.json',
+  extends: tsconfigBasePath,
   include: [tsConfigStyleIncludeForSourceFiles],
   /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
   compilerOptions: {
@@ -218,12 +217,12 @@ const TSCONFIG_PLAIN_SOURCE: ReadonlyRecord = deepMerge2(TSCONFIG_SOURCE, {
 Although node allows importing a package from itself (see https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name), it does not work well with Typescript because it will not consider the imported package as a seperate one. In particular, it will complain that the imported file is not defined in the include field of the tsconfig.json. For that reason, we need to reference the source sub-project from the examples sub-project 
  */
 const TSCONFIG_EXAMPLES: ReadonlyRecord = {
-  extends: './tsconfig.base.json',
+  extends: tsconfigBasePath,
   include: [tsConfigStyleIncludeForExampleFiles],
   references: [{ path: tsConfigSrcFilename }],
   /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
   compilerOptions: {
-    tsBuildInfoFile: `.tsbuildinfo/${examplesMark}.tsbuildinfo`,
+    tsBuildInfoFile: `${tsBuildInfoFolderName}/${examplesMark}.tsbuildinfo`,
     rootDir: '.',
     outDir: prodFolderName,
     declarationDir: `${prodFolderName}/${examplesFolderName}/${typesFolderName}`,
@@ -235,13 +234,13 @@ const TSCONFIG_EXAMPLES: ReadonlyRecord = {
 Although node allows importing a package from itself (see https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name), it does not work well with Typescript because it will not consider the imported package as a seperate one. In particular, it will complain that the imported file is not defined in the include field of the tsconfig.json. For that reason, we need to reference the source sub-project from the tests sub-project 
  */
 const TSCONFIG_TESTS: ReadonlyRecord = {
-  extends: './tsconfig.base.json',
+  extends: tsconfigBasePath,
   include: [tsConfigStyleIncludeForTestsFiles],
   // The tests project needs to import the source project. The other possibility would be to create a package.json in the tests folder
   references: [{ path: tsConfigSrcFilename }],
   /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
   compilerOptions: {
-    tsBuildInfoFile: `.tsbuildinfo/${testsMark}.tsbuildinfo`,
+    tsBuildInfoFile: `${tsBuildInfoFolderName}/${testsMark}.tsbuildinfo`,
     rootDir: '.',
     outDir: prodFolderName,
     declarationDir: `${prodFolderName}/${testsFolderName}/${typesFolderName}`,
@@ -251,11 +250,11 @@ const TSCONFIG_TESTS: ReadonlyRecord = {
 
 // Must work at all levels: top, monorepo, one-package repo, subrepo
 const TSCONFIG_OTHERS: ReadonlyRecord = {
-  extends: './tsconfig.base.json',
+  extends: tsconfigBasePath,
   exclude: [...foldersWithoutConfigFiles, ...filesGeneratedByThirdParties],
   /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
   compilerOptions: {
-    tsBuildInfoFile: `.tsbuildinfo/${othersMark}.tsbuildinfo`,
+    tsBuildInfoFile: `${tsBuildInfoFolderName}/${othersMark}.tsbuildinfo`,
     rootDir: '.',
     outDir: `${prodFolderName}/${othersFolderName}`,
     declarationDir: `${prodFolderName}/${othersFolderName}/${typesFolderName}`,
@@ -263,18 +262,12 @@ const TSCONFIG_OTHERS: ReadonlyRecord = {
   },
 };
 
-const TSCONFIG_OTHERS_FOR_CONFIGS_PACKAGE: ReadonlyRecord = {
-  ...TSCONFIG_OTHERS,
-  // The others project of the configs package needs to import the source project for eslintConfig and prettierConfig. See comment about TSCONFIG_TESTS for more details
-  references: [{ path: tsConfigSrcFilename }],
-};
-
 /**
  * Specific tsconfig used by docgen. Some examples can be provided as jsdoc comments and these
  * examples usually require the node environment
  */
 const TSCONFIG_DOCGEN: ReadonlyRecord = {
-  extends: './tsconfig.base.json',
+  extends: tsconfigBasePath,
   include: `${sourceFolderName}/${allFilesPattern}`,
   compilerOptions: {
     allowJs: false,
@@ -291,15 +284,14 @@ const GIT_IGNORE = [
 const VITEST_CONFIG_SOURCE = (
   name: string,
 ) => `import {config} from '@parischap/configs/VitestConfigSource';
-export default config(${name})`;
+export default config('${name}')`;
 
 const VITEST_CONFIG_NO_SOURCE = `import {config} from '@parischap/configs/VitestConfigNoSource';
 export default config`;
 
-const VITE_CONFIG_TRANSPILE = `/// <reference types="vitest" />
-import { defineConfig } from 'vite';
+const VITE_CONFIG_TRANSPILE = `import { defineConfig } from 'vite';
 
-export default defineConfig();`;
+export default defineConfig({});`;
 
 const VITE_CONFIG_BUNDLE = `/// <reference types="vitest" />
 import { defineConfig } from 'vite';
@@ -317,8 +309,7 @@ const MADGE_CONFIG = `{
 const PNPM_WORKSPACE_CONFIG = `packages:
   - '${packagesFolderName}/*'
   - '${packagesFolderName}/*/${packagesFolderName}/*'
-  
-trustPolicy: no-downgrade
+
 shellEmulator: true`;
 
 const VSCODE_WORKSPACE_CONFIG = ({
@@ -342,13 +333,13 @@ const VSCODE_WORKSPACE_CONFIG = ({
  * a new release will have to be issued.
  */
 const GITHUB_WORKFLOWS_PUBLISH_SCRIPT = readFileSync(
-  join(import.meta.dirname, 'assets/githubWorkflowsPublish.yml'),
+  join(import.meta.dirname, binUtilsAssetsFolderName, githubWorkflowsPublishPath),
   'utf8',
 );
 
 /** Creates the documentation for the package. Must be started manually. */
 const GITHUB_WORKFLOWS_PAGES_SCRIPT = readFileSync(
-  join(import.meta.dirname, 'assets/githubWorkflowsPages.yml'),
+  join(import.meta.dirname, binUtilsAssetsFolderName, githubWorkflowsPagesPath),
   'utf8',
 );
 
@@ -425,25 +416,24 @@ export const save = (path: string) => async (self: Type) => {
   }
 };
 
-/** PackageFiles instance that implements what is necessary in all situations. */
+/** Empty PackageFiles instance */
+export const empty = make({});
+
+/** PackageFiles instance that implements what is necessary in all situations */
 const _anyPackage = ({
   name,
   description,
   scripts,
-  isConfigsPackage,
 }: {
   readonly name: string;
   readonly description: string;
   readonly scripts: StringRecord;
-  readonly isConfigsPackage: boolean;
 }): Type =>
   make({
     // Used by the format script
     [prettierConfigFilename]: PRETTIER_CONFIG,
     // Used by the format script
     [prettierIgnoreFilename]: PRETTIER_IGNORE,
-    // Used by the tscheck script
-    [tsConfigBaseFilename]: TSCONFIG_BASE,
     [packageJsonFilename]: {
       name: `${slashedScope}${name}`,
       // Needs to be present even at the top or root of a monorepo because there are some javascript config files
@@ -459,26 +449,22 @@ const _anyPackage = ({
         'lint-and-analyze': 'eslint . --stats -f json > eslint-stats.json',
         'lint-rules': 'pnpx @eslint/config-inspector',
         format: 'prettier . --write',
-        'clean-config-files': `${tsExecuter} ${binariesPath(isConfigsPackage)}/clean-config-files.ts -activePackageOnly`,
-        'clean-node-modules': `${tsExecuter} ${binariesPath(isConfigsPackage)}/clean-node-modules.ts -activePackageOnly`,
-        'clean-prod': `${tsExecuter} ${binariesPath(isConfigsPackage)}/clean-prod.ts -activePackageOnly`,
-        'generate-config-files': `${tsExecuter} ${binariesPath(isConfigsPackage)}/generate-config-files.ts -activePackageOnly`,
-        'clean-all-config-files': `${tsExecuter} ${binariesPath(isConfigsPackage)}/clean-config-files.ts`,
-        'clean-all-node-modules': `${tsExecuter} ${binariesPath(isConfigsPackage)}/clean-node-modules.ts`,
-        'clean-all-prod': `${tsExecuter} ${binariesPath(isConfigsPackage)}/clean-prod.ts`,
-        'generate-all-config-files': `${tsExecuter} ${binariesPath(isConfigsPackage)}/generate-config-files.ts`,
+        'clean-config-files': `${tsExecuter} ${binariesPath}/clean-config-files.ts -activePackageOnly`,
+        'clean-node-modules': `${tsExecuter} ${binariesPath}/clean-node-modules.ts -activePackageOnly`,
+        'clean-prod': `${tsExecuter} ${binariesPath}/clean-prod.ts -activePackageOnly`,
+        'generate-config-files': `${tsExecuter} ${binariesPath}/generate-config-files.ts -activePackageOnly`,
+        'clean-all-config-files': `${tsExecuter} ${binariesPath}/clean-config-files.ts`,
+        'clean-all-node-modules': `${tsExecuter} ${binariesPath}/clean-node-modules.ts`,
+        'clean-all-prod': `${tsExecuter} ${binariesPath}/clean-prod.ts`,
+        'generate-all-config-files': `${tsExecuter} ${binariesPath}/generate-config-files.ts`,
         'reinstall-all-dependencies': 'pnpm i --force',
         ...scripts,
       },
-      devDependencies:
-        isConfigsPackage ? baseDevDependencies : (
-          {
-            ...baseDevDependencies,
-            ...configsPeerDependencies,
-            [`${slashedScope}${configsPackageName}`]: `git+ssh://${versionControlService}/${owner}/${configsPackageName}`,
-          }
-        ),
-      ...(isConfigsPackage ? { peerDependencies: configsPeerDependencies } : {}),
+      devDependencies: {
+        /* Even configs needs to import itself so script can be written homogeneously in all packages */
+        [`${slashedScope}${configsPackageName}`]: `git+ssh://${versionControlService}/${owner}/${configsPackageName}`,
+        ...baseDevDependencies,
+      },
     },
   });
 
@@ -519,87 +505,68 @@ const _noSourcePackage: Type = make({
 });
 
 /**
- * PackageFiles instance that implements what is necessary in a package that has code (an esm
- * directory). This package is also a workspace.
+ * PackageFiles instance that creates the build part of a source package.
+ *
+ * @category Instances
  */
-/*
- * For a one-package repo, name and parentName are the same. For a sub package, name is the
- * name of the sub package and parentName the name of the monorepo that contains it.
- */
-const _sourcePackage = ({
-  parentName,
-  name,
-  dependencies,
-  devDependencies,
-  peerDependencies,
-  examples,
+const _sourcePackageBuild = ({
   buildMethod,
-  environment,
   isPublished,
-  hasDocGen,
+}: {
+  readonly buildMethod: string;
+  readonly isPublished: boolean;
+}): Type => {
+  if (buildMethod === 'None') return make({});
+
+  if (buildMethod === 'Transpile')
+    return make({
+      [viteConfigFilename]: VITE_CONFIG_TRANSPILE,
+      [packageJsonFilename]: {
+        sideEffects: [],
+        scripts: {
+          compile:
+            // tsc builds but also generate types. All my packages ship with the sideEffects-free key in package.json. And this is perfectly well understood by vite and rollup. So annotate-pure-calls is only necessary for published packages that might be used by clients who use old bundlers. As far as I am concerned, I do not need cjs code. Likewise, this is only necessary for published packages.
+            `tsc -b ${tsConfigSrcFilename} --force`
+            + (isPublished ?
+              ` && babel ${prodFolderName}/${sourceFolderName} --out-dir ${prodFolderName}/${commonJsFolderName}`
+              + '--plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs  --source-maps'
+            : '')
+            + ` && babel ${prodFolderName} --plugins annotate-pure-calls --out-dir ${prodFolderName} --source-maps`
+            + ' && pnpm prodify-lib',
+        },
+      },
+    });
+  if (buildMethod === 'Bundle')
+    return make({
+      [viteConfigFilename]: VITE_CONFIG_BUNDLE,
+      [packageJsonFilename]: {
+        module: `./${sourceFolderName}/index.js`,
+        scripts: {
+          bundle: 'bundle-files',
+          compile: `pnpm bundle && pnpm prodify-bundle`,
+        },
+      },
+    });
+
+  // 'BundleWithDeps' , 'AppClient'
+  throw new Error(`Disallowed value for 'buildMethod' parameter. Actual: '${buildMethod}'`);
+};
+
+/**
+ * PackageFiles instance that creates the visibility part of a source package.
+ *
+ * @category Instances
+ */
+const _sourcePackageVisibility = ({
+  parentName,
+  isPublished,
   keywords,
-  useEffectAsPeerDependency,
-  useEffectPlatform,
-  isConfigsPackage,
 }: {
   readonly parentName: string;
-  readonly name: string;
-  readonly dependencies: StringRecord;
-  readonly devDependencies: StringRecord;
-  readonly peerDependencies: StringRecord;
-  readonly examples: ReadonlyArray<string>;
-  readonly buildMethod: string;
-  readonly environment: string;
   readonly isPublished: boolean;
-  readonly hasDocGen: boolean;
   readonly keywords: ReadonlyArray<string>;
-  readonly useEffectAsPeerDependency: boolean;
-  readonly useEffectPlatform: string;
-  readonly isConfigsPackage: boolean;
-}): Type => {
-  const [finalDependencies, finalPeerDependencies] =
-    useEffectAsPeerDependency ?
-      [dependencies, { ...peerDependencies, ...effectDependencies }]
-    : [{ ...dependencies, ...effectDependencies }, peerDependencies];
-
-  const buildConfig = (): Type => {
-    if (buildMethod === 'None') return make({});
-
-    if (buildMethod === 'Transpile')
-      return make({
-        [viteConfigFilename]: VITE_CONFIG_TRANSPILE,
-        [packageJsonFilename]: {
-          sideEffects: [],
-          scripts: {
-            compile:
-              // tsc builds but also generate types. All my packages ship with the sideEffects-free key in package.json. And this is perfectly well understood by vite and rollup. So annotate-pure-calls is only necessary for published packages that might be used by clients who use old bundlers. As far as I am concerned, I do not need cjs code. Likewise, this is only necessary for published packages.
-              `tsc -b ${tsConfigSrcFilename} --force`
-              + (isPublished ?
-                ` && babel ${prodFolderName}/${sourceFolderName} --out-dir ${prodFolderName}/${commonJsFolderName}`
-                + '--plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs  --source-maps'
-              : '')
-              + ` && babel ${prodFolderName} --plugins annotate-pure-calls --out-dir ${prodFolderName} --source-maps`
-              + ' && pnpm prodify-lib',
-          },
-        },
-      });
-    if (buildMethod === 'Bundle')
-      return make({
-        [viteConfigFilename]: VITE_CONFIG_BUNDLE,
-        [packageJsonFilename]: {
-          module: `./${sourceFolderName}/index.js`,
-          scripts: {
-            bundle: 'bundle-files',
-            compile: `pnpm bundle && pnpm prodify-bundle`,
-          },
-        },
-      });
-
-    // 'BundleWithDeps' , 'AppClient'
-    throw new Error(`Disallowed value for 'buildMethod' parameter. Actual: '${buildMethod}'`);
-  };
-
-  const visibilityConfig: Type = make(
+}): Type =>
+  make(
     isPublished ?
       {
         [packageJsonFilename]: {
@@ -629,7 +596,13 @@ const _sourcePackage = ({
       },
   );
 
-  const docGenConfig: Type = make(
+/**
+ * PackageFiles instance that creates the doc generation part of a source package.
+ *
+ * @category Instances
+ */
+const _sourcePackageDocGen = ({ hasDocGen }: { readonly hasDocGen: boolean }): Type =>
+  make(
     hasDocGen ?
       {
         [packageJsonFilename]: {
@@ -644,72 +617,245 @@ const _sourcePackage = ({
     : {},
   );
 
-  const platformConfig = (): Type => {
-    if (useEffectPlatform === 'No') return make({});
+/**
+ * PackageFiles instance that creates the Effect Platform part of a source package.
+ *
+ * @category Instances
+ */
+const _sourcePackagePlatform = ({
+  useEffectPlatform,
+}: {
+  readonly useEffectPlatform: string;
+}): Type => {
+  if (useEffectPlatform === 'No') return make({});
 
-    if (useEffectPlatform === 'AsDependency')
-      return make({
-        [packageJsonFilename]: {
-          dependencies: effectPlatformDependencies,
-        },
-      });
+  if (useEffectPlatform === 'AsDependency')
+    return make({
+      [packageJsonFilename]: {
+        dependencies: effectPlatformDependencies,
+      },
+    });
 
-    if (useEffectPlatform === 'AsPeerDependency')
-      return make({
-        [packageJsonFilename]: {
-          peerDependencies: effectPlatformDependencies,
-        },
-      });
+  if (useEffectPlatform === 'AsPeerDependency')
+    return make({
+      [packageJsonFilename]: {
+        peerDependencies: effectPlatformDependencies,
+      },
+    });
 
-    throw new Error(
-      `Disallowed value for 'useEffectPlatform' parameter. Actual: '${useEffectPlatform}'`,
-    );
+  throw new Error(
+    `Disallowed value for 'useEffectPlatform' parameter. Actual: '${useEffectPlatform}'`,
+  );
+};
+
+/**
+ * PackageFiles instance that creates the Environment part of a source package.
+ *
+ * @category Instances
+ */
+const _sourcePackageEnvironment = ({
+  environment,
+  isConfigsPackage,
+}: {
+  readonly environment: string;
+  readonly isConfigsPackage: boolean;
+}): Type => {
+  const base = {
+    // Used by the tscheck script
+    [tsConfigFilename]: TSCONFIG,
+    // Used by the tsConfig file
+    [tsConfigOthersFilename]: {
+      ...TSCONFIG_OTHERS,
+      // The others project of the configs package needs to import the source project for eslint.config.ts, prettier.config.ts, vitest.config.ts. See comment about TSCONFIG_TESTS for more details
+      ...(isConfigsPackage ? { references: [{ path: tsConfigSrcFilename }] } : {}),
+    },
+    // Used by the tsConfig file
+    [tsConfigExamplesFilename]: TSCONFIG_EXAMPLES,
+    // Used by the tsConfig file
+    [tsConfigTestsFilename]: TSCONFIG_TESTS,
   };
 
-  const environmentConfig = (): Type => {
-    const base = {
-      // Used by the tscheck script
-      [tsConfigFilename]: TSCONFIG,
-      // Used by the tsConfig file
-      [tsConfigOthersFilename]:
-        isConfigsPackage ? TSCONFIG_OTHERS_FOR_CONFIGS_PACKAGE : TSCONFIG_OTHERS,
-      // Used by the tsConfig file
-      [tsConfigExamplesFilename]: TSCONFIG_EXAMPLES,
-      // Used by the tsConfig file
-      [tsConfigTestsFilename]: TSCONFIG_TESTS,
-    };
+  if (environment === 'Browser')
+    return make({
+      ...base,
+      // Used by the checks script
+      [tsConfigSrcFilename]: TSCONFIG_BROWSER_SOURCE,
+      // Used by the checks script
+      // We don't use any dom specifities because it must run on the server. It's all hidden away in preact
+      [eslintConfigFilename]: ESLINT_CONFIG_BROWSER_SOURCE,
+    });
 
-    if (environment === 'Browser')
-      return make({
-        ...base,
-        // Used by the checks script
-        [tsConfigSrcFilename]: TSCONFIG_BROWSER_SOURCE,
-        // Used by the checks script
-        // We don't use any dom specifities because it must run on the server. It's all hidden away in preact
-        [eslintConfigFilename]: ESLINT_CONFIG_BROWSER_SOURCE,
-      });
+  if (environment === 'Node')
+    return make({
+      ...base,
+      // Used by the checks script
+      [tsConfigSrcFilename]: TSCONFIG_NODE_SOURCE,
+      // Used by the checks script
+      [eslintConfigFilename]: ESLINT_CONFIG_NODE_SOURCE,
+    });
 
-    if (environment === 'Node')
-      return make({
-        ...base,
-        // Used by the checks script
-        [tsConfigSrcFilename]: TSCONFIG_NODE_SOURCE,
-        // Used by the checks script
-        [eslintConfigFilename]: ESLINT_CONFIG_NODE_SOURCE,
-      });
+  if (environment === 'Plain')
+    return make({
+      ...base,
+      // Used by the checks script
+      [tsConfigSrcFilename]: TSCONFIG_PLAIN_SOURCE,
+      // Used by the checks script
+      [eslintConfigFilename]: ESLINT_CONFIG_PLAIN_SOURCE,
+    });
 
-    if (environment === 'Plain')
-      return make({
-        ...base,
-        // Used by the checks script
-        [tsConfigSrcFilename]: TSCONFIG_PLAIN_SOURCE,
-        // Used by the checks script
-        [eslintConfigFilename]: ESLINT_CONFIG_PLAIN_SOURCE,
-      });
+  throw new Error(`Disallowed value for 'environment' parameter. Actual: '${environment}'`);
+};
 
-    throw new Error(`Disallowed value for 'environment' parameter. Actual: '${environment}'`);
-  };
+/**
+ * PackageFiles instance that creates the default exports part of a source package.
+ *
+ * @category Instances
+ */
+const _basePackageJsonExports: Type = make({
+  [packageJsonFilename]: {
+    exports: {
+      '.': {
+        default: `./${sourceFolderName}/${indexBareName}.js`,
+      },
+      './tests': {
+        default: `./${sourceFolderName}/${testsIndexBaseName}.js`,
+      },
+    },
+  },
+});
 
+/**
+ * PackageFiles instance that creates the exports part of a source package.
+ *
+ * @category Instances
+ */
+export const sourcePackageExports = async ({
+  path,
+  packagePrefix,
+  isConfigsPackage = false,
+}: {
+  readonly path: string;
+  readonly packagePrefix: string | undefined;
+  readonly isConfigsPackage?: boolean;
+}): Promise<Type> => {
+  if (packagePrefix === undefined) return _basePackageJsonExports;
+
+  const sourceFiles = (
+    await readFilesRecursively({
+      path: join(path, sourceFolderName),
+      foldersToExclude: [internalFolderName, binariesFolderName],
+      dontFailOnInexistentPath: false,
+    })
+  )
+    .map((files) => ({
+      ...files,
+      isJavascript: allJavaScriptExtensions.includes(files.extension),
+      isOther: allJsonExtensions.includes(files.extension),
+    }))
+    .filter(
+      ({ bareName, isJavascript, isOther }) =>
+        bareName !== indexBareName && (isJavascript || isOther),
+    )
+    .map(({ bareName, relativeParentPath, isJavascript, extension }) => {
+      const barePath = fromOSPathToPosixPath(join(relativeParentPath, bareName));
+      return {
+        namespaceExportName: `${packagePrefix}${barePath
+          .split(/[/.]/)
+          .map(capitalizeFirstLetter)
+          .join('')}`,
+        barePath,
+        isJavascript,
+        extension,
+      };
+    });
+
+  return sourceFiles.length === 0 ?
+      _basePackageJsonExports
+    : merge(
+        _basePackageJsonExports,
+        make({
+          [join(sourceFolderName, indexTsFilename)]: sourceFiles
+            .filter(({ isJavascript }) => isJavascript)
+            // path.join removes upfront './' but typescript requires them so we must add them
+            .map(
+              ({ barePath, namespaceExportName }) =>
+                `export * as ${namespaceExportName} from './${barePath}.js';`,
+            )
+            .join('\n'),
+          [packageJsonFilename]: {
+            exports: Object.fromEntries(
+              sourceFiles.map(({ barePath, namespaceExportName, isJavascript, extension }) => {
+                return [
+                  `./${namespaceExportName}`,
+                  {
+                    /* We need to keep the original extensions for prettier that uses node with the `--experimental-transform-types` flag to read its configuration file when it has a `.ts` extension. Now node is unable to transform `.js` extensions into `.ts` extensions as TypeScript does */
+                    default: `./${sourceFolderName}/${barePath}${isJavascript && !isConfigsPackage ? '.js' : extension}`,
+                  },
+                ] as const;
+              }),
+            ),
+            scripts: {
+              'update-imports': `node ${binariesPath}/update-imports.ts run ${packagePrefix}`,
+              'auto-update-imports': `node ${binariesPath}/update-imports.ts watch ${packagePrefix}`,
+            },
+          },
+        }),
+      );
+};
+
+/**
+ * PackageFiles instance that implements what is necessary in a package that has code (an esm
+ * directory). This package is also a workspace.
+ */
+/*
+ * For a one-package repo, name and parentName are the same. For a sub package, name is the
+ * name of the sub package and parentName the name of the monorepo that contains it.
+ */
+const _sourcePackage = async ({
+  name,
+  parentName = name,
+  dependencies,
+  devDependencies,
+  peerDependencies,
+  examples,
+  buildMethod,
+  environment,
+  isPublished,
+  hasDocGen,
+  keywords,
+  useEffectAsPeerDependency,
+  useEffectPlatform,
+  isConfigsPackage = false,
+  path,
+  packagePrefix,
+}: {
+  readonly name: string;
+  readonly parentName?: string;
+  readonly dependencies: StringRecord;
+  readonly devDependencies: StringRecord;
+  readonly peerDependencies: StringRecord;
+  readonly examples: ReadonlyArray<string>;
+  readonly buildMethod: string;
+  readonly environment: string;
+  readonly isPublished: boolean;
+  readonly hasDocGen: boolean;
+  readonly keywords: ReadonlyArray<string>;
+  readonly useEffectAsPeerDependency: boolean;
+  readonly useEffectPlatform: string;
+  readonly isConfigsPackage?: boolean;
+  readonly path: string;
+  readonly packagePrefix: string | undefined;
+}): Promise<Type> => {
+  const [finalDependencies, finalPeerDependencies] =
+    useEffectAsPeerDependency ?
+      [dependencies, { ...peerDependencies, ...effectDependencies }]
+    : [{ ...dependencies, ...effectDependencies }, peerDependencies];
+
+  const exportsConfig = await sourcePackageExports({
+    path,
+    packagePrefix,
+    isConfigsPackage,
+  });
   return merge(
     make({
       // Used by the circular script
@@ -757,11 +903,12 @@ const _sourcePackage = ({
           + (name === parentName ? '' : `/tree/master/${packagesFolderName}/${name}`),
       },
     }),
-    buildConfig(),
-    visibilityConfig,
-    docGenConfig,
-    platformConfig(),
-    environmentConfig(),
+    _sourcePackageBuild({ buildMethod, isPublished }),
+    _sourcePackageVisibility({ parentName, isPublished, keywords }),
+    _sourcePackageDocGen({ hasDocGen }),
+    _sourcePackagePlatform({ useEffectPlatform }),
+    _sourcePackageEnvironment({ environment, isConfigsPackage }),
+    exportsConfig,
   );
 };
 
@@ -778,15 +925,13 @@ const _repo = ({
       /* Github actions need to be at the root of the github repo. This action calls a script `build-and-publish` but changes the working directory to the published package directory before calling them. So this script must be in configInternalProject.ts.
        */
       {
-        [`${githubFolderName}/${workflowsFolderName}/${githubWorkflowsPublishFilename}`]:
-          GITHUB_WORKFLOWS_PUBLISH_SCRIPT,
+        [githubWorkflowsPublishPath]: GITHUB_WORKFLOWS_PUBLISH_SCRIPT,
       }
     : {}),
     ...(docGenParameters !== undefined ?
       {
         /* Github actions need to be at the root of the github repo. This action calls a script `prepare-docs'`  */
-        [`${githubFolderName}/${workflowsFolderName}/${githubWorkflowsPagesFilename}`]:
-          GITHUB_WORKFLOWS_PAGES_SCRIPT,
+        [githubWorkflowsPagesPath]: GITHUB_WORKFLOWS_PAGES_SCRIPT,
         // Used by the github pages.yml action
         [`${docsFolderName}/${docsIndexMdFilename}`]: docGenParameters.description,
         // Used by the github pages.yml action
@@ -832,7 +977,6 @@ export const monorepo = ({
       name,
       description,
       scripts: {},
-      isConfigsPackage: false,
     }),
     _repo({
       // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
@@ -856,12 +1000,12 @@ export const monorepo = ({
 export const topPackage = ({
   name,
   description,
-  allSourcePackages,
+  allSourcePackagesNames,
   allPackagesPaths,
 }: {
   readonly name: string;
   readonly description: string;
-  readonly allSourcePackages: ReadonlyArray<string>;
+  readonly allSourcePackagesNames: ReadonlyArray<string>;
   readonly allPackagesPaths: ReadonlyArray<string>;
 }): Type =>
   merge(
@@ -869,7 +1013,6 @@ export const topPackage = ({
       name,
       description,
       scripts: {},
-      isConfigsPackage: false,
     }),
     _noSourcePackage,
 
@@ -877,10 +1020,10 @@ export const topPackage = ({
     make({
       [pnpmWorkspaceFilename]:
         PNPM_WORKSPACE_CONFIG
-        + (allSourcePackages.length !== 0 ?
+        + (allSourcePackagesNames.length !== 0 ?
           `
 overrides:
-${allSourcePackages.map((packageName) => `  '${slashedScope}${packageName}': 'workspace:*'`).join('\n')}`
+${allSourcePackagesNames.map((packageName) => `  '${slashedScope}${packageName}': 'workspace:*'`).join('\n')}`
         : ''),
       // Used by vscode
       [`${name}.code-workspace`]: VSCODE_WORKSPACE_CONFIG({
@@ -895,180 +1038,42 @@ ${allSourcePackages.map((packageName) => `  '${slashedScope}${packageName}': 'wo
  *
  * @category Instances
  */
-export const onePackageRepo = ({
-  name,
-  description,
-  dependencies,
-  devDependencies,
-  peerDependencies,
-  examples,
-  scripts,
-  environment,
-  buildMethod,
-  isPublished,
-  hasDocGen,
-  keywords,
-  useEffectAsPeerDependency,
-  useEffectPlatform,
-  isConfigsPackage,
-}: SourcePackagesPackageFilesParameters & {
-  readonly isConfigsPackage: boolean;
-}): Type =>
-  merge(
-    _anyPackage({
-      name,
-      description,
-      scripts,
-      isConfigsPackage,
-    }),
+export const onePackageRepo = async (
+  params: SourcePackagesConfigParameters & {
+    readonly isConfigsPackage: boolean;
+    readonly path: string;
+    readonly packagePrefix: string | undefined;
+  },
+): Promise<Type> => {
+  const sourcePackage = await _sourcePackage(params);
+  return merge(
+    _anyPackage(params),
     _repo({
-      ...(hasDocGen ? { docGenParameters: { name, description } } : {}),
-      isPublished,
+      ...(params.hasDocGen ? { docGenParameters: params } : {}),
+      isPublished: params.isPublished,
     }),
-    _sourcePackage({
-      name,
-      parentName: name,
-      dependencies,
-      devDependencies,
-      peerDependencies,
-      examples,
-      buildMethod,
-      environment,
-      isPublished,
-      hasDocGen,
-      keywords,
-      useEffectAsPeerDependency,
-      useEffectPlatform,
-      isConfigsPackage,
+    sourcePackage,
+    make({
+      [packageJsonFilename]: {
+        peerDependencies: configsPeerDependencies,
+        dependencies: configsDependencies,
+      },
     }),
   );
+};
 
 /**
  * PackageFiles instance to be used in a sub package
  *
  * @category Instances
  */
-export const subPackage = ({
-  parentName,
-  name,
-  description,
-  dependencies,
-  devDependencies,
-  peerDependencies,
-  examples,
-  scripts,
-  environment,
-  buildMethod,
-  isPublished,
-  hasDocGen,
-  keywords,
-  useEffectAsPeerDependency,
-  useEffectPlatform,
-}: SourcePackagesPackageFilesParameters & {
-  readonly parentName: string;
-}): Type =>
-  merge(
-    _anyPackage({
-      name,
-      description,
-      scripts,
-      isConfigsPackage: false,
-    }),
-    _sourcePackage({
-      name,
-      parentName,
-      dependencies,
-      devDependencies,
-      peerDependencies,
-      examples,
-      buildMethod,
-      environment,
-      isPublished,
-      hasDocGen,
-      keywords,
-      useEffectAsPeerDependency,
-      useEffectPlatform,
-      isConfigsPackage: false,
-    }),
-  );
-
-/**
- * Package file instance that creates the exports part of a source package.
- *
- * @category Instances
- */
-export const sourcePackageExportsConfig = async ({
-  path,
-  packagePrefix,
-  keepFileExtensions,
-}: {
-  readonly path: string;
-  readonly packagePrefix: string | undefined;
-  readonly keepFileExtensions: boolean;
-}): Promise<Type> => {
-  const basePackageJsonExports = {
-    '.': {
-      import: `./${sourceFolderName}/${indexBareName}.js`,
-    },
-    './tests': {
-      import: `./${sourceFolderName}/${testsIndexBaseName}.js`,
-    },
-  };
-
-  if (packagePrefix === undefined)
-    return make({ [packageJsonFilename]: { exports: basePackageJsonExports } });
-
-  const sourceFiles = (
-    await readFilesRecursively({
-      path: join(path, sourceFolderName),
-      foldersToExclude: [internalFolderName, binariesFolderName],
-      dontFailOnInexistentPath: false,
-    })
-  )
-    .filter(
-      ({ bareName, extension }) =>
-        bareName !== indexBareName && allJavaScriptExtensions.includes(extension),
-    )
-    .map(({ bareName, relativeParentPath, extension }) => {
-      const barePath = fromOSPathToPosixPath(join(relativeParentPath, bareName));
-      return {
-        namespaceExportName: `${packagePrefix}${barePath
-          .split(/[/.]/)
-          .map(capitalizeFirstLetter)
-          .join('')}`,
-        barePath,
-        extension,
-      };
-    });
-
-  return sourceFiles.length === 0 ?
-      make({ [packageJsonFilename]: { exports: basePackageJsonExports } })
-    : make({
-        [join(sourceFolderName, indexTsFilename)]: sourceFiles
-          // path.join removes upfront './' but typescript requires them so we must add them
-          .map(
-            ({ barePath, namespaceExportName }) =>
-              `export * as ${namespaceExportName} from './${barePath}.js';`,
-          )
-          .join('\n'),
-        [packageJsonFilename]: {
-          exports: {
-            ...basePackageJsonExports,
-            ...Object.fromEntries(
-              sourceFiles.map(({ barePath, namespaceExportName, extension }) => {
-                return [
-                  `./${namespaceExportName}`,
-                  {
-                    import: `./${sourceFolderName}/${barePath}${keepFileExtensions ? extension : '.js'}`,
-                  },
-                ] as const;
-              }),
-            ),
-          },
-          scripts: {
-            'update-imports': `node ${binariesPath(isConfigsPackage)}/update-imports.ts run ${packagePrefix}`,
-            'auto-update-imports': `node ${binariesPath(isConfigsPackage)}/update-imports.ts watch ${packagePrefix}`,
-          },
-        },
-      });
+export const subPackage = async (
+  params: SourcePackagesConfigParameters & {
+    readonly parentName: string;
+    readonly path: string;
+    readonly packagePrefix: string | undefined;
+  },
+): Promise<Type> => {
+  const sourcePackage = await _sourcePackage(params);
+  return merge(_anyPackage(params), sourcePackage);
 };
