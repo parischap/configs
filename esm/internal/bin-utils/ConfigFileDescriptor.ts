@@ -1,17 +1,19 @@
 /**
- * Module that represents the allowed parameters of a configuratyion file with their type and
- * optional default value
+ * Module that describes the types and optional default values of the parameters of a configuration
+ * file
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 import { configFilename } from '../shared-utils/constants.js';
 import {
+  Data,
   isStringArray,
   isStringRecord,
-  ReadonlyRecord,
-  Record,
-  StringArray,
-  StringRecord,
+  objectFromDataAndProto,
+  Proto,
 } from '../shared-utils/types.js';
+import type * as ConfigFileDescriptorDecoder from './ConfigFileDescriptorDecoder.js';
+import * as ParamDescriptor from './ParamDescriptor.js';
+import * as ParamDescriptors from './ParamDescriptors.js';
 
 /**
  * Module tag
@@ -22,77 +24,25 @@ const _moduleTag = '@parischap/configs/internal/bin-utils/ConfigFileDescriptor/'
 const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
 
-/** All allowed parameter types */
-type AllTypeNames = 'string' | 'stringOrUndefined' | 'boolean' | 'record' | 'array';
-
-/** Namespace of a ParamDescriptor */
-namespace ParamDescriptor {
-  const _namespaceTag = _moduleTag + 'ParameterDescriptor/';
-  const _TypeId: unique symbol = Symbol.for(_namespaceTag) as _TypeId;
-  type _TypeId = typeof _TypeId;
-
-  type _TypeFromTypeName<T extends AllTypeNames> =
-    T extends 'string' ? string
-    : T extends 'stringOrUndefined' ? string | undefined
-    : T extends 'boolean' ? boolean
-    : T extends 'record' ? StringRecord
-    : T extends 'array' ? StringArray
-    : never;
-
-  /**
-   * ParamDescriptor type
-   *
-   * @category Models
-   */
-  export interface Type<E extends AllTypeNames> {
-    /** Expected type of the parameter */
-    readonly expectedType: E;
-    /** Default value of the parameter if any */
-    readonly defaultValue?: _TypeFromTypeName<E>;
-
-    /** @internal */
-    readonly [_TypeId]: _TypeId;
-  }
-
-  /**
-   * Utility type that extracts the expectedType type of a Parameter
-   *
-   * @category Utility types
-   */
-  export type ExpectedType<T> =
-    [T] extends [Type<infer ExpectedType>] ? _TypeFromTypeName<ExpectedType> : never;
-
-  /** Prototype */
-  const _proto = {
-    [_TypeId]: _TypeId,
-  };
-
-  /**
-   * Constructor
-   *
-   * @category Constructors
-   */
-  export const make = <const E extends AllTypeNames>(data: {
-    readonly expectedType: E;
-    readonly defaultValue?: _TypeFromTypeName<E>;
-  }): Type<E> => Object.assign(Object.create(_proto), data) as never;
-}
-
-/** Type of a ConfigFileDescriptor */
-export interface Type<
-  ParamDescriptors extends ReadonlyRecord<string, ParamDescriptor.Type<AllTypeNames>>,
-> {
+/**
+ * Type of a ConfigFileDescriptor
+ *
+ * @category Models
+ */
+export interface Type<P extends ParamDescriptors.Type> {
   /**
    * Object whose keys are the allowed parameter names and whose values are the corresponding
    * ParamDescriptor's
    */
-  readonly paramDescriptors: ParamDescriptors;
+  readonly paramDescriptors: P;
   /** @internal */
   readonly [_TypeId]: _TypeId;
 }
 
+type Any = Type<ParamDescriptors.Type>;
+
 /** Prototype */
-const _proto = {
+const _proto: Proto<Any> = {
   [_TypeId]: _TypeId,
 };
 
@@ -101,11 +51,8 @@ const _proto = {
  *
  * @category Constructors
  */
-export const make = <
-  const ParamDescriptors extends ReadonlyRecord<string, ParamDescriptor.Type<AllTypeNames>>,
->(data: {
-  readonly paramDescriptors: ParamDescriptors;
-}): Type<ParamDescriptors> => Object.assign(Object.create(_proto), data) as never;
+export const make = <const P extends ParamDescriptors.Type>(data: Data<Type<P>>): Type<P> =>
+  objectFromDataAndProto(_proto, data);
 
 /**
  * Returns a decoder that takes as input a configurationFileObject (object representing the JSON
@@ -116,45 +63,38 @@ export const make = <
  * @category Destructors
  */
 export const toDecoder =
-  <ParamDescriptors extends ReadonlyRecord<string, ParamDescriptor.Type<AllTypeNames>>>(
-    self: Type<ParamDescriptors>,
-  ): ((configurationFileObject: Record) => {
-    [k in keyof ParamDescriptors]: ParamDescriptor.ExpectedType<ParamDescriptors[k]>;
-  } & { warnings: Array<string> }) =>
-  (configurationFileObject) => {
+  <P extends ParamDescriptors.Type>(self: Type<P>): ConfigFileDescriptorDecoder.Type<P> =>
+  ({ configurationFileObject, packageName }) => {
     const paramDescriptors = self.paramDescriptors;
     const extraKeys = Object.keys(configurationFileObject).filter(
       (key) => !(key in paramDescriptors),
     );
+    for (const extraKey of extraKeys)
+      console.log(
+        `Package '${packageName}': parameter '${extraKey}' was unexpectedly found in '${configFilename}' (WARNING)`,
+      );
+    return Object.fromEntries(
+      Object.entries(paramDescriptors).map(([key, descriptor]) => {
+        const value: unknown = configurationFileObject[key];
 
-    return {
-      ...Object.fromEntries(
-        Object.entries(paramDescriptors).map(([key, descriptor]) => {
-          const value = configurationFileObject[key];
-
-          const { defaultValue, expectedType } = descriptor;
-          if (defaultValue !== undefined && value === undefined) return [key, defaultValue];
-          const valueType = typeof value;
-          if (
-            (expectedType === 'string' && valueType !== 'string')
-            || (expectedType === 'stringOrUndefined'
-              && valueType !== 'string'
-              && valueType !== 'undefined')
-            || (expectedType === 'boolean' && valueType !== 'boolean')
-            || (expectedType === 'record' && !isStringRecord(value))
-            || (expectedType === 'array' && !isStringArray(value))
-          )
-            throw new Error(
-              `Parameter '${key}' of '${configFilename}' should be of type '${expectedType}'. Actual: ${typeof value}`,
-            );
-          return [key, value];
-        }),
-      ),
-      warnings: extraKeys.map(
-        (extraKey) =>
-          `parameters '${extraKey}' was unexpectedly found in '${configFilename}' (WARNING)`,
-      ),
-    } as never;
+        const { defaultValue, expectedType } = descriptor;
+        if (defaultValue !== undefined && value === undefined) return [key, defaultValue];
+        const valueType = typeof value;
+        if (
+          (expectedType === 'string' && valueType !== 'string')
+          || (expectedType === 'stringOrUndefined'
+            && valueType !== 'string'
+            && valueType !== 'undefined')
+          || (expectedType === 'boolean' && valueType !== 'boolean')
+          || (expectedType === 'record' && !isStringRecord(value))
+          || (expectedType === 'array' && !isStringArray(value))
+        )
+          throw new Error(
+            `Parameter '${key}' of '${configFilename}' should be of type '${expectedType}'. Actual: ${typeof value}`,
+          );
+        return [key, value];
+      }),
+    ) as never;
   };
 
 /** ConfigFileDescriptor instance for a no source package */

@@ -15,7 +15,6 @@ import {
 } from '../shared-utils/constants.js';
 import { isRecord, Record } from '../shared-utils/types.js';
 import { readFiles, readFilesRecursively, toMiniGlobRegExp } from '../shared-utils/utils.js';
-import * as ConfigFileDescriptor from './ConfigFileDescriptor.js';
 import * as PackageFiles from './PackageFiles.js';
 
 /**
@@ -34,12 +33,6 @@ const filesNotGeneratedByConfigsPackageDefault = toMiniGlobRegExp([
   viteTimeStampFilenamePattern,
 ]);
 
-const noSourcePackageConfigFileDecoder = ConfigFileDescriptor.toDecoder(
-  ConfigFileDescriptor.noSourcePackage,
-);
-const sourcePackageConfigFileDecoder = ConfigFileDescriptor.toDecoder(
-  ConfigFileDescriptor.sourcePackage,
-);
 /** Properties shared by all Package's */
 interface _Base {
   /** Name of the package */

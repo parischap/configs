@@ -5,7 +5,7 @@ export const devScope = scope + '-dev';
 export const slashedScope = scope + '/';
 export const slashedDevScope = devScope + '/';
 
-export const packageManager = `pnpm@10.25.0`;
+export const packageManager = `pnpm@10.26.0`;
 
 export const versionControlService = 'github.com';
 

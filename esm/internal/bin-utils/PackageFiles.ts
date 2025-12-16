@@ -880,6 +880,7 @@ const _sourcePackage = async ({
           circular: `madge --extensions ts --circular --no-color --no-spinner ${sourceFolderName}`,
           'clean-prod': `pnpm rmrf ${prodFolderName} && pnpm mkdirp ${prodFolderName}`,
           checks: 'pnpm circular && pnpm tscheck && pnpm lint && pnpm test',
+          tsconfig: `tsc --showConfig --project ${tsConfigSrcFilename}`,
           build: 'pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..',
           examples: examples
             .map((exampleName) => `${tsExecuter} ${examplesFolderName}/${exampleName}`)
