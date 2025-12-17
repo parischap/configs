@@ -1,4 +1,7 @@
-/** Module that describes the type and optional default value of a parameter of a configuration file */
+/**
+ * Module that describes the type and optional default value of a parameter of a project
+ * configuration file
+ */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 import {
   Data,
@@ -6,7 +9,7 @@ import {
   Proto,
   StringArray,
   StringRecord,
-} from '../shared-utils/types.js';
+} from '../../shared-utils/types.js';
 
 /**
  * Module tag
@@ -14,7 +17,7 @@ import {
  * @category Module markers
  */
 
-const _moduleTag = '@parischap/configs/internal/bin-utils/ParameterDescriptor/';
+const _moduleTag = '@parischap/configs/internal/bin-utils/JsonConfigFile/Parameter/';
 const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
 
@@ -32,7 +35,7 @@ type _TypeFromTypeName<T extends AllTypeNames> =
   : never;
 
 /**
- * Type of a ParamDescriptor
+ * Type of a JsonConfigFileParameter
  *
  * @category Models
  */
@@ -46,9 +49,9 @@ export interface Type<E extends AllTypeNames> {
   readonly [_TypeId]: _TypeId;
 }
 
-export type Any = Type<AllTypeNames>;
+export interface Any extends Type<AllTypeNames> {}
 /**
- * Utility type that extracts the expectedType type of a ParamDescriptor
+ * Utility type that extracts the expectedType type of a Parameter
  *
  * @category Utility types
  */

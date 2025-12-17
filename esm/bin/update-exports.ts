@@ -1,8 +1,8 @@
 /* This module must only use Typescript syntax understandable by Node with the --experimental-transform-types flag */
 import { watch } from 'node:fs/promises';
 import { extname } from 'node:path';
-import * as Package from '../internal/bin-utils/Package.js';
-import * as PackageFiles from '../internal/bin-utils/PackageFiles.js';
+import * as PackageFiles from '../internal/bin-utils/ConfigFiles.js';
+import * as Package from '../internal/bin-utils/Package/All.js';
 import * as Project from '../internal/bin-utils/Project.js';
 import {
   activePackageOnlyFlag,

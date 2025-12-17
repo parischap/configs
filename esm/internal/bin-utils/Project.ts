@@ -7,7 +7,7 @@
 import { join, relative, sep } from 'path';
 import { configsPackageName, packagesFolderName } from '../shared-utils/constants.js';
 import { readFolders } from '../shared-utils/utils.js';
-import * as Package from './Package.js';
+import * as Package from './Package/All.js';
 
 /**
  * Module tag

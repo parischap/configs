@@ -18,8 +18,8 @@
 
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used at the very start of a project */
 
-import * as Package from '../internal/bin-utils/Package.js';
-import * as PackageFiles from '../internal/bin-utils/PackageFiles.js';
+import * as PackageFiles from '../internal/bin-utils/ConfigFiles.js';
+import * as Package from '../internal/bin-utils/Package/All.js';
 import * as Project from '../internal/bin-utils/Project.js';
 import { activePackageOnlyFlag } from '../internal/shared-utils/constants.js';
 import { fromPosixPathToOSPath } from '../internal/shared-utils/utils.js';

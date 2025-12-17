@@ -75,7 +75,13 @@ import {
   viteConfigFilename,
   vitestConfigFilename,
 } from '../shared-utils/constants.js';
-import type { ReadonlyRecord, StringArray, StringRecord } from '../shared-utils/types.js';
+import {
+  objectFromDataAndProto,
+  type Data,
+  type Proto,
+  type ReadonlyRecord,
+  type StringRecord,
+} from '../shared-utils/types.js';
 import {
   capitalizeFirstLetter,
   deepMerge2,
@@ -90,60 +96,9 @@ import {
  *
  * @category Module markers
  */
-const _moduleTag = '@parischap/configs/internal/bin-utils/PackageFiles/';
+const _moduleTag = '@parischap/configs/internal/bin-utils/ConfigFiles/';
 const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
-
-/**
- * Type of a PackageFiles
- *
- * @category Models
- */
-export interface Type {
-  /**
-   * Record of all the configuration files of a package. The keys are the names of the configuration
-   * files and the values the contents of these files. If the key has a `json` extension, the
-   * associated value is converted to a json string with JSON.stringfy unless it is already a
-   * string. Otherwise, the associated value must be a string.
-   */
-  readonly configurationFiles: ReadonlyRecord;
-  /** @internal */
-  readonly [_TypeId]: _TypeId;
-}
-
-/**
- * Type guard
- *
- * @category Guards
- */
-export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
-
-/** _prototype */
-const _proto = {
-  [_TypeId]: _TypeId,
-};
-
-/**
- * Parameters used to build a PackageFiles for a source package
- *
- * @category Models
- */
-export interface SourcePackagesConfigParameters {
-  readonly name: string;
-  readonly description: string;
-  readonly dependencies: Readonly<StringRecord>;
-  readonly devDependencies: Readonly<StringRecord>;
-  readonly peerDependencies: Readonly<StringRecord>;
-  readonly examples: Readonly<StringArray>;
-  readonly scripts: Readonly<StringRecord>;
-  readonly environment: string;
-  readonly buildMethod: string;
-  readonly isPublished: boolean;
-  readonly hasDocGen: boolean;
-  readonly keywords: Readonly<StringArray>;
-  readonly useEffectAsPeerDependency: boolean;
-  readonly useEffectPlatform: string;
-}
 
 const PRETTIER_CONFIG = `import {config} from '@parischap/configs/PrettierConfig';
 export default config`;
@@ -363,12 +318,42 @@ aux_links:
     - "//github.com/${owner}/${name}"`;
 
 /**
+ * Type of a PackageFiles
+ *
+ * @category Models
+ */
+export interface Type {
+  /**
+   * Record of all the configuration files of a package. The keys are the names of the configuration
+   * files and the values the contents of these files. If the key has a `json` extension, the
+   * associated value is converted to a json string with JSON.stringify unless it is already a
+   * string. Otherwise, the associated value is a string.
+   */
+  readonly configurationFiles: ReadonlyRecord;
+  /** @internal */
+  readonly [_TypeId]: _TypeId;
+}
+
+/**
+ * Type guard
+ *
+ * @category Guards
+ */
+export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
+
+/** _prototype */
+const _proto: Proto<Type> = {
+  [_TypeId]: _TypeId,
+};
+
+const _make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
+
+/**
  * Constructor
  *
  * @category Constructors
  */
-export const make = (configurationFiles: ReadonlyRecord): Type =>
-  Object.assign(Object.create(_proto), { configurationFiles }) as never;
+export const make = (configurationFiles: ReadonlyRecord): Type => _make({ configurationFiles });
 
 /**
  * Returns the value of the `configurationFiles` property of self
@@ -391,7 +376,7 @@ export const merge = (...packageFilesArr: ReadonlyArray<Type>): Type =>
   );
 
 /**
- * Returns a function that takes configuration files and saves them in self
+ * Saves `self` at path `path`
  *
  * @category Destructors
  */
@@ -419,15 +404,19 @@ export const save = (path: string) => async (self: Type) => {
 /** Empty PackageFiles instance */
 export const empty = make({});
 
-/** PackageFiles instance that implements what is necessary in all situations */
-const _anyPackage = ({
+/**
+ * PackageFiles instance that implements what is necessary in all situations
+ *
+ * @category Instances
+ */
+export const anyPackage = ({
   name,
   description,
-  scripts,
+  scripts = {},
 }: {
   readonly name: string;
   readonly description: string;
-  readonly scripts: StringRecord;
+  readonly scripts?: StringRecord;
 }): Type =>
   make({
     // Used by the format script
@@ -469,10 +458,12 @@ const _anyPackage = ({
   });
 
 /**
- * PackageFiles instance taht implements what is necessary in a package that has no code (no esm
+ * PackageFiles instance that implements what is necessary in a package that has no code (no esm
  * directory). Such a package is also a workspace.
+ *
+ * @category Instances
  */
-const _noSourcePackage: Type = make({
+export const noSourcePackage: Type = make({
   // Used by the checks script
   [tsConfigFilename]: TSCONFIG_OTHERS,
   // Used by the checks script
@@ -509,7 +500,7 @@ const _noSourcePackage: Type = make({
  *
  * @category Instances
  */
-const _sourcePackageBuild = ({
+export const sourcePackageBuild = ({
   buildMethod,
   isPublished,
 }: {
@@ -557,7 +548,7 @@ const _sourcePackageBuild = ({
  *
  * @category Instances
  */
-const _sourcePackageVisibility = ({
+export const sourcePackageVisibility = ({
   parentName,
   isPublished,
   keywords,
@@ -601,7 +592,7 @@ const _sourcePackageVisibility = ({
  *
  * @category Instances
  */
-const _sourcePackageDocGen = ({ hasDocGen }: { readonly hasDocGen: boolean }): Type =>
+export const sourcePackageDocGen = ({ hasDocGen }: { readonly hasDocGen: boolean }): Type =>
   make(
     hasDocGen ?
       {
@@ -622,7 +613,7 @@ const _sourcePackageDocGen = ({ hasDocGen }: { readonly hasDocGen: boolean }): T
  *
  * @category Instances
  */
-const _sourcePackagePlatform = ({
+export const sourcePackagePlatform = ({
   useEffectPlatform,
 }: {
   readonly useEffectPlatform: string;
@@ -653,7 +644,7 @@ const _sourcePackagePlatform = ({
  *
  * @category Instances
  */
-const _sourcePackageEnvironment = ({
+export const sourcePackageEnvironment = ({
   environment,
   isConfigsPackage,
 }: {
@@ -711,7 +702,7 @@ const _sourcePackageEnvironment = ({
  *
  * @category Instances
  */
-const _basePackageJsonExports: Type = make({
+export const basePackageJsonExports: Type = make({
   [packageJsonFilename]: {
     exports: {
       '.': {
@@ -738,7 +729,7 @@ export const sourcePackageExports = async ({
   readonly packagePrefix: string | undefined;
   readonly isConfigsPackage?: boolean;
 }): Promise<Type> => {
-  if (packagePrefix === undefined) return _basePackageJsonExports;
+  if (packagePrefix === undefined) return basePackageJsonExports;
 
   const sourceFiles = (
     await readFilesRecursively({
@@ -770,9 +761,9 @@ export const sourcePackageExports = async ({
     });
 
   return sourceFiles.length === 0 ?
-      _basePackageJsonExports
+      basePackageJsonExports
     : merge(
-        _basePackageJsonExports,
+        basePackageJsonExports,
         make({
           [join(sourceFolderName, indexTsFilename)]: sourceFiles
             .filter(({ isJavascript }) => isJavascript)
@@ -804,15 +795,28 @@ export const sourcePackageExports = async ({
 };
 
 /**
+ * PackageFiles instance that implements the configs package specificities
+ *
+ * @category Instances
+ */
+export const sourcePackageConfigsPackage = make({
+  [packageJsonFilename]: {
+    peerDependencies: configsPeerDependencies,
+    dependencies: configsDependencies,
+  },
+});
+
+/**
  * PackageFiles instance that implements what is necessary in a package that has code (an esm
- * directory). This package is also a workspace.
+ * directory). This package is also a workspace
  */
 /*
  * For a one-package repo, name and parentName are the same. For a sub package, name is the
  * name of the sub package and parentName the name of the monorepo that contains it.
  */
-const _sourcePackage = async ({
+export const sourcePackage = async ({
   name,
+  // parentName is equal to name in a one-package repo
   parentName = name,
   dependencies,
   devDependencies,
@@ -825,6 +829,7 @@ const _sourcePackage = async ({
   keywords,
   useEffectAsPeerDependency,
   useEffectPlatform,
+  // isConfigsPackage is always false in a SubPackage
   isConfigsPackage = false,
   path,
   packagePrefix,
@@ -851,11 +856,12 @@ const _sourcePackage = async ({
       [dependencies, { ...peerDependencies, ...effectDependencies }]
     : [{ ...dependencies, ...effectDependencies }, peerDependencies];
 
-  const exportsConfig = await sourcePackageExports({
+  const exports = await sourcePackageExports({
     path,
     packagePrefix,
     isConfigsPackage,
   });
+
   return merge(
     make({
       // Used by the circular script
@@ -904,177 +910,112 @@ const _sourcePackage = async ({
           + (name === parentName ? '' : `/tree/master/${packagesFolderName}/${name}`),
       },
     }),
-    _sourcePackageBuild({ buildMethod, isPublished }),
-    _sourcePackageVisibility({ parentName, isPublished, keywords }),
-    _sourcePackageDocGen({ hasDocGen }),
-    _sourcePackagePlatform({ useEffectPlatform }),
-    _sourcePackageEnvironment({ environment, isConfigsPackage }),
-    exportsConfig,
+    sourcePackageBuild({ buildMethod, isPublished }),
+    sourcePackageVisibility({ parentName, isPublished, keywords }),
+    sourcePackageDocGen({ hasDocGen }),
+    sourcePackagePlatform({ useEffectPlatform }),
+    sourcePackageEnvironment({ environment, isConfigsPackage }),
+    isConfigsPackage ? sourcePackageConfigsPackage : empty,
+    exports,
   );
 };
 
-/** PackageFiles instance that implements what is necessary at the root of a git (and github) repo */
-const _repo = ({
-  docGenParameters,
-  isPublished,
+export const repoVisibility: Type = make({
+  /* Github actions need to be at the root of the github repo. This action calls a script `build-and-publish` but changes the working directory to the published package directory before calling them. So this script must be in sourcePackage.
+   */
+  [githubWorkflowsPublishPath]: GITHUB_WORKFLOWS_PUBLISH_SCRIPT,
+});
+
+/**
+ * PackageFiles instance that implements the docGen part of a repo
+ *
+ * @category Instances
+ */
+export const repoDocGen = ({
+  name,
+  description,
 }: {
-  readonly docGenParameters?: { readonly name: string; readonly description: string };
-  readonly isPublished: boolean;
+  readonly name: string;
+  readonly description: string;
 }): Type =>
   make({
-    ...(isPublished ?
-      /* Github actions need to be at the root of the github repo. This action calls a script `build-and-publish` but changes the working directory to the published package directory before calling them. So this script must be in configInternalProject.ts.
-       */
-      {
-        [githubWorkflowsPublishPath]: GITHUB_WORKFLOWS_PUBLISH_SCRIPT,
-      }
-    : {}),
-    ...(docGenParameters !== undefined ?
-      {
-        /* Github actions need to be at the root of the github repo. This action calls a script `prepare-docs'`  */
-        [githubWorkflowsPagesPath]: GITHUB_WORKFLOWS_PAGES_SCRIPT,
-        // Used by the github pages.yml action
-        [`${docsFolderName}/${docsIndexMdFilename}`]: docGenParameters.description,
-        // Used by the github pages.yml action
-        [`${docsFolderName}/${docsConfigYmlFilename}`]: JUST_THE_DOCS_CONFIG(docGenParameters.name),
-      }
-    : {}),
-    [gitIgnoreFilename]: GIT_IGNORE,
+    /* Github actions need to be at the root of the github repo. This action calls a script `prepare-docs'`  */
+    [githubWorkflowsPagesPath]: GITHUB_WORKFLOWS_PAGES_SCRIPT,
+    // Used by the github pages.yml action
+    [`${docsFolderName}/${docsIndexMdFilename}`]: description,
+    // Used by the github pages.yml action
+    [`${docsFolderName}/${docsConfigYmlFilename}`]: JUST_THE_DOCS_CONFIG(name),
     [packageJsonFilename]: {
-      packageManager,
-      ...(docGenParameters !== undefined ?
-        {
-          scripts: {
-            // --if-present is necessary because it is possible that no package in the workspace has a docgen script
-            'prepare-docs':
-              'pnpm -r --if-present -include-workspace-root=true --parallel --aggregate-output docgen && compile-docs',
-          },
-        }
-      : {}),
+      scripts: {
+        // --if-present is necessary because it is possible that no package in the workspace has a docgen script
+        'prepare-docs':
+          'pnpm -r --if-present -include-workspace-root=true --parallel --aggregate-output docgen && compile-docs',
+      },
+    },
+  });
 
-      /*pnpm: {
+/**
+ * PackageFiles instance that implements what is necessary at the root of a git (and github) repo
+ *
+ * @category Instances
+ */
+export const repo = ({
+  name,
+  description,
+  // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
+  hasDocGen = true,
+  // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
+  isPublished = true,
+}: {
+  readonly name: string;
+  readonly description: string;
+  readonly hasDocGen?: boolean;
+  readonly isPublished?: boolean;
+}): Type =>
+  merge(
+    ...[
+      make({
+        [gitIgnoreFilename]: GIT_IGNORE,
+        [packageJsonFilename]: {
+          packageManager,
+          /*pnpm: {
       patchedDependencies: {},
       overrides: {
         //'tsconfig-paths': '^4.0.0'
       },
     },*/
-    },
-  });
-
-/**
- * PackageFiles instance to be used at the root (top) of a monorepo
- *
- * @category Instances
- */
-export const monorepo = ({
-  name,
-  description,
-}: {
-  readonly name: string;
-  readonly description: string;
-}): Type =>
-  merge(
-    _anyPackage({
-      name,
-      description,
-      scripts: {},
-    }),
-    _repo({
-      // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
-      docGenParameters: { name, description },
-      // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
-      isPublished: true,
-    }),
-    _noSourcePackage,
-    // Disabled for the moment, I am not sure I need it
-    /*{
-        // Used by all scripts to define scope of -r flag.
-        [pnpmWorkspaceFilename]: PNPM_WORKSPACE_CONFIG,
-      },*/
+        },
+      }),
+      ...(hasDocGen ? [repoDocGen({ name, description })] : []),
+      ...(isPublished ? [repoVisibility] : []),
+    ],
   );
 
 /**
- * PackageFiles instance to be used at the root (top) of a project
+ * PackageFiles instance that implements the workspace part of a top repo
  *
  * @category Instances
  */
-export const topPackage = ({
+export const topPackageWorkspace = ({
   name,
-  description,
   allSourcePackagesNames,
   allPackagesPaths,
 }: {
   readonly name: string;
-  readonly description: string;
   readonly allSourcePackagesNames: ReadonlyArray<string>;
   readonly allPackagesPaths: ReadonlyArray<string>;
-}): Type =>
-  merge(
-    _anyPackage({
+}) =>
+  make({
+    [pnpmWorkspaceFilename]:
+      PNPM_WORKSPACE_CONFIG
+      + (allSourcePackagesNames.length !== 0 ?
+        `
+      overrides:
+      ${allSourcePackagesNames.map((packageName) => `  '${slashedScope}${packageName}': 'workspace:*'`).join('\n')}`
+      : ''),
+    // Used by vscode
+    [`${name}.code-workspace`]: VSCODE_WORKSPACE_CONFIG({
       name,
-      description,
-      scripts: {},
+      allPackagesPaths,
     }),
-    _noSourcePackage,
-
-    // Used by all scripts to define scope of -r flag
-    make({
-      [pnpmWorkspaceFilename]:
-        PNPM_WORKSPACE_CONFIG
-        + (allSourcePackagesNames.length !== 0 ?
-          `
-overrides:
-${allSourcePackagesNames.map((packageName) => `  '${slashedScope}${packageName}': 'workspace:*'`).join('\n')}`
-        : ''),
-      // Used by vscode
-      [`${name}.code-workspace`]: VSCODE_WORKSPACE_CONFIG({
-        name,
-        allPackagesPaths,
-      }),
-    }),
-  );
-
-/**
- * PackageFiles instance to be used in a one-package repo
- *
- * @category Instances
- */
-export const onePackageRepo = async (
-  params: SourcePackagesConfigParameters & {
-    readonly isConfigsPackage: boolean;
-    readonly path: string;
-    readonly packagePrefix: string | undefined;
-  },
-): Promise<Type> => {
-  const sourcePackage = await _sourcePackage(params);
-  return merge(
-    _anyPackage(params),
-    _repo({
-      ...(params.hasDocGen ? { docGenParameters: params } : {}),
-      isPublished: params.isPublished,
-    }),
-    sourcePackage,
-    make({
-      [packageJsonFilename]: {
-        peerDependencies: configsPeerDependencies,
-        dependencies: configsDependencies,
-      },
-    }),
-  );
-};
-
-/**
- * PackageFiles instance to be used in a sub package
- *
- * @category Instances
- */
-export const subPackage = async (
-  params: SourcePackagesConfigParameters & {
-    readonly parentName: string;
-    readonly path: string;
-    readonly packagePrefix: string | undefined;
-  },
-): Promise<Type> => {
-  const sourcePackage = await _sourcePackage(params);
-  return merge(_anyPackage(params), sourcePackage);
-};
+  });
