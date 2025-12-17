@@ -25,8 +25,6 @@ type _TypeId = typeof _TypeId;
  * @category Models
  */
 export interface Type extends PackageSourceBase.Type {
-  /** Name of the parent MonoRepo of `self` */
-  readonly parentName: string;
   /** @internal */
   readonly [_TypeId]: _TypeId;
 }
@@ -39,18 +37,15 @@ export interface Type extends PackageSourceBase.Type {
 export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
 
 /** _prototype */
-const _proto: Proto<Type> = {
+const _proto: Proto<Type> = objectFromDataAndProto(PackageSourceBase.proto, {
   [_TypeId]: _TypeId,
-  [PackageBase.externalConfigurationFilesSymbol]: PackageBase.externalConfigurationFilesDefault,
-  async [PackageBase.toPackageFilesSymbol](
+  [PackageBase.toPackageFilesSymbol](
     this: Type,
     exportsFilesOnly: boolean,
   ): Promise<ConfigFiles.Type> {
-    return exportsFilesOnly ?
-        await ConfigFiles.sourcePackageExports(this)
-      : ConfigFiles.merge(ConfigFiles.anyPackage(this), await ConfigFiles.sourcePackage(this));
+    return PackageSourceBase.proto[PackageBase.toPackageFilesSymbol](exportsFilesOnly);
   },
-};
+} as const);
 
 const _make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
 

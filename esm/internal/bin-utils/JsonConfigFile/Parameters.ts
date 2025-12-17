@@ -7,4 +7,4 @@
 import { ReadonlyRecord } from '../../shared-utils/types.js';
 import * as JsonConfigFileParameter from './Parameter.js';
 
-export type Type = ReadonlyRecord<string, JsonConfigFileParameter.Any>;
+export interface Type extends ReadonlyRecord<string, JsonConfigFileParameter.Any> {}

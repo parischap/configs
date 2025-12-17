@@ -3,7 +3,7 @@ import { watch } from 'node:fs/promises';
 import { extname } from 'node:path';
 import * as PackageFiles from '../internal/bin-utils/ConfigFiles.js';
 import * as Package from '../internal/bin-utils/Package/All.js';
-import * as Project from '../internal/bin-utils/Project.js';
+import * as Project from '../internal/bin-utils/Packages.js';
 import {
   activePackageOnlyFlag,
   allJavaScriptExtensions,

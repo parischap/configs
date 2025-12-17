@@ -4,15 +4,30 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { StringArray, StringRecord } from '../../shared-utils/types.js';
+import {
+  Data,
+  objectFromDataAndProto,
+  Proto,
+  StringArray,
+  StringRecord,
+} from '../../shared-utils/types.js';
+import * as ConfigFiles from '../ConfigFiles.js';
 import * as PackageBase from './Base.js';
 
 /**
- * Type of a Base
+ * Module tag
+ *
+ * @category Module markers
+ */
+const _moduleTag = '@parischap/configs/internal/bin-utils/Package/SourceBase/';
+const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
+type _TypeId = typeof _TypeId;
+
+/**
+ * Type of a SourceBase
  *
  * @category Models
  */
-// This object is not marked because it is not meant to be built
 export interface Type extends PackageBase.Type {
   /** Description of the package */
   readonly description: string;
@@ -80,4 +95,39 @@ export interface Type extends PackageBase.Type {
    * deactivate it, omit the field.
    */
   readonly packagePrefix: string | undefined;
+
+  /** @internal */
+  readonly [_TypeId]: _TypeId;
 }
+
+/**
+ * Type guard
+ *
+ * @category Guards
+ */
+export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
+
+/** _prototype */
+export const proto: Proto<Type> = objectFromDataAndProto(PackageBase.proto, {
+  [_TypeId]: _TypeId,
+  async [PackageBase.toPackageFilesSymbol](
+    this: Type,
+    exportsFilesOnly: boolean,
+  ): Promise<ConfigFiles.Type> {
+    return Promise.resolve(
+      ConfigFiles.merge(
+        await PackageBase.proto[PackageBase.toPackageFilesSymbol](exportsFilesOnly),
+        await (exportsFilesOnly ?
+          ConfigFiles.sourcePackageExports(this)
+        : ConfigFiles.sourcePackage(this)),
+      ),
+    );
+  },
+} as const);
+
+/**
+ * Constructor
+ *
+ * @category Constructors
+ */
+export const make = (data: Data<Type>): Type => objectFromDataAndProto(proto, data);

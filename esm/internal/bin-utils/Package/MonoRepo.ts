@@ -37,29 +37,18 @@ export interface Type extends PackageNoSourceBase.Type {
 export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
 
 /** _prototype */
-const _proto: Proto<Type> = {
+const _proto: Proto<Type> = objectFromDataAndProto(PackageNoSourceBase.proto, {
   [_TypeId]: _TypeId,
-  [PackageBase.externalConfigurationFilesSymbol]: PackageBase.externalConfigurationFilesDefault,
-  [PackageBase.toPackageFilesSymbol](
+  async [PackageBase.toPackageFilesSymbol](
     this: Type,
     exportsFilesOnly: boolean,
   ): Promise<ConfigFiles.Type> {
-    return Promise.resolve(
-      exportsFilesOnly ?
-        ConfigFiles.empty
-      : ConfigFiles.merge(
-          ConfigFiles.anyPackage(this),
-          ConfigFiles.repo(this),
-          ConfigFiles.noSourcePackage,
-          // Disabled for the moment, I am not sure I need it
-          /*{
-            // Used by all scripts to define scope of -r flag.
-            [pnpmWorkspaceFilename]: PNPM_WORKSPACE_CONFIG,
-          },*/
-        ),
+    return ConfigFiles.merge(
+      await PackageNoSourceBase.proto[PackageBase.toPackageFilesSymbol](exportsFilesOnly),
+      exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.repo(this),
     );
   },
-};
+} as const);
 
 const _make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
 

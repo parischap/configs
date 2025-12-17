@@ -20,7 +20,7 @@
 
 import * as PackageFiles from '../internal/bin-utils/ConfigFiles.js';
 import * as Package from '../internal/bin-utils/Package/All.js';
-import * as Project from '../internal/bin-utils/Project.js';
+import * as Project from '../internal/bin-utils/Packages.js';
 import { activePackageOnlyFlag } from '../internal/shared-utils/constants.js';
 import { fromPosixPathToOSPath } from '../internal/shared-utils/utils.js';
 

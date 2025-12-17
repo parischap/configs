@@ -7,7 +7,7 @@
 /* This module must not use any external dependency because it cleans the node-modules folders and must therfore not depend on any dependency in these folders */
 import { rm } from 'fs/promises';
 import { join } from 'path';
-import * as Project from '../internal/bin-utils/Project.js';
+import * as Project from '../internal/bin-utils/Packages.js';
 import { activePackageOnlyFlag, npmFolderName } from '../internal/shared-utils/constants.js';
 
 const arg1 = process.argv[2];

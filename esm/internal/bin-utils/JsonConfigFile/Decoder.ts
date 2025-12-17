@@ -12,17 +12,19 @@ import * as JsonConfigFileParameter from './Parameter.js';
 import * as JsonConfigFileParameters from './Parameters.js';
 
 // We do not create a marked object because this module has nothing but a constructor and instances
-export type Type<P extends JsonConfigFileParameters.Type> = ({
-  configurationFileObject,
-  packageName,
-}: {
-  /** Object representing the JSON value of a project configuration file */
-  readonly configurationFileObject: Record;
-  /** Name of the package that contains the project configuration files */
-  readonly packageName: string;
-}) => {
-  [k in keyof P]: JsonConfigFileParameter.ExpectedType<P[k]>;
-};
+export interface Type<P extends JsonConfigFileParameters.Type> {
+  ({
+    configurationFileObject,
+    packageName,
+  }: {
+    /** Object representing the JSON value of a project configuration file */
+    readonly configurationFileObject: Record;
+    /** Name of the package that contains the project configuration files */
+    readonly packageName: string;
+  }): {
+    [k in keyof P]: JsonConfigFileParameter.ExpectedType<P[k]>;
+  };
+}
 
 /**
  * Constructor from a ConfigFileDescriptor

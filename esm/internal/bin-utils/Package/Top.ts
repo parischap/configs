@@ -42,27 +42,22 @@ export interface Type extends PackageNoSourceBase.Type {
 export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
 
 /** _prototype */
-const _proto: Proto<Type> = {
+const _proto: Proto<Type> = objectFromDataAndProto(PackageNoSourceBase.proto, {
   [_TypeId]: _TypeId,
   [PackageBase.externalConfigurationFilesSymbol]: toMiniGlobRegExp([
     readMeFilename,
     pnpmLockFilename,
   ]),
-  [PackageBase.toPackageFilesSymbol](
+  async [PackageBase.toPackageFilesSymbol](
     this: Type,
     exportsFilesOnly: boolean,
   ): Promise<ConfigFiles.Type> {
-    return Promise.resolve(
-      exportsFilesOnly ?
-        ConfigFiles.empty
-      : ConfigFiles.merge(
-          ConfigFiles.anyPackage(this),
-          ConfigFiles.noSourcePackage,
-          ConfigFiles.topPackageWorkspace(this),
-        ),
+    return ConfigFiles.merge(
+      await PackageNoSourceBase.proto[PackageBase.toPackageFilesSymbol](exportsFilesOnly),
+      exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.topPackageWorkspace(this),
     );
   },
-};
+} as const);
 
 /**
  * Constructor

@@ -11,6 +11,7 @@ import {
 } from '../../shared-utils/constants.js';
 import { readFiles, readFilesRecursively } from '../../shared-utils/utils.js';
 import * as PackageFiles from '../ConfigFiles.js';
+import * as PackageBase from './Base.js';
 import type * as PackageMonoRepo from './MonoRepo.js';
 import type * as PackageOnePackageRepo from './OnePackageRepo.js';
 import type * as PackageSubPackage from './SubPackage.js';
@@ -51,6 +52,21 @@ export const name = (self: Type): string => self.name;
 export const path = (self: Type): string => self.path;
 
 /**
+ * Predicate that returns true if `self` is the active Package, i.e. the package at the root of
+ * which the binary was called
+ *
+ * @category Predicates
+ */
+export const isActive = (self: Type): boolean => self.path === '';
+
+/**
+ * Predicate that returns true if `self` is a source Package
+ *
+ * @category Predicates
+ */
+export const isSourcePackage = (self: Type): boolean => self[PackageBase.isSourcePackageSymbol]();
+
+/**
  * Returns an array of all configuration files present in `self`
  *
  * @category Destructors
@@ -67,7 +83,9 @@ export const allConfigurationFiles = async (self: Type): Promise<Array<string>> 
       })
     )
       .map(({ relativePath }) => relativePath)
-      .filter((relativePath) => !self.filesNotGeneratedByConfigsPackage.test(relativePath)),
+      .filter(
+        (relativePath) => !self[PackageBase.externalConfigurationFilesSymbol].test(relativePath),
+      ),
     ...(
       await readFiles({
         path: join(path, packagesFolderName),
@@ -94,4 +112,4 @@ export const cleanProd = async (self: Type): Promise<void> => {
 export const toPackageFiles = (
   self: Type,
   { exportsFilesOnly = false }: { readonly exportsFilesOnly?: boolean } = {},
-): Promise<PackageFiles.Type> => self.toPackageFiles(exportsFilesOnly);
+): Promise<PackageFiles.Type> => self[PackageBase.toPackageFilesSymbol](exportsFilesOnly);

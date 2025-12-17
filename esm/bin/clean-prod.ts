@@ -7,7 +7,7 @@
  */
 
 import * as Package from '../internal/bin-utils/Package/All.js';
-import * as Project from '../internal/bin-utils/Project.js';
+import * as Project from '../internal/bin-utils/Packages.js';
 import { activePackageOnlyFlag } from '../internal/shared-utils/constants.js';
 
 const arg1 = process.argv[2];

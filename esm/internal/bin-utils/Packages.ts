@@ -1,45 +1,20 @@
 /**
- * Module that represents a Project (see README.md). Pacakages are stored linearly in an Array, not
- * in a tree.
+ * Module that represents an array of Package's, which can be a whole Project (see README.md) or
+ * only part of it.
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import { join, relative, sep } from 'path';
 import { configsPackageName, packagesFolderName } from '../shared-utils/constants.js';
 import { readFolders } from '../shared-utils/utils.js';
-import * as Package from './Package/All.js';
+import * as PackageAll from './Package/All.js';
+import * as PackageMonoRepo from './Package/MonoRepo.js';
+import * as PackageOnePackageRepo from './Package/OnePackageRepo.js';
+import * as PackageSubPackage from './Package/SubPackage.js';
+import * as PackageTop from './Package/Top.js';
 
-/**
- * Module tag
- *
- * @category Module markers
- */
-const _moduleTag = '@parischap/configs/internal/bin-utils/Project/';
-const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
-type _TypeId = typeof _TypeId;
-
-/** Type of a Project */
-export interface Type {
-  /** Array of the packages constituting the project */
-  readonly packages: ReadonlyArray<Package.Type>;
-  /** @internal */
-  readonly [_TypeId]: _TypeId;
-}
-
-/**
- * Type guard
- *
- * @category Guards
- */
-export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
-
-/** _prototype */
-const _proto = {
-  [_TypeId]: _TypeId,
-};
-
-export const _make = (data: { readonly packages: ReadonlyArray<Package.Type> }) =>
-  Object.assign(Object.create(_proto), data) as never;
+/** Type of a Packages */
+export interface Type extends ReadonlyArray<PackageAll.Type> {}
 
 /**
  * Constructor that returns all the packages in the active Project or only the active Package if
@@ -49,12 +24,12 @@ export const _make = (data: { readonly packages: ReadonlyArray<Package.Type> }) 
  *
  * @category Constructors
  */
-export const make = async (activePackageOnly: boolean): Promise<Type> => {
+export const make = async (): Promise<Type> => {
   const currentPath = process.cwd();
   const splitPath = currentPath.split(sep);
   const firstPackagesIndex = splitPath.findIndex((split) => split === packagesFolderName);
   if (firstPackagesIndex <= 0) throw new Error('Could not find project root');
-  const topPackagePath = join(...splitPath.slice(0, firstPackagesIndex));
+  const topPackagePath = relative(currentPath, join(...splitPath.slice(0, firstPackagesIndex)));
   const topPackageName = splitPath[firstPackagesIndex - 1] as string;
 
   console.log(`Project '${topPackageName}' root identified at: '${topPackagePath}'`);
@@ -79,32 +54,34 @@ export const make = async (activePackageOnly: boolean): Promise<Type> => {
 
         return [
           isMonoRepo ?
-            Package.MonoRepo.make({ name: repoName, path: repoPath })
-          : Package.OnePackageRepo.make({
+            await PackageMonoRepo.make({ name: repoName, path: repoPath })
+          : await PackageOnePackageRepo.make({
               name: repoName,
               path: repoPath,
               isConfigsPackage: repoName === configsPackageName,
             }),
-          ...subPackages.map((subPackageName) =>
-            Package.SubPackage.make({
-              name: subPackageName,
-              path: join(repoPackagesPath, subPackageName),
-              parentName: repoName,
-            }),
-          ),
+          ...(await Promise.all(
+            subPackages.map((subPackageName) =>
+              PackageSubPackage.make({
+                name: subPackageName,
+                path: join(repoPackagesPath, subPackageName),
+                parentName: repoName,
+              }),
+            ),
+          )),
         ];
       }),
     )
   ).flat();
 
-  const allSourcePackages = allPackagesButTop.filter(Package.isSourcePackage);
+  const allSourcePackages = allPackagesButTop.filter(PackageAll.isSourcePackage);
 
   const packages = [
-    Package.TopPackage.make({
+    PackageTop.make({
       name: topPackageName,
       path: topPackagePath,
-      allSourcePackagesNames: allSourcePackages.map(Package.name),
-      allPackagesPaths: ['.', ...allPackagesButTop.map(Package.path)],
+      allSourcePackagesNames: allSourcePackages.map(PackageAll.name),
+      allPackagesPaths: ['.', ...allPackagesButTop.map(PackageAll.path)],
     }),
     ...allPackagesButTop,
   ].filter(
