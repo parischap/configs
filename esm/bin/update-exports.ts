@@ -1,9 +1,6 @@
 /* This module must only use Typescript syntax understandable by Node with the --experimental-transform-types flag */
 import { watch } from 'node:fs/promises';
 import { extname } from 'node:path';
-import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
-import * as Package from '../internal/bin-utils/Package/All.js';
-import * as Project from '../internal/bin-utils/ProjectBase.js';
 import {
   activePackageOnlyFlag,
   allJavaScriptExtensions,
@@ -11,7 +8,10 @@ import {
   packagePrefixFlag,
   sourceFolderName,
   watchFlag,
-} from '../internal/shared-utils/constants.js';
+} from '../constants.js';
+import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
+import * as Package from '../internal/bin-utils/Package/All.js';
+import * as Project from '../internal/bin-utils/ProjectBase.js';
 
 const command = process.argv[1] ?? 'update-exports';
 

@@ -5,7 +5,7 @@
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import { join, sep } from 'path';
-import { configsPackageName, packagesFolderName } from '../shared-utils/constants.js';
+import { configsPackageName, packagesFolderName } from '../../constants.js';
 import { Data, objectFromDataAndProto, Proto } from '../shared-utils/types.js';
 import { readFolders } from '../shared-utils/utils.js';
 import * as PackageBase from './Package/Base.js';

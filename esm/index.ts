@@ -1,5 +1,6 @@
 // ************** This file was automatically generated. DO NOT MODIFY ************************
 
+export * as Constants from './constants.js';
 export * as EslintConfig from './eslintConfig.js';
 export * as IndexTests from './index.tests.js';
 export * as PrettierConfig from './prettierConfig.js';

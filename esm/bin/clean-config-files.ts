@@ -5,10 +5,9 @@
  * executed. The active Package is the one in whose root this binary is executed.
  */
 
+import { activePackageOnlyFlag } from '../constants.js';
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
 import * as ProjectBase from '../internal/bin-utils/ProjectBase.js';
-import { activePackageOnlyFlag } from '../internal/shared-utils/constants.js';
-import { rmAndLogIfSuccessful } from '../internal/shared-utils/utils.js';
 
 console.log('Cleaning config files');
 const arg1 = process.argv[2];
@@ -25,16 +24,12 @@ const filteredProject = ProjectBase.filterAndShowCount(
 await Promise.all(
   filteredProject.packages.map(async (currentPackage) => {
     try {
-      const allConfigurationFiles = await PackageBase.toConfigurationFileList(currentPackage);
+      const allConfigurationFiles = await PackageBase.getPathsOfExistingConfigFiles(currentPackage);
 
       /* eslint-disable-next-line functional/no-expression-statements*/
       await Promise.all(
         allConfigurationFiles.map((relativePath) =>
-          rmAndLogIfSuccessful({
-            packageName: currentPackage.name,
-            packagePath: currentPackage.path,
-            relativePath,
-          }),
+          PackageBase.rmAndLogIfSuccessful(relativePath)(currentPackage),
         ),
       );
     } catch (e: unknown) {

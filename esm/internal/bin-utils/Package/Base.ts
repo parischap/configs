@@ -9,15 +9,16 @@
 import { rm } from 'fs/promises';
 import { join, relative } from 'path';
 import {
-  configFilename,
   foldersWithoutConfigFiles,
+  npmFolderName,
   packagesFolderName,
   pnpmLockFilename,
   prodFolderName,
+  projectConfigFilename,
   readMeFilename,
   tsBuildInfoFolderName,
   viteTimeStampFilenamePattern,
-} from '../../shared-utils/constants.js';
+} from '../../../constants.js';
 import { Data, objectFromDataAndProto, Proto, Record } from '../../shared-utils/types.js';
 import {
   readFiles,
@@ -43,7 +44,7 @@ const EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE = toMiniGlobRegExp([
 
 const EXTERNAL_CONFIGURATION_FILES_FOR_OTHER_PACKAGES = toMiniGlobRegExp([
   readMeFilename,
-  configFilename,
+  projectConfigFilename,
   viteTimeStampFilenamePattern,
 ]);
 
@@ -141,8 +142,8 @@ export const isSourcePackage = (self: Type): boolean =>
  *
  * @category Destructors
  */
-export const readConfigFile = async (self: Type): Promise<Record> =>
-  readJsonFile(join(self.path, configFilename));
+export const readProjectConfigFile = async (self: Type): Promise<Record> =>
+  readJsonFile(join(self.path, projectConfigFilename));
 
 /**
  * Returns an array of the paths of the configuration files present in `self`. The paths are
@@ -150,7 +151,7 @@ export const readConfigFile = async (self: Type): Promise<Record> =>
  *
  * @category Destructors
  */
-export const toConfigurationFileList = async (self: Type): Promise<Array<string>> => {
+export const getPathsOfExistingConfigFiles = async (self: Type): Promise<Array<string>> => {
   const { path } = self;
 
   return [
@@ -178,11 +179,41 @@ export const toConfigurationFileList = async (self: Type): Promise<Array<string>
   ];
 };
 
-/** Cleans prod directories of `self` */
-export const cleanProd = async (self: Type): Promise<void> => {
-  const { path } = self;
+/**
+ * Deletes in `self` the file or folder at `relativePath` expressed relatively to the root of
+ * `self`. Logs the good completion of the task only if a file or folder was effectively deleted
+ */
+export const rmAndLogIfSuccessful =
+  (relativePath: string) =>
+  async (self: Type): Promise<void> => {
+    try {
+      const { path: packagePath, name: packageName } = self;
+      /* eslint-disable-next-line functional/no-expression-statements */
+      await rm(join(packagePath, relativePath), { recursive: true });
+      console.log(`'${packageName}': deleted '${relativePath}'`);
+    } catch (e: unknown) {
+      if (!(e instanceof Error) || !('code' in e) || e.code !== 'ENOENT') throw e;
+    }
+  };
+
+/**
+ * Cleans prod directories of `self`
+ *
+ * @category Destructors
+ */
+export const cleanProdFolders = async (self: Type): Promise<void> => {
   /* eslint-disable-next-line functional/no-expression-statements*/
-  await rm(join(path, prodFolderName), { force: true, recursive: true });
+  await rmAndLogIfSuccessful(prodFolderName)(self);
   /* eslint-disable-next-line functional/no-expression-statements*/
-  await rm(join(path, tsBuildInfoFolderName), { force: true, recursive: true });
+  await rmAndLogIfSuccessful(tsBuildInfoFolderName)(self);
+};
+
+/**
+ * Cleans prod directories of `self`
+ *
+ * @category Destructors
+ */
+export const cleanNodeModulesFolder = async (self: Type): Promise<void> => {
+  /* eslint-disable-next-line functional/no-expression-statements*/
+  await rmAndLogIfSuccessful(npmFolderName)(self);
 };

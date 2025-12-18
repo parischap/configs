@@ -74,7 +74,7 @@ import {
   versionControlService,
   viteConfigFilename,
   vitestConfigFilename,
-} from '../shared-utils/constants.js';
+} from '../../constants.js';
 import {
   objectFromDataAndProto,
   type Data,
@@ -139,7 +139,6 @@ const TSCONFIG: ReadonlyRecord = {
 const TSCONFIG_SOURCE = {
   extends: tsconfigBasePath,
   include: [tsConfigStyleIncludeForSourceFiles],
-  /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
   compilerOptions: {
     tsBuildInfoFile: `${tsBuildInfoFolderName}/${srcMark}.tsbuildinfo`,
     rootDir: '.',
@@ -168,14 +167,11 @@ const TSCONFIG_PLAIN_SOURCE: ReadonlyRecord = deepMerge2(TSCONFIG_SOURCE, {
   },
 });
 
-/*
-Although node allows importing a package from itself (see https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name), it does not work well with Typescript because it will not consider the imported package as a seperate one. In particular, it will complain that the imported file is not defined in the include field of the tsconfig.json. For that reason, we need to reference the source sub-project from the examples sub-project 
- */
 const TSCONFIG_EXAMPLES: ReadonlyRecord = {
   extends: tsconfigBasePath,
   include: [tsConfigStyleIncludeForExampleFiles],
+  // The examples project needs to import the source project. The other possibility would be to create a package.json in the tests folder
   references: [{ path: tsConfigSrcFilename }],
-  /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
   compilerOptions: {
     tsBuildInfoFile: `${tsBuildInfoFolderName}/${examplesMark}.tsbuildinfo`,
     rootDir: '.',
@@ -185,15 +181,11 @@ const TSCONFIG_EXAMPLES: ReadonlyRecord = {
   },
 };
 
-/*
-Although node allows importing a package from itself (see https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name), it does not work well with Typescript because it will not consider the imported package as a seperate one. In particular, it will complain that the imported file is not defined in the include field of the tsconfig.json. For that reason, we need to reference the source sub-project from the tests sub-project 
- */
 const TSCONFIG_TESTS: ReadonlyRecord = {
   extends: tsconfigBasePath,
   include: [tsConfigStyleIncludeForTestsFiles],
   // The tests project needs to import the source project. The other possibility would be to create a package.json in the tests folder
   references: [{ path: tsConfigSrcFilename }],
-  /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
   compilerOptions: {
     tsBuildInfoFile: `${tsBuildInfoFolderName}/${testsMark}.tsbuildinfo`,
     rootDir: '.',
@@ -207,7 +199,6 @@ const TSCONFIG_TESTS: ReadonlyRecord = {
 const TSCONFIG_OTHERS: ReadonlyRecord = {
   extends: tsconfigBasePath,
   exclude: [...foldersWithoutConfigFiles, ...filesGeneratedByThirdParties],
-  /* NoEmit cannot be set to true in a referenced project even though we never emit anything . rootDir, outDir and declarationDir need to be set otherwise Typescript will complain */
   compilerOptions: {
     tsBuildInfoFile: `${tsBuildInfoFolderName}/${othersMark}.tsbuildinfo`,
     rootDir: '.',

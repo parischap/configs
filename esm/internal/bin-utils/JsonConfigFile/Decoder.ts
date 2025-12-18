@@ -5,7 +5,7 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { configFilename } from '../../shared-utils/constants.js';
+import { projectConfigFilename } from '../../../constants.js';
 import { isStringArray, isStringRecord, Record } from '../../shared-utils/types.js';
 import * as JsonConfigFileFormat from './Format.js';
 import * as JsonConfigFileParameter from './Parameter.js';
@@ -44,7 +44,7 @@ export const make =
     );
     for (const extraKey of extraKeys)
       console.log(
-        `Package '${packageName}': parameter '${extraKey}' was unexpectedly found in '${configFilename}' (WARNING)`,
+        `Package '${packageName}': parameter '${extraKey}' was unexpectedly found in '${projectConfigFilename}' (WARNING)`,
       );
     return Object.fromEntries(
       Object.entries(paramDescriptors).map(([key, descriptor]) => {
@@ -63,7 +63,7 @@ export const make =
           || (expectedType === 'array' && !isStringArray(value))
         )
           throw new Error(
-            `Parameter '${key}' of '${configFilename}' should be of type '${expectedType}'. Actual: ${typeof value}`,
+            `Parameter '${key}' of '${projectConfigFilename}' should be of type '${expectedType}'. Actual: ${typeof value}`,
           );
         return [key, value];
       }),

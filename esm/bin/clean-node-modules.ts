@@ -5,22 +5,27 @@
  * binary is executed. The active Package is the one in whose root this binary is executed.
  */
 /* This module must not use any external dependency because it cleans the node-modules folders and must therfore not depend on any dependency in these folders */
-import { rm } from 'fs/promises';
-import { join } from 'path';
-import * as Project from '../internal/bin-utils/ProjectBase.js';
-import { activePackageOnlyFlag, npmFolderName } from '../internal/shared-utils/constants.js';
 
+import { activePackageOnlyFlag } from '../constants.js';
+import * as PackageBase from '../internal/bin-utils/Package/Base.js';
+import * as ProjectBase from '../internal/bin-utils/ProjectBase.js';
+
+console.log('Cleaning config files');
 const arg1 = process.argv[2];
+if (arg1 !== undefined && arg1 !== activePackageOnlyFlag)
+  throw new Error(`Unexpected flag '${arg1}' received`);
 const activePackageOnly = arg1 === activePackageOnlyFlag;
 
-const project = await Project.make(activePackageOnly);
+const project = await ProjectBase.make();
+const filteredProject = ProjectBase.filterAndShowCount(
+  activePackageOnly ? PackageBase.isActive : () => true,
+)(project);
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
-  project.packages.map(async (currentPackage) => {
+  filteredProject.packages.map((currentPackage) => {
     try {
-      /* eslint-disable-next-line functional/no-expression-statements*/
-      await rm(join(currentPackage.path, npmFolderName), { force: true, recursive: true });
+      return PackageBase.cleanNodeModulesFolder(currentPackage);
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);
       throw e;

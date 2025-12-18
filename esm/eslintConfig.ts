@@ -11,7 +11,7 @@ import {
   eslintStyleIncludeForSourceFiles,
   filesGeneratedByThirdParties,
   foldersGeneratedByThirdParties,
-} from './internal/shared-utils/constants.js';
+} from './constants.js';
 import { regExpEscape } from './internal/shared-utils/utils.js';
 
 import eslint from '@eslint/js';

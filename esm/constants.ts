@@ -1,6 +1,7 @@
+// This module has been placed directly under esm so it gets exports sugar in package.json. This allows importing it from vitest.config.ts and prettier.config.ts which are not capable of importing a .ts extension because they use Node with the --experimental-transform-types flag
+// This module must not import any external dependency. It must be runnable without a package.json
 import { join } from 'path';
 
-// This module must not import any external dependency. It must be runnable without a package.json
 export const owner = 'parischap';
 export const scope = '@' + owner;
 export const devScope = scope + '-dev';
@@ -41,7 +42,7 @@ export const tsConfigSrcFilename = `tsconfig.${srcMark}.json`;
 export const tsConfigTestsFilename = `tsconfig.${testsMark}.json`;
 export const tsConfigExamplesFilename = `tsconfig.${examplesMark}.json`;
 export const tsConfigOthersFilename = `tsconfig.${othersMark}.json`;
-export const configFilename = 'project.config.json';
+export const projectConfigFilename = 'project.config.json';
 export const prettierConfigFilename = 'prettier.config.ts';
 export const eslintConfigFilename = 'eslint.config.ts';
 export const madgeConfigFilename = '.madgerc';

@@ -1,4 +1,5 @@
-/* This module must only use Typescript syntax understandable by Node with the --experimental-transform-types flag because this is how Prettier loads it configuration file when it is in Typescript format */
+/* This module must only use Typescript syntax understandable by Node with the --experimental-transform-types flag because this is how Prettier loads it configuration file when it is in Typescript format. In case we need to import constants, use `import { XX } from '@parischap/configs/Constants';` */
+
 import type { Config } from 'prettier';
 
 export const config: Config = {

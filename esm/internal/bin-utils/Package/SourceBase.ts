@@ -139,7 +139,7 @@ export const fromPackageBase = async ({
   _make({
     ...packageBase,
     ...JsonConfigFileDecoder.sourcePackage({
-      configurationFileObject: await PackageBase.readConfigFile(packageBase),
+      configurationFileObject: await PackageBase.readProjectConfigFile(packageBase),
       packageName: packageBase.name,
     }),
   });

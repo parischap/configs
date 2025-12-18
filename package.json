@@ -1,7 +1,6 @@
 {
   "name": "@parischap/configs",
   "type": "module",
-  "description": "Utility to generate configuration files in a repository",
   "author": "Jérôme MARTIN",
   "license": "MIT",
   "scripts": {
@@ -22,6 +21,7 @@
     "reinstall-all-dependencies": "pnpm i --force",
     "circular": "madge --extensions ts --circular --no-color --no-spinner esm",
     "checks": "pnpm circular && pnpm tscheck && pnpm lint && pnpm test",
+    "tsconfig": "tsc --showConfig --project tsconfig.esm.json",
     "build": "pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..",
     "examples": "",
     "update-imports": "node node_modules/@parischap/configs/esm/bin/update-imports.ts run ",
@@ -51,7 +51,7 @@
     "@babel/plugin-transform-export-namespace-from": "7.27.1",
     "@babel/plugin-transform-modules-commonjs": "7.27.1"
   },
-  "packageManager": "pnpm@10.25.0",
+  "description": "Utility to generate configuration files in a repository",
   "module": "./esm/index.js",
   "peerDependencies": {
     "effect": "3.19.6",
@@ -65,12 +65,28 @@
   },
   "homepage": "https://github.com/parischap/configs",
   "private": true,
+  "dependencies": {
+    "globals": "16.4.0",
+    "@tsconfig/strictest": "2.0.8",
+    "@eslint/js": "9.39.1",
+    "@eslint/json": "0.14.0",
+    "@eslint/markdown": "7.5.1",
+    "@html-eslint/eslint-plugin": "0.49.0",
+    "@html-eslint/parser": "0.49.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-functional": "9.0.2",
+    "eslint-plugin-yml": "1.19.0",
+    "typescript-eslint": "8.47.0"
+  },
   "exports": {
     ".": {
       "default": "./esm/index.js"
     },
     "./tests": {
       "default": "./esm/index.tests.js"
+    },
+    "./Constants": {
+      "default": "./esm/constants.ts"
     },
     "./EslintConfig": {
       "default": "./esm/eslintConfig.ts"
@@ -94,17 +110,5 @@
       "default": "./esm/vitestConfigSource.ts"
     }
   },
-  "dependencies": {
-    "globals": "16.4.0",
-    "@tsconfig/strictest": "2.0.8",
-    "@eslint/js": "9.39.1",
-    "@eslint/json": "0.14.0",
-    "@eslint/markdown": "7.5.1",
-    "@html-eslint/eslint-plugin": "0.49.0",
-    "@html-eslint/parser": "0.49.0",
-    "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-functional": "9.0.2",
-    "eslint-plugin-yml": "1.19.0",
-    "typescript-eslint": "8.47.0"
-  }
+  "packageManager": "pnpm@10.26.0"
 }

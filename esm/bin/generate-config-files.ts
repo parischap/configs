@@ -18,11 +18,11 @@
 
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used at the very start of a project */
 
+import { activePackageOnlyFlag } from '../constants.js';
 import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
 import * as PackageAll from '../internal/bin-utils/Package/All.js';
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
 import * as Project from '../internal/bin-utils/Project.js';
-import { activePackageOnlyFlag } from '../internal/shared-utils/constants.js';
 
 console.log('Generating config files');
 const arg1 = process.argv[2];
@@ -41,7 +41,7 @@ await Promise.all(
       /* eslint-disable-next-line functional/no-expression-statements*/
       await ConfigFiles.save(currentPackage.path)(configFiles);
 
-      const configurationFileList = await PackageBase.toConfigurationFileList(currentPackage);
+      const configurationFileList = await PackageBase.getPathsOfExistingConfigFiles(currentPackage);
       const filesToCreate = Object.keys(configFiles.configurationFiles);
       const unexpectedConfigFiles = configurationFileList.filter(
         (relativePath) => !filesToCreate.includes(relativePath),
@@ -53,7 +53,7 @@ await Promise.all(
 
       /* Remove prod directories because the packages will need rebuilding and these directories might contain conflicting versions of imported packages. We do it also in packages with no source, just in case... */
       /* eslint-disable-next-line functional/no-expression-statements*/
-      await PackageBase.cleanProd(currentPackage);
+      await PackageBase.cleanProdFolders(currentPackage);
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);
       throw e;
