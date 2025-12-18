@@ -6,7 +6,6 @@
 
 import { Data, objectFromDataAndProto, Proto } from '../../shared-utils/types.js';
 import * as ConfigFiles from '../ConfigFiles.js';
-import * as JsonConfigFileDecoder from '../JsonConfigFile/Decoder.js';
 import * as PackageBase from './Base.js';
 import * as PackageSourceBase from './SourceBase.js';
 
@@ -37,14 +36,15 @@ export interface Type extends PackageSourceBase.Type {
 export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
 
 /** _prototype */
-const _proto: Proto<Type> = objectFromDataAndProto(PackageSourceBase.proto, {
+const parentProto = PackageSourceBase.proto;
+const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
   [_TypeId]: _TypeId,
   async [PackageBase.toPackageFilesSymbol](
     this: Type,
     exportsFilesOnly: boolean,
   ): Promise<ConfigFiles.Type> {
     return ConfigFiles.merge(
-      await PackageSourceBase.proto[PackageBase.toPackageFilesSymbol](exportsFilesOnly),
+      await parentProto[PackageBase.toPackageFilesSymbol].call(this, exportsFilesOnly),
       exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.repo(this),
     );
   },
@@ -57,13 +57,6 @@ const _make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
  *
  * @category Constructors
  */
-export const make = async (
-  data: Omit<Data<Type>, Exclude<keyof PackageSourceBase.Type, keyof PackageBase.Type>>,
-): Promise<Type> =>
-  _make({
-    ...data,
-    ...JsonConfigFileDecoder.sourcePackage({
-      configurationFileObject: await PackageBase.readConfigFile(data),
-      packageName: data.name,
-    }),
-  });
+export const fromPackageBase = async (data: {
+  readonly packageBase: PackageBase.Type;
+}): Promise<Type> => _make(await PackageSourceBase.fromPackageBase(data));

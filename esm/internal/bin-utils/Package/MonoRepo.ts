@@ -6,7 +6,6 @@
 
 import { Data, objectFromDataAndProto, Proto } from '../../shared-utils/types.js';
 import * as ConfigFiles from '../ConfigFiles.js';
-import * as JsonConfigFileDecoder from '../JsonConfigFile/Decoder.js';
 import * as PackageBase from './Base.js';
 import * as PackageNoSourceBase from './NoSourceBase.js';
 
@@ -37,15 +36,24 @@ export interface Type extends PackageNoSourceBase.Type {
 export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
 
 /** _prototype */
-const _proto: Proto<Type> = objectFromDataAndProto(PackageNoSourceBase.proto, {
+const parentProto = PackageNoSourceBase.proto;
+const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
   [_TypeId]: _TypeId,
   async [PackageBase.toPackageFilesSymbol](
     this: Type,
     exportsFilesOnly: boolean,
   ): Promise<ConfigFiles.Type> {
     return ConfigFiles.merge(
-      await PackageNoSourceBase.proto[PackageBase.toPackageFilesSymbol](exportsFilesOnly),
-      exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.repo(this),
+      await parentProto[PackageBase.toPackageFilesSymbol].call(this, exportsFilesOnly),
+      exportsFilesOnly ?
+        ConfigFiles.empty
+      : ConfigFiles.repo({
+          ...this,
+          // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
+          hasDocGen: true,
+          // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
+          isPublished: true,
+        }),
     );
   },
 } as const);
@@ -57,13 +65,6 @@ const _make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
  *
  * @category Constructors
  */
-export const make = async (
-  data: Omit<Data<Type>, Exclude<keyof PackageNoSourceBase.Type, keyof PackageBase.Type>>,
-): Promise<Type> =>
-  _make({
-    ...data,
-    ...JsonConfigFileDecoder.noSourcePackage({
-      configurationFileObject: await PackageBase.readConfigFile(data),
-      packageName: data.name,
-    }),
-  });
+export const fromPackageBase = async (data: {
+  readonly packageBase: PackageBase.Type;
+}): Promise<Type> => _make(await PackageNoSourceBase.fromPackageBase(data));

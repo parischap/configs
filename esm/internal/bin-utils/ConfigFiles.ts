@@ -318,7 +318,7 @@ aux_links:
     - "//github.com/${owner}/${name}"`;
 
 /**
- * Type of a PackageFiles
+ * Type of a ConfigFiles
  *
  * @category Models
  */
@@ -363,7 +363,7 @@ export const make = (configurationFiles: ReadonlyRecord): Type => _make({ config
 export const configurationFiles = (self: Type): ReadonlyRecord => self.configurationFiles;
 
 /**
- * Builds a new Packagefiles from the concatenation of several PackageFiles
+ * Builds a new Packagefiles from the concatenation of several ConfigFiles
  *
  * @category Constructors
  */
@@ -401,11 +401,11 @@ export const save = (path: string) => async (self: Type) => {
   }
 };
 
-/** Empty PackageFiles instance */
+/** Empty ConfigFiles instance */
 export const empty = make({});
 
 /**
- * PackageFiles instance that implements what is necessary in all situations
+ * ConfigFiles instance that implements what is necessary in all situations
  *
  * @category Instances
  */
@@ -455,7 +455,7 @@ export const anyPackage = ({
   });
 
 /**
- * PackageFiles instance that implements what is necessary in a package that has no code (no esm
+ * ConfigFiles instance that implements what is necessary in a package that has no code (no esm
  * directory). Such a package is also a workspace.
  *
  * @category Instances
@@ -496,7 +496,7 @@ export const noSourcePackage = ({ description }: { readonly description: string 
   });
 
 /**
- * PackageFiles instance that creates the build part of a source package.
+ * ConfigFiles instance that creates the build part of a source package.
  *
  * @category Instances
  */
@@ -544,7 +544,7 @@ export const sourcePackageBuild = ({
 };
 
 /**
- * PackageFiles instance that creates the visibility part of a source package.
+ * ConfigFiles instance that creates the visibility part of a source package.
  *
  * @category Instances
  */
@@ -588,7 +588,7 @@ export const sourcePackageVisibility = ({
   );
 
 /**
- * PackageFiles instance that creates the doc generation part of a source package.
+ * ConfigFiles instance that creates the doc generation part of a source package.
  *
  * @category Instances
  */
@@ -609,7 +609,7 @@ export const sourcePackageDocGen = ({ hasDocGen }: { readonly hasDocGen: boolean
   );
 
 /**
- * PackageFiles instance that creates the Effect Platform part of a source package.
+ * ConfigFiles instance that creates the Effect Platform part of a source package.
  *
  * @category Instances
  */
@@ -640,7 +640,7 @@ export const sourcePackagePlatform = ({
 };
 
 /**
- * PackageFiles instance that creates the Environment part of a source package.
+ * ConfigFiles instance that creates the Environment part of a source package.
  *
  * @category Instances
  */
@@ -698,7 +698,7 @@ export const sourcePackageEnvironment = ({
 };
 
 /**
- * PackageFiles instance that creates the default exports part of a source package.
+ * ConfigFiles instance that creates the default exports part of a source package.
  *
  * @category Instances
  */
@@ -716,18 +716,18 @@ export const basePackageJsonExports: Type = make({
 });
 
 /**
- * PackageFiles instance that creates the exports part of a source package.
+ * ConfigFiles instance that creates the exports part of a source package.
  *
  * @category Instances
  */
 export const sourcePackageExports = async ({
   path,
   packagePrefix,
-  isConfigsPackage = false,
+  isConfigsPackage,
 }: {
   readonly path: string;
   readonly packagePrefix: string | undefined;
-  readonly isConfigsPackage?: boolean;
+  readonly isConfigsPackage: boolean;
 }): Promise<Type> => {
   if (packagePrefix === undefined) return basePackageJsonExports;
 
@@ -795,7 +795,7 @@ export const sourcePackageExports = async ({
 };
 
 /**
- * PackageFiles instance that implements the configs package specificities
+ * ConfigFiles instance that implements the configs package specificities
  *
  * @category Instances
  */
@@ -807,7 +807,7 @@ export const sourcePackageConfigsPackage = make({
 });
 
 /**
- * PackageFiles instance that implements what is necessary in a package that has code (an esm
+ * ConfigFiles instance that implements what is necessary in a package that has code (an esm
  * directory). This package is also a workspace
  */
 /*
@@ -830,8 +830,7 @@ export const sourcePackage = async ({
   keywords,
   useEffectAsPeerDependency,
   useEffectPlatform,
-  // isConfigsPackage is always false in a SubPackage
-  isConfigsPackage = false,
+  isConfigsPackage,
   path,
   packagePrefix,
 }: {
@@ -849,7 +848,7 @@ export const sourcePackage = async ({
   readonly keywords: ReadonlyArray<string>;
   readonly useEffectAsPeerDependency: boolean;
   readonly useEffectPlatform: string;
-  readonly isConfigsPackage?: boolean;
+  readonly isConfigsPackage: boolean;
   readonly path: string;
   readonly packagePrefix: string | undefined;
 }): Promise<Type> => {
@@ -930,7 +929,7 @@ export const repoVisibility: Type = make({
 });
 
 /**
- * PackageFiles instance that implements the docGen part of a repo
+ * ConfigFiles instance that implements the docGen part of a repo
  *
  * @category Instances
  */
@@ -958,22 +957,20 @@ export const repoDocGen = ({
   });
 
 /**
- * PackageFiles instance that implements what is necessary at the root of a git (and github) repo
+ * ConfigFiles instance that implements what is necessary at the root of a git (and github) repo
  *
  * @category Instances
  */
 export const repo = ({
   name,
   description,
-  // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
-  hasDocGen = true,
-  // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
-  isPublished = true,
+  hasDocGen,
+  isPublished,
 }: {
   readonly name: string;
   readonly description: string;
-  readonly hasDocGen?: boolean;
-  readonly isPublished?: boolean;
+  readonly hasDocGen: boolean;
+  readonly isPublished: boolean;
 }): Type =>
   merge(
     ...[
@@ -995,7 +992,7 @@ export const repo = ({
   );
 
 /**
- * PackageFiles instance that implements the workspace part of a top repo
+ * ConfigFiles instance that implements the workspace part of a top repo
  *
  * @category Instances
  */

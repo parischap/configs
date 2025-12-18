@@ -21,7 +21,7 @@ A `repo` that contains source code and does not serve as a container to other pa
 
 Inversely, a `repo` that contains no source code and serves solely as container to other packages is called a `monorepo`. A `package` contained in such a `monorepo` is called a `sub-package`. The `monorepo` that contains it is called its `parent monorepo`.
 
-Packages can be split in:
+Project can be split in:
 
 - packages that contain source code called `source packages`: one-package repos and sub-packages
 - packages that contain no source code called `no source packages`: top package and monorepos

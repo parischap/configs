@@ -18,30 +18,32 @@
 
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used at the very start of a project */
 
-import * as PackageFiles from '../internal/bin-utils/ConfigFiles.js';
-import * as Package from '../internal/bin-utils/Package/All.js';
-import * as Project from '../internal/bin-utils/Packages.js';
+import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
+import * as PackageAll from '../internal/bin-utils/Package/All.js';
+import * as PackageBase from '../internal/bin-utils/Package/Base.js';
+import * as Project from '../internal/bin-utils/Project.js';
 import { activePackageOnlyFlag } from '../internal/shared-utils/constants.js';
-import { fromPosixPathToOSPath } from '../internal/shared-utils/utils.js';
 
+console.log('Generating config files');
 const arg1 = process.argv[2];
+if (arg1 !== undefined && arg1 !== activePackageOnlyFlag)
+  throw new Error(`Unexpected flag '${arg1}' received`);
 const activePackageOnly = arg1 === activePackageOnlyFlag;
 
-const project = await Project.make(activePackageOnly);
+const project = await Project.makeFiltered(activePackageOnly ? PackageBase.isActive : () => true);
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
   project.packages.map(async (currentPackage) => {
     try {
-      const packageFiles = await Package.toPackageFiles(currentPackage);
+      const configFiles = await PackageAll.toConfigFiles(currentPackage);
 
       /* eslint-disable-next-line functional/no-expression-statements*/
-      await PackageFiles.save(currentPackage.path)(packageFiles);
+      await ConfigFiles.save(currentPackage.path)(configFiles);
 
-      const allConfigurationFiles = await Package.allConfigurationFiles(currentPackage);
-      // In project.config.ts, paths are posix-Style. Let's convert them to OS style
-      const filesToCreate = Object.keys(packageFiles.configurationFiles).map(fromPosixPathToOSPath);
-      const unexpectedConfigFiles = allConfigurationFiles.filter(
+      const configurationFileList = await PackageBase.toConfigurationFileList(currentPackage);
+      const filesToCreate = Object.keys(configFiles.configurationFiles);
+      const unexpectedConfigFiles = configurationFileList.filter(
         (relativePath) => !filesToCreate.includes(relativePath),
       );
       for (const unexpectedConfigFile of unexpectedConfigFiles)
@@ -51,7 +53,7 @@ await Promise.all(
 
       /* Remove prod directories because the packages will need rebuilding and these directories might contain conflicting versions of imported packages. We do it also in packages with no source, just in case... */
       /* eslint-disable-next-line functional/no-expression-statements*/
-      await Package.cleanProd(currentPackage);
+      await PackageBase.cleanProd(currentPackage);
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);
       throw e;

@@ -4,9 +4,7 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { pnpmLockFilename, readMeFilename } from '../../shared-utils/constants.js';
 import { Data, objectFromDataAndProto, Proto } from '../../shared-utils/types.js';
-import { toMiniGlobRegExp } from '../../shared-utils/utils.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as PackageBase from './Base.js';
 import * as PackageNoSourceBase from './NoSourceBase.js';
@@ -42,26 +40,39 @@ export interface Type extends PackageNoSourceBase.Type {
 export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
 
 /** _prototype */
-const _proto: Proto<Type> = objectFromDataAndProto(PackageNoSourceBase.proto, {
+const parentProto = PackageNoSourceBase.proto;
+const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
   [_TypeId]: _TypeId,
-  [PackageBase.externalConfigurationFilesSymbol]: toMiniGlobRegExp([
-    readMeFilename,
-    pnpmLockFilename,
-  ]),
   async [PackageBase.toPackageFilesSymbol](
     this: Type,
     exportsFilesOnly: boolean,
   ): Promise<ConfigFiles.Type> {
     return ConfigFiles.merge(
-      await PackageNoSourceBase.proto[PackageBase.toPackageFilesSymbol](exportsFilesOnly),
+      await parentProto[PackageBase.toPackageFilesSymbol].call(this, exportsFilesOnly),
       exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.topPackageWorkspace(this),
     );
   },
 } as const);
+
+const _make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
 
 /**
  * Constructor
  *
  * @category Constructors
  */
-export const make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
+export const fromPackageBase = ({
+  packageBase,
+  allSourcePackagesNames,
+  allPackagesPaths,
+}: {
+  readonly packageBase: PackageBase.Type;
+  readonly allSourcePackagesNames: ReadonlyArray<string>;
+  readonly allPackagesPaths: ReadonlyArray<string>;
+}): Type =>
+  _make({
+    ...packageBase,
+    allSourcePackagesNames,
+    allPackagesPaths,
+    description: 'Top package of my projects',
+  });

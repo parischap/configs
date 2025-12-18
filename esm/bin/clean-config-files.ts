@@ -5,27 +5,36 @@
  * executed. The active Package is the one in whose root this binary is executed.
  */
 
-import { rm } from 'fs/promises';
-import { join } from 'path';
-import * as Package from '../internal/bin-utils/Package/All.js';
-import * as Project from '../internal/bin-utils/Packages.js';
+import * as PackageBase from '../internal/bin-utils/Package/Base.js';
+import * as ProjectBase from '../internal/bin-utils/ProjectBase.js';
 import { activePackageOnlyFlag } from '../internal/shared-utils/constants.js';
+import { rmAndLogIfSuccessful } from '../internal/shared-utils/utils.js';
 
+console.log('Cleaning config files');
 const arg1 = process.argv[2];
+if (arg1 !== undefined && arg1 !== activePackageOnlyFlag)
+  throw new Error(`Unexpected flag '${arg1}' received`);
 const activePackageOnly = arg1 === activePackageOnlyFlag;
 
-const project = await Project.make(activePackageOnly);
+const project = await ProjectBase.make();
+const filteredProject = ProjectBase.filterAndShowCount(
+  activePackageOnly ? PackageBase.isActive : () => true,
+)(project);
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
-  project.packages.map(async (currentPackage) => {
+  filteredProject.packages.map(async (currentPackage) => {
     try {
-      const allConfigurationFiles = await Package.allConfigurationFiles(currentPackage);
+      const allConfigurationFiles = await PackageBase.toConfigurationFileList(currentPackage);
 
       /* eslint-disable-next-line functional/no-expression-statements*/
       await Promise.all(
-        allConfigurationFiles.map((relativeFilepath) =>
-          rm(join(currentPackage.path, relativeFilepath), { force: true, recursive: true }),
+        allConfigurationFiles.map((relativePath) =>
+          rmAndLogIfSuccessful({
+            packageName: currentPackage.name,
+            packagePath: currentPackage.path,
+            relativePath,
+          }),
         ),
       );
     } catch (e: unknown) {
