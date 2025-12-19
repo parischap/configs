@@ -5,32 +5,38 @@
  * executed. The active Package is the one in whose root this binary is executed.
  */
 
-import { activePackageOnlyFlag } from '../constants.js';
-import * as PackageUnloaded from '../internal/bin-utils/Package/Base.js';
-import * as ProjectUnloaded from '../internal/bin-utils/ProjectUnloaded.js';
+import { join } from 'path';
+import { activePackageOnlyFlag, indexTsFilename, sourceFolderName } from '../constants.js';
+import * as PackageAll from '../internal/bin-utils/Package/All.js';
+import * as PackageBase from '../internal/bin-utils/Package/Base.js';
+import * as Project from '../internal/bin-utils/Project.js';
 
-console.log('Removing config files');
+console.log('Removing all configuration files');
 const arg1 = process.argv[2];
 if (arg1 !== undefined && arg1 !== activePackageOnlyFlag)
   throw new Error(`Unexpected flag '${arg1}' received`);
 const activePackageOnly = arg1 === activePackageOnlyFlag;
+const arg2 = process.argv[3];
+if (arg2 !== undefined) throw new Error(`Unexpected flag '${arg2}' received`);
 
-const project = await ProjectUnloaded.make();
-const filteredProject = ProjectUnloaded.filterAndShowCount(
-  activePackageOnly ? PackageUnloaded.isActive : () => true,
-)(project);
+const project = await Project.makeFilteredAndShowCount(
+  activePackageOnly ? PackageBase.isActive : () => true,
+);
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
-  filteredProject.packages.map(async (currentPackage) => {
+  project.packages.map(async (currentPackage) => {
     try {
-      const allConfigurationFiles =
-        await PackageUnloaded.getPathsOfExistingConfigFiles(currentPackage);
+      const configurationFiles = await PackageBase.getPathsOfExistingConfigFiles(currentPackage);
+      const configurationFilesWithIndex =
+        PackageAll.isSourcePackage(currentPackage) && currentPackage.packagePrefix !== undefined ?
+          [...configurationFiles, join(sourceFolderName, indexTsFilename)]
+        : configurationFiles;
 
       /* eslint-disable-next-line functional/no-expression-statements*/
       await Promise.all(
-        allConfigurationFiles.map((relativePath) =>
-          PackageUnloaded.rmAndLogIfSuccessful(relativePath)(currentPackage),
+        configurationFilesWithIndex.map((relativePath) =>
+          PackageBase.rmAndLogIfSuccessful(relativePath)(currentPackage),
         ),
       );
     } catch (e: unknown) {

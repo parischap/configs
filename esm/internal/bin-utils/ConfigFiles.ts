@@ -16,15 +16,14 @@ import {
   binariesPath,
   binUtilsAssetsFolderName,
   commonJsFolderName,
-  configFilename,
   configsDependencies,
   configsPackageName,
   configsPeerDependencies,
   docgenConfigFilename,
   docGenDependencies,
-  docsConfigYmlFilename,
+  docsConfigYmlPath,
   docsFolderName,
-  docsIndexMdFilename,
+  docsIndexMdPath,
   effectDependencies,
   effectPlatformDependencies,
   eslintConfigFilename,
@@ -51,6 +50,7 @@ import {
   prettierConfigFilename,
   prettierIgnoreFilename,
   prodFolderName,
+  projectConfigFilename,
   slashedScope,
   sourceDevDependencies,
   sourceFolderName,
@@ -378,7 +378,7 @@ export const save = (path: string) => async (self: Type) => {
       : extname(filename) === '.json' ? () => prettyStringify(fileContent)
       : () => {
           throw new Error(
-            `Entry '${filename}' in '${configFilename}' must have value of type string`,
+            `Entry '${filename}' in '${projectConfigFilename}' must have value of type string`,
           );
         };
 
@@ -932,9 +932,9 @@ export const repoDocGen = ({
     /* Github actions need to be at the root of the github repo. This action calls a script `prepare-docs'`  */
     [githubWorkflowsPagesPath]: GITHUB_WORKFLOWS_PAGES_SCRIPT,
     // Used by the github pages.yml action
-    [`${docsFolderName}/${docsIndexMdFilename}`]: description,
+    [docsIndexMdPath]: description,
     // Used by the github pages.yml action
-    [`${docsFolderName}/${docsConfigYmlFilename}`]: JUST_THE_DOCS_CONFIG(name),
+    [docsConfigYmlPath]: JUST_THE_DOCS_CONFIG(name),
     [packageJsonFilename]: {
       scripts: {
         // --if-present is necessary because it is possible that no package in the workspace has a docgen script
@@ -998,8 +998,8 @@ export const topPackageWorkspace = ({
       PNPM_WORKSPACE_CONFIG
       + (allSourcePackagesNames.length !== 0 ?
         `
-      overrides:
-      ${allSourcePackagesNames.map((packageName) => `  '${slashedScope}${packageName}': 'workspace:*'`).join('\n')}`
+overrides:
+${allSourcePackagesNames.map((packageName) => `  '${slashedScope}${packageName}': 'workspace:*'`).join('\n')}`
       : ''),
     // Used by vscode
     [`${name}.code-workspace`]: VSCODE_WORKSPACE_CONFIG({

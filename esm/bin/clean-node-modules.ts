@@ -7,7 +7,7 @@
 /* This module must not use any external dependency because it cleans the node-modules folders and must therfore not depend on any dependency in these folders */
 
 import { activePackageOnlyFlag } from '../constants.js';
-import * as PackageUnloaded from '../internal/bin-utils/Package/Base.js';
+import * as PackageBase from '../internal/bin-utils/Package/Base.js';
 import * as ProjectUnloaded from '../internal/bin-utils/ProjectUnloaded.js';
 
 console.log('Removing node_modules directory');
@@ -15,17 +15,18 @@ const arg1 = process.argv[2];
 if (arg1 !== undefined && arg1 !== activePackageOnlyFlag)
   throw new Error(`Unexpected flag '${arg1}' received`);
 const activePackageOnly = arg1 === activePackageOnlyFlag;
+const arg2 = process.argv[3];
+if (arg2 !== undefined) throw new Error(`Unexpected flag '${arg2}' received`);
 
-const project = await ProjectUnloaded.make();
-const filteredProject = ProjectUnloaded.filterAndShowCount(
-  activePackageOnly ? PackageUnloaded.isActive : () => true,
-)(project);
+const project = await ProjectUnloaded.makeFilteredAndShowCount(
+  activePackageOnly ? PackageBase.isActive : () => true,
+);
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
-  filteredProject.packages.map((currentPackage) => {
+  project.packages.map((currentPackage) => {
     try {
-      return PackageUnloaded.cleanNodeModulesFolder(currentPackage);
+      return PackageBase.cleanNodeModulesFolder(currentPackage);
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);
       throw e;

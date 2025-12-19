@@ -1,72 +1,78 @@
 /* This module must only use Typescript syntax understandable by Node with the --experimental-transform-types flag */
 import { watch } from 'node:fs/promises';
-import { extname } from 'node:path';
+import { extname, join } from 'node:path';
 import {
   activePackageOnlyFlag,
   allJavaScriptExtensions,
   indexTsFilename,
-  packagePrefixFlag,
   sourceFolderName,
   watchFlag,
 } from '../constants.js';
 import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
-import * as Package from '../internal/bin-utils/Package/All.js';
-import * as Project from '../internal/bin-utils/ProjectUnloaded.js';
+import * as PackageAll from '../internal/bin-utils/Package/All.js';
+import * as PackageBase from '../internal/bin-utils/Package/Base.js';
+import * as Project from '../internal/bin-utils/Project.js';
 
-const command = process.argv[1] ?? 'update-exports';
-
-const arg1 = process.argv[2] ?? '';
-
-const firstEqualIndex = arg1.indexOf('=');
-const packagePrefixName = arg1.slice(0, firstEqualIndex);
-const packagePrefix = arg1.slice(firstEqualIndex + 1);
-if (packagePrefixName !== packagePrefixFlag)
-  throw new Error(`Bad '-packagePrefix' argument for '${command}' command. Actual: '${arg1}'`);
-
-const arg2 = process.argv[3];
+const getParams = (): { isWatch: boolean; activePackageOnly: boolean } => {
+  const arg1 = process.argv[2];
+  const arg2 = process.argv[3];
+  if (arg1 === undefined) return { isWatch: false, activePackageOnly: false };
+  if (arg2 === undefined) {
+    if (arg1 === watchFlag) return { isWatch: true, activePackageOnly: false };
+    if (arg1 === activePackageOnlyFlag) return { isWatch: false, activePackageOnly: true };
+    throw new Error(`Unexpected flag '${arg1}' received`);
+  }
+  if (arg1 !== watchFlag && arg1 !== activePackageOnlyFlag)
+    throw new Error(`Unexpected flag '${arg1}' received`);
+  if (arg2 !== watchFlag && arg2 !== activePackageOnlyFlag)
+    throw new Error(`Unexpected flag '${arg2}' received`);
+  if (arg1 === arg2) throw new Error(`Flag '${arg1}' received twice`);
+  return { isWatch: true, activePackageOnly: true };
+};
 const arg3 = process.argv[4];
-const isWatch = arg2 === watchFlag || arg3 === watchFlag;
-const activePackageOnly = arg2 === activePackageOnlyFlag || arg3 === activePackageOnlyFlag;
+if (arg3 !== undefined) throw new Error(`Unexpected flag '${arg3}' received`);
 
-const project = await Project.make(activePackageOnly);
+const { isWatch, activePackageOnly } = getParams();
+
+const project = await Project.makeFiltered(activePackageOnly ? PackageBase.isActive : () => true);
+const filteredProject = Project.filterAndShowCount(
+  (currentPackage) =>
+    PackageAll.isSourcePackage(currentPackage) && currentPackage.packagePrefix !== undefined,
+)(project);
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
-  project.packages.map(async (currentPackage) => {
+  filteredProject.packages.map(async (currentPackage) => {
     try {
       if (isWatch) {
         let lastEventTime = Date.now();
-        const watcher = watch(sourceFolderName, { recursive: true });
+        const watcher = watch(join(currentPackage.path, sourceFolderName), { recursive: true });
         for await (const event of watcher) {
           const currentEventTime = Date.now();
           // Avoid too many events. It's not that bad if we miss an event since we regenerate the whole file each time
           if (currentEventTime - lastEventTime > 500) {
             const changeFilename = event.filename;
-
-            if (changeFilename === null)
-              throw new Error('${tag]watch event does not include filename on this platform');
             if (
-              changeFilename !== indexTsFilename
-              && allJavaScriptExtensions.includes(extname(changeFilename))
+              changeFilename === null
+              || (changeFilename !== indexTsFilename
+                && allJavaScriptExtensions.includes(extname(changeFilename)))
             ) {
-              /* eslint-disable-next-line functional/no-expression-statements */
-              await updateImports({
-                packagePath: '.',
-                packagePrefix,
-                keepFileExtensions: isConfigsPackage,
-                tag,
+              const configFiles = await PackageAll.generateConfigFiles(currentPackage, {
+                exportsFilesOnly: true,
               });
+              /* eslint-disable-next-line functional/no-expression-statements*/
+              await ConfigFiles.save(currentPackage.path)(configFiles);
             }
+            /* eslint-disable-next-line functional/no-expression-statements */
+            lastEventTime = currentEventTime;
           }
-          /* eslint-disable-next-line functional/no-expression-statements */
-          lastEventTime = currentEventTime;
         }
       } else {
-        const packageFiles = await Package.generateConfigFiles(currentPackage, {
+        const configFiles = await PackageAll.generateConfigFiles(currentPackage, {
           exportsFilesOnly: true,
         });
-
-        return await ConfigFiles.save(currentPackage.path)(packageFiles);
+        /* eslint-disable-next-line functional/no-expression-statements*/
+        await ConfigFiles.save(currentPackage.path)(configFiles);
       }
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);

@@ -29,15 +29,18 @@ const arg1 = process.argv[2];
 if (arg1 !== undefined && arg1 !== activePackageOnlyFlag)
   throw new Error(`Unexpected flag '${arg1}' received`);
 const activePackageOnly = arg1 === activePackageOnlyFlag;
+const arg2 = process.argv[3];
+if (arg2 !== undefined) throw new Error(`Unexpected flag '${arg2}' received`);
 
-const project = await Project.makeFiltered(activePackageOnly ? PackageBase.isActive : () => true);
+const project = await Project.makeFilteredAndShowCount(
+  activePackageOnly ? PackageBase.isActive : () => true,
+);
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
   project.packages.map(async (currentPackage) => {
     try {
       const configFiles = await PackageAll.generateConfigFiles(currentPackage);
-
       /* eslint-disable-next-line functional/no-expression-statements*/
       await ConfigFiles.save(currentPackage.path)(configFiles);
 

@@ -110,6 +110,24 @@ export const make = async (): Promise<Type> => {
 };
 
 /**
+ * Combination of make and filter
+ *
+ * @category Constructors
+ */
+export const makeFiltered = async (
+  predicate: (t: PackageUnloaded.Type) => boolean,
+): Promise<Type> => filter(predicate)(await make());
+
+/**
+ * Combination of make and filterAndShowCount
+ *
+ * @category Constructors
+ */
+export const makeFilteredAndShowCount = async (
+  predicate: (t: PackageUnloaded.Type) => boolean,
+): Promise<Type> => filterAndShowCount(predicate)(await make());
+
+/**
  * Displays the number of PackageUnloaded's in `self`
  *
  * @category Destructors

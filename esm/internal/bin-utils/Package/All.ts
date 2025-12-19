@@ -13,15 +13,41 @@ import * as PackageSubPackage from './SubPackage.js';
 import * as PackageTop from './Top.js';
 
 /**
+ * Type of a source Package
+ *
+ * @category Models
+ */
+export type SourceType = PackageOnePackageRepo.Type | PackageSubPackage.Type;
+
+/**
+ * Type of a no source Package
+ *
+ * @category Models
+ */
+export type NoSourceType = PackageTop.Type | PackageMonoRepo.Type;
+
+/**
  * Type of a Package
  *
  * @category Models
  */
-export type Type =
-  | PackageTop.Type
-  | PackageMonoRepo.Type
-  | PackageOnePackageRepo.Type
-  | PackageSubPackage.Type;
+export type Type = SourceType | NoSourceType;
+
+/**
+ * Type guard
+ *
+ * @category Guards
+ */
+export const isSourcePackage = (u: Type): u is SourceType =>
+  PackageOnePackageRepo.has(u) || PackageSubPackage.has(u);
+
+/**
+ * Type guard
+ *
+ * @category Guards
+ */
+export const isNoSourcePackage = (u: Type): u is NoSourceType =>
+  PackageTop.has(u) || PackageMonoRepo.has(u);
 
 /**
  * Generates the ConfigFiles for `self`
