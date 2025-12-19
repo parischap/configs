@@ -11,7 +11,7 @@ import {
 } from '../constants.js';
 import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
 import * as Package from '../internal/bin-utils/Package/All.js';
-import * as Project from '../internal/bin-utils/ProjectBase.js';
+import * as Project from '../internal/bin-utils/ProjectUnloaded.js';
 
 const command = process.argv[1] ?? 'update-exports';
 
@@ -62,7 +62,7 @@ await Promise.all(
           lastEventTime = currentEventTime;
         }
       } else {
-        const packageFiles = await Package.toConfigFiles(currentPackage, {
+        const packageFiles = await Package.generateConfigFiles(currentPackage, {
           exportsFilesOnly: true,
         });
 

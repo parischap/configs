@@ -402,9 +402,11 @@ export const empty = make({});
  */
 export const anyPackage = ({
   name,
+  description,
   scripts = {},
 }: {
   readonly name: string;
+  readonly description: string;
   readonly scripts?: StringRecord;
 }): Type =>
   make({
@@ -414,6 +416,7 @@ export const anyPackage = ({
     [prettierIgnoreFilename]: PRETTIER_IGNORE,
     [packageJsonFilename]: {
       name: `${slashedScope}${name}`,
+      description,
       // Needs to be present even at the top or root of a monorepo because there are some javascript config files
       type: 'module',
       author: 'Jérôme MARTIN',
@@ -451,40 +454,37 @@ export const anyPackage = ({
  *
  * @category Instances
  */
-export const noSourcePackage = ({ description }: { readonly description: string }): Type =>
-  make({
-    // Used by the checks script
-    [tsConfigFilename]: TSCONFIG_OTHERS,
-    // Used by the checks script
-    [eslintConfigFilename]: ESLINT_CONFIG_OTHERS,
-    // Used by the test script
-    [vitestConfigFilename]: VITEST_CONFIG_NO_SOURCE,
-    [packageJsonFilename]: {
-      description,
-      scripts: {
-        checks: 'pnpm tscheck && pnpm lint',
-        // --if-present is necessary because it is possible that no package in the workspace has a build script
-        'build-all': 'pnpm --if-present -r build',
-        // --if-present is necessary because it is possible that no package in the workspace has an auto-update-imports script
-        'auto-update-imports-for-all':
-          'pnpm --if-present -r --parallel --aggregate-output auto-update-imports',
-        // --if-present is necessary because it is possible that no package in the workspace has an update-imports script
-        'update-imports-for-all':
-          'pnpm --if-present -r --parallel --aggregate-output update-imports',
-        'tscheck-all': 'pnpm -r -include-workspace-root=true tscheck',
-        'lint-all': 'pnpm -r -include-workspace-root=true lint',
-        'checks-all': 'pnpm -r -include-workspace-root=true checks',
-        'format-all': 'pnpm -r -include-workspace-root=true format',
-      },
+export const noSourcePackage: Type = make({
+  // Used by the checks script
+  [tsConfigFilename]: TSCONFIG_OTHERS,
+  // Used by the checks script
+  [eslintConfigFilename]: ESLINT_CONFIG_OTHERS,
+  // Used by the test script
+  [vitestConfigFilename]: VITEST_CONFIG_NO_SOURCE,
+  [packageJsonFilename]: {
+    scripts: {
+      checks: 'pnpm tscheck && pnpm lint',
+      // --if-present is necessary because it is possible that no package in the workspace has a build script
+      'build-all': 'pnpm --if-present -r build',
+      // --if-present is necessary because it is possible that no package in the workspace has an auto-update-imports script
+      'auto-update-imports-for-all':
+        'pnpm --if-present -r --parallel --aggregate-output auto-update-imports',
+      // --if-present is necessary because it is possible that no package in the workspace has an update-imports script
+      'update-imports-for-all': 'pnpm --if-present -r --parallel --aggregate-output update-imports',
+      'tscheck-all': 'pnpm -r -include-workspace-root=true tscheck',
+      'lint-all': 'pnpm -r -include-workspace-root=true lint',
+      'checks-all': 'pnpm -r -include-workspace-root=true checks',
+      'format-all': 'pnpm -r -include-workspace-root=true format',
+    },
 
-      /*pnpm: {
+    /*pnpm: {
         patchedDependencies: {},
         overrides: {
           //'tsconfig-paths': '^4.0.0'
         },
       },*/
-    },
-  });
+  },
+});
 
 /**
  * ConfigFiles instance that creates the build part of a source package.
@@ -809,7 +809,6 @@ export const sourcePackage = async ({
   name,
   // parentName is equal to name in a one-package repo
   parentName = name,
-  description,
   dependencies,
   devDependencies,
   peerDependencies,
@@ -827,7 +826,6 @@ export const sourcePackage = async ({
 }: {
   readonly name: string;
   readonly parentName?: string;
-  readonly description: string;
   readonly dependencies: StringRecord;
   readonly devDependencies: StringRecord;
   readonly peerDependencies: StringRecord;
@@ -861,7 +859,6 @@ export const sourcePackage = async ({
       // Used by the test script
       [vitestConfigFilename]: VITEST_CONFIG_SOURCE(name),
       [packageJsonFilename]: {
-        description,
         module: `./${sourceFolderName}/index.js`,
         ...(Object.keys(finalDependencies).length === 0 ? {} : { dependencies: finalDependencies }),
         ...(Object.keys(finalPeerDependencies).length === 0 ?

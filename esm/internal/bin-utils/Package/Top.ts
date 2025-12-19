@@ -1,35 +1,35 @@
 /**
- * Module that represents a TopPackage which is a sub-type of a Package (see README.md and
+ * Module that represents a TopPackage which is a sub-type of a PackageAll (see README.md and
  * Package.ts).
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import { Data, objectFromDataAndProto, Proto } from '../../shared-utils/types.js';
 import * as ConfigFiles from '../ConfigFiles.js';
+import * as PackageAllBase from './AllBase.js';
 import * as PackageBase from './Base.js';
 import * as PackageNoSourceBase from './NoSourceBase.js';
 
 /**
- * Module tag
- *
- * @category Module markers
- */
-const _moduleTag = '@parischap/configs/internal/bin-utils/Package/Top/';
-const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
-type _TypeId = typeof _TypeId;
-
-/**
- * Type of a TopPackage
+ * Type of a PackageTop
  *
  * @category Models
  */
 export interface Type extends PackageNoSourceBase.Type {
+  /** Structure discriminant */
+  readonly [PackageBase.tagSymbol]: 'TopPackage';
   /** Array of the names of all the source packages of the Project whose TopPackage is `self` */
   readonly allSourcePackagesNames: ReadonlyArray<string>;
   /** Array of the paths to all the packages of the Project whose TopPackage is `self` */
   readonly allPackagesPaths: ReadonlyArray<string>;
-  /** @internal */
-  readonly [_TypeId]: _TypeId;
+  /**
+   * Generates the configuration files of `this`. If `exportsFilesOnly` is true, only the
+   * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
+   * generated
+   */
+  readonly [PackageAllBase.generateConfigFilesSymbol]: (
+    exportsFilesOnly: boolean,
+  ) => Promise<ConfigFiles.Type>;
 }
 
 /**
@@ -37,22 +37,20 @@ export interface Type extends PackageNoSourceBase.Type {
  *
  * @category Guards
  */
-export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
+export const has = (u: unknown): u is Type =>
+  PackageBase.has(u) && PackageBase.tagSymbol in u && u[PackageBase.tagSymbol] === 'TopPackage';
 
 /** _prototype */
 const parentProto = PackageNoSourceBase.proto;
 const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
-  [_TypeId]: _TypeId,
-  async [PackageBase.toPackageFilesSymbol](
+  [PackageBase.tagSymbol]: 'TopPackage' as const,
+  async [PackageAllBase.generateConfigFilesSymbol](
     this: Type,
     exportsFilesOnly: boolean,
   ): Promise<ConfigFiles.Type> {
-    return ConfigFiles.merge(
-      await parentProto[PackageBase.toPackageFilesSymbol].call(this, exportsFilesOnly),
-      exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.topPackageWorkspace(this),
-    );
+    return generateConfigFiles(exportsFilesOnly)(this);
   },
-} as const);
+});
 
 const _make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
 
@@ -76,3 +74,16 @@ export const fromPackageBase = ({
     allPackagesPaths,
     description: 'Top package of my projects',
   });
+
+/**
+ * Generates the configuration files of `self`. If `exportsFilesOnly` is true, only the
+ * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
+ * generated
+ */
+export const generateConfigFiles =
+  (exportsFilesOnly: boolean) =>
+  async (self: Type): Promise<ConfigFiles.Type> =>
+    ConfigFiles.merge(
+      await PackageNoSourceBase.generateConfigFiles(exportsFilesOnly)(self),
+      exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.topPackageWorkspace(self),
+    );

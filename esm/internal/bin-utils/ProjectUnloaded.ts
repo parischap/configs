@@ -1,6 +1,6 @@
 /**
- * Module that represents an array of BasePackage's, which can be a whole Project (see README.md) or
- * only part of it.
+ * Module that represents an array of PackageUnloaded's, which can be a whole Project (see
+ * README.md) or only part of it.
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
@@ -8,9 +8,9 @@ import { join, sep } from 'path';
 import { configsPackageName, packagesFolderName } from '../../constants.js';
 import { Data, objectFromDataAndProto, Proto } from '../shared-utils/types.js';
 import { readFolders } from '../shared-utils/utils.js';
-import * as PackageBase from './Package/Base.js';
+import * as PackageUnloaded from './Package/Unloaded.js';
 
-const _moduleTag = '@parischap/configs/internal/bin-utils/ProjectBase/';
+const _moduleTag = '@parischap/configs/internal/bin-utils/ProjectUnloaded/';
 const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
 export type _TypeId = typeof _TypeId;
 
@@ -18,8 +18,8 @@ export type _TypeId = typeof _TypeId;
 export interface Type {
   /** Path to the project root */
   readonly topPackagePath: string;
-  /** List of contained PackageBase's */
-  readonly packages: ReadonlyArray<PackageBase.Type>;
+  /** List of contained PackageUnloaded's */
+  readonly packages: ReadonlyArray<PackageUnloaded.Type>;
 
   /** @internal */
   readonly [_TypeId]: _TypeId;
@@ -40,7 +40,7 @@ export const proto: Proto<Type> = {
 const _make = (data: Data<Type>): Type => objectFromDataAndProto(proto, data);
 
 /**
- * Constructor that returns all the PackageBase's in the active Project (see README.md for the
+ * Constructor that returns all the PackageUnloaded's in the active Project (see README.md for the
  * definition of a Project and of a Package). The active Project is the one that contains the path
  * from which this binary is executed.
  *
@@ -65,8 +65,8 @@ export const make = async (): Promise<Type> => {
   return _make({
     topPackagePath,
     packages: [
-      PackageBase.make({
-        tag: 'TopPackage',
+      PackageUnloaded.make({
+        type: 'TopPackage',
         name: topPackageName,
         parentName: topPackageName,
         path: topPackagePath,
@@ -85,16 +85,16 @@ export const make = async (): Promise<Type> => {
             const isMonoRepo = subPackages.length !== 0;
 
             return [
-              PackageBase.make({
-                tag: isMonoRepo ? 'MonoRepo' : 'OnePackageRepo',
+              PackageUnloaded.make({
+                type: isMonoRepo ? 'MonoRepo' : 'OnePackageRepo',
                 name: repoName,
                 parentName: repoName,
                 path: repoPath,
                 isConfigsPackage: repoName === configsPackageName,
               }),
               ...subPackages.map((subPackageName) =>
-                PackageBase.make({
-                  tag: 'SubPackage',
+                PackageUnloaded.make({
+                  type: 'SubPackage',
                   name: subPackageName,
                   parentName: repoName,
                   path: join(repoPackagesPath, subPackageName),
@@ -110,7 +110,7 @@ export const make = async (): Promise<Type> => {
 };
 
 /**
- * Displays the number of BasePackage's in `self`
+ * Displays the number of PackageUnloaded's in `self`
  *
  * @category Destructors
  */
@@ -118,13 +118,13 @@ export const showCount = (self: Type): void =>
   console.log(`Number of packages in scope: ${self.packages.length.toString()}`);
 
 /**
- * Returns a copy of `self` in which only the PackageBase's that fulfill the predicate `predicate`
- * remain.
+ * Returns a copy of `self` in which only the PackageUnloaded's that fulfill the predicate
+ * `predicate` remain.
  *
  * @category Combinators
  */
 export const filter =
-  (predicate: (t: PackageBase.Type) => boolean) =>
+  (predicate: (t: PackageUnloaded.Type) => boolean) =>
   (self: Type): Type =>
     _make({
       topPackagePath: self.topPackagePath,
@@ -132,12 +132,12 @@ export const filter =
     });
 
 /**
- * Same as filter but displays the number of remaining PackageBase's
+ * Same as filter but displays the number of remaining PackageUnloaded's
  *
  * @category Combinators
  */
 export const filterAndShowCount =
-  (predicate: (t: PackageBase.Type) => boolean) =>
+  (predicate: (t: PackageUnloaded.Type) => boolean) =>
   (self: Type): Type => {
     const result = filter(predicate)(self);
     showCount(result);

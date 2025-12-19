@@ -12,7 +12,7 @@ import * as PackageMonoRepo from './Package/MonoRepo.js';
 import * as PackageOnePackageRepo from './Package/OnePackageRepo.js';
 import * as PackageSubPackage from './Package/SubPackage.js';
 import * as PackageTop from './Package/Top.js';
-import * as ProjectBase from './ProjectBase.js';
+import * as ProjectUnloaded from './ProjectUnloaded.js';
 
 const _moduleTag = '@parischap/configs/internal/bin-utils/Project/';
 const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
@@ -52,7 +52,7 @@ const _make = (data: Data<Type>): Type => objectFromDataAndProto(proto, data);
  * @category Constructors
  */
 export const makeFiltered = async (predicate: (t: PackageBase.Type) => boolean): Promise<Type> => {
-  const packageBases = await ProjectBase.make();
+  const packageBases = await ProjectUnloaded.make();
   const { packages: bases, topPackagePath } = packageBases;
 
   const allSourcePackagesNames = bases.filter(PackageBase.isSourcePackage).map(PackageBase.name);
@@ -61,23 +61,25 @@ export const makeFiltered = async (predicate: (t: PackageBase.Type) => boolean):
   return _make({
     topPackagePath,
     packages: await Promise.all(
-      ProjectBase.filterAndShowCount(predicate)(packageBases).packages.map(async (packageBase) => {
-        const tag = packageBase.tag;
-        switch (tag) {
-          case 'MonoRepo':
-            return await PackageMonoRepo.fromPackageBase({ packageBase });
-          case 'OnePackageRepo':
-            return await PackageOnePackageRepo.fromPackageBase({ packageBase });
-          case 'SubPackage':
-            return await PackageSubPackage.fromPackageBase({ packageBase });
-          case 'TopPackage':
-            return PackageTop.fromPackageBase({
-              packageBase,
-              allSourcePackagesNames,
-              allPackagesPaths,
-            });
-        }
-      }),
+      ProjectUnloaded.filterAndShowCount(predicate)(packageBases).packages.map(
+        async (packageBase) => {
+          const tag = packageBase.tag;
+          switch (tag) {
+            case 'MonoRepo':
+              return await PackageMonoRepo.fromPackageBase({ packageBase });
+            case 'OnePackageRepo':
+              return await PackageOnePackageRepo.fromPackageBase({ packageBase });
+            case 'SubPackage':
+              return await PackageSubPackage.fromPackageBase({ packageBase });
+            case 'TopPackage':
+              return PackageTop.fromPackageBase({
+                packageBase,
+                allSourcePackagesNames,
+                allPackagesPaths,
+              });
+          }
+        },
+      ),
     ),
   });
 };

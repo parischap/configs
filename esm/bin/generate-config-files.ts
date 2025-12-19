@@ -36,7 +36,7 @@ const project = await Project.makeFiltered(activePackageOnly ? PackageBase.isAct
 await Promise.all(
   project.packages.map(async (currentPackage) => {
     try {
-      const configFiles = await PackageAll.toConfigFiles(currentPackage);
+      const configFiles = await PackageAll.generateConfigFiles(currentPackage);
 
       /* eslint-disable-next-line functional/no-expression-statements*/
       await ConfigFiles.save(currentPackage.path)(configFiles);

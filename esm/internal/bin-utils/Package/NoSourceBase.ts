@@ -1,61 +1,28 @@
-/** Module that serves as a base for all no source Package types (see README.md and Package.ts) */
+/**
+ * Module that serves as a base for all no source Package types (see README.md and Package.ts). This
+ * module does not export a constructor: abstract class equivalent
+ */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { Data, objectFromDataAndProto, Proto } from '../../shared-utils/types.js';
+import { Data, Proto } from '../../shared-utils/types.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as JsonConfigFileDecoder from '../JsonConfigFile/Decoder.js';
+import * as PackageAllBase from './AllBase.js';
 import * as PackageBase from './Base.js';
 
 /**
- * Module tag
- *
- * @category Module markers
- */
-const _moduleTag = '@parischap/configs/internal/bin-utils/Package/NoSourceBase/';
-const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
-type _TypeId = typeof _TypeId;
-
-/**
- * Type of a NoSourceBase
+ * Type of a PackageNoSourceBase
  *
  * @category Models
  */
-export interface Type extends PackageBase.Type {
-  /** Description of the package */
-  readonly description: string;
-
-  /** @internal */
-  readonly [_TypeId]: _TypeId;
-}
-
-/**
- * Type guard
- *
- * @category Guards
- */
-export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
+export interface Type extends PackageAllBase.Type {}
 
 /** _prototype */
-const parentProto = PackageBase.proto;
-export const proto: Proto<Type> = objectFromDataAndProto(parentProto, {
-  [_TypeId]: _TypeId,
-  async [PackageBase.toPackageFilesSymbol](
-    this: Type,
-    exportsFilesOnly: boolean,
-  ): Promise<ConfigFiles.Type> {
-    return Promise.resolve(
-      ConfigFiles.merge(
-        await parentProto[PackageBase.toPackageFilesSymbol].call(this, exportsFilesOnly),
-        exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.noSourcePackage(this),
-      ),
-    );
-  },
-} as const);
-
-const _make = (data: Data<Type>): Type => objectFromDataAndProto(proto, data);
+const parentProto = PackageAllBase.proto;
+export const proto: Proto<Type> = parentProto;
 
 /**
- * Constructor
+ * Untyped constructor (abstract class equivalent)
  *
  * @category Constructors
  */
@@ -63,11 +30,23 @@ export const fromPackageBase = async ({
   packageBase,
 }: {
   readonly packageBase: PackageBase.Type;
-}): Promise<Type> =>
-  _make({
-    ...packageBase,
-    ...JsonConfigFileDecoder.noSourcePackage({
-      configurationFileObject: await PackageBase.readProjectConfigFile(packageBase),
-      packageName: packageBase.name,
-    }),
-  });
+}): Promise<Data<Type>> => ({
+  ...packageBase,
+  ...JsonConfigFileDecoder.noSourcePackage({
+    configurationFileObject: await PackageBase.readProjectConfigFile(packageBase),
+    packageName: packageBase.name,
+  }),
+});
+
+/**
+ * Generates the configuration files of `self`. If `exportsFilesOnly` is true, only the
+ * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
+ * generated
+ */
+export const generateConfigFiles =
+  (exportsFilesOnly: boolean) =>
+  async (self: Type): Promise<ConfigFiles.Type> =>
+    ConfigFiles.merge(
+      await PackageAllBase.generateConfigFiles(exportsFilesOnly)(self),
+      exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.noSourcePackage,
+    );

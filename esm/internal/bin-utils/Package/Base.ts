@@ -1,8 +1,6 @@
 /**
- * Module that serves as a base for all Package types (see README.md and Package.ts). A BasePackage
- * does not read the project configuration file upon construction. It can be used for all operations
- * that don't require reading the project configuration file, e.g. removing all prod,
- * node_modules... directories, all existing configuration files.
+ * Module that serves as a base for all Package types (see README.md and Package.ts). This module
+ * does not export a constructor: abstract class equivalent
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
@@ -19,14 +17,13 @@ import {
   tsBuildInfoFolderName,
   viteTimeStampFilenamePattern,
 } from '../../../constants.js';
-import { Data, objectFromDataAndProto, Proto, Record } from '../../shared-utils/types.js';
+import { Proto, Record } from '../../shared-utils/types.js';
 import {
   readFiles,
   readFilesRecursively,
   readJsonFile,
   toMiniGlobRegExp,
 } from '../../shared-utils/utils.js';
-import * as ConfigFiles from '../ConfigFiles.js';
 
 /**
  * Module tag
@@ -34,8 +31,15 @@ import * as ConfigFiles from '../ConfigFiles.js';
  * @category Module markers
  */
 const _moduleTag = '@parischap/configs/internal/bin-utils/Package/Base/';
-const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
-export type _TypeId = typeof _TypeId;
+export const TypeId: unique symbol = Symbol.for(_moduleTag) as TypeId;
+export type TypeId = typeof TypeId;
+
+/**
+ * Symbol used for the `tag` property
+ *
+ * @category Models
+ */
+export const tagSymbol: unique symbol = Symbol.for(_moduleTag + 'tag/');
 
 const EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE = toMiniGlobRegExp([
   readMeFilename,
@@ -49,21 +53,12 @@ const EXTERNAL_CONFIGURATION_FILES_FOR_OTHER_PACKAGES = toMiniGlobRegExp([
 ]);
 
 /**
- * Symbol used for the `toConfigFiles` property
- *
- * @category Models
- */
-export const toPackageFilesSymbol: unique symbol = Symbol.for(_moduleTag + 'toConfigFiles/');
-
-/**
- * Type of a Base
+ * Type of a PackageBase
  *
  * @category Models
  */
 export interface Type {
-  /** Tag of the package */
-  readonly tag: 'TopPackage' | 'MonoRepo' | 'OnePackageRepo' | 'SubPackage';
-  /** Name of the package */
+  /** Package name */
   readonly name: string;
   /** Name of the parent MonoRepo of `self` if self is a SubPackage. Equal to `name` otherwise */
   readonly parentName: string;
@@ -71,11 +66,9 @@ export interface Type {
   readonly path: string;
   /** Flag that indicates if `self` is the configs package */
   readonly isConfigsPackage: boolean;
-  /** Generates the ConfigFiles for `this` */
-  readonly [toPackageFilesSymbol]: (exportsFilesOnly: boolean) => Promise<ConfigFiles.Type>;
 
   /** @internal */
-  readonly [_TypeId]: _TypeId;
+  readonly [TypeId]: TypeId;
 }
 
 /**
@@ -83,22 +76,12 @@ export interface Type {
  *
  * @category Guards
  */
-export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
+export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && TypeId in u;
 
 /** _prototype */
 export const proto: Proto<Type> = {
-  [_TypeId]: _TypeId,
-  [toPackageFilesSymbol](this: Type, exportsFilesOnly: boolean): Promise<ConfigFiles.Type> {
-    return Promise.resolve(exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.anyPackage(this));
-  },
+  [TypeId]: TypeId,
 };
-
-/**
- * Constructor
- *
- * @category Constructors
- */
-export const make = (data: Data<Type>): Type => objectFromDataAndProto(proto, data);
 
 /**
  * Returns the `name` property of `self`
@@ -128,14 +111,6 @@ export const isConfigsPackage = (self: Type): boolean => self.isConfigsPackage;
  * @category Predicates
  */
 export const isActive = (self: Type): boolean => relative(process.cwd(), self.path) === '';
-
-/**
- * Predicate that returns true if `self` is a source Package
- *
- * @category Predicates
- */
-export const isSourcePackage = (self: Type): boolean =>
-  self.tag === 'OnePackageRepo' || self.tag === 'SubPackage';
 
 /**
  * Reads the configuration file of `self`

@@ -1,31 +1,31 @@
 /**
- * Module that represents a OnePackageRepo which is a sub-type of a Package (see README.md and
+ * Module that represents a OnePackageRepo which is a sub-type of a PackageAll (see README.md and
  * Package.ts).
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import { Data, objectFromDataAndProto, Proto } from '../../shared-utils/types.js';
 import * as ConfigFiles from '../ConfigFiles.js';
+import * as PackageAllBase from './AllBase.js';
 import * as PackageBase from './Base.js';
 import * as PackageSourceBase from './SourceBase.js';
 
 /**
- * Module tag
- *
- * @category Module markers
- */
-const _moduleTag = '@parischap/configs/internal/bin-utils/Package/OnePackageRepo/';
-const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
-type _TypeId = typeof _TypeId;
-
-/**
- * Type of a OnePackageRepo
+ * Type of a PackageOnePackageRepo
  *
  * @category Models
  */
 export interface Type extends PackageSourceBase.Type {
-  /** @internal */
-  readonly [_TypeId]: _TypeId;
+  /** Structure discriminant */
+  readonly [PackageBase.tagSymbol]: 'OnePackageRepo';
+  /**
+   * Generates the configuration files of `this`. If `exportsFilesOnly` is true, only the
+   * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
+   * generated
+   */
+  readonly [PackageAllBase.generateConfigFilesSymbol]: (
+    exportsFilesOnly: boolean,
+  ) => Promise<ConfigFiles.Type>;
 }
 
 /**
@@ -33,22 +33,20 @@ export interface Type extends PackageSourceBase.Type {
  *
  * @category Guards
  */
-export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
+export const has = (u: unknown): u is Type =>
+  PackageBase.has(u) && PackageBase.tagSymbol in u && u[PackageBase.tagSymbol] === 'OnePackageRepo';
 
 /** _prototype */
 const parentProto = PackageSourceBase.proto;
 const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
-  [_TypeId]: _TypeId,
-  async [PackageBase.toPackageFilesSymbol](
+  [PackageBase.tagSymbol]: 'OnePackageRepo' as const,
+  async [PackageAllBase.generateConfigFilesSymbol](
     this: Type,
     exportsFilesOnly: boolean,
   ): Promise<ConfigFiles.Type> {
-    return ConfigFiles.merge(
-      await parentProto[PackageBase.toPackageFilesSymbol].call(this, exportsFilesOnly),
-      exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.repo(this),
-    );
+    return generateConfigFiles(exportsFilesOnly)(this);
   },
-} as const);
+});
 
 const _make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
 
@@ -60,3 +58,16 @@ const _make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
 export const fromPackageBase = async (data: {
   readonly packageBase: PackageBase.Type;
 }): Promise<Type> => _make(await PackageSourceBase.fromPackageBase(data));
+
+/**
+ * Generates the configuration files of `self`. If `exportsFilesOnly` is true, only the
+ * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
+ * generated
+ */
+export const generateConfigFiles =
+  (exportsFilesOnly: boolean) =>
+  async (self: Type): Promise<ConfigFiles.Type> =>
+    ConfigFiles.merge(
+      await PackageSourceBase.generateConfigFiles(exportsFilesOnly)(self),
+      exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.repo(self),
+    );

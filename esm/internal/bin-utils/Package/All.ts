@@ -33,7 +33,7 @@ export type Type =
  *
  * @categrory Destructors
  */
-export const toConfigFiles = (
+export const generateConfigFiles = (
   self: Type,
   { exportsFilesOnly = false }: { readonly exportsFilesOnly?: boolean } = {},
-): Promise<ConfigFiles.Type> => self[PackageBase.toPackageFilesSymbol](exportsFilesOnly);
+): Promise<ConfigFiles.Type> => self[PackageBase.generateConfigFilesSymbol](exportsFilesOnly);

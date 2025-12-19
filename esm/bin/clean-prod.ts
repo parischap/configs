@@ -7,25 +7,25 @@
  */
 
 import { activePackageOnlyFlag } from '../constants.js';
-import * as PackageBase from '../internal/bin-utils/Package/Base.js';
-import * as ProjectBase from '../internal/bin-utils/ProjectBase.js';
+import * as PackageUnloaded from '../internal/bin-utils/Package/Base.js';
+import * as ProjectUnloaded from '../internal/bin-utils/ProjectUnloaded.js';
 
-console.log('Cleaning config files');
+console.log('Removing prod directories');
 const arg1 = process.argv[2];
 if (arg1 !== undefined && arg1 !== activePackageOnlyFlag)
   throw new Error(`Unexpected flag '${arg1}' received`);
 const activePackageOnly = arg1 === activePackageOnlyFlag;
 
-const project = await ProjectBase.make();
-const filteredProject = ProjectBase.filterAndShowCount(
-  activePackageOnly ? PackageBase.isActive : () => true,
+const project = await ProjectUnloaded.make();
+const filteredProject = ProjectUnloaded.filterAndShowCount(
+  activePackageOnly ? PackageUnloaded.isActive : () => true,
 )(project);
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
   filteredProject.packages.map((currentPackage) => {
     try {
-      return PackageBase.cleanProdFolders(currentPackage);
+      return PackageUnloaded.cleanProdFolders(currentPackage);
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);
       throw e;
