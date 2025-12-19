@@ -332,7 +332,7 @@ export interface Type {
  */
 export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
 
-/** _prototype */
+/** Prototype */
 const _proto: Proto<Type> = {
   [_TypeId]: _TypeId,
 };

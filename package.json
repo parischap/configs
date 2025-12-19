@@ -1,5 +1,6 @@
 {
   "name": "@parischap/configs",
+  "description": "Utility to generate configuration files in a repository",
   "type": "module",
   "author": "Jérôme MARTIN",
   "license": "MIT",
@@ -51,7 +52,6 @@
     "@babel/plugin-transform-export-namespace-from": "7.27.1",
     "@babel/plugin-transform-modules-commonjs": "7.27.1"
   },
-  "description": "Utility to generate configuration files in a repository",
   "module": "./esm/index.js",
   "peerDependencies": {
     "effect": "3.19.6",

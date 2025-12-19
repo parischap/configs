@@ -14,7 +14,7 @@ const _moduleTag = '@parischap/configs/internal/bin-utils/ProjectUnloaded/';
 const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
 export type _TypeId = typeof _TypeId;
 
-/** Type of a Project */
+/** Type of a ProjectUnloaded */
 export interface Type {
   /** Path to the project root */
   readonly topPackagePath: string;
@@ -32,7 +32,7 @@ export interface Type {
  */
 export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
 
-/** _prototype */
+/** Prototype */
 export const proto: Proto<Type> = {
   [_TypeId]: _TypeId,
 };
@@ -41,8 +41,8 @@ const _make = (data: Data<Type>): Type => objectFromDataAndProto(proto, data);
 
 /**
  * Constructor that returns all the PackageUnloaded's in the active Project (see README.md for the
- * definition of a Project and of a Package). The active Project is the one that contains the path
- * from which this binary is executed.
+ * definition of a Project and of a Package), i.e. the project that contains the current working
+ * directory
  *
  * @category Constructors
  */
@@ -66,7 +66,7 @@ export const make = async (): Promise<Type> => {
     topPackagePath,
     packages: [
       PackageUnloaded.make({
-        type: 'TopPackage',
+        type: 'Top',
         name: topPackageName,
         parentName: topPackageName,
         path: topPackagePath,
@@ -118,8 +118,8 @@ export const showCount = (self: Type): void =>
   console.log(`Number of packages in scope: ${self.packages.length.toString()}`);
 
 /**
- * Returns a copy of `self` in which only the PackageUnloaded's that fulfill the predicate
- * `predicate` remain.
+ * Returns a copy of `self` in which only the PackageUnloaded's that fulfill predicate `predicate`
+ * remain.
  *
  * @category Combinators
  */

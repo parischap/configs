@@ -34,9 +34,9 @@ export interface Type extends PackageBase.Type {
   readonly description: string;
 }
 
-/** _prototype */
+/** Prototype */
 const parentProto = PackageBase.proto;
-export const proto: Proto<Type> = parentProto;
+export const proto: Omit<Proto<Type>, PackageBase.isTopPackageSymbol> = parentProto;
 
 /**
  * Generates the configuration files of `self`. If `exportsFilesOnly` is true, only the

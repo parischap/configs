@@ -1,21 +1,16 @@
-/** Module that represents a Package (see README.md). */
+/**
+ * Module that implements a Package (see README.md and Package.ts) that reads the project
+ * configuration file upon construction. A PackageAll can be used to generate the configuration
+ * files of a package, check if no unwanted configuration files are present in a package, ...
+ */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import * as ConfigFiles from '../ConfigFiles.js';
-import * as PackageBase from './Base.js';
-import type * as PackageMonoRepo from './MonoRepo.js';
-import type * as PackageOnePackageRepo from './OnePackageRepo.js';
-import type * as PackageSubPackage from './SubPackage.js';
-import type * as PackageTop from './Top.js';
-
-/**
- * Module tag
- *
- * @category Module markers
- */
-const _moduleTag = '@parischap/configs/internal/bin-utils/Package/All/';
-const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
-type _TypeId = typeof _TypeId;
+import * as PackageAllBase from './AllBase.js';
+import * as PackageMonoRepo from './MonoRepo.js';
+import * as PackageOnePackageRepo from './OnePackageRepo.js';
+import * as PackageSubPackage from './SubPackage.js';
+import * as PackageTop from './Top.js';
 
 /**
  * Type of a Package
@@ -36,4 +31,4 @@ export type Type =
 export const generateConfigFiles = (
   self: Type,
   { exportsFilesOnly = false }: { readonly exportsFilesOnly?: boolean } = {},
-): Promise<ConfigFiles.Type> => self[PackageBase.generateConfigFilesSymbol](exportsFilesOnly);
+): Promise<ConfigFiles.Type> => self[PackageAllBase.generateConfigFilesSymbol](exportsFilesOnly);

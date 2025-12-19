@@ -82,9 +82,9 @@ export interface Type extends PackageAllBase.Type {
   readonly packagePrefix: string | undefined;
 }
 
-/** _prototype */
+/** Prototype */
 const parentProto = PackageAllBase.proto;
-export const proto: Proto<Type> = parentProto;
+export const proto: Omit<Proto<Type>, PackageBase.isTopPackageSymbol> = parentProto;
 
 /**
  * Untyped constructor (abstract class equivalent)

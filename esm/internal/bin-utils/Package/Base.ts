@@ -31,7 +31,19 @@ import {
  * @category Module markers
  */
 const _moduleTag = '@parischap/configs/internal/bin-utils/Package/Base/';
+
+/**
+ * Module TypeId
+ *
+ * @category Module markers
+ */
 export const TypeId: unique symbol = Symbol.for(_moduleTag) as TypeId;
+
+/**
+ * Module TypeId
+ *
+ * @category Module markers
+ */
 export type TypeId = typeof TypeId;
 
 /**
@@ -40,6 +52,16 @@ export type TypeId = typeof TypeId;
  * @category Models
  */
 export const tagSymbol: unique symbol = Symbol.for(_moduleTag + 'tag/');
+
+/**
+ * Symbol used for the `isTopPackage` property
+ *
+ * @category Models
+ */
+export const isTopPackageSymbol: unique symbol = Symbol.for(
+  _moduleTag + 'isTopPackage/',
+) as isTopPackageSymbol;
+export type isTopPackageSymbol = typeof isTopPackageSymbol;
 
 const EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE = toMiniGlobRegExp([
   readMeFilename,
@@ -66,6 +88,8 @@ export interface Type {
   readonly path: string;
   /** Flag that indicates if `self` is the configs package */
   readonly isConfigsPackage: boolean;
+  // Returns true is this is the top Package of a Project
+  readonly [isTopPackageSymbol]: () => boolean;
 
   /** @internal */
   readonly [TypeId]: TypeId;
@@ -78,8 +102,8 @@ export interface Type {
  */
 export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && TypeId in u;
 
-/** _prototype */
-export const proto: Proto<Type> = {
+/** Prototype. isTopPackageSymbol is implemented further down in the hierarchy */
+export const proto: Omit<Proto<Type>, isTopPackageSymbol> = {
   [TypeId]: TypeId,
 };
 
@@ -104,6 +128,12 @@ export const path = (self: Type): string => self.path;
  */
 export const isConfigsPackage = (self: Type): boolean => self.isConfigsPackage;
 
+/**
+ * Returns the `isTopPackage` property of `self`
+ *
+ * @category Destructors
+ */
+export const isTopPackage = (self: Type): boolean => self[isTopPackageSymbol]();
 /**
  * Predicate that returns true if `self` is the active Package, i.e. the package whose root is in
  * the current working directory
@@ -141,7 +171,7 @@ export const getPathsOfExistingConfigFiles = async (self: Type): Promise<Array<s
       .filter(
         (relativePath) =>
           !(
-            self.tag === 'TopPackage' ?
+            isTopPackage(self) ?
               EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE
             : EXTERNAL_CONFIGURATION_FILES_FOR_OTHER_PACKAGES).test(relativePath),
       ),

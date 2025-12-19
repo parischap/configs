@@ -12,6 +12,7 @@ import * as PackageMonoRepo from './Package/MonoRepo.js';
 import * as PackageOnePackageRepo from './Package/OnePackageRepo.js';
 import * as PackageSubPackage from './Package/SubPackage.js';
 import * as PackageTop from './Package/Top.js';
+import * as PackageUnloaded from './Package/Unloaded.js';
 import * as ProjectUnloaded from './ProjectUnloaded.js';
 
 const _moduleTag = '@parischap/configs/internal/bin-utils/Project/';
@@ -36,7 +37,7 @@ export interface Type {
  */
 export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
 
-/** _prototype */
+/** Prototype */
 export const proto: Proto<Type> = {
   [_TypeId]: _TypeId,
 };
@@ -44,36 +45,41 @@ export const proto: Proto<Type> = {
 const _make = (data: Data<Type>): Type => objectFromDataAndProto(proto, data);
 
 /**
- * Constructor that returns all the PackageBase's in the active Project (see README.md for the
- * definition of a Project and of a Package). The active Project is the one that contains the path
- * from which this binary is executed. The active Package is the one in whose root this binary is
- * executed.
+ * Constructor that returns all the PackageAll's in the active Project (see README.md for the
+ * definition of a Project and of a Package), i.e. the project that contains the current working
+ * directory.
  *
  * @category Constructors
  */
-export const makeFiltered = async (predicate: (t: PackageBase.Type) => boolean): Promise<Type> => {
-  const packageBases = await ProjectUnloaded.make();
-  const { packages: bases, topPackagePath } = packageBases;
+export const makeFiltered = async (
+  predicate: (t: PackageUnloaded.Type) => boolean,
+): Promise<Type> => {
+  const unloadedProject = await ProjectUnloaded.make();
+  const { packages, topPackagePath } = unloadedProject;
 
-  const allSourcePackagesNames = bases.filter(PackageBase.isSourcePackage).map(PackageBase.name);
-  const allPackagesPaths = bases.map((basePackage) => relative(topPackagePath, basePackage.path));
+  const allSourcePackagesNames = packages
+    .filter(PackageUnloaded.isSourcePackage)
+    .map(PackageBase.name);
+  const allPackagesPaths = packages.map((currentPackage) =>
+    relative(topPackagePath, currentPackage.path),
+  );
 
   return _make({
     topPackagePath,
     packages: await Promise.all(
-      ProjectUnloaded.filterAndShowCount(predicate)(packageBases).packages.map(
-        async (packageBase) => {
-          const tag = packageBase.tag;
-          switch (tag) {
+      ProjectUnloaded.filterAndShowCount(predicate)(unloadedProject).packages.map(
+        async (currentPackage) => {
+          const type = currentPackage.type;
+          switch (type) {
             case 'MonoRepo':
-              return await PackageMonoRepo.fromPackageBase({ packageBase });
+              return await PackageMonoRepo.fromPackageBase({ packageBase: currentPackage });
             case 'OnePackageRepo':
-              return await PackageOnePackageRepo.fromPackageBase({ packageBase });
+              return await PackageOnePackageRepo.fromPackageBase({ packageBase: currentPackage });
             case 'SubPackage':
-              return await PackageSubPackage.fromPackageBase({ packageBase });
-            case 'TopPackage':
+              return await PackageSubPackage.fromPackageBase({ packageBase: currentPackage });
+            case 'Top':
               return PackageTop.fromPackageBase({
-                packageBase,
+                packageBase: currentPackage,
                 allSourcePackagesNames,
                 allPackagesPaths,
               });

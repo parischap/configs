@@ -17,9 +17,9 @@ import * as PackageBase from './Base.js';
  */
 export interface Type extends PackageAllBase.Type {}
 
-/** _prototype */
+/** Prototype */
 const parentProto = PackageAllBase.proto;
-export const proto: Proto<Type> = parentProto;
+export const proto: Omit<Proto<Type>, PackageBase.isTopPackageSymbol> = parentProto;
 
 /**
  * Untyped constructor (abstract class equivalent)

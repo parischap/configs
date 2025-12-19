@@ -36,7 +36,7 @@ export interface Type extends PackageNoSourceBase.Type {
 export const has = (u: unknown): u is Type =>
   PackageBase.has(u) && PackageBase.tagSymbol in u && u[PackageBase.tagSymbol] === 'MonoRepo';
 
-/** _prototype */
+/** Prototype */
 const parentProto = PackageNoSourceBase.proto;
 const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
   [PackageBase.tagSymbol]: 'MonoRepo' as const,
@@ -45,6 +45,9 @@ const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
     exportsFilesOnly: boolean,
   ): Promise<ConfigFiles.Type> {
     return generateConfigFiles(exportsFilesOnly)(this);
+  },
+  [PackageBase.isTopPackageSymbol](this: Type) {
+    return false;
   },
 });
 

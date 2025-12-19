@@ -16,7 +16,7 @@ import * as PackageBase from './Base.js';
  */
 export interface Type extends PackageBase.Type {
   /** Type of the package */
-  readonly type: 'TopPackage' | 'MonoRepo' | 'OnePackageRepo' | 'SubPackage';
+  readonly type: 'Top' | 'MonoRepo' | 'OnePackageRepo' | 'SubPackage';
   /** Structure discriminant */
   readonly [PackageBase.tagSymbol]: 'Unloaded';
 }
@@ -29,10 +29,13 @@ export interface Type extends PackageBase.Type {
 export const has = (u: unknown): u is Type =>
   PackageBase.has(u) && PackageBase.tagSymbol in u && u[PackageBase.tagSymbol] === 'Unloaded';
 
-/** _prototype */
+/** Prototype */
 const parentProto = PackageBase.proto;
 const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
   [PackageBase.tagSymbol]: 'Unloaded' as const,
+  [PackageBase.isTopPackageSymbol](this: Type) {
+    return this.type === 'Top';
+  },
 });
 
 /**
@@ -41,3 +44,11 @@ const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
  * @category Constructors
  */
 export const make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
+
+/**
+ * Predicate that returns true if self is a source Package
+ *
+ * @category Predictae
+ */
+export const isSourcePackage = (self: Type): boolean =>
+  self.type === 'OnePackageRepo' || self.type === 'SubPackage';

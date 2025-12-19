@@ -1,5 +1,5 @@
 /**
- * Module that represents a TopPackage which is a sub-type of a PackageAll (see README.md and
+ * Module that represents a PackageTop which is a sub-type of a PackageAll (see README.md and
  * Package.ts).
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
@@ -17,10 +17,10 @@ import * as PackageNoSourceBase from './NoSourceBase.js';
  */
 export interface Type extends PackageNoSourceBase.Type {
   /** Structure discriminant */
-  readonly [PackageBase.tagSymbol]: 'TopPackage';
-  /** Array of the names of all the source packages of the Project whose TopPackage is `self` */
+  readonly [PackageBase.tagSymbol]: 'Top';
+  /** Array of the names of all the source packages of the Project whose Top is `self` */
   readonly allSourcePackagesNames: ReadonlyArray<string>;
-  /** Array of the paths to all the packages of the Project whose TopPackage is `self` */
+  /** Array of the paths to all the packages of the Project whose Top is `self` */
   readonly allPackagesPaths: ReadonlyArray<string>;
   /**
    * Generates the configuration files of `this`. If `exportsFilesOnly` is true, only the
@@ -38,17 +38,20 @@ export interface Type extends PackageNoSourceBase.Type {
  * @category Guards
  */
 export const has = (u: unknown): u is Type =>
-  PackageBase.has(u) && PackageBase.tagSymbol in u && u[PackageBase.tagSymbol] === 'TopPackage';
+  PackageBase.has(u) && PackageBase.tagSymbol in u && u[PackageBase.tagSymbol] === 'Top';
 
-/** _prototype */
+/** Prototype */
 const parentProto = PackageNoSourceBase.proto;
 const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
-  [PackageBase.tagSymbol]: 'TopPackage' as const,
+  [PackageBase.tagSymbol]: 'Top' as const,
   async [PackageAllBase.generateConfigFilesSymbol](
     this: Type,
     exportsFilesOnly: boolean,
   ): Promise<ConfigFiles.Type> {
     return generateConfigFiles(exportsFilesOnly)(this);
+  },
+  [PackageBase.isTopPackageSymbol](this: Type) {
+    return true;
   },
 });
 
