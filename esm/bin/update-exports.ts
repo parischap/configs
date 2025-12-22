@@ -15,7 +15,10 @@ import * as PackageSource from '../internal/bin-utils/Package/Source.js';
 import * as Project from '../internal/bin-utils/Project.js';
 import { getExeFlags } from '../internal/shared-utils/utils.js';
 
+console.log('Generating exports config files');
+
 const [isWatch, activePackageOnly] = getExeFlags([watchFlag, activePackageOnlyFlag] as const);
+if (isWatch) console.log('Watch mode activated');
 
 const project = await Project.makeFiltered(activePackageOnly ? PackageBase.isActive : () => true);
 const filteredProject = Project.filterAndShowCount(
@@ -40,6 +43,7 @@ await Promise.all(
               || (changeFilename !== indexTsFilename
                 && allJavaScriptExtensions.includes(extname(changeFilename)))
             ) {
+              console.log(`Updating exports files of package: '${currentPackage.name}'`);
               const configFiles = ConfigFiles.filterExportsFiles(
                 await PackageAll.generateConfigFiles(currentPackage),
               );

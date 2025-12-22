@@ -393,9 +393,9 @@ and does not start with predefined warning comment`);
 export const getExeFlags = <A extends ReadonlyArray<string>>(
   allowedFlags: A,
 ): { [k in keyof A]: boolean } => {
-  const args = process.argv;
+  const args = process.argv.slice(2);
   const allowedFlagsNum = allowedFlags.length;
-  const receivedArgsNum = args.length - 2;
+  const receivedArgsNum = args.length;
   if (receivedArgsNum > allowedFlagsNum)
     throw new Error(
       `Too many arguments received. Expected: ${allowedFlagsNum.toString()}. Actual: ${receivedArgsNum.toString()}`,

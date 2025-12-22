@@ -743,15 +743,18 @@ const sourcePackageExports = async ({
       dontFailOnInexistentPath: false,
     })
   )
-    .map((files) => ({
-      ...files,
-      isJavascript: allJavaScriptExtensions.includes(files.extension),
-      isOther: allJsonExtensions.includes(files.extension),
+    .map((file) => ({
+      ...file,
+      isJavascript: allJavaScriptExtensions.includes(file.extension),
+      isOther: allJsonExtensions.includes(file.extension),
     }))
-    .filter(
-      ({ bareName, isJavascript, isOther }) =>
-        bareName !== indexBareName && (isJavascript || isOther),
-    )
+    .filter(({ bareName, isJavascript, isOther }) => {
+      const dotPos = bareName.indexOf('.');
+      return (
+        bareName.slice(0, dotPos === -1 ? undefined : dotPos) !== indexBareName
+        && (isJavascript || isOther)
+      );
+    })
     .map(({ bareName, relativeParentPath, isJavascript, extension }) => {
       const barePath = fromOSPathToPosixPath(join(relativeParentPath, bareName));
       return {

@@ -91,9 +91,6 @@
     "./EslintConfig": {
       "default": "./esm/eslintConfig.ts"
     },
-    "./IndexTests": {
-      "default": "./esm/index.tests.ts"
-    },
     "./PrettierConfig": {
       "default": "./esm/prettierConfig.ts"
     },
