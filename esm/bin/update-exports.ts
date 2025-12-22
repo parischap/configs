@@ -11,33 +11,16 @@ import {
 import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
 import * as PackageAll from '../internal/bin-utils/Package/All.js';
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
+import * as PackageSource from '../internal/bin-utils/Package/Source.js';
 import * as Project from '../internal/bin-utils/Project.js';
+import { getExeFlags } from '../internal/shared-utils/utils.js';
 
-const getParams = (): { isWatch: boolean; activePackageOnly: boolean } => {
-  const arg1 = process.argv[2];
-  const arg2 = process.argv[3];
-  if (arg1 === undefined) return { isWatch: false, activePackageOnly: false };
-  if (arg2 === undefined) {
-    if (arg1 === watchFlag) return { isWatch: true, activePackageOnly: false };
-    if (arg1 === activePackageOnlyFlag) return { isWatch: false, activePackageOnly: true };
-    throw new Error(`Unexpected flag '${arg1}' received`);
-  }
-  if (arg1 !== watchFlag && arg1 !== activePackageOnlyFlag)
-    throw new Error(`Unexpected flag '${arg1}' received`);
-  if (arg2 !== watchFlag && arg2 !== activePackageOnlyFlag)
-    throw new Error(`Unexpected flag '${arg2}' received`);
-  if (arg1 === arg2) throw new Error(`Flag '${arg1}' received twice`);
-  return { isWatch: true, activePackageOnly: true };
-};
-const arg3 = process.argv[4];
-if (arg3 !== undefined) throw new Error(`Unexpected flag '${arg3}' received`);
-
-const { isWatch, activePackageOnly } = getParams();
+const [isWatch, activePackageOnly] = getExeFlags([watchFlag, activePackageOnlyFlag] as const);
 
 const project = await Project.makeFiltered(activePackageOnly ? PackageBase.isActive : () => true);
 const filteredProject = Project.filterAndShowCount(
   (currentPackage) =>
-    PackageAll.isSourcePackage(currentPackage) && currentPackage.packagePrefix !== undefined,
+    PackageSource.has(currentPackage) && currentPackage.packagePrefix !== undefined,
 )(project);
 
 /* eslint-disable-next-line functional/no-expression-statements*/
@@ -57,9 +40,9 @@ await Promise.all(
               || (changeFilename !== indexTsFilename
                 && allJavaScriptExtensions.includes(extname(changeFilename)))
             ) {
-              const configFiles = await PackageAll.generateConfigFiles(currentPackage, {
-                exportsFilesOnly: true,
-              });
+              const configFiles = ConfigFiles.filterExportsFiles(
+                await PackageAll.generateConfigFiles(currentPackage),
+              );
               /* eslint-disable-next-line functional/no-expression-statements*/
               await ConfigFiles.save(currentPackage.path)(configFiles);
             }
@@ -68,9 +51,9 @@ await Promise.all(
           }
         }
       } else {
-        const configFiles = await PackageAll.generateConfigFiles(currentPackage, {
-          exportsFilesOnly: true,
-        });
+        const configFiles = ConfigFiles.filterExportsFiles(
+          await PackageAll.generateConfigFiles(currentPackage),
+        );
         /* eslint-disable-next-line functional/no-expression-statements*/
         await ConfigFiles.save(currentPackage.path)(configFiles);
       }

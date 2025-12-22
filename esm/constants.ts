@@ -92,6 +92,9 @@ export const githubWorkflowsPagesPath = join(
 );
 
 /* This path is used as key in a ConfigFiles object. It must therefore use the system path separator */
+export const indexTsPath = join(sourceFolderName, indexTsFilename);
+
+/* This path is used as key in a ConfigFiles object. It must therefore use the system path separator */
 export const docsIndexMdPath = join(docsFolderName, docsIndexMdFilename);
 
 /* This path is used as key in a ConfigFiles object. It must therefore use the system path separator */

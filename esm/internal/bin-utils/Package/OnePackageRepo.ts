@@ -23,9 +23,7 @@ export interface Type extends PackageSourceBase.Type {
    * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
    * generated
    */
-  readonly [PackageAllBase.generateConfigFilesSymbol]: (
-    exportsFilesOnly: boolean,
-  ) => Promise<ConfigFiles.Type>;
+  readonly [PackageAllBase.generateConfigFilesSymbol]: () => Promise<ConfigFiles.Type>;
 }
 
 /**
@@ -40,11 +38,8 @@ export const has = (u: unknown): u is Type =>
 const parentProto = PackageSourceBase.proto;
 const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
   [PackageBase.tagSymbol]: 'OnePackageRepo' as const,
-  async [PackageAllBase.generateConfigFilesSymbol](
-    this: Type,
-    exportsFilesOnly: boolean,
-  ): Promise<ConfigFiles.Type> {
-    return generateConfigFiles(exportsFilesOnly)(this);
+  [PackageAllBase.generateConfigFilesSymbol](this: Type): Promise<ConfigFiles.Type> {
+    return generateConfigFiles(this);
   },
   [PackageBase.isTopPackageSymbol](this: Type) {
     return false;
@@ -67,10 +62,5 @@ export const fromPackageBase = async (data: {
  * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
  * generated
  */
-export const generateConfigFiles =
-  (exportsFilesOnly: boolean) =>
-  async (self: Type): Promise<ConfigFiles.Type> =>
-    ConfigFiles.merge(
-      await PackageSourceBase.generateConfigFiles(exportsFilesOnly)(self),
-      exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.repo(self),
-    );
+export const generateConfigFiles = async (self: Type): Promise<ConfigFiles.Type> =>
+  ConfigFiles.merge(await PackageSourceBase.generateConfigFiles(self), ConfigFiles.repo(self));

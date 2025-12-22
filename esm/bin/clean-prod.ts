@@ -9,14 +9,10 @@
 import { activePackageOnlyFlag } from '../constants.js';
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
 import * as ProjectUnloaded from '../internal/bin-utils/ProjectUnloaded.js';
+import { getExeFlags } from '../internal/shared-utils/utils.js';
 
 console.log('Removing prod directories');
-const arg1 = process.argv[2];
-if (arg1 !== undefined && arg1 !== activePackageOnlyFlag)
-  throw new Error(`Unexpected flag '${arg1}' received`);
-const activePackageOnly = arg1 === activePackageOnlyFlag;
-const arg2 = process.argv[3];
-if (arg2 !== undefined) throw new Error(`Unexpected flag '${arg2}' received`);
+const [activePackageOnly] = getExeFlags([activePackageOnlyFlag] as const);
 
 const project = await ProjectUnloaded.makeFilteredAndShowCount(
   activePackageOnly ? PackageBase.isActive : () => true,

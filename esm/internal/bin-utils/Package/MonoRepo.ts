@@ -23,9 +23,7 @@ export interface Type extends PackageNoSourceBase.Type {
    * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
    * generated
    */
-  readonly [PackageAllBase.generateConfigFilesSymbol]: (
-    exportsFilesOnly: boolean,
-  ) => Promise<ConfigFiles.Type>;
+  readonly [PackageAllBase.generateConfigFilesSymbol]: () => Promise<ConfigFiles.Type>;
 }
 
 /**
@@ -40,11 +38,8 @@ export const has = (u: unknown): u is Type =>
 const parentProto = PackageNoSourceBase.proto;
 const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
   [PackageBase.tagSymbol]: 'MonoRepo' as const,
-  async [PackageAllBase.generateConfigFilesSymbol](
-    this: Type,
-    exportsFilesOnly: boolean,
-  ): Promise<ConfigFiles.Type> {
-    return generateConfigFiles(exportsFilesOnly)(this);
+  [PackageAllBase.generateConfigFilesSymbol](this: Type): Promise<ConfigFiles.Type> {
+    return generateConfigFiles(this);
   },
   [PackageBase.isTopPackageSymbol](this: Type) {
     return false;
@@ -67,19 +62,15 @@ export const fromPackageBase = async (data: {
  * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
  * generated
  */
-export const generateConfigFiles =
-  (exportsFilesOnly: boolean) =>
-  async (self: Type): Promise<ConfigFiles.Type> =>
-    ConfigFiles.merge(
-      await PackageNoSourceBase.generateConfigFiles(exportsFilesOnly)(self),
-      exportsFilesOnly ?
-        ConfigFiles.empty
-      : ConfigFiles.repo({
-          name: self.name,
-          description: self.description,
-          // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
-          hasDocGen: true,
-          // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
-          isPublished: true,
-        }),
-    );
+export const generateConfigFiles = async (self: Type): Promise<ConfigFiles.Type> =>
+  ConfigFiles.merge(
+    await PackageNoSourceBase.generateConfigFiles(self),
+    ConfigFiles.repo({
+      name: self.name,
+      description: self.description,
+      // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
+      hasDocGen: true,
+      // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
+      isPublished: true,
+    }),
+  );

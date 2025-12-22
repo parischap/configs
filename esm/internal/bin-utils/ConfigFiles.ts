@@ -36,7 +36,7 @@ import {
   githubWorkflowsPublishPath,
   gitIgnoreFilename,
   indexBareName,
-  indexTsFilename,
+  indexTsPath,
   internalFolderName,
   madgeConfigFilename,
   npmFolderName,
@@ -354,6 +354,20 @@ export const make = (configurationFiles: ReadonlyRecord): Type => _make({ config
 export const configurationFiles = (self: Type): ReadonlyRecord => self.configurationFiles;
 
 /**
+ * Returns the value of the `configurationFiles` property of self
+ *
+ * @category Destructors
+ */
+export const filterExportsFiles = (self: Type): Type =>
+  _make({
+    configurationFiles: Object.fromEntries(
+      Object.entries(self.configurationFiles).filter(
+        ([filename]) => filename === indexTsPath || filename === packageJsonFilename,
+      ),
+    ),
+  });
+
+/**
  * Builds a new Packagefiles from the concatenation of several ConfigFiles
  *
  * @category Constructors
@@ -491,7 +505,7 @@ export const noSourcePackage: Type = make({
  *
  * @category Instances
  */
-export const sourcePackageBuild = ({
+const sourcePackageBuild = ({
   buildMethod,
   isPublished,
 }: {
@@ -539,7 +553,7 @@ export const sourcePackageBuild = ({
  *
  * @category Instances
  */
-export const sourcePackageVisibility = ({
+const sourcePackageVisibility = ({
   parentName,
   isPublished,
   keywords,
@@ -583,7 +597,7 @@ export const sourcePackageVisibility = ({
  *
  * @category Instances
  */
-export const sourcePackageDocGen = ({ hasDocGen }: { readonly hasDocGen: boolean }): Type =>
+const sourcePackageDocGen = ({ hasDocGen }: { readonly hasDocGen: boolean }): Type =>
   make(
     hasDocGen ?
       {
@@ -604,7 +618,7 @@ export const sourcePackageDocGen = ({ hasDocGen }: { readonly hasDocGen: boolean
  *
  * @category Instances
  */
-export const sourcePackagePlatform = ({
+const sourcePackagePlatform = ({
   useEffectPlatform,
 }: {
   readonly useEffectPlatform: string;
@@ -635,7 +649,7 @@ export const sourcePackagePlatform = ({
  *
  * @category Instances
  */
-export const sourcePackageEnvironment = ({
+const sourcePackageEnvironment = ({
   environment,
   isConfigsPackage,
 }: {
@@ -693,7 +707,7 @@ export const sourcePackageEnvironment = ({
  *
  * @category Instances
  */
-export const basePackageJsonExports: Type = make({
+const baseSourcePackageExports: Type = make({
   [packageJsonFilename]: {
     exports: {
       '.': {
@@ -711,7 +725,7 @@ export const basePackageJsonExports: Type = make({
  *
  * @category Instances
  */
-export const sourcePackageExports = async ({
+const sourcePackageExports = async ({
   path,
   packagePrefix,
   isConfigsPackage,
@@ -720,7 +734,7 @@ export const sourcePackageExports = async ({
   readonly packagePrefix: string | undefined;
   readonly isConfigsPackage: boolean;
 }): Promise<Type> => {
-  if (packagePrefix === undefined) return basePackageJsonExports;
+  if (packagePrefix === undefined) return baseSourcePackageExports;
 
   const sourceFiles = (
     await readFilesRecursively({
@@ -752,11 +766,11 @@ export const sourcePackageExports = async ({
     });
 
   return sourceFiles.length === 0 ?
-      basePackageJsonExports
+      baseSourcePackageExports
     : merge(
-        basePackageJsonExports,
+        baseSourcePackageExports,
         make({
-          [join(sourceFolderName, indexTsFilename)]: sourceFiles
+          [indexTsPath]: sourceFiles
             .filter(({ isJavascript }) => isJavascript)
             // path.join removes upfront './' but typescript requires them so we must add them
             .map(
@@ -790,7 +804,7 @@ export const sourcePackageExports = async ({
  *
  * @category Instances
  */
-export const sourcePackageConfigsPackage = make({
+const sourcePackageConfigsPackage = make({
   [packageJsonFilename]: {
     peerDependencies: configsPeerDependencies,
     dependencies: configsDependencies,
@@ -846,12 +860,6 @@ export const sourcePackage = async ({
       [dependencies, { ...peerDependencies, ...effectDependencies }]
     : [{ ...dependencies, ...effectDependencies }, peerDependencies];
 
-  const exports = await sourcePackageExports({
-    path,
-    packagePrefix,
-    isConfigsPackage,
-  });
-
   return merge(
     make({
       // Used by the circular script
@@ -906,11 +914,11 @@ export const sourcePackage = async ({
     sourcePackagePlatform({ useEffectPlatform }),
     sourcePackageEnvironment({ environment, isConfigsPackage }),
     isConfigsPackage ? sourcePackageConfigsPackage : empty,
-    exports,
+    await sourcePackageExports({ path, packagePrefix, isConfigsPackage }),
   );
 };
 
-export const repoVisibility: Type = make({
+const repoVisibility: Type = make({
   /* Github actions need to be at the root of the github repo. This action calls a script `build-and-publish` but changes the working directory to the published package directory before calling them. So this script must be in sourcePackage.
    */
   [githubWorkflowsPublishPath]: GITHUB_WORKFLOWS_PUBLISH_SCRIPT,
@@ -921,7 +929,7 @@ export const repoVisibility: Type = make({
  *
  * @category Instances
  */
-export const repoDocGen = ({
+const repoDocGen = ({
   name,
   description,
 }: {

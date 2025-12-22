@@ -23,14 +23,10 @@ import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
 import * as PackageAll from '../internal/bin-utils/Package/All.js';
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
 import * as Project from '../internal/bin-utils/Project.js';
+import { getExeFlags } from '../internal/shared-utils/utils.js';
 
 console.log('Generating config files');
-const arg1 = process.argv[2];
-if (arg1 !== undefined && arg1 !== activePackageOnlyFlag)
-  throw new Error(`Unexpected flag '${arg1}' received`);
-const activePackageOnly = arg1 === activePackageOnlyFlag;
-const arg2 = process.argv[3];
-if (arg2 !== undefined) throw new Error(`Unexpected flag '${arg2}' received`);
+const [activePackageOnly] = getExeFlags([activePackageOnlyFlag] as const);
 
 const project = await Project.makeFilteredAndShowCount(
   activePackageOnly ? PackageBase.isActive : () => true,

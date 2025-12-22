@@ -108,12 +108,8 @@ export const fromPackageBase = async ({
  * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
  * generated
  */
-export const generateConfigFiles =
-  (exportsFilesOnly: boolean) =>
-  async (self: Type): Promise<ConfigFiles.Type> =>
-    ConfigFiles.merge(
-      await PackageAllBase.generateConfigFiles(exportsFilesOnly)(self),
-      await (exportsFilesOnly ?
-        ConfigFiles.sourcePackageExports(self)
-      : ConfigFiles.sourcePackage(self)),
-    );
+export const generateConfigFiles = async (self: Type): Promise<ConfigFiles.Type> =>
+  ConfigFiles.merge(
+    await PackageAllBase.generateConfigFiles(self),
+    await ConfigFiles.sourcePackage(self),
+  );

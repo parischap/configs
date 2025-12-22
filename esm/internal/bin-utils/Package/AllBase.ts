@@ -43,7 +43,5 @@ export const proto: Omit<Proto<Type>, PackageBase.isTopPackageSymbol> = parentPr
  * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
  * generated
  */
-export const generateConfigFiles =
-  (exportsFilesOnly: boolean) =>
-  (self: Type): Promise<ConfigFiles.Type> =>
-    Promise.resolve(exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.anyPackage(self));
+export const generateConfigFiles = (self: Type): Promise<ConfigFiles.Type> =>
+  Promise.resolve(ConfigFiles.anyPackage(self));

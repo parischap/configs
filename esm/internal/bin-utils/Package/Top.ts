@@ -27,9 +27,7 @@ export interface Type extends PackageNoSourceBase.Type {
    * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
    * generated
    */
-  readonly [PackageAllBase.generateConfigFilesSymbol]: (
-    exportsFilesOnly: boolean,
-  ) => Promise<ConfigFiles.Type>;
+  readonly [PackageAllBase.generateConfigFilesSymbol]: () => Promise<ConfigFiles.Type>;
 }
 
 /**
@@ -44,11 +42,8 @@ export const has = (u: unknown): u is Type =>
 const parentProto = PackageNoSourceBase.proto;
 const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
   [PackageBase.tagSymbol]: 'Top' as const,
-  async [PackageAllBase.generateConfigFilesSymbol](
-    this: Type,
-    exportsFilesOnly: boolean,
-  ): Promise<ConfigFiles.Type> {
-    return generateConfigFiles(exportsFilesOnly)(this);
+  async [PackageAllBase.generateConfigFilesSymbol](this: Type): Promise<ConfigFiles.Type> {
+    return generateConfigFiles(this);
   },
   [PackageBase.isTopPackageSymbol](this: Type) {
     return true;
@@ -83,10 +78,8 @@ export const fromPackageBase = ({
  * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
  * generated
  */
-export const generateConfigFiles =
-  (exportsFilesOnly: boolean) =>
-  async (self: Type): Promise<ConfigFiles.Type> =>
-    ConfigFiles.merge(
-      await PackageNoSourceBase.generateConfigFiles(exportsFilesOnly)(self),
-      exportsFilesOnly ? ConfigFiles.empty : ConfigFiles.topPackageWorkspace(self),
-    );
+export const generateConfigFiles = async (self: Type): Promise<ConfigFiles.Type> =>
+  ConfigFiles.merge(
+    await PackageNoSourceBase.generateConfigFiles(self),
+    ConfigFiles.topPackageWorkspace(self),
+  );
