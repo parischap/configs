@@ -154,6 +154,7 @@ const javascriptConfigForNonMdFiles = ({
             ignoreVoid: true,
             ignoreCodePattern: [
               '^' + regExpEscape('describe('),
+              /^this\.([^=]+)\s*=\s*(?:[^.]+\.)?\1/.source,
               // process.exit returns never, not void
               //'^' + regExpEscape('process.exit('),
               // regExpEscape('super'),

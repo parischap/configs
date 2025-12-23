@@ -5,22 +5,18 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import * as ConfigFiles from '../ConfigFiles.js';
-import * as PackageAllBase from './AllBase.js';
-import * as PackageNoSource from './NoSource.js';
-import * as PackageSource from './Source.js';
+import * as PackageMonoRepo from './MonoRepo.js';
+import * as PackageOnePackageRepo from './OnePackageRepo.js';
+import * as PackageSubRepo from './SubRepo.js';
+import * as PackageTop from './Top.js';
 
 /**
  * Type of a Package
  *
  * @category Models
  */
-export type Type = PackageSource.Type | PackageNoSource.Type;
-
-/**
- * Generates the ConfigFiles for `self`
- *
- * @categrory Destructors
- */
-export const generateConfigFiles = (self: Type): Promise<ConfigFiles.Type> =>
-  self[PackageAllBase.generateConfigFilesSymbol]();
+export type Type =
+  | PackageMonoRepo.Type
+  | PackageOnePackageRepo.Type
+  | PackageSubRepo.Type
+  | PackageTop.Type;

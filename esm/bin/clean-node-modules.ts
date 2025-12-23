@@ -6,15 +6,20 @@
  */
 /* This module must not use any external dependency because it cleans the node-modules folders and must therfore not depend on any dependency in these folders */
 
-import { activePackageOnlyFlag } from '../constants.js';
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
 import * as ProjectUnloaded from '../internal/bin-utils/ProjectUnloaded.js';
+import * as SchemaFormat from '../internal/bin-utils/Schema/Format.js';
 import { getExeFlags } from '../internal/shared-utils/utils.js';
 
 console.log('Removing node_modules directory');
-const [activePackageOnly] = getExeFlags([activePackageOnlyFlag] as const);
+const { ['-activePackageOnly']: activePackageOnly } = SchemaFormat.injectDefaultsAndValidate(
+  SchemaFormat.filteringArgs,
+  {
+    allowStringConversion: true,
+  },
+)(getExeFlags());
 
-const project = await ProjectUnloaded.makeFilteredAndShowCount(
+const project = await ProjectUnloaded.filteredFromActiveProjectAndShowCount(
   activePackageOnly ? PackageBase.isActive : () => true,
 );
 

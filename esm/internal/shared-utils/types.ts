@@ -36,31 +36,25 @@ export const isStringRecord = (v: unknown): v is StringRecord =>
 export const isStringArray = (v: unknown): v is StringArray =>
   isArray(v) && v.filter((value) => typeof value !== 'string').length === 0;
 
+export interface AnyFunction {
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  (...args: ReadonlyArray<any>): any;
+}
+
 /**
- * Utility type that removes all non-data from a type.
+ * Utility type that removes all non-data from a type. Is considered as non-data the `tag` property
+ * and any property that starts with an underscore. Don't make this function too complex, e.g. use
+ * the fact that the value is a function, because it creates issues when infering types in the
+ * constructors of generic types
  *
  * @category Utility types
  */
 export type Data<T extends ReadonlyRecord<string | symbol>> = {
-  [k in keyof T as [k] extends [symbol] ? never : k]: T[k];
+  [k in keyof T as [k] extends ['tag' | `_${string}`] ? never : k]: T[k];
 };
 
-/**
- * Utility type that removes all data from a type
- *
- * @category Utility types
- */
-export type Proto<T extends ReadonlyRecord<string | symbol>> = Omit<T, keyof Data<T>>;
-
-/**
- * Constructs an object with prototype `proto` and data `data`
- *
- * @category Utils
- */
-export const objectFromDataAndProto = <
-  P extends ReadonlyRecord<string | symbol>,
-  D extends ReadonlyRecord<string | symbol>,
->(
-  proto: P,
-  data: D,
-): P & D => Object.assign(Object.create(proto) as P, data);
+// Same as Object.assign but returns void so as to suppress the
+export const ObjectAssign = (source: Record, target: Record): void => {
+  /* eslint-disable-next-line functional/no-expression-statements , functional/immutable-data*/
+  Object.assign(source, target);
+};

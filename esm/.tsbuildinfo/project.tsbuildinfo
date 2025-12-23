@@ -950,7 +950,7 @@
     "../internal/bin-utils/package/monorepo.ts",
     "../internal/bin-utils/package/sourcebase.ts",
     "../internal/bin-utils/package/onepackagerepo.ts",
-    "../internal/bin-utils/package/subpackage.ts",
+    "../internal/bin-utils/package/subrepo.ts",
     "../internal/bin-utils/package/top.ts",
     "../internal/bin-utils/package/all.ts",
     "../internal/bin-utils/project.ts",

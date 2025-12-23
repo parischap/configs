@@ -4,9 +4,8 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { Data, objectFromDataAndProto, Proto } from '../../shared-utils/types.js';
+import { Data } from '../../shared-utils/types.js';
 import * as ConfigFiles from '../ConfigFiles.js';
-import * as PackageAllBase from './AllBase.js';
 import * as PackageBase from './Base.js';
 import * as PackageNoSourceBase from './NoSourceBase.js';
 
@@ -15,62 +14,58 @@ import * as PackageNoSourceBase from './NoSourceBase.js';
  *
  * @category Models
  */
-export interface Type extends PackageNoSourceBase.Type {
+export class Type extends PackageNoSourceBase.Type {
   /** Structure discriminant */
-  readonly [PackageBase.tagSymbol]: 'MonoRepo';
-  /**
-   * Generates the configuration files of `this`. If `exportsFilesOnly` is true, only the
-   * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
-   * generated
-   */
-  readonly [PackageAllBase.generateConfigFilesSymbol]: () => Promise<ConfigFiles.Type>;
-}
+  readonly tag = 'MonoRepo';
 
-/**
- * Type guard
- *
- * @category Guards
- */
-export const has = (u: unknown): u is Type =>
-  PackageBase.has(u) && PackageBase.tagSymbol in u && u[PackageBase.tagSymbol] === 'MonoRepo';
-
-/** Prototype */
-const parentProto = PackageNoSourceBase.proto;
-const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
-  [PackageBase.tagSymbol]: 'MonoRepo' as const,
-  [PackageAllBase.generateConfigFilesSymbol](this: Type): Promise<ConfigFiles.Type> {
-    return generateConfigFiles(this);
-  },
-  [PackageBase.isTopPackageSymbol](this: Type) {
+  /** Returns true is this is the top Package of a Project */
+  _isTop(): boolean {
     return false;
-  },
-});
+  }
+  /** Returns true is this is a MonoRepo */
+  _isMonoRepo(): boolean {
+    return true;
+  }
+  /** Returns true is this is a OnePackageRepo */
+  _isOnePackageRepo(): boolean {
+    return false;
+  }
+  /** Returns true is this is a SubRepo */
+  _isSubRepo(): boolean {
+    return false;
+  }
 
-const _make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
+  /** Class constructor */
+  private constructor(params: Data<Type>) {
+    super(params);
+  }
+
+  /** Static constructor */
+  static async fromPackageBase(params: { readonly packageBase: PackageBase.Type }): Promise<Type> {
+    return new Type(await PackageNoSourceBase.fromPackageBase(params));
+  }
+
+  /** Generates the configuration files of `self` */
+  override async _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
+    return ConfigFiles.merge(
+      await super._generateConfigFiles(),
+      ConfigFiles.repo({
+        name: this.name,
+        description: this.description,
+        // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
+        hasDocGen: true,
+        // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
+        isPublished: true,
+      }),
+    );
+  }
+}
 
 /**
  * Constructor
  *
  * @category Constructors
  */
-export const fromPackageBase = async (data: {
+export const fromPackageBase = (params: {
   readonly packageBase: PackageBase.Type;
-}): Promise<Type> => _make(await PackageNoSourceBase.fromPackageBase(data));
-
-/**
- * Generates the configuration files of `self`. If `exportsFilesOnly` is true, only the
- * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
- * generated
- */
-export const generateConfigFiles = async (self: Type): Promise<ConfigFiles.Type> =>
-  ConfigFiles.merge(
-    await PackageNoSourceBase.generateConfigFiles(self),
-    ConfigFiles.repo({
-      name: self.name,
-      description: self.description,
-      // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
-      hasDocGen: true,
-      // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
-      isPublished: true,
-    }),
-  );
+}): Promise<Type> => Type.fromPackageBase(params);

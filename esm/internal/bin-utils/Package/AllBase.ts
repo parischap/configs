@@ -4,44 +4,35 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { Proto } from '../../shared-utils/types.js';
+import { Data } from '../../shared-utils/types.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as PackageBase from './Base.js';
-
-/**
- * Module tag
- *
- * @category Module markers
- */
-const _moduleTag = '@parischap/configs/internal/bin-utils/Package/AllBase/';
-
-/**
- * Symbol used for the `generateConfigFiles` property
- *
- * @category Models
- */
-export const generateConfigFilesSymbol: unique symbol = Symbol.for(
-  _moduleTag + 'generateConfigFiles/',
-);
 
 /**
  * Type of a PackageAllBase
  *
  * @category Models
  */
-export interface Type extends PackageBase.Type {
+export abstract class Type extends PackageBase.Type {
   /** Package description */
   readonly description: string;
+
+  /** Class constructor */
+  protected constructor(params: Data<Type>) {
+    super(params);
+    this.description = params.description;
+  }
+
+  /** Generates the configuration files of `self` */
+  _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
+    return Promise.resolve(ConfigFiles.anyPackage(this));
+  }
 }
 
-/** Prototype */
-const parentProto = PackageBase.proto;
-export const proto: Omit<Proto<Type>, PackageBase.isTopPackageSymbol> = parentProto;
-
 /**
- * Generates the configuration files of `self`. If `exportsFilesOnly` is true, only the
- * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
- * generated
+ * Generates the ConfigFiles for `self`
+ *
+ * @categrory Destructors
  */
 export const generateConfigFiles = (self: Type): Promise<ConfigFiles.Type> =>
-  Promise.resolve(ConfigFiles.anyPackage(self));
+  self._generateConfigFiles();

@@ -6,7 +6,7 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { Data, objectFromDataAndProto, Proto } from '../../shared-utils/types.js';
+import { Data } from '../../shared-utils/types.js';
 import * as PackageBase from './Base.js';
 
 /**
@@ -14,41 +14,44 @@ import * as PackageBase from './Base.js';
  *
  * @category Models
  */
-export interface Type extends PackageBase.Type {
+export class Type extends PackageBase.Type {
   /** Type of the package */
-  readonly type: 'Top' | 'MonoRepo' | 'OnePackageRepo' | 'SubPackage';
+  readonly type: 'Top' | 'MonoRepo' | 'OnePackageRepo' | 'SubRepo';
   /** Structure discriminant */
-  readonly [PackageBase.tagSymbol]: 'Unloaded';
-}
+  readonly tag = 'Unloaded';
 
-/**
- * Type guard
- *
- * @category Guards
- */
-export const has = (u: unknown): u is Type =>
-  PackageBase.has(u) && PackageBase.tagSymbol in u && u[PackageBase.tagSymbol] === 'Unloaded';
-
-/** Prototype */
-const parentProto = PackageBase.proto;
-const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
-  [PackageBase.tagSymbol]: 'Unloaded' as const,
-  [PackageBase.isTopPackageSymbol](this: Type) {
+  /** Returns true is this is the top Package of a Project */
+  _isTop(): boolean {
     return this.type === 'Top';
-  },
-});
+  }
+  /** Returns true is this is a MonoRepo */
+  _isMonoRepo(): boolean {
+    return this.type === 'MonoRepo';
+  }
+  /** Returns true is this is a OnePackageRepo */
+  _isOnePackageRepo(): boolean {
+    return this.type === 'OnePackageRepo';
+  }
+  /** Returns true is this is a SubRepo */
+  _isSubRepo(): boolean {
+    return this.type === 'SubRepo';
+  }
+
+  /** Class constructor */
+  private constructor(params: Data<Type>) {
+    super(params);
+    this.type = params.type;
+  }
+
+  /** Static constructor */
+  static make(params: Data<Type>): Type {
+    return new Type(params);
+  }
+}
 
 /**
  * Constructor
  *
  * @category Constructors
  */
-export const make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
-
-/**
- * Predicate that returns true if self is a source Package
- *
- * @category Predictae
- */
-export const isSourcePackage = (self: Type): boolean =>
-  self.type === 'OnePackageRepo' || self.type === 'SubPackage';
+export const make = (params: Data<Type>): Type => Type.make(params);

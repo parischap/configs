@@ -17,51 +17,13 @@ import {
   tsBuildInfoFolderName,
   viteTimeStampFilenamePattern,
 } from '../../../constants.js';
-import { Proto, Record } from '../../shared-utils/types.js';
+import { Data, Record } from '../../shared-utils/types.js';
 import {
   readFiles,
   readFilesRecursively,
   readJsonFile,
   toMiniGlobRegExp,
 } from '../../shared-utils/utils.js';
-
-/**
- * Module tag
- *
- * @category Module markers
- */
-const _moduleTag = '@parischap/configs/internal/bin-utils/Package/Base/';
-
-/**
- * Module TypeId
- *
- * @category Module markers
- */
-export const TypeId: unique symbol = Symbol.for(_moduleTag) as TypeId;
-
-/**
- * Module TypeId
- *
- * @category Module markers
- */
-export type TypeId = typeof TypeId;
-
-/**
- * Symbol used for the `tag` property
- *
- * @category Models
- */
-export const tagSymbol: unique symbol = Symbol.for(_moduleTag + 'tag/');
-
-/**
- * Symbol used for the `isTopPackage` property
- *
- * @category Models
- */
-export const isTopPackageSymbol: unique symbol = Symbol.for(
-  _moduleTag + 'isTopPackage/',
-) as isTopPackageSymbol;
-export type isTopPackageSymbol = typeof isTopPackageSymbol;
 
 const EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE = toMiniGlobRegExp([
   readMeFilename,
@@ -79,33 +41,31 @@ const EXTERNAL_CONFIGURATION_FILES_FOR_OTHER_PACKAGES = toMiniGlobRegExp([
  *
  * @category Models
  */
-export interface Type {
+export abstract class Type {
   /** Package name */
   readonly name: string;
-  /** Name of the parent MonoRepo of `self` if self is a SubPackage. Equal to `name` otherwise */
+  /** Name of the parent MonoRepo of `self` if self is a SubRepo. Equal to `name` otherwise */
   readonly parentName: string;
   /** Path to the package root */
   readonly path: string;
   /** Flag that indicates if `self` is the configs package */
   readonly isConfigsPackage: boolean;
-  // Returns true is this is the top Package of a Project
-  readonly [isTopPackageSymbol]: () => boolean;
-
-  /** @internal */
-  readonly [TypeId]: TypeId;
+  /** Returns true is this is the top Package of a Project */
+  abstract _isTop(): boolean;
+  /** Returns true is this is a MonoRepo */
+  abstract _isMonoRepo(): boolean;
+  /** Returns true is this is a OnePackageRepo */
+  abstract _isOnePackageRepo(): boolean;
+  /** Returns true is this is a SubRepo */
+  abstract _isSubRepo(): boolean;
+  /** Class constructor */
+  protected constructor(params: Data<Type>) {
+    this.name = params.name;
+    this.parentName = params.parentName;
+    this.path = params.path;
+    this.isConfigsPackage = params.isConfigsPackage;
+  }
 }
-
-/**
- * Type guard
- *
- * @category Guards
- */
-export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && TypeId in u;
-
-/** Prototype. isTopPackageSymbol is implemented further down in the hierarchy */
-export const proto: Omit<Proto<Type>, isTopPackageSymbol> = {
-  [TypeId]: TypeId,
-};
 
 /**
  * Returns the `name` property of `self`
@@ -129,14 +89,50 @@ export const path = (self: Type): string => self.path;
 export const isConfigsPackage = (self: Type): boolean => self.isConfigsPackage;
 
 /**
- * Returns the `isTopPackage` property of `self`
+ * Returns true if `self` is the top package
  *
- * @category Destructors
+ * @category Predicates
  */
-export const isTopPackage = (self: Type): boolean => self[isTopPackageSymbol]();
+export const isTop = (self: Type): boolean => self._isTop();
+
 /**
- * Predicate that returns true if `self` is the active Package, i.e. the package whose root is in
- * the current working directory
+ * Returns true if `self` is a MonoRepo
+ *
+ * @category Predicates
+ */
+export const isMonoRepo = (self: Type): boolean => self._isMonoRepo();
+
+/**
+ * Returns true if `self` is a OnePackageRepo
+ *
+ * @category Predicates
+ */
+export const isOnePackageRepo = (self: Type): boolean => self._isOnePackageRepo();
+
+/**
+ * Returns true if `self` is a SubRepo
+ *
+ * @category Predicates
+ */
+export const isSubRepo = (self: Type): boolean => self._isSubRepo();
+
+/**
+ * Returns true if `self` is a source Package
+ *
+ * @category Predicates
+ */
+export const isSource = (self: Type): boolean => self._isOnePackageRepo() || self._isSubRepo();
+
+/**
+ * Returns true if `self` is a no source Package
+ *
+ * @category Predicates
+ */
+export const isNoSource = (self: Type): boolean => self._isTop() || self._isMonoRepo();
+
+/**
+ * Returns true if `self` is the active Package, i.e. the package whose root is in the current
+ * working directory
  *
  * @category Predicates
  */
@@ -171,7 +167,7 @@ export const getPathsOfExistingConfigFiles = async (self: Type): Promise<Array<s
       .filter(
         (relativePath) =>
           !(
-            isTopPackage(self) ?
+            isTop(self) ?
               EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE
             : EXTERNAL_CONFIGURATION_FILES_FOR_OTHER_PACKAGES).test(relativePath),
       ),
@@ -187,6 +183,8 @@ export const getPathsOfExistingConfigFiles = async (self: Type): Promise<Array<s
 /**
  * Deletes in `self` the file or folder at `relativePath` expressed relatively to the root of
  * `self`. Logs the good completion of the task only if a file or folder was effectively deleted
+ *
+ * @category Destructors
  */
 export const rmAndLogIfSuccessful =
   (relativePath: string) =>

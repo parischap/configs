@@ -4,9 +4,9 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { Data, Proto } from '../../shared-utils/types.js';
+import { Data } from '../../shared-utils/types.js';
 import * as ConfigFiles from '../ConfigFiles.js';
-import * as JsonConfigFileDecoder from '../JsonConfigFile/Decoder.js';
+import * as SchemaFormat from '../Schema/Format.js';
 import * as PackageAllBase from './AllBase.js';
 import * as PackageBase from './Base.js';
 
@@ -15,14 +15,20 @@ import * as PackageBase from './Base.js';
  *
  * @category Models
  */
-export interface Type extends PackageAllBase.Type {}
+export abstract class Type extends PackageAllBase.Type {
+  /** Class constructor */
+  protected constructor(params: Data<Type>) {
+    super(params);
+  }
 
-/** Prototype */
-const parentProto = PackageAllBase.proto;
-export const proto: Omit<Proto<Type>, PackageBase.isTopPackageSymbol> = parentProto;
+  /** Generates the configuration files of `self` */
+  override async _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
+    return ConfigFiles.merge(await super._generateConfigFiles(), ConfigFiles.noSourcePackage);
+  }
+}
 
 /**
- * Untyped constructor (abstract class equivalent)
+ * Untyped constructor
  *
  * @category Constructors
  */
@@ -30,18 +36,13 @@ export const fromPackageBase = async ({
   packageBase,
 }: {
   readonly packageBase: PackageBase.Type;
-}): Promise<Data<Type>> => ({
-  ...packageBase,
-  ...JsonConfigFileDecoder.noSourcePackage({
-    configurationFileObject: await PackageBase.readProjectConfigFile(packageBase),
-    packageName: packageBase.name,
-  }),
-});
-
-/**
- * Generates the configuration files of `self`. If `exportsFilesOnly` is true, only the
- * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
- * generated
- */
-export const generateConfigFiles = async (self: Type): Promise<ConfigFiles.Type> =>
-  ConfigFiles.merge(await PackageAllBase.generateConfigFiles(self), ConfigFiles.noSourcePackage);
+}): Promise<Data<Type>> => {
+  const configRecord = await PackageBase.readProjectConfigFile(packageBase);
+  const parameters = Object.entries(configRecord);
+  return {
+    ...(packageBase as Data<PackageBase.Type>),
+    ...SchemaFormat.injectDefaultsAndValidate(SchemaFormat.noSourcePackage, {
+      errorPrefix: `'${packageBase.name}': `,
+    })(parameters),
+  };
+};

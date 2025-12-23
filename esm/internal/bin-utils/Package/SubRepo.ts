@@ -1,5 +1,5 @@
 /**
- * Module that represents a OnePackageRepo which is a sub-type of a PackageAll (see README.md and
+ * Module that represents a SubRepo which is a sub-type of a PackageAll (see README.md and
  * Package.ts).
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
@@ -10,13 +10,13 @@ import * as PackageBase from './Base.js';
 import * as PackageSourceBase from './SourceBase.js';
 
 /**
- * Type of a PackageOnePackageRepo
+ * Type of a PackageSubRepo
  *
  * @category Models
  */
 export class Type extends PackageSourceBase.Type {
   /** Structure discriminant */
-  readonly tag = 'OnePackageRepo';
+  readonly tag = 'SubRepo';
 
   /** Returns true is this is the top Package of a Project */
   _isTop(): boolean {
@@ -28,11 +28,11 @@ export class Type extends PackageSourceBase.Type {
   }
   /** Returns true is this is a OnePackageRepo */
   _isOnePackageRepo(): boolean {
-    return true;
+    return false;
   }
   /** Returns true is this is a SubRepo */
   _isSubRepo(): boolean {
-    return false;
+    return true;
   }
 
   /** Class constructor */
@@ -46,8 +46,8 @@ export class Type extends PackageSourceBase.Type {
   }
 
   /** Generates the configuration files of `self` */
-  override async _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
-    return ConfigFiles.merge(await super._generateConfigFiles(), ConfigFiles.repo(this));
+  override _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
+    return super._generateConfigFiles();
   }
 }
 

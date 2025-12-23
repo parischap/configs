@@ -161,10 +161,6 @@ export const allJson5Files = prefixWithAllFilePatterns(json5Extensions);
 export const allYmlFiles = prefixWithAllFilePatterns(ymlExtensions);
 export const allJsInMdFiles = prefixWith(allFilesInMd)(allJavaScriptExtensions);
 
-export const activePackageOnlyFlag = '-activePackageOnly';
-export const packagePrefixFlag = '-packagePrefix';
-export const watchFlag = '-watch';
-
 /* Do not use carret at start of dependency versions because we could end up with different versions in the diverse projects. Set one version and update it regularly */
 export const effectDependencies = {
   effect: '3.19.6',

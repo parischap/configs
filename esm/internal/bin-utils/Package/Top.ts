@@ -4,9 +4,8 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { Data, objectFromDataAndProto, Proto } from '../../shared-utils/types.js';
+import { Data } from '../../shared-utils/types.js';
 import * as ConfigFiles from '../ConfigFiles.js';
-import * as PackageAllBase from './AllBase.js';
 import * as PackageBase from './Base.js';
 import * as PackageNoSourceBase from './NoSourceBase.js';
 
@@ -15,71 +14,72 @@ import * as PackageNoSourceBase from './NoSourceBase.js';
  *
  * @category Models
  */
-export interface Type extends PackageNoSourceBase.Type {
+export class Type extends PackageNoSourceBase.Type {
   /** Structure discriminant */
-  readonly [PackageBase.tagSymbol]: 'Top';
+  readonly tag = 'Top';
   /** Array of the names of all the source packages of the Project whose Top is `self` */
   readonly allSourcePackagesNames: ReadonlyArray<string>;
   /** Array of the paths to all the packages of the Project whose Top is `self` */
   readonly allPackagesPaths: ReadonlyArray<string>;
-  /**
-   * Generates the configuration files of `this`. If `exportsFilesOnly` is true, only the
-   * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
-   * generated
-   */
-  readonly [PackageAllBase.generateConfigFilesSymbol]: () => Promise<ConfigFiles.Type>;
-}
 
-/**
- * Type guard
- *
- * @category Guards
- */
-export const has = (u: unknown): u is Type =>
-  PackageBase.has(u) && PackageBase.tagSymbol in u && u[PackageBase.tagSymbol] === 'Top';
-
-/** Prototype */
-const parentProto = PackageNoSourceBase.proto;
-const _proto: Proto<Type> = objectFromDataAndProto(parentProto, {
-  [PackageBase.tagSymbol]: 'Top' as const,
-  async [PackageAllBase.generateConfigFilesSymbol](this: Type): Promise<ConfigFiles.Type> {
-    return generateConfigFiles(this);
-  },
-  [PackageBase.isTopPackageSymbol](this: Type) {
+  /** Returns true is this is the top Package of a Project */
+  _isTop(): boolean {
     return true;
-  },
-});
+  }
+  /** Returns true is this is a MonoRepo */
+  _isMonoRepo(): boolean {
+    return false;
+  }
+  /** Returns true is this is a OnePackageRepo */
+  _isOnePackageRepo(): boolean {
+    return false;
+  }
+  /** Returns true is this is a SubRepo */
+  _isSubRepo(): boolean {
+    return false;
+  }
 
-const _make = (data: Data<Type>): Type => objectFromDataAndProto(_proto, data);
+  /** Class constructor */
+  private constructor(params: Data<Type>) {
+    super(params);
+    this.allSourcePackagesNames = params.allSourcePackagesNames;
+    this.allPackagesPaths = params.allPackagesPaths;
+  }
+
+  /** Static constructor */
+  static fromPackageBase({
+    packageBase,
+    allSourcePackagesNames,
+    allPackagesPaths,
+  }: {
+    readonly packageBase: PackageBase.Type;
+    readonly allSourcePackagesNames: ReadonlyArray<string>;
+    readonly allPackagesPaths: ReadonlyArray<string>;
+  }): Type {
+    return new Type({
+      ...(packageBase as Data<PackageBase.Type>),
+      allSourcePackagesNames,
+      allPackagesPaths,
+      description: 'Top package of my projects',
+    });
+  }
+
+  /** Generates the configuration files of `self` */
+  override async _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
+    return ConfigFiles.merge(
+      await super._generateConfigFiles(),
+      ConfigFiles.topPackageWorkspace(this),
+    );
+  }
+}
 
 /**
  * Constructor
  *
  * @category Constructors
  */
-export const fromPackageBase = ({
-  packageBase,
-  allSourcePackagesNames,
-  allPackagesPaths,
-}: {
+export const fromPackageBase = (params: {
   readonly packageBase: PackageBase.Type;
   readonly allSourcePackagesNames: ReadonlyArray<string>;
   readonly allPackagesPaths: ReadonlyArray<string>;
-}): Type =>
-  _make({
-    ...packageBase,
-    allSourcePackagesNames,
-    allPackagesPaths,
-    description: 'Top package of my projects',
-  });
-
-/**
- * Generates the configuration files of `self`. If `exportsFilesOnly` is true, only the
- * configuration files that handle module exports (i.e. `index.ts` and `package.json`) are
- * generated
- */
-export const generateConfigFiles = async (self: Type): Promise<ConfigFiles.Type> =>
-  ConfigFiles.merge(
-    await PackageNoSourceBase.generateConfigFiles(self),
-    ConfigFiles.topPackageWorkspace(self),
-  );
+}): Type => Type.fromPackageBase(params);

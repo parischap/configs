@@ -5,45 +5,39 @@
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import { normalize, relative } from 'path';
-import { Data, objectFromDataAndProto, Proto } from '../shared-utils/types.js';
+import { Data } from '../shared-utils/types.js';
 import { fromOSPathToPosixPath } from '../shared-utils/utils.js';
 import * as PackageAll from './Package/All.js';
 import * as PackageBase from './Package/Base.js';
 import * as PackageMonoRepo from './Package/MonoRepo.js';
 import * as PackageOnePackageRepo from './Package/OnePackageRepo.js';
-import * as PackageSubPackage from './Package/SubPackage.js';
+import * as PackageSubRepo from './Package/SubRepo.js';
 import * as PackageTop from './Package/Top.js';
 import * as PackageUnloaded from './Package/Unloaded.js';
 import * as ProjectUnloaded from './ProjectUnloaded.js';
 
-const _moduleTag = '@parischap/configs/internal/bin-utils/Project/';
-const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
-export type _TypeId = typeof _TypeId;
-
-/** Type of a Project */
-export interface Type {
+/**
+ * Type of a Project
+ *
+ * @category Models
+ */
+export class Type {
   /** Path to the project root */
   readonly topPackagePath: string;
   /** List of contained PackageAll's */
   readonly packages: ReadonlyArray<PackageAll.Type>;
 
-  /** @internal */
-  readonly [_TypeId]: _TypeId;
+  /** Class constructor */
+  private constructor(params: Data<Type>) {
+    this.topPackagePath = params.topPackagePath;
+    this.packages = params.packages;
+  }
+
+  /** Static constructor */
+  static make(params: Data<Type>): Type {
+    return new Type(params);
+  }
 }
-
-/**
- * Type guard
- *
- * @category Guards
- */
-export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
-
-/** Prototype */
-export const proto: Proto<Type> = {
-  [_TypeId]: _TypeId,
-};
-
-const _make = (data: Data<Type>): Type => objectFromDataAndProto(proto, data);
 
 /**
  * Constructor that returns all the PackageAll's in the active Project (see README.md for the
@@ -52,20 +46,18 @@ const _make = (data: Data<Type>): Type => objectFromDataAndProto(proto, data);
  *
  * @category Constructors
  */
-export const makeFiltered = async (
+export const filteredFromActiveProject = async (
   predicate: (t: PackageUnloaded.Type) => boolean,
 ): Promise<Type> => {
-  const unloadedProject = await ProjectUnloaded.make();
+  const unloadedProject = await ProjectUnloaded.fromActiveProject();
   const { packages, topPackagePath } = unloadedProject;
 
-  const allSourcePackagesNames = packages
-    .filter(PackageUnloaded.isSourcePackage)
-    .map(PackageBase.name);
+  const allSourcePackagesNames = packages.filter(PackageBase.isSource).map(PackageBase.name);
   const allPackagesPaths = packages.map((currentPackage) =>
     fromOSPathToPosixPath(normalize(relative(topPackagePath, currentPackage.path))),
   );
 
-  return _make({
+  return Type.make({
     topPackagePath,
     packages: await Promise.all(
       ProjectUnloaded.filter(predicate)(unloadedProject).packages.map(async (currentPackage) => {
@@ -75,8 +67,8 @@ export const makeFiltered = async (
             return await PackageMonoRepo.fromPackageBase({ packageBase: currentPackage });
           case 'OnePackageRepo':
             return await PackageOnePackageRepo.fromPackageBase({ packageBase: currentPackage });
-          case 'SubPackage':
-            return await PackageSubPackage.fromPackageBase({ packageBase: currentPackage });
+          case 'SubRepo':
+            return await PackageSubRepo.fromPackageBase({ packageBase: currentPackage });
           case 'Top':
             return PackageTop.fromPackageBase({
               packageBase: currentPackage,
@@ -94,10 +86,10 @@ export const makeFiltered = async (
  *
  * @category Constructors
  */
-export const makeFilteredAndShowCount = async (
+export const filteredFromActiveProjectAndShowCount = async (
   predicate: (t: PackageUnloaded.Type) => boolean,
 ): Promise<Type> => {
-  const result = await makeFiltered(predicate);
+  const result = await filteredFromActiveProject(predicate);
   showCount(result);
   return result;
 };
@@ -119,7 +111,7 @@ export const showCount = (self: Type): void =>
 export const filter =
   (predicate: (t: PackageAll.Type) => boolean) =>
   (self: Type): Type =>
-    _make({
+    Type.make({
       topPackagePath: self.topPackagePath,
       packages: self.packages.filter(predicate),
     });

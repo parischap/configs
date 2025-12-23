@@ -6,38 +6,32 @@
 
 import { join, sep } from 'path';
 import { configsPackageName, packagesFolderName } from '../../constants.js';
-import { Data, objectFromDataAndProto, Proto } from '../shared-utils/types.js';
+import { Data } from '../shared-utils/types.js';
 import { readFolders } from '../shared-utils/utils.js';
 import * as PackageUnloaded from './Package/Unloaded.js';
 
-const _moduleTag = '@parischap/configs/internal/bin-utils/ProjectUnloaded/';
-const _TypeId: unique symbol = Symbol.for(_moduleTag) as _TypeId;
-export type _TypeId = typeof _TypeId;
-
-/** Type of a ProjectUnloaded */
-export interface Type {
+/**
+ * Type of a ProjectUnloaded
+ *
+ * @category Models
+ */
+export class Type {
   /** Path to the project root */
   readonly topPackagePath: string;
   /** List of contained PackageUnloaded's */
   readonly packages: ReadonlyArray<PackageUnloaded.Type>;
 
-  /** @internal */
-  readonly [_TypeId]: _TypeId;
+  /** Class constructor */
+  private constructor(params: Data<Type>) {
+    this.topPackagePath = params.topPackagePath;
+    this.packages = params.packages;
+  }
+
+  /** Static constructor */
+  static make(params: Data<Type>): Type {
+    return new Type(params);
+  }
 }
-
-/**
- * Type guard
- *
- * @category Guards
- */
-export const has = (u: unknown): u is Type => typeof u === 'object' && u !== null && _TypeId in u;
-
-/** Prototype */
-export const proto: Proto<Type> = {
-  [_TypeId]: _TypeId,
-};
-
-const _make = (data: Data<Type>): Type => objectFromDataAndProto(proto, data);
 
 /**
  * Constructor that returns all the PackageUnloaded's in the active Project (see README.md for the
@@ -46,7 +40,7 @@ const _make = (data: Data<Type>): Type => objectFromDataAndProto(proto, data);
  *
  * @category Constructors
  */
-export const make = async (): Promise<Type> => {
+export const fromActiveProject = async (): Promise<Type> => {
   const currentPath = process.cwd();
   const splitPath = currentPath.split(sep);
   const firstPackagesIndex = splitPath.findIndex((split) => split === packagesFolderName);
@@ -62,7 +56,7 @@ export const make = async (): Promise<Type> => {
     dontFailOnInexistentPath: false,
   });
 
-  return _make({
+  return Type.make({
     topPackagePath,
     packages: [
       PackageUnloaded.make({
@@ -77,12 +71,12 @@ export const make = async (): Promise<Type> => {
           ...repoNames.map(async (repoName) => {
             const repoPath = join(topPackagePackagesPath, repoName);
             const repoPackagesPath = join(repoPath, packagesFolderName);
-            const subPackages = await readFolders({
+            const subRepos = await readFolders({
               path: repoPackagesPath,
               dontFailOnInexistentPath: true,
             });
 
-            const isMonoRepo = subPackages.length !== 0;
+            const isMonoRepo = subRepos.length !== 0;
 
             return [
               PackageUnloaded.make({
@@ -92,12 +86,12 @@ export const make = async (): Promise<Type> => {
                 path: repoPath,
                 isConfigsPackage: repoName === configsPackageName,
               }),
-              ...subPackages.map((subPackageName) =>
+              ...subRepos.map((subRepoName) =>
                 PackageUnloaded.make({
-                  type: 'SubPackage',
-                  name: subPackageName,
+                  type: 'SubRepo',
+                  name: subRepoName,
                   parentName: repoName,
-                  path: join(repoPackagesPath, subPackageName),
+                  path: join(repoPackagesPath, subRepoName),
                   isConfigsPackage: false,
                 }),
               ),
@@ -114,18 +108,18 @@ export const make = async (): Promise<Type> => {
  *
  * @category Constructors
  */
-export const makeFiltered = async (
+export const filteredFromActiveProject = async (
   predicate: (t: PackageUnloaded.Type) => boolean,
-): Promise<Type> => filter(predicate)(await make());
+): Promise<Type> => filter(predicate)(await fromActiveProject());
 
 /**
  * Combination of make and filterAndShowCount
  *
  * @category Constructors
  */
-export const makeFilteredAndShowCount = async (
+export const filteredFromActiveProjectAndShowCount = async (
   predicate: (t: PackageUnloaded.Type) => boolean,
-): Promise<Type> => filterAndShowCount(predicate)(await make());
+): Promise<Type> => filterAndShowCount(predicate)(await fromActiveProject());
 
 /**
  * Displays the number of PackageUnloaded's in `self`
@@ -144,7 +138,7 @@ export const showCount = (self: Type): void =>
 export const filter =
   (predicate: (t: PackageUnloaded.Type) => boolean) =>
   (self: Type): Type =>
-    _make({
+    Type.make({
       topPackagePath: self.topPackagePath,
       packages: self.packages.filter(predicate),
     });
