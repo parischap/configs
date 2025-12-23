@@ -149,8 +149,7 @@ export const injectDefaultsAndValidate = <P extends ParameterDescriptors.Type>(
 
     for (const [key, value] of parameters) {
       const descriptor = parameterDescriptorsCpy[key];
-      if (descriptor === undefined)
-        throw new Error(`${errorPrefix}Unexpected parameter '${key}' (WARNING)`);
+      if (descriptor === undefined) throw new Error(`${errorPrefix}Unexpected parameter '${key}'`);
 
       if ('value' in descriptor) throw new Error(`${errorPrefix}Parameter '${key}' received twice`);
 

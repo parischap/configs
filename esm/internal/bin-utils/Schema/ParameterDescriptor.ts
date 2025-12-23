@@ -89,9 +89,8 @@ export const validate =
   <E extends AllTypeNames>(self: Type<E>): ExpectedType<Type<E>> => {
     const expectedType = self.expectedType;
     const convertedValue =
-      allowStringConversion && typeof value === 'string' && expectedType === 'number' ?
-        Number(value)
-      : value;
+      allowStringConversion && typeof value === 'string' ? (JSON.parse(value) as unknown) : value;
+
     const valueType = typeof convertedValue;
     if (
       (expectedType === 'string' && valueType !== 'string')
