@@ -1,12 +1,15 @@
 /** Module that describes the type and optional default value of a parameter */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
-import {
-  Data,
-  isStringArray,
-  isStringRecord,
-  StringArray,
-  StringRecord,
-} from '../../shared-utils/types.js';
+import { Data, isStringArray, isStringRecord, StringArray, StringRecord } from '../../../types.js';
+
+/**
+ * Module tag
+ *
+ * @category Models
+ */
+export const moduleTag = '@parischap/configs/internal/bin-utils/Schema/ParameterDescriptor/';
+const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
+type _TypeId = typeof _TypeId;
 
 /** All allowed parameter types */
 export type AllTypeNames =
@@ -51,6 +54,11 @@ export class Type<E extends AllTypeNames> {
   /** Static constructor */
   static make<E extends AllTypeNames>(params: Data<Type<E>>): Type<E> {
     return new Type<E>(params);
+  }
+
+  /** @internal */
+  get [_TypeId](): _TypeId {
+    return _TypeId;
   }
 }
 

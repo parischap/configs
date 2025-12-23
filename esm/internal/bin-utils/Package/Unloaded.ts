@@ -6,8 +6,17 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { Data } from '../../shared-utils/types.js';
+import { Data } from '../../../types.js';
 import * as PackageBase from './Base.js';
+
+/**
+ * Module tag
+ *
+ * @category Models
+ */
+export const moduleTag = '@parischap/configs/internal/bin-utils/Package/Unloaded/';
+const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
+type _TypeId = typeof _TypeId;
 
 /**
  * Type of a PackageUnloaded
@@ -17,8 +26,6 @@ import * as PackageBase from './Base.js';
 export class Type extends PackageBase.Type {
   /** Type of the package */
   readonly type: 'Top' | 'MonoRepo' | 'OnePackageRepo' | 'SubRepo';
-  /** Structure discriminant */
-  readonly tag = 'Unloaded';
 
   /** Returns true is this is the top Package of a Project */
   _isTop(): boolean {
@@ -46,6 +53,11 @@ export class Type extends PackageBase.Type {
   /** Static constructor */
   static make(params: Data<Type>): Type {
     return new Type(params);
+  }
+
+  /** @internal */
+  get [_TypeId](): _TypeId {
+    return _TypeId;
   }
 }
 

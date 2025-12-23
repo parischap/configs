@@ -17,13 +17,17 @@ import {
   tsBuildInfoFolderName,
   viteTimeStampFilenamePattern,
 } from '../../../constants.js';
-import { Data, Record } from '../../shared-utils/types.js';
-import {
-  readFiles,
-  readFilesRecursively,
-  readJsonFile,
-  toMiniGlobRegExp,
-} from '../../shared-utils/utils.js';
+import { Data, Record } from '../../../types.js';
+import { readFiles, readFilesRecursively, readJsonFile, toMiniGlobRegExp } from '../../../utils.js';
+
+/**
+ * Module tag
+ *
+ * @category Models
+ */
+export const moduleTag = '@parischap/configs/internal/bin-utils/Package/Base/';
+const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
+type _TypeId = typeof _TypeId;
 
 const EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE = toMiniGlobRegExp([
   readMeFilename,
@@ -64,6 +68,11 @@ export abstract class Type {
     this.parentName = params.parentName;
     this.path = params.path;
     this.isConfigsPackage = params.isConfigsPackage;
+  }
+
+  /** @internal */
+  get [_TypeId](): _TypeId {
+    return _TypeId;
   }
 }
 

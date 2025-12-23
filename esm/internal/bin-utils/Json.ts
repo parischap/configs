@@ -1,5 +1,5 @@
 import { Effect } from 'effect';
-import { prettyStringify } from '../shared-utils/utils.js';
+import { prettyStringify } from '../../utils.js';
 import * as PortError from './PortError.js';
 
 /** Port of Json stringify */

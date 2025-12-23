@@ -6,9 +6,18 @@
 
 import { join, sep } from 'path';
 import { configsPackageName, packagesFolderName } from '../../constants.js';
-import { Data } from '../shared-utils/types.js';
-import { readFolders } from '../shared-utils/utils.js';
+import { Data } from '../../types.js';
+import { readFolders } from '../../utils.js';
 import * as PackageUnloaded from './Package/Unloaded.js';
+
+/**
+ * Module tag
+ *
+ * @category Models
+ */
+export const moduleTag = '@parischap/configs/internal/bin-utils/ProjectUnloaded/';
+const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
+type _TypeId = typeof _TypeId;
 
 /**
  * Type of a ProjectUnloaded
@@ -30,6 +39,11 @@ export class Type {
   /** Static constructor */
   static make(params: Data<Type>): Type {
     return new Type(params);
+  }
+
+  /** @internal */
+  get [_TypeId](): _TypeId {
+    return _TypeId;
   }
 }
 

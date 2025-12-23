@@ -4,10 +4,19 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { Data } from '../../shared-utils/types.js';
+import { Data } from '../../../types.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as PackageBase from './Base.js';
 import * as PackageNoSourceBase from './NoSourceBase.js';
+
+/**
+ * Module tag
+ *
+ * @category Models
+ */
+export const moduleTag = '@parischap/configs/internal/bin-utils/Package/MonoRepo/';
+const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
+type _TypeId = typeof _TypeId;
 
 /**
  * Type of a PackageMonoRepo
@@ -15,9 +24,6 @@ import * as PackageNoSourceBase from './NoSourceBase.js';
  * @category Models
  */
 export class Type extends PackageNoSourceBase.Type {
-  /** Structure discriminant */
-  readonly tag = 'MonoRepo';
-
   /** Returns true is this is the top Package of a Project */
   _isTop(): boolean {
     return false;
@@ -58,6 +64,11 @@ export class Type extends PackageNoSourceBase.Type {
         isPublished: true,
       }),
     );
+  }
+
+  /** @internal */
+  get [_TypeId](): _TypeId {
+    return _TypeId;
   }
 }
 

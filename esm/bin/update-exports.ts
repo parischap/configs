@@ -9,7 +9,7 @@ import * as PackageOnePackageRepo from '../internal/bin-utils/Package/OnePackage
 import * as PackageSubRepo from '../internal/bin-utils/Package/SubRepo.js';
 import * as Project from '../internal/bin-utils/Project.js';
 import * as SchemaFormat from '../internal/bin-utils/Schema/Format.js';
-import { getExeFlags } from '../internal/shared-utils/utils.js';
+import { getExeFlags } from '../utils.js';
 
 console.log('Generating exports config files');
 

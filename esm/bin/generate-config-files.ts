@@ -23,7 +23,7 @@ import * as PackageAllBase from '../internal/bin-utils/Package/AllBase.js';
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
 import * as Project from '../internal/bin-utils/Project.js';
 import * as SchemaFormat from '../internal/bin-utils/Schema/Format.js';
-import { getExeFlags } from '../internal/shared-utils/utils.js';
+import { getExeFlags } from '../utils.js';
 
 console.log('Generating config files');
 const { ['-activePackageOnly']: activePackageOnly } = SchemaFormat.injectDefaultsAndValidate(

@@ -9,7 +9,7 @@ import {
   gitIgnoreFilename,
   prettierIgnoreFilename,
   ymlExtensions,
-} from '../../constants.js';
+} from './constants.js';
 import { type ReadonlyRecord, type Record, isArray, isRecord } from './types.js';
 
 /**

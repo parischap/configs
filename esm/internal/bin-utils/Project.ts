@@ -5,8 +5,8 @@
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import { normalize, relative } from 'path';
-import { Data } from '../shared-utils/types.js';
-import { fromOSPathToPosixPath } from '../shared-utils/utils.js';
+import { Data } from '../../types.js';
+import { fromOSPathToPosixPath } from '../../utils.js';
 import * as PackageAll from './Package/All.js';
 import * as PackageBase from './Package/Base.js';
 import * as PackageMonoRepo from './Package/MonoRepo.js';
@@ -16,6 +16,14 @@ import * as PackageTop from './Package/Top.js';
 import * as PackageUnloaded from './Package/Unloaded.js';
 import * as ProjectUnloaded from './ProjectUnloaded.js';
 
+/**
+ * Module tag
+ *
+ * @category Models
+ */
+export const moduleTag = '@parischap/configs/internal/bin-utils/Project/';
+const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
+type _TypeId = typeof _TypeId;
 /**
  * Type of a Project
  *
@@ -36,6 +44,11 @@ export class Type {
   /** Static constructor */
   static make(params: Data<Type>): Type {
     return new Type(params);
+  }
+
+  /** @internal */
+  get [_TypeId](): _TypeId {
+    return _TypeId;
   }
 }
 

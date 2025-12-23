@@ -4,10 +4,19 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { Data } from '../../shared-utils/types.js';
+import { Data } from '../../../types.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as PackageBase from './Base.js';
 import * as PackageSourceBase from './SourceBase.js';
+
+/**
+ * Module tag
+ *
+ * @category Models
+ */
+export const moduleTag = '@parischap/configs/internal/bin-utils/Package/OnePackageRepo/';
+const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
+type _TypeId = typeof _TypeId;
 
 /**
  * Type of a PackageOnePackageRepo
@@ -15,9 +24,6 @@ import * as PackageSourceBase from './SourceBase.js';
  * @category Models
  */
 export class Type extends PackageSourceBase.Type {
-  /** Structure discriminant */
-  readonly tag = 'OnePackageRepo';
-
   /** Returns true is this is the top Package of a Project */
   _isTop(): boolean {
     return false;
@@ -48,6 +54,11 @@ export class Type extends PackageSourceBase.Type {
   /** Generates the configuration files of `self` */
   override async _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
     return ConfigFiles.merge(await super._generateConfigFiles(), ConfigFiles.repo(this));
+  }
+
+  /** @internal */
+  get [_TypeId](): _TypeId {
+    return _TypeId;
   }
 }
 

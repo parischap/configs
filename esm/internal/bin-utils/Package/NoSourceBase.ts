@@ -4,11 +4,20 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { Data } from '../../shared-utils/types.js';
+import { Data } from '../../../types.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as SchemaFormat from '../Schema/Format.js';
 import * as PackageAllBase from './AllBase.js';
 import * as PackageBase from './Base.js';
+
+/**
+ * Module tag
+ *
+ * @category Models
+ */
+export const moduleTag = '@parischap/configs/internal/bin-utils/Package/NoSourceBase/';
+const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
+type _TypeId = typeof _TypeId;
 
 /**
  * Type of a PackageNoSourceBase
@@ -24,6 +33,11 @@ export abstract class Type extends PackageAllBase.Type {
   /** Generates the configuration files of `self` */
   override async _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
     return ConfigFiles.merge(await super._generateConfigFiles(), ConfigFiles.noSourcePackage);
+  }
+
+  /** @internal */
+  get [_TypeId](): _TypeId {
+    return _TypeId;
   }
 }
 

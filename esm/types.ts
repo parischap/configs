@@ -42,19 +42,13 @@ export interface AnyFunction {
 }
 
 /**
- * Utility type that removes all non-data from a type. Is considered as non-data the `tag` property
- * and any property that starts with an underscore. Don't make this function too complex, e.g. use
- * the fact that the value is a function, because it creates issues when infering types in the
+ * Utility type that removes all non-data from a type. Is considered as non-data any property that
+ * starts with an underscore or whose name is a symbol. Don't make this function too complex, e.g.
+ * use the fact that the value is a function, because it creates issues when infering types in the
  * constructors of generic types
  *
  * @category Utility types
  */
 export type Data<T extends ReadonlyRecord<string | symbol>> = {
-  [k in keyof T as [k] extends ['tag' | `_${string}`] ? never : k]: T[k];
-};
-
-// Same as Object.assign but returns void so as to suppress the
-export const ObjectAssign = (source: Record, target: Record): void => {
-  /* eslint-disable-next-line functional/no-expression-statements , functional/immutable-data*/
-  Object.assign(source, target);
+  [k in keyof T as [k] extends [symbol | `_${string}`] ? never : k]: T[k];
 };

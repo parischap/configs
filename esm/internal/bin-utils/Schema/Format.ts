@@ -4,8 +4,17 @@
  * name/value pairs.
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
-import { Data, ReadonlyRecord } from '../../shared-utils/types.js';
+import { Data, ReadonlyRecord } from '../../../types.js';
 import * as SchemaParameterDescriptor from './ParameterDescriptor.js';
+
+/**
+ * Module tag
+ *
+ * @category Models
+ */
+export const moduleTag = '@parischap/configs/internal/bin-utils/Schema/Format/';
+const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
+type _TypeId = typeof _TypeId;
 
 namespace ParameterDescriptors {
   export interface Type extends ReadonlyRecord<string, SchemaParameterDescriptor.Any> {}
@@ -31,6 +40,11 @@ export class Type<P extends ParameterDescriptors.Type> {
   /** Static constructor */
   static make<P extends ParameterDescriptors.Type>(params: Data<Type<P>>): Type<P> {
     return new Type<P>(params);
+  }
+
+  /** @internal */
+  get [_TypeId](): _TypeId {
+    return _TypeId;
   }
 }
 

@@ -28,9 +28,7 @@
     "build": "pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..",
     "examples": "",
     "update-exports": "jiti node_modules/@parischap/configs/esm/bin/update-exports.ts -activePackageOnly",
-    "watch-for-exports": "jiti node_modules/@parischap/configs/esm/bin/update-exports.ts -watch -activePackageOnly",
-    "update-imports": "node node_modules/@parischap/configs/esm/bin/update-imports.ts run ",
-    "auto-update-imports": "node node_modules/@parischap/configs/esm/bin/update-imports.ts watch "
+    "watch-for-exports": "jiti node_modules/@parischap/configs/esm/bin/update-exports.ts -watch -activePackageOnly"
   },
   "devDependencies": {
     "@parischap/configs": "git+ssh://github.com/parischap/configs",
@@ -103,6 +101,12 @@
     },
     "./TsconfigBase": {
       "default": "./esm/tsconfigBase.json"
+    },
+    "./Types": {
+      "default": "./esm/types.ts"
+    },
+    "./Utils": {
+      "default": "./esm/utils.ts"
     },
     "./VitestConfigNoSource": {
       "default": "./esm/vitestConfigNoSource.ts"
