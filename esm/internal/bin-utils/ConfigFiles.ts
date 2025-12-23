@@ -432,6 +432,8 @@ export const anyPackage = ({
         'clean-all-node-modules': `${tsExecuter} ${binariesPath}/clean-node-modules.ts`,
         'clean-all-prod': `${tsExecuter} ${binariesPath}/clean-prod.ts`,
         'generate-all-config-files': `${tsExecuter} ${binariesPath}/generate-config-files.ts`,
+        'update-all-exports': `${tsExecuter} ${binariesPath}/update-exports.ts`,
+        'watch-all-for-exports': `${tsExecuter} ${binariesPath}/update-exports.ts -watch`,
         'reinstall-all-dependencies': 'pnpm i --force',
         ...scripts,
       },
@@ -462,10 +464,6 @@ export const noSourcePackage: Type = make({
       // --if-present is necessary because it is possible that no package in the workspace has a build script
       'build-all': 'pnpm --if-present -r build',
       // --if-present is necessary because it is possible that no package in the workspace has an auto-update-imports script
-      'auto-update-imports-for-all':
-        'pnpm --if-present -r --parallel --aggregate-output auto-update-imports',
-      // --if-present is necessary because it is possible that no package in the workspace has an update-imports script
-      'update-imports-for-all': 'pnpm --if-present -r --parallel --aggregate-output update-imports',
       'tscheck-all': 'pnpm -r -include-workspace-root=true tscheck',
       'lint-all': 'pnpm -r -include-workspace-root=true lint',
       'checks-all': 'pnpm -r -include-workspace-root=true checks',
@@ -873,6 +871,8 @@ export const sourcePackage = async ({
           examples: examples
             .map((exampleName) => `${tsExecuter} ${examplesFolderName}/${exampleName}`)
             .join('&&'),
+          'update-exports': `${tsExecuter} ${binariesPath}/update-exports.ts -activePackageOnly`,
+          'watch-for-exports': `${tsExecuter} ${binariesPath}/update-exports.ts -watch -activePackageOnly`,
         },
         // Must be present even for private packages as it can be used for other purposes
         repository: {
