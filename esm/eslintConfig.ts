@@ -12,7 +12,7 @@ import {
   filesGeneratedByThirdParties,
   foldersGeneratedByThirdParties,
 } from './constants.js';
-import { regExpEscape } from './utils.js';
+import { regExpEscape, type ReadonlyRecord } from './utils.js';
 
 import eslint from '@eslint/js';
 import json from '@eslint/json';
@@ -25,7 +25,6 @@ import eslintPluginYml from 'eslint-plugin-yml';
 import { defineConfig, globalIgnores, type Config } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
-import { type ReadonlyRecord } from './types.js';
 
 interface ConfigArray extends ReadonlyArray<Config> {}
 

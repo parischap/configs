@@ -17,8 +17,15 @@ import {
   tsBuildInfoFolderName,
   viteTimeStampFilenamePattern,
 } from '../../../constants.js';
-import { Data, Record } from '../../../types.js';
-import { readFiles, readFilesRecursively, readJsonFile, toMiniGlobRegExp } from '../../../utils.js';
+
+import {
+  readFiles,
+  readFilesRecursively,
+  readJsonFile,
+  toMiniGlobRegExp,
+  type Data,
+  type Record,
+} from '../../../utils.js';
 
 /**
  * Module tag

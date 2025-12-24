@@ -93,6 +93,9 @@
     "./EslintConfig": {
       "default": "./esm/eslintConfig.ts"
     },
+    "./NamedImportsVitePlugin": {
+      "default": "./esm/namedImportsVitePlugin.ts"
+    },
     "./PrettierConfig": {
       "default": "./esm/prettierConfig.ts"
     },
@@ -102,9 +105,6 @@
     "./TsconfigBase": {
       "default": "./esm/tsconfigBase.json"
     },
-    "./Types": {
-      "default": "./esm/types.ts"
-    },
     "./Utils": {
       "default": "./esm/utils.ts"
     },
@@ -113,6 +113,9 @@
     },
     "./VitestConfigSource": {
       "default": "./esm/vitestConfigSource.ts"
+    },
+    "./ViteTranspile": {
+      "default": "./esm/viteTranspile.ts"
     }
   },
   "packageManager": "pnpm@10.26.1"

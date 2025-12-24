@@ -1,6 +1,12 @@
 /** Module that describes the type and optional default value of a parameter */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
-import { Data, isStringArray, isStringRecord, StringArray, StringRecord } from '../../../types.js';
+import {
+  type Data,
+  isStringArray,
+  isStringRecord,
+  type StringArray,
+  type StringRecord,
+} from '../../../utils.js';
 
 /**
  * Module tag
@@ -97,7 +103,9 @@ export const validate =
   <E extends AllTypeNames>(self: Type<E>): ExpectedType<Type<E>> => {
     const expectedType = self.expectedType;
     const convertedValue =
-      allowStringConversion && typeof value === 'string' ? (JSON.parse(value) as unknown) : value;
+      allowStringConversion && typeof value === 'string' && expectedType !== 'string' ?
+        (JSON.parse(value) as unknown)
+      : value;
 
     const valueType = typeof convertedValue;
     if (

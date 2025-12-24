@@ -6,8 +6,7 @@
 
 import { join, sep } from 'path';
 import { configsPackageName, packagesFolderName } from '../../constants.js';
-import { Data } from '../../types.js';
-import { readFolders } from '../../utils.js';
+import { readFolders, type Data } from '../../utils.js';
 import * as PackageUnloaded from './Package/Unloaded.js';
 
 /**

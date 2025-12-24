@@ -6,7 +6,7 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { Data } from '../../../types.js';
+import { type Data } from '../../../utils.js';
 import * as PackageBase from './Base.js';
 
 /**

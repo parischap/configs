@@ -1,3 +1,4 @@
+import { npmFolderName, testsFolderName } from '@parischap/configs/Constants';
 import { defineConfig } from 'vitest/config';
 
 export const config = (name: string) =>
@@ -6,8 +7,8 @@ export const config = (name: string) =>
       projects: [
         {
           test: {
-            include: ['tests/*.ts'],
-            exclude: ['node_modules/**'],
+            include: [`${testsFolderName}/*.ts`],
+            exclude: [`${npmFolderName}/**`],
             name: `Repo ${name}`,
             isolate: false,
             fileParallelism: false,

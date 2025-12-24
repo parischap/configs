@@ -4,7 +4,7 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { Data, StringArray, StringRecord } from '../../../types.js';
+import { type Data, type StringArray, type StringRecord } from '../../../utils.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as SchemaFormat from '../Schema/Format.js';
 import * as PackageAllBase from './AllBase.js';

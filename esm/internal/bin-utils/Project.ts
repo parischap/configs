@@ -5,8 +5,7 @@
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import { normalize, relative } from 'path';
-import { Data } from '../../types.js';
-import { fromOSPathToPosixPath } from '../../utils.js';
+import { fromOSPathToPosixPath, type Data } from '../../utils.js';
 import * as PackageAll from './Package/All.js';
 import * as PackageBase from './Package/Base.js';
 import * as PackageMonoRepo from './Package/MonoRepo.js';

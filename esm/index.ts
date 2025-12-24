@@ -4,7 +4,7 @@ export * as Constants from './constants.js';
 export * as EslintConfig from './eslintConfig.js';
 export * as PrettierConfig from './prettierConfig.js';
 export * as TestUtils from './testUtils.js';
-export * as Types from './types.js';
 export * as Utils from './utils.js';
 export * as VitestConfigNoSource from './vitestConfigNoSource.js';
 export * as VitestConfigSource from './vitestConfigSource.js';
+export * as ViteTranspile from './viteTranspile.js';
