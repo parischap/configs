@@ -6,36 +6,41 @@ import {
   isStringRecord,
   type StringArray,
   type StringRecord,
-} from '../../../utils.js';
+} from "../../shared-utils/utils.js";
 
 /**
  * Module tag
  *
  * @category Models
  */
-export const moduleTag = '@parischap/configs/internal/bin-utils/Schema/ParameterDescriptor/';
+export const moduleTag = "@parischap/configs/internal/bin-utils/Schema/ParameterDescriptor/";
 const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
 
 /** All allowed parameter types */
 export type AllTypeNames =
-  | 'string'
-  | 'stringOrUndefined'
-  | 'boolean'
-  | 'number'
-  | 'record'
-  | 'array';
+  | "string"
+  | "stringOrUndefined"
+  | "boolean"
+  | "number"
+  | "record"
+  | "array";
 
 /** Utility type that converts a typeName to a type */
 // Do not use tuples in the extends clause as T can be a union of type names
-type _TypeFromTypeName<T extends AllTypeNames> =
-  T extends 'string' ? string
-  : T extends 'stringOrUndefined' ? string | undefined
-  : T extends 'boolean' ? boolean
-  : T extends 'number' ? number
-  : T extends 'record' ? StringRecord
-  : T extends 'array' ? StringArray
-  : never;
+type _TypeFromTypeName<T extends AllTypeNames> = T extends "string"
+  ? string
+  : T extends "stringOrUndefined"
+    ? string | undefined
+    : T extends "boolean"
+      ? boolean
+      : T extends "number"
+        ? number
+        : T extends "record"
+          ? StringRecord
+          : T extends "array"
+            ? StringArray
+            : never;
 
 /**
  * Type of a SchemaParameterDescriptor
@@ -52,7 +57,7 @@ export class Type<E extends AllTypeNames> {
   /** Class constructor */
   private constructor(params: Data<Type<E>>) {
     this.expectedType = params.expectedType;
-    if ('defaultValue' in params) {
+    if ("defaultValue" in params) {
       this.defaultValue = params.defaultValue;
     }
   }
@@ -74,8 +79,9 @@ export interface Any extends Type<AllTypeNames> {}
  *
  * @category Utility types
  */
-export type ExpectedType<T> =
-  [T] extends [Type<infer ExpectedType>] ? _TypeFromTypeName<ExpectedType> : never;
+export type ExpectedType<T> = [T] extends [Type<infer ExpectedType>]
+  ? _TypeFromTypeName<ExpectedType>
+  : never;
 
 /**
  * Constructor
@@ -94,29 +100,29 @@ export const validate =
   ({
     value,
     allowStringConversion = false,
-    errorPrefix = '',
+    errorPrefix = "",
   }: {
     readonly value: unknown;
     readonly allowStringConversion?: boolean;
     readonly errorPrefix?: string;
   }) =>
   <E extends AllTypeNames>(self: Type<E>): ExpectedType<Type<E>> => {
-    const expectedType = self.expectedType;
+    const { expectedType } = self;
     const convertedValue =
-      allowStringConversion && typeof value === 'string' && expectedType !== 'string' ?
-        (JSON.parse(value) as unknown)
-      : value;
+      allowStringConversion && typeof value === "string" && expectedType !== "string"
+        ? (JSON.parse(value) as unknown)
+        : value;
 
     const valueType = typeof convertedValue;
     if (
-      (expectedType === 'string' && valueType !== 'string')
-      || (expectedType === 'stringOrUndefined'
-        && valueType !== 'string'
-        && valueType !== 'undefined')
-      || (expectedType === 'boolean' && valueType !== 'boolean')
-      || (expectedType === 'number' && valueType !== 'number')
-      || (expectedType === 'record' && !isStringRecord(value))
-      || (expectedType === 'array' && !isStringArray(value))
+      (expectedType === "string" && valueType !== "string") ||
+      (expectedType === "stringOrUndefined" &&
+        valueType !== "string" &&
+        valueType !== "undefined") ||
+      (expectedType === "boolean" && valueType !== "boolean") ||
+      (expectedType === "number" && valueType !== "number") ||
+      (expectedType === "record" && !isStringRecord(value)) ||
+      (expectedType === "array" && !isStringArray(value))
     )
       throw new Error(
         `${errorPrefix}Parameter should be of type '${expectedType}'. Actual: ${valueType}`,

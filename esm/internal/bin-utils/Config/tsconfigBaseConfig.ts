@@ -1,0 +1,39 @@
+import { tsBuildInfoFolderName } from "../../shared-utils/constants.js";
+
+export const config = {
+  $schema: "https://json.schemastore.org/tsconfig",
+  _version: "20.1.0",
+  extends: ["@tsconfig/strictest/tsconfig.json"],
+  compilerOptions: {
+    moduleDetection: "force",
+    composite: true,
+    resolveJsonModule: true,
+    esModuleInterop: false,
+    declaration: true,
+    skipLibCheck: true,
+    emitDecoratorMetadata: true,
+    experimentalDecorators: true,
+    moduleResolution: "NodeNext",
+    isolatedModules: true,
+    sourceMap: true,
+    declarationMap: true,
+    noEmitOnError: false,
+    noErrorTruncation: true,
+    target: "ES2022",
+    module: "NodeNext",
+    incremental: true,
+    removeComments: false,
+    stripInternal: true,
+    lib: ["ESNext"],
+    types: ["node"],
+    allowJs: true,
+    checkJs: true,
+    noEmit: true,
+    plugins: [
+      {
+        name: "@effect/language-service",
+      },
+    ],
+    tsBuildInfoFile: `.${tsBuildInfoFolderName}/project.${tsBuildInfoFolderName}`,
+  },
+};

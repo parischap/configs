@@ -18,15 +18,15 @@
 
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used at the very start of a project */
 
-import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
-import * as PackageAllBase from '../internal/bin-utils/Package/AllBase.js';
-import * as PackageBase from '../internal/bin-utils/Package/Base.js';
-import * as Project from '../internal/bin-utils/Project.js';
-import * as SchemaFormat from '../internal/bin-utils/Schema/Format.js';
-import { getExeFlags } from '../utils.js';
+import * as ConfigFiles from "../internal/bin-utils/Config/Files.js";
+import * as PackageAllBase from "../internal/bin-utils/Package/AllBase.js";
+import * as PackageBase from "../internal/bin-utils/Package/Base.js";
+import * as Project from "../internal/bin-utils/Project.js";
+import * as SchemaFormat from "../internal/bin-utils/Schema/Format.js";
+import { getExeFlags } from "../internal/shared-utils/utils.js";
 
-console.log('Generating config files');
-const { ['-activePackageOnly']: activePackageOnly } = SchemaFormat.injectDefaultsAndValidate(
+console.log("Generating config files");
+const { "-activePackageOnly": activePackageOnly } = SchemaFormat.injectDefaultsAndValidate(
   SchemaFormat.filteringArgs,
   {
     allowStringConversion: true,
@@ -49,13 +49,14 @@ await Promise.all(
       })(configFiles);
 
       const configurationFileList = await PackageBase.getPathsOfExistingConfigFiles(currentPackage);
+
       const filesToCreate = Object.keys(configFiles.configurationFiles);
       const unexpectedConfigFiles = configurationFileList.filter(
         (relativePath) => !filesToCreate.includes(relativePath),
       );
-      for (const unexpectedConfigFile of unexpectedConfigFiles)
-        console.log(
-          `Package '${currentPackage.name}': unexpected file '${unexpectedConfigFile}' was found`,
+      if (unexpectedConfigFiles.length > 0)
+        throw new Error(
+          `Package '${currentPackage.name}': following unexpected files were found: '${unexpectedConfigFiles.join("', '")}'`,
         );
 
       /* Remove prod directories because the packages will need rebuilding and these directories might contain conflicting versions of imported packages. We do it also in packages with no source, just in case... */
@@ -68,4 +69,4 @@ await Promise.all(
   }),
 );
 
-console.log('SUCCESS');
+console.log("SUCCESS");

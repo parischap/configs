@@ -1,14 +1,14 @@
-import * as TestUtils from '@parischap/configs/TestUtils';
-import { Array, Either, Equal, Option } from 'effect';
-import { describe, expect, it } from 'vitest';
+import * as TestUtils from "@parischap/configs/TestUtils";
+import { Array, Either, Equal, Option } from "effect";
+import { describe, expect, it } from "vitest";
 
-describe('TestUtils', () => {
-  describe('assertEquals', () => {
-    it('Primitive values', () => {
+describe("TestUtils", () => {
+  describe("assertEquals", () => {
+    it("Primitive values", () => {
       expect(() => TestUtils.assertEquals(1, 1)).not.toThrow();
     });
 
-    it('Arrays of options matching', () => {
+    it("Arrays of options matching", () => {
       expect(() =>
         TestUtils.assertEquals(
           Array.make(Option.some(1), Array.make(Option.none(), Option.some(3))),
@@ -17,7 +17,7 @@ describe('TestUtils', () => {
       ).not.toThrow();
     });
 
-    it('Arrays of options not matching', () => {
+    it("Arrays of options not matching", () => {
       expect(() =>
         TestUtils.assertEquals(
           Array.make(Option.some(1), Option.some(2)),
@@ -27,12 +27,12 @@ describe('TestUtils', () => {
     });
   });
 
-  describe('assertNotEquals', () => {
-    it('Primitive values', () => {
+  describe("assertNotEquals", () => {
+    it("Primitive values", () => {
       expect(() => TestUtils.assertNotEquals(1, 2)).not.toThrow();
     });
 
-    it('Arrays of options matching', () => {
+    it("Arrays of options matching", () => {
       expect(() =>
         TestUtils.assertNotEquals(
           Array.make(Option.some(1), Array.make(Option.none(), Option.some(3))),
@@ -41,7 +41,7 @@ describe('TestUtils', () => {
       ).toThrow();
     });
 
-    it('Arrays of options not matching', () => {
+    it("Arrays of options not matching", () => {
       expect(() =>
         TestUtils.assertNotEquals(
           Array.make(Option.some(1), Option.some(2)),
@@ -51,29 +51,29 @@ describe('TestUtils', () => {
     });
   });
 
-  describe('assertTrue', () => {
-    it('should assert that a value is true', () => {
+  describe("assertTrue", () => {
+    it("should assert that a value is true", () => {
       expect(() => TestUtils.assertTrue(true)).not.toThrow();
       expect(() => TestUtils.assertTrue(false)).toThrow();
     });
   });
 
-  describe('assertFalse', () => {
-    it('should assert that a value is false', () => {
+  describe("assertFalse", () => {
+    it("should assert that a value is false", () => {
       expect(() => TestUtils.assertFalse(false)).not.toThrow();
       expect(() => TestUtils.assertFalse(true)).toThrow();
     });
   });
 
-  describe('assertNone', () => {
-    it('should assert that an Option is none', () => {
+  describe("assertNone", () => {
+    it("should assert that an Option is none", () => {
       expect(() => TestUtils.assertNone(Option.none())).not.toThrow();
       expect(() => TestUtils.assertNone(Option.some(1))).toThrow();
     });
   });
 
-  describe('assertSome', () => {
-    it('should assert that an Option is some with the expected value', () => {
+  describe("assertSome", () => {
+    it("should assert that an Option is some with the expected value", () => {
       expect(() => TestUtils.assertSome(Option.some(1), 1)).not.toThrow();
       expect(() => TestUtils.assertSome(Option.some(1))).not.toThrow();
       expect(() => TestUtils.assertSome(Option.some(1), 2)).toThrow();
@@ -81,25 +81,25 @@ describe('TestUtils', () => {
     });
   });
 
-  describe('assertLeft', () => {
-    it('should assert that an Either is left with the expected value', () => {
-      expect(() => TestUtils.assertLeft(Either.left('foo'), 'foo')).not.toThrow();
-      expect(() => TestUtils.assertLeft(Either.left('foo'))).not.toThrow();
-      expect(() => TestUtils.assertLeft(Either.left('foo'), 'bar')).toThrow();
-      expect(() => TestUtils.assertLeft(Either.right('foo'), 'foo')).toThrow();
+  describe("assertLeft", () => {
+    it("should assert that an Either is left with the expected value", () => {
+      expect(() => TestUtils.assertLeft(Either.left("foo"), "foo")).not.toThrow();
+      expect(() => TestUtils.assertLeft(Either.left("foo"))).not.toThrow();
+      expect(() => TestUtils.assertLeft(Either.left("foo"), "bar")).toThrow();
+      expect(() => TestUtils.assertLeft(Either.right("foo"), "foo")).toThrow();
     });
   });
 
-  describe('assertLeftMessage', () => {
-    it('should assert that an Either is left with the expected message', () => {
-      expect(() => TestUtils.assertLeftMessage(Either.left(new Error('foo')), 'foo')).not.toThrow();
-      expect(() => TestUtils.assertLeftMessage(Either.left(new Error('foo')), 'bar')).toThrow();
-      expect(() => TestUtils.assertLeftMessage(Either.right(new Error('foo')), 'foo')).toThrow();
+  describe("assertLeftMessage", () => {
+    it("should assert that an Either is left with the expected message", () => {
+      expect(() => TestUtils.assertLeftMessage(Either.left(new Error("foo")), "foo")).not.toThrow();
+      expect(() => TestUtils.assertLeftMessage(Either.left(new Error("foo")), "bar")).toThrow();
+      expect(() => TestUtils.assertLeftMessage(Either.right(new Error("foo")), "foo")).toThrow();
     });
   });
 
-  describe('assertRight', () => {
-    it('should assert that an Either is right with the expected value', () => {
+  describe("assertRight", () => {
+    it("should assert that an Either is right with the expected value", () => {
       expect(() => TestUtils.assertRight(Either.right(42), 42)).not.toThrow();
       expect(() => TestUtils.assertRight(Either.right(42))).not.toThrow();
       expect(() => TestUtils.assertRight(Either.right(42), 43)).toThrow();
@@ -107,33 +107,33 @@ describe('TestUtils', () => {
     });
   });
 
-  describe('throws', () => {
-    it('should assert that an error is thrown', () => {
+  describe("throws", () => {
+    it("should assert that an error is thrown", () => {
       expect(() => TestUtils.throws(() => BigInt(Infinity))).not.toThrow();
       expect(() => TestUtils.throws(() => BigInt(5))).toThrow();
     });
   });
 
-  describe('doesNotThrow', () => {
-    it('should assert that an error is not thrown', () => {
+  describe("doesNotThrow", () => {
+    it("should assert that an error is not thrown", () => {
       expect(() => TestUtils.doesNotThrow(() => BigInt(5))).not.toThrow();
       expect(() => TestUtils.doesNotThrow(() => BigInt(Infinity))).toThrow();
     });
   });
 
-  describe('moduleTagFromTestFilePath', () => {
-    it('should return the module tag for a valid test file path', () => {
+  describe("moduleTagFromTestFilePath", () => {
+    it("should return the module tag for a valid test file path", () => {
       expect(
         Equal.equals(
-          TestUtils.moduleTagFromTestFilePath('C:/project/packages/module/tests/example.test.ts'),
-          Option.some('@parischap/module/example/'),
+          TestUtils.moduleTagFromTestFilePath("C:/project/packages/module/tests/example.test.ts"),
+          Option.some("@parischap/module/example/"),
         ),
       ).toBe(true);
     });
 
-    it('should return none for an invalid test file path', () => {
+    it("should return none for an invalid test file path", () => {
       expect(
-        Option.isNone(TestUtils.moduleTagFromTestFilePath('C:/project/tests/example.js')),
+        Option.isNone(TestUtils.moduleTagFromTestFilePath("C:/project/tests/example.js")),
       ).toBe(true);
     });
   });

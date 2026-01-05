@@ -23,7 +23,8 @@ export function strictEqual<A>(actual: A, expected: A, message?: string) {
 /** Asserts that `actual` is equal to `expected` using the `Equal.equals` trait. */
 export function assertEquals<A>(actual: A, expected: A, message?: string) {
   if (!Utils.structuralRegion(() => Equal.equals(actual, expected))) {
-    deepStrictEqual(actual, expected, message); // show diff
+    // Show diff
+    deepStrictEqual(actual, expected, message);
     fail(message ?? 'Expected values to be Equal.equals');
   }
 }
@@ -98,12 +99,11 @@ export function assertRight<R, L>(
 // Throwing
 // ----------------------------
 export function throws(thunk: () => void, error?: Error | ((u: unknown) => undefined)) {
-  let throwError;
+  let throwError = false;
   try {
     thunk();
     throwError = true;
   } catch (e) {
-    throwError = false;
     if (error !== undefined) {
       if (Predicate.isFunction(error)) {
         error(e);
@@ -160,12 +160,12 @@ export const moduleTagFromTestFilePath = (filePath: string): Option.Option<strin
  * @category Utils
  */
 
-export function areEqualTypes<A, B>(): readonly [A] extends readonly [B] ?
-  readonly [B] extends readonly [A] ?
+export function areEqualTypes<A, B>(): [A] extends [B] ?
+  [B] extends [A] ?
     true
   : false
 : false {
-  return undefined as never;
+  return false as never;
 }
 
 /**

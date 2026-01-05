@@ -1,6 +1,6 @@
-import { Effect } from 'effect';
-import { prettyStringify } from '../../utils.js';
-import * as PortError from './PortError.js';
+import { Effect } from "effect";
+import { prettyStringify } from "../shared-utils/utils.js";
+import * as PortError from "./PortError.js";
 
 /** Port of Json stringify */
 export const stringify = (value: unknown) =>
@@ -9,7 +9,7 @@ export const stringify = (value: unknown) =>
     catch: (e: unknown) =>
       PortError.make({
         originalError: e,
-        originalFunctionName: 'JSON.stringify',
+        originalFunctionName: "JSON.stringify",
       }),
   });
 
@@ -20,6 +20,6 @@ export const parse = (text: string) =>
     catch: (e: unknown) =>
       PortError.make({
         originalError: e,
-        originalFunctionName: 'JSON.parse',
+        originalFunctionName: "JSON.parse",
       }),
   });

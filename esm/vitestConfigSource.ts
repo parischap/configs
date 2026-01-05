@@ -1,5 +1,5 @@
-import { npmFolderName, testsFolderName } from '@parischap/configs/Constants';
-import { defineConfig } from 'vitest/config';
+import { npmFolderName, testsFolderName } from "@parischap/configs/Constants";
+import { defineConfig } from "vitest/config";
 
 export const config = (name: string) =>
   defineConfig({
@@ -12,7 +12,7 @@ export const config = (name: string) =>
             name: `Repo ${name}`,
             isolate: false,
             fileParallelism: false,
-            pool: 'threads',
+            pool: "threads",
           },
         },
       ],

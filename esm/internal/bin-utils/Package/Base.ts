@@ -4,8 +4,8 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { rm } from 'fs/promises';
-import { join, relative } from 'path';
+import { rm } from "fs/promises";
+import { join, relative } from "path";
 import {
   foldersWithoutConfigFiles,
   npmFolderName,
@@ -16,7 +16,7 @@ import {
   readMeFilename,
   tsBuildInfoFolderName,
   viteTimeStampFilenamePattern,
-} from '../../../constants.js';
+} from "../../shared-utils/constants.js";
 
 import {
   readFiles,
@@ -25,14 +25,14 @@ import {
   toMiniGlobRegExp,
   type Data,
   type Record,
-} from '../../../utils.js';
+} from "../../shared-utils/utils.js";
 
 /**
  * Module tag
  *
  * @category Models
  */
-export const moduleTag = '@parischap/configs/internal/bin-utils/Package/Base/';
+export const moduleTag = "@parischap/configs/internal/bin-utils/Package/Base/";
 const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
 
@@ -152,14 +152,14 @@ export const isNoSource = (self: Type): boolean => self._isTop() || self._isMono
  *
  * @category Predicates
  */
-export const isActive = (self: Type): boolean => relative(process.cwd(), self.path) === '';
+export const isActive = (self: Type): boolean => relative(process.cwd(), self.path) === "";
 
 /**
  * Reads the configuration file of `self`
  *
  * @category Destructors
  */
-export const readProjectConfigFile = async (self: Type): Promise<Record> =>
+export const readProjectConfigFile = (self: Type): Promise<Record> =>
   readJsonFile(join(self.path, projectConfigFilename));
 
 /**
@@ -183,9 +183,10 @@ export const getPathsOfExistingConfigFiles = async (self: Type): Promise<Array<s
       .filter(
         (relativePath) =>
           !(
-            isTop(self) ?
-              EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE
-            : EXTERNAL_CONFIGURATION_FILES_FOR_OTHER_PACKAGES).test(relativePath),
+            isTop(self)
+              ? EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE
+              : EXTERNAL_CONFIGURATION_FILES_FOR_OTHER_PACKAGES
+          ).test(relativePath),
       ),
     ...(
       await readFiles({
@@ -211,7 +212,7 @@ export const rmAndLogIfSuccessful =
       await rm(join(packagePath, relativePath), { recursive: true });
       console.log(`'${packageName}': deleted '${relativePath}'`);
     } catch (e: unknown) {
-      if (!(e instanceof Error) || !('code' in e) || e.code !== 'ENOENT') throw e;
+      if (!(e instanceof Error) || !("code" in e) || e.code !== "ENOENT") throw e;
     }
   };
 

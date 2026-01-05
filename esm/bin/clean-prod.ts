@@ -6,13 +6,13 @@
  * executed.
  */
 
-import * as PackageBase from '../internal/bin-utils/Package/Base.js';
-import * as ProjectUnloaded from '../internal/bin-utils/ProjectUnloaded.js';
-import * as SchemaFormat from '../internal/bin-utils/Schema/Format.js';
-import { getExeFlags } from '../utils.js';
+import * as PackageBase from "../internal/bin-utils/Package/Base.js";
+import * as ProjectUnloaded from "../internal/bin-utils/ProjectUnloaded.js";
+import * as SchemaFormat from "../internal/bin-utils/Schema/Format.js";
+import { getExeFlags } from "../internal/shared-utils/utils.js";
 
-console.log('Removing prod directories');
-const { ['-activePackageOnly']: activePackageOnly } = SchemaFormat.injectDefaultsAndValidate(
+console.log("Removing prod directories");
+const { "-activePackageOnly": activePackageOnly } = SchemaFormat.injectDefaultsAndValidate(
   SchemaFormat.filteringArgs,
   {
     allowStringConversion: true,
@@ -35,4 +35,4 @@ await Promise.all(
   }),
 );
 
-console.log('SUCCESS');
+console.log("SUCCESS");

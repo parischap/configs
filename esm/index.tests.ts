@@ -1,3 +1,4 @@
-import namedImportsVitePlugin from './namedImportsVitePlugin.js';
+import NamedImportsVitePlugin from "./internal/exported-utils/namedImportsVitePlugin.js";
+import * as Utils from "./internal/shared-utils/utils.js";
 
-export { namedImportsVitePlugin };
+export { NamedImportsVitePlugin, Utils };

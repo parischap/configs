@@ -4,9 +4,11 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
+import { existsSync } from 'fs';
+import { resolve } from 'node:path';
 import { join, sep } from 'path';
-import { configsPackageName, packagesFolderName } from '../../constants.js';
-import { readFolders, type Data } from '../../utils.js';
+import { configsPackageName, packagesFolderName } from '../shared-utils/constants.js';
+import { readFolders, type Data } from '../shared-utils/utils.js';
 import * as PackageUnloaded from './Package/Unloaded.js';
 
 /**
@@ -54,12 +56,17 @@ export class Type {
  * @category Constructors
  */
 export const fromActiveProject = async (): Promise<Type> => {
-  const currentPath = process.cwd();
+  // With resolve, we are sure to get an absolute path
+  const currentPath = resolve();
   const splitPath = currentPath.split(sep);
   const firstPackagesIndex = splitPath.findIndex((split) => split === packagesFolderName);
-  if (firstPackagesIndex <= 0) throw new Error('Could not find project root');
-  const topPackagePath = join(...splitPath.slice(0, firstPackagesIndex));
-  const topPackageName = splitPath[firstPackagesIndex - 1] as string;
+  const indexAfterTop =
+    firstPackagesIndex > 0 ? firstPackagesIndex
+    : existsSync(packagesFolderName) ? splitPath.length
+    : -1;
+  if (indexAfterTop <= 0) throw new Error('Could not find project root');
+  const topPackageName = splitPath[indexAfterTop - 1] as string;
+  const topPackagePath = join(...splitPath.slice(0, indexAfterTop));
 
   console.log(`Project '${topPackageName}' root identified at: '${topPackagePath}'`);
 
@@ -139,8 +146,9 @@ export const filteredFromActiveProjectAndShowCount = async (
  *
  * @category Destructors
  */
-export const showCount = (self: Type): void =>
+export const showCount = (self: Type): void => {
   console.log(`Number of packages in scope: ${self.packages.length.toString()}`);
+};
 
 /**
  * Returns a copy of `self` in which only the PackageUnloaded's that fulfill predicate `predicate`
@@ -165,6 +173,7 @@ export const filterAndShowCount =
   (predicate: (t: PackageUnloaded.Type) => boolean) =>
   (self: Type): Type => {
     const result = filter(predicate)(self);
+    /* eslint-disable-next-line functional/no-expression-statements */
     showCount(result);
     return result;
   };

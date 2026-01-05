@@ -1,6 +1,6 @@
-import { Data } from 'effect';
+import { Data } from "effect";
 
-class Type extends Data.TaggedError('PortError')<{
+class Type extends Data.TaggedError("PortError")<{
   readonly message: string;
 }> {}
 
@@ -15,13 +15,11 @@ export const make = ({
 }) =>
   new Type({
     message:
-      `Ported funtion '${originalFunctionName}' gave the following error: `
-      + ((
-        originalError !== null
-        && typeof originalError === 'object'
-        && 'message' in originalError
-        && typeof originalError.message === 'string'
-      ) ?
-        originalError.message
-      : 'no error message provided'),
+      `Ported funtion '${originalFunctionName}' gave the following error: ` +
+      (originalError !== null &&
+      typeof originalError === "object" &&
+      "message" in originalError &&
+      typeof originalError.message === "string"
+        ? originalError.message
+        : "no error message provided"),
   });

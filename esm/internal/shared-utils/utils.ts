@@ -8,7 +8,7 @@ import { sep as posixSep } from 'node:path/posix';
  * Redefines the Record type: keys are restricted to strings or symbols. In TypeScript, functions
  * and non-null objects, including arrays, are assignable to this Record definition.
  */
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any, functional/prefer-readonly-type */
 export type Record<K extends string | symbol = string, V = any> = {
   [k in K]: V;
 };
@@ -25,7 +25,7 @@ export interface StringRecord extends Record<string, string> {}
 /** Alias to Array with string values */
 export interface StringArray extends Array<string> {}
 
-export const isArray: (v: unknown) => v is Array<unknown> = Array.isArray;
+export const { isArray }: { readonly isArray: (v: unknown) => v is Array<unknown> } = Array;
 
 export const isRecord = (v: unknown): v is Record<string | symbol> =>
   typeof v === 'function' || (typeof v === 'object' && v !== null);
@@ -53,7 +53,7 @@ export interface AnyFunction {
  * @category Utility types
  */
 export type Data<T extends ReadonlyRecord<string | symbol>> = {
-  [k in keyof T as [k] extends [symbol | `_${string}`] ? never : k]: T[k];
+  readonly [k in keyof T as [k] extends [symbol | `_${string}`] ? never : k]: T[k];
 };
 
 /**
@@ -124,10 +124,12 @@ export const prettyStringify = (v: unknown): string => JSON.stringify(v, null, 2
 type MergedRecord<R1, R2> =
   R1 extends Record ?
     R2 extends Record ?
+      /* eslint-disable-next-line functional/prefer-readonly-type */
       {
-        [key in keyof R1 as key extends keyof R2 ? never : key]: R1[key];
-      } & { [key in keyof R2 as key extends keyof R1 ? never : key]: R2[key] } & {
-        [key in keyof R1 as key extends keyof R2 ? key : never]: key extends keyof R2 ?
+        [key in keyof R1 as [key] extends [keyof R2] ? never : key]: R1[key];
+        /* eslint-disable-next-line functional/prefer-readonly-type */
+      } & { [key in keyof R2 as [key] extends [keyof R1] ? never : key]: R2[key] } & {
+        [key in keyof R1 as [key] extends [keyof R2] ? key : never]: [key] extends [keyof R2] ?
           MergedRecord<R1[key], R2[key]>
         : never;
       }
@@ -156,7 +158,7 @@ export const deepMerge2 = <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>
     if (secondKey in first) {
       /* @ts-expect-error Typescript should narrow first but does not */
       const firstValue: unknown = first[secondKey];
-      /* eslint-disable-next-line functional/no-expression-statements, functional/immutable-data*/
+      /* eslint-disable-next-line functional/no-expression-statements, functional/immutable-data */
       result[secondKey as string] =
         isArray(secondValue) && isArray(firstValue) ? ([...firstValue, ...secondValue] as never)
         : isRecord(secondValue) && isRecord(firstValue) ?
@@ -169,21 +171,6 @@ export const deepMerge2 = <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>
 
   return result as never;
 };
-
-/**
- * Partitions an array into two arrays based on a predicate
- *
- * @category Utils
- */
-export const partitionArray = <T>(
-  array: ReadonlyArray<T>,
-  predicate: (item: T) => boolean,
-): [matching: Array<T>, nonMatching: Array<T>] =>
-  array.reduce<[Array<T>, Array<T>]>(
-    ([matching, nonMatching], elem) =>
-      predicate(elem) ? [[...matching, elem], nonMatching] : [matching, [...nonMatching, elem]],
-    [[], []],
-  );
 
 /**
  * Deep merge of multiple records.

@@ -6,15 +6,15 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { type Data } from '../../../utils.js';
-import * as PackageBase from './Base.js';
+import { type Data } from "../../shared-utils/utils.js";
+import * as PackageBase from "./Base.js";
 
 /**
  * Module tag
  *
  * @category Models
  */
-export const moduleTag = '@parischap/configs/internal/bin-utils/Package/Unloaded/';
+export const moduleTag = "@parischap/configs/internal/bin-utils/Package/Unloaded/";
 const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
 
@@ -25,23 +25,23 @@ type _TypeId = typeof _TypeId;
  */
 export class Type extends PackageBase.Type {
   /** Type of the package */
-  readonly type: 'Top' | 'MonoRepo' | 'OnePackageRepo' | 'SubRepo';
+  readonly type: "Top" | "MonoRepo" | "OnePackageRepo" | "SubRepo";
 
   /** Returns true is this is the top Package of a Project */
   _isTop(): boolean {
-    return this.type === 'Top';
+    return this.type === "Top";
   }
   /** Returns true is this is a MonoRepo */
   _isMonoRepo(): boolean {
-    return this.type === 'MonoRepo';
+    return this.type === "MonoRepo";
   }
   /** Returns true is this is a OnePackageRepo */
   _isOnePackageRepo(): boolean {
-    return this.type === 'OnePackageRepo';
+    return this.type === "OnePackageRepo";
   }
   /** Returns true is this is a SubRepo */
   _isSubRepo(): boolean {
-    return this.type === 'SubRepo';
+    return this.type === "SubRepo";
   }
 
   /** Class constructor */

@@ -6,16 +6,16 @@
  */
 
 import { join } from 'path';
-import { indexTsFilename, sourceFolderName } from '../constants.js';
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
 import * as PackageOnePackageRepo from '../internal/bin-utils/Package/OnePackageRepo.js';
 import * as PackageSubRepo from '../internal/bin-utils/Package/SubRepo.js';
 import * as Project from '../internal/bin-utils/Project.js';
 import * as SchemaFormat from '../internal/bin-utils/Schema/Format.js';
-import { getExeFlags } from '../utils.js';
+import { indexTsFilename, sourceFolderName } from '../internal/shared-utils/constants.js';
+import { getExeFlags } from '../internal/shared-utils/utils.js';
 
 console.log('Removing all configuration files');
-const { ['-activePackageOnly']: activePackageOnly } = SchemaFormat.injectDefaultsAndValidate(
+const { '-activePackageOnly': activePackageOnly } = SchemaFormat.injectDefaultsAndValidate(
   SchemaFormat.filteringArgs,
   {
     allowStringConversion: true,

@@ -5,7 +5,7 @@
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import { normalize, relative } from 'path';
-import { fromOSPathToPosixPath, type Data } from '../../utils.js';
+import { fromOSPathToPosixPath, type Data } from '../shared-utils/utils.js';
 import * as PackageAll from './Package/All.js';
 import * as PackageBase from './Package/Base.js';
 import * as PackageMonoRepo from './Package/MonoRepo.js';
@@ -73,7 +73,7 @@ export const filteredFromActiveProject = async (
     topPackagePath,
     packages: await Promise.all(
       ProjectUnloaded.filter(predicate)(unloadedProject).packages.map(async (currentPackage) => {
-        const type = currentPackage.type;
+        const { type } = currentPackage;
         switch (type) {
           case 'MonoRepo':
             return await PackageMonoRepo.fromPackageBase({ packageBase: currentPackage });
@@ -102,6 +102,7 @@ export const filteredFromActiveProjectAndShowCount = async (
   predicate: (t: PackageUnloaded.Type) => boolean,
 ): Promise<Type> => {
   const result = await filteredFromActiveProject(predicate);
+  /* eslint-disable-next-line functional/no-expression-statements */
   showCount(result);
   return result;
 };
@@ -111,8 +112,9 @@ export const filteredFromActiveProjectAndShowCount = async (
  *
  * @category Destructors
  */
-export const showCount = (self: Type): void =>
+export const showCount = (self: Type): void => {
   console.log(`Number of packages in scope: ${self.packages.length.toString()}`);
+};
 
 /**
  * Returns a copy of `self` in which only the PackageUnloaded's that fulfill predicate `predicate`
@@ -137,6 +139,7 @@ export const filterAndShowCount =
   (predicate: (t: PackageAll.Type) => boolean) =>
   (self: Type): Type => {
     const result = filter(predicate)(self);
+    /* eslint-disable-next-line functional/no-expression-statements */
     showCount(result);
     return result;
   };

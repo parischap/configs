@@ -1,19 +1,23 @@
 /* This module must only use Typescript syntax understandable by Node with the --experimental-transform-types flag */
 import { watch } from 'node:fs/promises';
 import { extname, join } from 'node:path';
-import { allJavaScriptExtensions, indexTsFilename, sourceFolderName } from '../constants.js';
-import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
+import * as ConfigFiles from '../internal/bin-utils/Config/Files.js';
 import * as PackageAllBase from '../internal/bin-utils/Package/AllBase.js';
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
 import * as PackageOnePackageRepo from '../internal/bin-utils/Package/OnePackageRepo.js';
 import * as PackageSubRepo from '../internal/bin-utils/Package/SubRepo.js';
 import * as Project from '../internal/bin-utils/Project.js';
 import * as SchemaFormat from '../internal/bin-utils/Schema/Format.js';
-import { getExeFlags } from '../utils.js';
+import {
+  indexTsFilename,
+  javaScriptExtensions,
+  sourceFolderName,
+} from '../internal/shared-utils/constants.js';
+import { getExeFlags } from '../internal/shared-utils/utils.js';
 
 console.log('Generating exports config files');
 
-const { ['-activePackageOnly']: activePackageOnly, ['-watch']: isWatch } =
+const { '-activePackageOnly': activePackageOnly, '-watch': isWatch } =
   SchemaFormat.injectDefaultsAndValidate(SchemaFormat.updateExportsArgs, {
     allowStringConversion: true,
   })(getExeFlags());
@@ -45,7 +49,7 @@ await Promise.all(
             if (
               changeFilename === null
               || (changeFilename !== indexTsFilename
-                && allJavaScriptExtensions.includes(extname(changeFilename)))
+                && javaScriptExtensions.includes(extname(changeFilename)))
             ) {
               console.log(`Updating exports files of package: '${currentPackage.name}'`);
               const configFiles = ConfigFiles.filterExportsFiles(
