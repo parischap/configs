@@ -3,9 +3,8 @@
  * and the values the contents of these files
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
-import { readFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, extname, join } from 'node:path';
+import { dirname, extname, join, parse } from 'node:path';
 import {
   allFilesPattern,
   allTsFiles,
@@ -13,7 +12,6 @@ import {
   baseDevDependencies,
   binariesFolderName,
   binariesPath,
-  binUtilsAssetsFolderName,
   configsDependencies,
   configsPackageName,
   configsPeerDependencies,
@@ -54,6 +52,7 @@ import {
   sourceDevDependencies,
   sourceFolderName,
   srcMark,
+  templatesFolderName,
   testsFolderName,
   testsIndexBaseName,
   testsMark,
@@ -79,14 +78,14 @@ import {
   capitalizeFirstLetter,
   deepMerge2,
   fromOSPathToPosixPath,
+  isRecord,
   prettyStringify,
   readFilesRecursively,
+  valToYaml,
   type Data,
   type ReadonlyRecord,
   type StringRecord,
 } from '../../shared-utils/utils.js';
-import { config as formatterConfig } from './formatterConfig.js';
-import { config as tsconfigBaseConfig } from './tsconfigBaseConfig.js';
 
 /**
  * Module tag
@@ -96,6 +95,50 @@ import { config as tsconfigBaseConfig } from './tsconfigBaseConfig.js';
 export const moduleTag = '@parischap/configs/internal/bin-utils/ConfigFiles/';
 const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
+
+/**
+ * Reads the contents of the template at `templatePath` and converts it to a string acording to
+ * `targetFormat`. Templates are all written in JavaScript. This allows:
+ *
+ * - to add comments
+ * - to inject constant values
+ * - to have a uniform build process
+ */
+const _readTemplate = async ({
+  targetPath,
+  targetFormat,
+}: {
+  readonly targetPath: string;
+  readonly targetFormat?: string;
+}): Promise<string> => {
+  const { dir, name, ext } = parse(targetPath);
+
+  const templatePath = join(import.meta.dirname, templatesFolderName, dir, `${name}.template.ts`);
+  const format = targetFormat ?? ext;
+  if (format === '.js') return await readFile(templatePath, 'utf8');
+  const content: unknown = await import(templatePath);
+  if (!isRecord(content) || !('default' in content))
+    throw new Error(`File '${templatePath}' must export a default value`);
+  const defaultExport: unknown = content['default'];
+
+  if (format === '.raw') {
+    if (typeof defaultExport !== 'string')
+      throw new Error(`File '${templatePath}' must export a default string for 'raw' format`);
+    return defaultExport;
+  }
+  if (format === '.json') return prettyStringify(defaultExport);
+  if (format === '.yml') {
+    if (!isRecord(defaultExport))
+      throw new Error(`File '${templatePath}' must export a default object for 'yaml' target`);
+    return valToYaml({ value: defaultExport, errorPrefix: `'${templatePath}': ` }).join('\n');
+  }
+  throw new Error(`Trying to convert template '${templatePath}' to unexpected format '${format}'`);
+};
+
+const FORMATTER_CONFIG = await _readTemplate({
+  targetPath: formatterConfigFilename,
+  targetFormat: '.json',
+});
 
 const FORMATTER_IGNORE: string = [
   ...foldersGeneratedByThirdParties.map((folderName) => `/${folderName}/`),
@@ -114,21 +157,11 @@ export default plainEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 const ESLINT_CONFIG_OTHERS = `import {plainEslintConfig} from '@parischap/configs/LinterConfig';
 export default plainEslintConfig({tsconfigRootDir:import.meta.dirname})`;
 
-/* General tsconfig.json file. It references four sub-projects, each with its own environments (node available or not):
-- the source sub-project where the package modules are located.
-- the examples sub-project where example modules are located. The examples sub-project will usually use the node environment. Even if the examples sub-project has the exact same configuration as the source sub-project, they must be seperated because building the source project can always be necessary.
-- the tests sub-project where test modules are located. The tests sub-project will usually use the node environment. Even if the tests sub-project has the exact same configuration as the source sub-project, they must be seperated because building the source project can always be necessary.
-- the others sub-project which covers all configuration modules (eslint.config.ts, prettier.config.ts, vitest.config.ts,...). The others sub-project uses the node environment.
-*/
-const TSCONFIG: ReadonlyRecord = {
-  include: [],
-  references: [
-    { path: tsConfigSrcFilename },
-    { path: tsConfigExamplesFilename },
-    { path: tsConfigTestsFilename },
-    { path: tsConfigOthersFilename },
-  ],
-};
+const TSCONFIG_BASE_CONFIG = await _readTemplate({ targetPath: tsConfigBaseFilename });
+
+const TSCONFIG = await _readTemplate({
+  targetPath: tsConfigFilename,
+});
 
 const TSCONFIG_SOURCE = {
   extends: [`./${tsConfigBaseFilename}`],
@@ -270,16 +303,12 @@ const VSCODE_WORKSPACE_CONFIG = ({
  * failed and no modification to the code is necessary. If a modification to the code is necessary,
  * a new release will have to be issued.
  */
-const GITHUB_WORKFLOWS_PUBLISH_SCRIPT = readFileSync(
-  join(import.meta.dirname, binUtilsAssetsFolderName, githubWorkflowsPublishPath),
-  'utf8',
-);
+const GITHUB_WORKFLOWS_PUBLISH_SCRIPT = await _readTemplate({
+  targetPath: githubWorkflowsPublishPath,
+});
 
 /** Creates the documentation for the package. Must be started manually. */
-const GITHUB_WORKFLOWS_PAGES_SCRIPT = readFileSync(
-  join(import.meta.dirname, binUtilsAssetsFolderName, githubWorkflowsPagesPath),
-  'utf8',
-);
+const GITHUB_WORKFLOWS_PAGES_SCRIPT = await _readTemplate({ targetPath: githubWorkflowsPagesPath });
 
 const DOCGEN_CONFIG: ReadonlyRecord = {
   parseCompilerOptions: `./${tsConfigDocGenFilename}`,
@@ -312,7 +341,7 @@ export class Type {
    * associated value is converted to a json string with JSON.stringify unless it is already a
    * string. Otherwise, the associated value is a string.
    */
-  readonly configurationFiles: ReadonlyRecord;
+  readonly configurationFiles: ReadonlyRecord<string, unknown>;
 
   /** Class constructor */
   private constructor(params: Data<Type>) {
@@ -338,14 +367,15 @@ export class Type {
 export const make = (configurationFiles: ReadonlyRecord): Type => Type.make(configurationFiles);
 
 /**
- * Returns the value of the `configurationFiles` property of self
+ * Returns the value of the `configurationFiles` property of `self`
  *
  * @category Destructors
  */
-export const configurationFiles = (self: Type): ReadonlyRecord => self.configurationFiles;
+export const configurationFiles = (self: Type): ReadonlyRecord<string, unknown> =>
+  self.configurationFiles;
 
 /**
- * Returns the value of the `configurationFiles` property of self
+ * Returns a copy of `self` in which only exports configuration files have been kept
  *
  * @category Destructors
  */
@@ -455,10 +485,10 @@ export const anyPackage = ({
 }): Type =>
   make({
     // Used by the format script
-    [formatterConfigFilename]: formatterConfig,
+    [formatterConfigFilename]: FORMATTER_CONFIG,
     // Used by the format script
     [formatterIgnoreFilename]: FORMATTER_IGNORE,
-    [tsConfigBaseFilename]: tsconfigBaseConfig,
+    [tsConfigBaseFilename]: TSCONFIG_BASE_CONFIG,
     [packageJsonFilename]: {
       name: `${slashedScope}${name}`,
       description,

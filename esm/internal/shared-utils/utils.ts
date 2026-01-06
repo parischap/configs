@@ -370,7 +370,7 @@ export const readFilesRecursively = async ({
 };
 
 /**
- * Reads a JSON file that must contain the JSON representation of a object
+ * Reads a JSON file that must contain the JSON representation of an object
  *
  * @category Utils
  */
@@ -391,6 +391,7 @@ export const readJsonFile = async (path: string): Promise<Record> => {
  * array of tuples. Arguments with an equals sign are split into name and value, while arguments
  * without are treated as boolean flags with a value of `true`.
  *
+ * @category Utils
  * @example
  *   // Given command: `node app.js --verbose --output=result.txt`
  *   // Returns: [["--verbose", true], ["--output", "result.txt"]]
@@ -404,4 +405,58 @@ export const getExeFlags = (): Array<[name: string, value: string | boolean]> =>
     const eqIndex = arg.indexOf('=');
     if (eqIndex === -1) return [arg, true];
     return [arg.substring(0, eqIndex), arg.substring(eqIndex + 1)];
+  });
+
+/**
+ * Partitions an array into two arrays based on a predicate
+ *
+ * @category Utils
+ */
+export const partitionArray = <T>(
+  array: ReadonlyArray<T>,
+  predicate: (item: T) => boolean,
+): [matching: Array<T>, nonMatching: Array<T>] =>
+  array.reduce<[Array<T>, Array<T>]>(
+    ([matching, nonMatching], elem) =>
+      predicate(elem) ? [[...matching, elem], nonMatching] : [matching, [...nonMatching, elem]],
+    [[], []],
+  );
+
+/**
+ * Formats a javascript object in YAML
+ *
+ * @category Utils
+ */
+export const valToYaml = ({
+  value,
+  errorPrefix = '',
+}: {
+  readonly value: ReadonlyRecord;
+  readonly errorPrefix?: string;
+}): Array<string> =>
+  Object.entries(value).flatMap(([key, elem]) => {
+    const valueIsArray = Array.isArray(value);
+    const elemPart = (
+      typeof elem === 'number' || typeof elem === 'boolean' ? () => elem.toString()
+      : typeof elem === 'string' ?
+        () => {
+          const lines = elem.split('\n');
+          return lines.length <= 1 ? lines : ['|', ...lines];
+        }
+      : typeof elem === 'object' ?
+        elem === null ?
+          () => ''
+        : () => [...(valueIsArray ? [] : ['']), ...valToYaml({ value: elem, errorPrefix })]
+      : () => {
+          throw new Error(
+            `${errorPrefix}This value cannot be converted to YAML: ${prettyStringify(elem)}`,
+          );
+        })();
+    const keyPart = valueIsArray ? '-' : `${key}:`;
+    return Array.isArray(elemPart) ?
+        elemPart.map(
+          (line, index) =>
+            `${index === 0 ? `${keyPart}${line.length === 0 ? '' : ' '}` : '  '}${line}`,
+        )
+      : `${keyPart}${elemPart.length === 0 ? '' : ' '}${elemPart}`;
   });

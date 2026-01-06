@@ -4,5 +4,8 @@
   "experimentalTernaries": true,
   "experimentalOperatorPosition": "start",
   "jsdocCapitalizeDescription": false,
-  "plugins": ["prettier-plugin-organize-imports", "prettier-plugin-jsdoc"]
+  "plugins": [
+    "prettier-plugin-organize-imports",
+    "prettier-plugin-jsdoc"
+  ]
 }

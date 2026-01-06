@@ -93,20 +93,8 @@
     "./tests": {
       "default": "./esm/index.tests.js"
     },
-    "./LinterConfig": {
-      "default": "./esm/linterConfig.ts"
-    },
     "./TestUtils": {
       "default": "./esm/testUtils.ts"
-    },
-    "./ViteLib": {
-      "default": "./esm/viteLib.ts"
-    },
-    "./VitestConfigNoSource": {
-      "default": "./esm/vitestConfigNoSource.ts"
-    },
-    "./VitestConfigSource": {
-      "default": "./esm/vitestConfigSource.ts"
     }
   }
 }

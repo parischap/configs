@@ -1,25 +1,14 @@
 import { extname } from 'path';
 import { type PluginOption } from 'vite';
 import { javaScriptExtensions, slashedScope } from '../shared-utils/constants.js';
+import { partitionArray } from '../shared-utils/utils.js';
+
 const importRegExp =
   /import\s*{\s*(?<namedImports>[^}]*?)\s*}\s*from\s*(?<mark>["'])(?<importFilename>[^"']+)\k<mark>(?<eol>(?:\s*;)?)/g;
 const commaRegExp = /\s*,\s*/;
 const asRegExp = /\s+as\s+/;
 const effectSlashedScope = '@effect/';
 const importsFromEffectFunction = ['absurd', 'flow', 'hole', 'identity', 'pipe', 'unsafeCoerce'];
-
-/**
- * Partitions an array into two arrays based on a predicate
- */
-const partitionArray = <T>(
-  array: ReadonlyArray<T>,
-  predicate: (item: T) => boolean,
-): [matching: Array<T>, nonMatching: Array<T>] =>
-  array.reduce<[Array<T>, Array<T>]>(
-    ([matching, nonMatching], elem) =>
-      predicate(elem) ? [[...matching, elem], nonMatching] : [matching, [...nonMatching, elem]],
-    [[], []],
-  );
 
 export default {
   name: 'transform-named-imports-to-namespace-imports',

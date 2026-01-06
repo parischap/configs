@@ -1,6 +1,6 @@
 import { type Config } from 'prettier';
 
-export const config: Config = {
+export default {
   //$schema: './node_modules/oxfmt/configuration_schema.json',
   printWidth: 100,
   singleQuote: true,
@@ -9,4 +9,4 @@ export const config: Config = {
   jsdocCapitalizeDescription: false,
   //embeddedLanguageFormatting: 'auto',
   plugins: ['prettier-plugin-organize-imports', 'prettier-plugin-jsdoc'],
-};
+} satisfies Config;
