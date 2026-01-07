@@ -131,7 +131,7 @@ export const javaScriptExtensions = [...jsExtensions, ...tsExtensions];
 export const htmlExtensions = ['.html', '.htm'];
 export const mdExtensions = ['.md'];
 export const simpleJsonExtensions = ['.json'];
-export const jsoncExtensions = ['.jsonc'];
+export const jsoncExtensions = ['.jsonc', '.code-workspace'];
 export const json5Extensions = ['.json5'];
 export const jsonExtensions = [...simpleJsonExtensions, ...jsoncExtensions, ...json5Extensions];
 export const ymlExtensions = ['.yml', '.yaml'];
@@ -179,13 +179,12 @@ export const docGenDependencies = {
 };
 
 /* Add here all dependencies used by modules exported in index.ts */
-export const configsDependencies = {
-  // Used by the linterConfig.ts file
-  globals: '17.0.0',
-};
+export const configsDependencies = {};
 
 // Add here all dependencies used by modules exported in index.ts.
 export const configsPeerDependencies = {
+  // Used by the linterConfig.ts file
+  globals: '17.0.0',
   // Used by the linterConfig.ts file
   '@eslint/js': '9.39.2',
   // Used by the linterConfig.ts file

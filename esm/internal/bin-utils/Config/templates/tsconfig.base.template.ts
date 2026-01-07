@@ -1,4 +1,5 @@
 import { tsBuildInfoFolderName } from '../../../shared-utils/constants.js';
+import { type ReadonlyRecord } from '../../../shared-utils/utils.js';
 
 export default {
   $schema: 'https://json.schemastore.org/tsconfig',
@@ -36,4 +37,4 @@ export default {
     ],
     tsBuildInfoFile: `.${tsBuildInfoFolderName}/project.${tsBuildInfoFolderName}`,
   },
-};
+} satisfies ReadonlyRecord;

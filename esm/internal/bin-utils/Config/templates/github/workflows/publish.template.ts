@@ -1,10 +1,15 @@
 /*
- * This workflow is triggered by a new release. Based on the release tag that must be in the form
- * `version` or `repo@version`, it will create build the target repo, update the version number of the
- * package.json in this repo and publish the repo to npm.
+ * Publishes a sub-package or a one-package repo to npm. Triggered by a new release but can be started manually. Based on the release tag that must be in the form
+ * `version` or `repo@version`, it will create and build the target repo, update the version number of the
+ * package.json in this repo and publish the repo to npm. If started manually, it
+ * uses the release number of the last issued release. It can be useful if the publish action has
+ * failed and no modification to the code is necessary. If a modification to the code is necessary,
+ * a new release will have to be issued.
+ *
  */
 
 import { githubActionTimeOut } from '../../../../../shared-utils/constants.js';
+import { type ReadonlyRecord } from '../../../../../shared-utils/utils.js';
 
 export default {
   name: 'publish',
@@ -100,4 +105,4 @@ export default {
       ],
     },
   },
-};
+} satisfies ReadonlyRecord;

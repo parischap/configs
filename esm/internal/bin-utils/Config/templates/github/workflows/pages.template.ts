@@ -1,5 +1,10 @@
-// This workflow is triggered manually. It will create the documentation and push it to github pages
+/**
+ * Creates the documentation for the package and pushes it to github pages. Must be started
+ * manually.
+ */
+
 import { docsFolderName, githubActionTimeOut } from '../../../../../shared-utils/constants.js';
+import { type ReadonlyRecord } from '../../../../../shared-utils/utils.js';
 
 export default {
   name: 'Pages',
@@ -77,4 +82,4 @@ export default {
       ],
     },
   },
-};
+} satisfies ReadonlyRecord;

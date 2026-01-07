@@ -427,7 +427,7 @@ export const partitionArray = <T>(
  *
  * @category Utils
  */
-export const valToYaml = ({
+export const objectToYaml = ({
   value,
   errorPrefix = '',
 }: {
@@ -446,10 +446,10 @@ export const valToYaml = ({
       : typeof elem === 'object' ?
         elem === null ?
           () => ''
-        : () => [...(valueIsArray ? [] : ['']), ...valToYaml({ value: elem, errorPrefix })]
+        : () => [...(valueIsArray ? [] : ['']), ...objectToYaml({ value: elem, errorPrefix })]
       : () => {
           throw new Error(
-            `${errorPrefix}This value cannot be converted to YAML: ${prettyStringify(elem)}`,
+            `${errorPrefix}This value of key '${key}' cannot be converted to YAML: ${prettyStringify(elem)}`,
           );
         })();
     const keyPart = valueIsArray ? '-' : `${key}:`;
