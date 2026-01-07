@@ -93,8 +93,26 @@
     "./tests": {
       "default": "./esm/index.tests.js"
     },
+    "./EslintConfigNode": {
+      "default": "./esm/eslint.config.node.ts"
+    },
+    "./EslintConfigPlain": {
+      "default": "./esm/eslint.config.plain.ts"
+    },
     "./TestUtils": {
       "default": "./esm/testUtils.ts"
+    },
+    "./VitestConfigNosource": {
+      "default": "./esm/vitest.config.nosource.ts"
+    },
+    "./VitestConfigSource": {
+      "default": "./esm/vitest.config.source.ts"
+    },
+    "./StarterMain": {
+      "default": "./esm/starter/main.ts"
+    },
+    "./StarterTsdownConfig": {
+      "default": "./esm/starter/tsdown.config.ts"
     }
   }
 }

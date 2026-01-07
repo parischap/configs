@@ -1,4 +1,4 @@
-import { scope } from '../../../shared-utils/constants.js';
+import { scope } from '../../shared-utils/constants.js';
 export default `MIT License
 
 Copyright (c) 2026 ${scope}

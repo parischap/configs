@@ -6,8 +6,8 @@ import {
   allFilesPattern,
   sourceFolderName,
   tsConfigBaseFilename,
-} from '../../../shared-utils/constants.js';
-import { type ReadonlyRecord } from '../../../shared-utils/utils.js';
+} from '../../shared-utils/constants.js';
+import { type ReadonlyRecord } from '../../shared-utils/utils.js';
 
 export default {
   extends: [`./${tsConfigBaseFilename}`],

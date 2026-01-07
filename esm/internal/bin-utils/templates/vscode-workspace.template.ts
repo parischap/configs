@@ -1,4 +1,4 @@
-import { type ReadonlyRecord } from '../../../shared-utils/utils.js';
+import { type ReadonlyRecord } from '../../shared-utils/utils.js';
 export default ({
   allPackagesPaths,
 }: {

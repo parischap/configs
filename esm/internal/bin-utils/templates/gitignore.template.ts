@@ -1,7 +1,7 @@
 import {
   filesGeneratedByThirdParties,
   foldersGeneratedByThirdParties,
-} from '../../../shared-utils/constants.js';
+} from '../../shared-utils/constants.js';
 
 export default [
   ...foldersGeneratedByThirdParties.map((folderName) => `/${folderName}/`),

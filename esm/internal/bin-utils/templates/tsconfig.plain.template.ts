@@ -1,4 +1,4 @@
-import { deepMerge2, type ReadonlyRecord } from '../../../shared-utils/utils.js';
+import { deepMerge2, type ReadonlyRecord } from '../../shared-utils/utils.js';
 import TsconfigSource from './tsconfig.source.template.js';
 
 export default deepMerge2(TsconfigSource, {

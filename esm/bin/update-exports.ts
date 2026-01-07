@@ -1,7 +1,7 @@
 /* This module must only use Typescript syntax understandable by Node with the --experimental-transform-types flag */
 import { watch } from 'node:fs/promises';
 import { extname, join } from 'node:path';
-import * as ConfigFiles from '../internal/bin-utils/Config/Files.js';
+import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
 import * as PackageAllBase from '../internal/bin-utils/Package/AllBase.js';
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
 import * as PackageOnePackageRepo from '../internal/bin-utils/Package/OnePackageRepo.js';

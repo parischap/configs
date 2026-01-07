@@ -43,7 +43,6 @@ import {
   slashedScope,
   sourceDevDependencies,
   sourceFolderName,
-  templatesFolderName,
   testsIndexBaseName,
   tsConfigBaseFilename,
   tsConfigDocGenFilename,
@@ -56,7 +55,7 @@ import {
   versionControlService,
   vitestConfigFilename,
   ymlExtensions,
-} from '../../shared-utils/constants.js';
+} from '../shared-utils/constants.js';
 import {
   capitalizeFirstLetter,
   deepMerge2,
@@ -68,9 +67,11 @@ import {
   type Data,
   type ReadonlyRecord,
   type StringRecord,
-} from '../../shared-utils/utils.js';
+} from '../shared-utils/utils.js';
 import Docgen from './templates/docgen.template.js';
 import DocsConfig from './templates/docs/_config.template.js';
+import EslintConfigNode from './templates/eslint.config.node.template.js';
+import EslintConfigPlain from './templates/eslint.config.plain.template.js';
 import GithubWorkflowsPages from './templates/github/workflows/pages.template.js';
 import GithubWorkflowsPublish from './templates/github/workflows/publish.template.js';
 import GitIgnore from './templates/gitignore.template.js';
@@ -86,6 +87,8 @@ import TsconfigPlain from './templates/tsconfig.plain.template.js';
 import TsconfigSource from './templates/tsconfig.source.template.js';
 import Tsconfig from './templates/tsconfig.template.js';
 import TsconfigTests from './templates/tsconfig.tests.template.js';
+import VitestConfigNoSource from './templates/vitest.config.nosource.template.js';
+import VitestConfigSource from './templates/vitest.config.source.template.js';
 import VscodeWorkspace from './templates/vscode-workspace.template.js';
 
 /**
@@ -96,30 +99,6 @@ import VscodeWorkspace from './templates/vscode-workspace.template.js';
 export const moduleTag = '@parischap/configs/internal/bin-utils/ConfigFiles/';
 const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
-
-const VitestConfigNoSource = await readFile(
-  join(import.meta.dirname, templatesFolderName, 'vitest.config.nosource.template.ts'),
-  'utf8',
-);
-
-const VitestConfigSource = await readFile(
-  join(import.meta.dirname, templatesFolderName, 'vitest.config.source.template.ts'),
-  'utf8',
-);
-
-const EslintConfigBase = await readFile(
-  join(import.meta.dirname, templatesFolderName, 'eslint.config.base.template.ts'),
-  'utf8',
-);
-
-const EslintConfigNode = await readFile(
-  join(import.meta.dirname, templatesFolderName, 'eslint.config.node.template.ts'),
-  'utf8',
-);
-
-const EslintConfigBrowser = EslintConfigBase;
-
-const EslintConfigPlain = EslintConfigBase;
 
 const TsconfigBrowser = TsconfigPlain;
 const TsconfigNode = TsconfigSource;
@@ -328,7 +307,7 @@ export const noSourcePackage: Type = make({
   // Used by the checks script
   [tsConfigFilename]: TsconfigOthers,
   // Used by the checks script
-  [linterConfigFilename]: EslintConfigBase,
+  [linterConfigFilename]: EslintConfigPlain,
   // Used by the test script
   [vitestConfigFilename]: VitestConfigNoSource,
   [packageJsonFilename]: {
@@ -522,7 +501,7 @@ const sourcePackageEnvironment = ({
       [tsConfigSrcFilename]: TsconfigBrowser,
       // Used by the checks script
       // We don't use any dom specifities because it must run on the server. It's all hidden away in preact
-      [linterConfigFilename]: EslintConfigBrowser,
+      [linterConfigFilename]: EslintConfigPlain,
     });
 
   if (environment === 'Node')

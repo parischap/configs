@@ -3,8 +3,8 @@
  * manually.
  */
 
-import { docsFolderName, githubActionTimeOut } from '../../../../../shared-utils/constants.js';
-import { type ReadonlyRecord } from '../../../../../shared-utils/utils.js';
+import { docsFolderName, githubActionTimeOut } from '../../../../shared-utils/constants.js';
+import { type ReadonlyRecord } from '../../../../shared-utils/utils.js';
 
 export default {
   name: 'Pages',

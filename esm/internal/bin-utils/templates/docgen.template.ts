@@ -4,8 +4,8 @@ import {
   internalFolderName,
   sourceFolderName,
   tsConfigDocGenFilename,
-} from '../../../shared-utils/constants.js';
-import { type ReadonlyRecord } from '../../../shared-utils/utils.js';
+} from '../../shared-utils/constants.js';
+import { type ReadonlyRecord } from '../../shared-utils/utils.js';
 
 export default {
   parseCompilerOptions: `./${tsConfigDocGenFilename}`,
