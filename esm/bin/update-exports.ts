@@ -8,6 +8,9 @@ import * as PackageOnePackageRepo from '../internal/bin-utils/Package/OnePackage
 import * as PackageSubRepo from '../internal/bin-utils/Package/SubRepo.js';
 import * as Project from '../internal/bin-utils/Project.js';
 import * as SchemaFormat from '../internal/bin-utils/Schema/Format.js';
+import * as SchemaParameterDescriptor from '../internal/bin-utils/Schema/ParameterDescriptor.js';
+import * as SchemaParameterType from '../internal/bin-utils/Schema/ParameterType.js';
+
 import {
   indexTsFilename,
   javaScriptExtensions,
@@ -17,8 +20,21 @@ import { getExeFlags } from '../internal/shared-utils/utils.js';
 
 console.log('Generating exports config files');
 
+const argsFormat = SchemaFormat.make({
+  descriptors: {
+    '-activePackageOnly': SchemaParameterDescriptor.make({
+      expectedType: SchemaParameterType.boolean,
+      defaultValue: false,
+    }),
+    '-watch': SchemaParameterDescriptor.make({
+      expectedType: SchemaParameterType.boolean,
+      defaultValue: false,
+    }),
+  },
+});
+
 const { '-activePackageOnly': activePackageOnly, '-watch': isWatch } =
-  SchemaFormat.injectDefaultsAndValidate(SchemaFormat.updateExportsArgs, {
+  SchemaFormat.injectDefaultsAndValidate(argsFormat, {
     allowStringConversion: true,
   })(getExeFlags());
 

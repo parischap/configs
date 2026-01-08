@@ -11,12 +11,23 @@ import * as PackageOnePackageRepo from '../internal/bin-utils/Package/OnePackage
 import * as PackageSubRepo from '../internal/bin-utils/Package/SubRepo.js';
 import * as Project from '../internal/bin-utils/Project.js';
 import * as SchemaFormat from '../internal/bin-utils/Schema/Format.js';
+import * as SchemaParameterDescriptor from '../internal/bin-utils/Schema/ParameterDescriptor.js';
+import * as SchemaParameterType from '../internal/bin-utils/Schema/ParameterType.js';
 import { indexTsFilename, sourceFolderName } from '../internal/shared-utils/constants.js';
 import { getExeFlags } from '../internal/shared-utils/utils.js';
 
 console.log('Removing all configuration files');
+const argsFormat = SchemaFormat.make({
+  descriptors: {
+    '-activePackageOnly': SchemaParameterDescriptor.make({
+      expectedType: SchemaParameterType.boolean,
+      defaultValue: false,
+    }),
+  },
+});
+
 const { '-activePackageOnly': activePackageOnly } = SchemaFormat.injectDefaultsAndValidate(
-  SchemaFormat.filteringArgs,
+  argsFormat,
   {
     allowStringConversion: true,
   },

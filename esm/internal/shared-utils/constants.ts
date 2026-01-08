@@ -145,8 +145,10 @@ export const eslintStyleIncludeForSourceFiles = javaScriptExtensions.map(
 );
 export const eslintStyleExcludeForSourceFiles = `${sourceFolderName}/**`;
 
-/** @type {(prefix: string) => (as: ReadonlyArray<string>) => string[]} */
-const prefixWith = (prefix) => (as) => as.map((a) => prefix + a);
+const prefixWith =
+  (prefix: string) =>
+  (as: ReadonlyArray<string>): Array<string> =>
+    as.map((a) => prefix + a);
 const prefixWithAllFilePatterns = prefixWith(allFilesPattern);
 export const allTsFiles = prefixWithAllFilePatterns(tsExtensions);
 export const allJavaScriptFiles = prefixWithAllFilePatterns(javaScriptExtensions);

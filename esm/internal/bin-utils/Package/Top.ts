@@ -7,7 +7,7 @@
 import { type Data } from '../../shared-utils/utils.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as PackageBase from './Base.js';
-import * as PackageNoSourceBase from './NoSourceBase.js';
+import * as PackageLoadedNoSource from './LoadedNoSource.js';
 
 /**
  * Module tag
@@ -23,7 +23,7 @@ type _TypeId = typeof _TypeId;
  *
  * @category Models
  */
-export class Type extends PackageNoSourceBase.Type {
+export class Type extends PackageLoadedNoSource.Type {
   /** Array of the names of all the source packages of the Project whose Top is `self` */
   readonly allSourcePackagesNames: ReadonlyArray<string>;
   /** Array of the paths to all the packages of the Project whose Top is `self` */

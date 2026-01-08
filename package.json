@@ -1,5 +1,5 @@
 {
-  "name": "@parischap/configs",
+  "name": "@parischap-dev/configs",
   "description": "Utility to generate configuration files in a repository",
   "type": "module",
   "author": "Jérôme MARTIN",

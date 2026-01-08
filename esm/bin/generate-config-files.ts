@@ -19,15 +19,26 @@
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used at the very start of a project */
 
 import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
-import * as PackageAllBase from '../internal/bin-utils/Package/AllBase.js';
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
+import * as PackageLoadedBase from '../internal/bin-utils/Package/LoadedBase.js';
 import * as Project from '../internal/bin-utils/Project.js';
 import * as SchemaFormat from '../internal/bin-utils/Schema/Format.js';
+import * as SchemaParameterDescriptor from '../internal/bin-utils/Schema/ParameterDescriptor.js';
+import * as SchemaParameterType from '../internal/bin-utils/Schema/ParameterType.js';
 import { getExeFlags } from '../internal/shared-utils/utils.js';
 
 console.log('Generating config files');
+const argsFormat = SchemaFormat.make({
+  descriptors: {
+    '-activePackageOnly': SchemaParameterDescriptor.make({
+      expectedType: SchemaParameterType.boolean,
+      defaultValue: false,
+    }),
+  },
+});
+
 const { '-activePackageOnly': activePackageOnly } = SchemaFormat.injectDefaultsAndValidate(
-  SchemaFormat.filteringArgs,
+  argsFormat,
   {
     allowStringConversion: true,
   },
@@ -41,7 +52,7 @@ const project = await Project.filteredFromActiveProjectAndShowCount(
 await Promise.all(
   project.packages.map(async (currentPackage) => {
     try {
-      const configFiles = await PackageAllBase.generateConfigFiles(currentPackage);
+      const configFiles = await PackageLoadedBase.generateConfigFiles(currentPackage);
       /* eslint-disable-next-line functional/no-expression-statements*/
       await ConfigFiles.save({
         packagePath: currentPackage.path,

@@ -6,8 +6,8 @@
 
 import { normalize, relative } from 'path';
 import { fromOSPathToPosixPath, type Data } from '../shared-utils/utils.js';
-import * as PackageAll from './Package/All.js';
 import * as PackageBase from './Package/Base.js';
+import * as PackageLoaded from './Package/Loaded.js';
 import * as PackageMonoRepo from './Package/MonoRepo.js';
 import * as PackageOnePackageRepo from './Package/OnePackageRepo.js';
 import * as PackageSubRepo from './Package/SubRepo.js';
@@ -32,7 +32,7 @@ export class Type {
   /** Path to the project root */
   readonly topPackagePath: string;
   /** List of contained PackageAll's */
-  readonly packages: ReadonlyArray<PackageAll.Type>;
+  readonly packages: ReadonlyArray<PackageLoaded.Type>;
 
   /** Class constructor */
   private constructor(params: Data<Type>) {
@@ -123,7 +123,7 @@ export const showCount = (self: Type): void => {
  * @category Combinators
  */
 export const filter =
-  (predicate: (t: PackageAll.Type) => boolean) =>
+  (predicate: (t: PackageLoaded.Type) => boolean) =>
   (self: Type): Type =>
     Type.make({
       topPackagePath: self.topPackagePath,
@@ -136,7 +136,7 @@ export const filter =
  * @category Combinators
  */
 export const filterAndShowCount =
-  (predicate: (t: PackageAll.Type) => boolean) =>
+  (predicate: (t: PackageLoaded.Type) => boolean) =>
   (self: Type): Type => {
     const result = filter(predicate)(self);
     /* eslint-disable-next-line functional/no-expression-statements */

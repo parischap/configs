@@ -1,5 +1,6 @@
 import {
-  allTsFiles,
+  allFilesPattern,
+  binariesFolderName,
   docsFolderName,
   internalFolderName,
   sourceFolderName,
@@ -13,7 +14,8 @@ export default {
   srcDir: `./${sourceFolderName}`,
   outDir: docsFolderName,
   exclude: [
-    ...allTsFiles.map((ext) => `${sourceFolderName}/${internalFolderName}/${ext}`),
+    `${sourceFolderName}/${internalFolderName}/${allFilesPattern}`,
+    `${sourceFolderName}/${binariesFolderName}/${allFilesPattern}`,
     `${sourceFolderName}/index.ts`,
   ],
   enforceDescriptions: true,

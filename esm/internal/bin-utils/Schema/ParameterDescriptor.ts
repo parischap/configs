@@ -1,46 +1,16 @@
 /** Module that describes the type and optional default value of a parameter */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
-import {
-  type Data,
-  isStringArray,
-  isStringRecord,
-  type StringArray,
-  type StringRecord,
-} from "../../shared-utils/utils.js";
+import { type Data } from '../../shared-utils/utils.js';
+import * as SchemaParameterType from './SchemaParameterType.js';
 
 /**
  * Module tag
  *
  * @category Models
  */
-export const moduleTag = "@parischap/configs/internal/bin-utils/Schema/ParameterDescriptor/";
+export const moduleTag = '@parischap/configs/internal/bin-utils/Schema/ParameterDescriptor/';
 const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
-
-/** All allowed parameter types */
-export type AllTypeNames =
-  | "string"
-  | "stringOrUndefined"
-  | "boolean"
-  | "number"
-  | "record"
-  | "array";
-
-/** Utility type that converts a typeName to a type */
-// Do not use tuples in the extends clause as T can be a union of type names
-type _TypeFromTypeName<T extends AllTypeNames> = T extends "string"
-  ? string
-  : T extends "stringOrUndefined"
-    ? string | undefined
-    : T extends "boolean"
-      ? boolean
-      : T extends "number"
-        ? number
-        : T extends "record"
-          ? StringRecord
-          : T extends "array"
-            ? StringArray
-            : never;
 
 /**
  * Type of a SchemaParameterDescriptor
@@ -48,23 +18,23 @@ type _TypeFromTypeName<T extends AllTypeNames> = T extends "string"
  * @category Models
  */
 
-export class Type<E extends AllTypeNames> {
+export class Type<RealType> {
   /** Expected type of the parameter */
-  readonly expectedType: E;
+  readonly expectedType: SchemaParameterType.Type<RealType>;
   /** Default value of the parameter if any */
-  readonly defaultValue?: _TypeFromTypeName<E>;
+  readonly defaultValue?: RealType;
 
   /** Class constructor */
-  private constructor(params: Data<Type<E>>) {
+  private constructor(params: Data<Type<RealType>>) {
     this.expectedType = params.expectedType;
-    if ("defaultValue" in params) {
+    if ('defaultValue' in params) {
       this.defaultValue = params.defaultValue;
     }
   }
 
   /** Static constructor */
-  static make<E extends AllTypeNames>(params: Data<Type<E>>): Type<E> {
-    return new Type<E>(params);
+  static make<RealType>(params: Data<Type<RealType>>): Type<RealType> {
+    return new Type(params);
   }
 
   /** @internal */
@@ -73,26 +43,27 @@ export class Type<E extends AllTypeNames> {
   }
 }
 
-export interface Any extends Type<AllTypeNames> {}
 /**
  * Utility type that extracts the expectedType type of a SchemaParameterDescriptor
  *
  * @category Utility types
  */
-export type ExpectedType<T> = [T] extends [Type<infer ExpectedType>]
-  ? _TypeFromTypeName<ExpectedType>
-  : never;
+export type RealType<T> = [T] extends [Type<infer RealType>] ? RealType : never;
 
 /**
  * Constructor
  *
  * @category Constructors
  */
-export const make = <const E extends AllTypeNames>(params: Data<Type<E>>): Type<E> =>
-  Type.make(params);
+export const make = <const RealType>(params: {
+  readonly expectedType: SchemaParameterType.Type<RealType>;
+  readonly defaultValue?: NoInfer<RealType>;
+}): Type<RealType> => Type.make(params);
 
 /**
- * Validates that `value` is of the expected type of `self` and returns it converted to that type
+ * Validates that `value` is of the expected type of `self` and returns it converted to that type.
+ * If `allowStringConversion` is true and value is a string, the value is converted with JSON.parse
+ * prior to checking its type
  *
  * @category Combinators
  */
@@ -100,32 +71,25 @@ export const validate =
   ({
     value,
     allowStringConversion = false,
-    errorPrefix = "",
+    errorPrefix = '',
   }: {
     readonly value: unknown;
     readonly allowStringConversion?: boolean;
     readonly errorPrefix?: string;
   }) =>
-  <E extends AllTypeNames>(self: Type<E>): ExpectedType<Type<E>> => {
+  <RealType>(self: Type<RealType>): RealType => {
     const { expectedType } = self;
-    const convertedValue =
-      allowStringConversion && typeof value === "string" && expectedType !== "string"
-        ? (JSON.parse(value) as unknown)
-        : value;
+    if (expectedType.guard(value)) return value;
 
-    const valueType = typeof convertedValue;
-    if (
-      (expectedType === "string" && valueType !== "string") ||
-      (expectedType === "stringOrUndefined" &&
-        valueType !== "string" &&
-        valueType !== "undefined") ||
-      (expectedType === "boolean" && valueType !== "boolean") ||
-      (expectedType === "number" && valueType !== "number") ||
-      (expectedType === "record" && !isStringRecord(value)) ||
-      (expectedType === "array" && !isStringArray(value))
-    )
+    if (!allowStringConversion || typeof value !== 'string')
       throw new Error(
-        `${errorPrefix}Parameter should be of type '${expectedType}'. Actual: ${valueType}`,
+        `${errorPrefix}Parameter should be of type '${expectedType.name}'. Actual: ${typeof value}`,
       );
-    return convertedValue as never;
+
+    const convertedValue: unknown = JSON.parse(value);
+    if (expectedType.guard(convertedValue)) return convertedValue;
+
+    throw new Error(
+      `${errorPrefix}Parameter should be of type '${expectedType.name}'. Actual: ${typeof convertedValue}`,
+    );
   };

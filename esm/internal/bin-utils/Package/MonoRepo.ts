@@ -7,7 +7,7 @@
 import { type Data } from '../../shared-utils/utils.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as PackageBase from './Base.js';
-import * as PackageNoSourceBase from './NoSourceBase.js';
+import * as PackageLoadedNoSource from './LoadedNoSource.js';
 
 /**
  * Module tag
@@ -23,7 +23,7 @@ type _TypeId = typeof _TypeId;
  *
  * @category Models
  */
-export class Type extends PackageNoSourceBase.Type {
+export class Type extends PackageLoadedNoSource.Type {
   /** Returns true is this is the top Package of a Project */
   _isTop(): boolean {
     return false;
@@ -48,7 +48,7 @@ export class Type extends PackageNoSourceBase.Type {
 
   /** Static constructor */
   static async fromPackageBase(params: { readonly packageBase: PackageBase.Type }): Promise<Type> {
-    return new Type(await PackageNoSourceBase.fromPackageBase(params));
+    return new Type(await PackageLoadedNoSource.fromPackageBase(params));
   }
 
   /** Generates the configuration files of `self` */

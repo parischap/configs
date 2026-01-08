@@ -7,24 +7,39 @@
 import { type Data } from '../../shared-utils/utils.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as SchemaFormat from '../Schema/Format.js';
-import * as PackageAllBase from './AllBase.js';
+import * as SchemaParameterDescriptor from '../Schema/ParameterDescriptor.js';
+import * as SchemaParameterType from '../Schema/ParameterType.js';
 import * as PackageBase from './Base.js';
+import * as PackageLoadedBase from './LoadedBase.js';
 
 /**
  * Module tag
  *
  * @category Models
  */
-export const moduleTag = '@parischap/configs/internal/bin-utils/Package/NoSourceBase/';
+export const moduleTag = '@parischap/configs/internal/bin-utils/Package/LoadedNoSource/';
 const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
 
 /**
- * Type of a PackageNoSourceBase
+ * SchemaFormat instance for a PackageLoadedNoSource
+ *
+ * @category Instances
+ */
+const noSourcePackageFormat = SchemaFormat.make({
+  descriptors: {
+    description: SchemaParameterDescriptor.make({ expectedType: SchemaParameterType.string }),
+  },
+});
+
+type LoadedParameters = SchemaFormat.RealType<typeof noSourcePackageFormat>;
+
+/**
+ * Type of a PackageLoadedNoSource
  *
  * @category Models
  */
-export abstract class Type extends PackageAllBase.Type {
+export abstract class Type extends PackageLoadedBase.Type implements LoadedParameters {
   /** Class constructor */
   protected constructor(params: Data<Type>) {
     super(params);
@@ -55,7 +70,7 @@ export const fromPackageBase = async ({
   const parameters = Object.entries(configRecord);
   return {
     ...(packageBase as Data<PackageBase.Type>),
-    ...SchemaFormat.injectDefaultsAndValidate(SchemaFormat.noSourcePackage, {
+    ...SchemaFormat.injectDefaultsAndValidate(noSourcePackageFormat, {
       errorPrefix: `'${packageBase.name}': `,
     })(parameters),
   };

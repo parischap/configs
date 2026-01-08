@@ -13,12 +13,12 @@ import * as PackageBase from './Base.js';
  *
  * @category Models
  */
-export const moduleTag = '@parischap/configs/internal/bin-utils/Package/AllBase/';
+export const moduleTag = '@parischap/configs/internal/bin-utils/Package/LoadedBase/';
 const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
 
 /**
- * Type of a PackageAllBase
+ * Type of a PackageLoadedBase
  *
  * @category Models
  */
