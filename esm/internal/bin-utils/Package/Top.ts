@@ -72,8 +72,14 @@ export class Type extends PackageLoadedNoSource.Type {
   }
 
   /** Generates the configuration files of `self` */
-  override async _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
-    return ConfigFiles.merge(await super._generateConfigFiles(), ConfigFiles.top(this));
+  override async _generateConfigFiles(
+    this: Type,
+    mode: ConfigFiles.Mode,
+  ): Promise<ConfigFiles.Type> {
+    return ConfigFiles.merge(
+      await super._generateConfigFiles(mode),
+      ConfigFiles.top({ packageTop: this, mode }),
+    );
   }
 
   /** @internal */

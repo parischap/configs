@@ -52,8 +52,8 @@ export class Type extends PackageLoadedSource.Type {
   }
 
   /** Generates the configuration files of `self` */
-  override _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
-    return super._generateConfigFiles();
+  override _generateConfigFiles(this: Type, mode: ConfigFiles.Mode): Promise<ConfigFiles.Type> {
+    return super._generateConfigFiles(mode);
   }
 
   /** @internal */

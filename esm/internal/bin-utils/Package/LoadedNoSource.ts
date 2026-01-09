@@ -46,8 +46,14 @@ export abstract class Type extends PackageLoadedBase.Type implements LoadedParam
   }
 
   /** Generates the configuration files of `self` */
-  override async _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
-    return ConfigFiles.merge(await super._generateConfigFiles(), ConfigFiles.noSourcePackage);
+  override async _generateConfigFiles(
+    this: Type,
+    mode: ConfigFiles.Mode,
+  ): Promise<ConfigFiles.Type> {
+    return ConfigFiles.merge(
+      await super._generateConfigFiles(mode),
+      ConfigFiles.noSourcePackage({ packageLoadedNoSource: this, mode }),
+    );
   }
 
   /** @internal */

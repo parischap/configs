@@ -24,6 +24,15 @@ type _TypeId = typeof _TypeId;
  * @category Models
  */
 export class Type extends PackageLoadedNoSource.Type {
+  // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
+  get hasDocGen() {
+    return true;
+  }
+  // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
+  get isPublished() {
+    return true;
+  }
+
   /** Returns true is this is the top Package of a Project */
   _isTop(): boolean {
     return false;
@@ -42,7 +51,7 @@ export class Type extends PackageLoadedNoSource.Type {
   }
 
   /** Class constructor */
-  private constructor(params: Data<Type>) {
+  private constructor(params: Omit<Data<Type>, 'hasDocGen' | 'isPublished'>) {
     super(params);
   }
 
@@ -52,16 +61,15 @@ export class Type extends PackageLoadedNoSource.Type {
   }
 
   /** Generates the configuration files of `self` */
-  override async _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
+  override async _generateConfigFiles(
+    this: Type,
+    mode: ConfigFiles.Mode,
+  ): Promise<ConfigFiles.Type> {
     return ConfigFiles.merge(
-      await super._generateConfigFiles(),
+      await super._generateConfigFiles(mode),
       ConfigFiles.repo({
-        name: this.name,
-        description: this.description,
-        // In a monorepo, we need to have the docGen stuff in case one of the subrepos needs to be documented
-        hasDocGen: true,
-        // In a monorepo, we need to have the publish script in case one of the subrepos needs to be published
-        isPublished: true,
+        packageRepo: this,
+        mode,
       }),
     );
   }

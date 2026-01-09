@@ -176,33 +176,31 @@ export const effectPlatformDependencies = {
 
 export const docGenDependencies = {
   '@effect/docgen': '0.5.2',
-  // `tsx` must be installed because it is used by docgen (strangely, it is not requested as a dev-dependency
+  // Used by docgen as peerDependency
   tsx: '4.20.6',
 };
 
-/* Add here all dependencies used by modules exported in index.ts */
-export const configsDependencies = {};
-
-// Add here all dependencies used by modules exported in index.ts.
-export const configsPeerDependencies = {
-  // Used by the linterConfig.ts file
+/* Add here all dependencies used by modules exported in index.ts that are not used by other by the other packages */
+export const configsDependencies = {
+  // Used by eslint.config.*.ts
   globals: '17.0.0',
-  // Used by the linterConfig.ts file
+  // Used by eslint.config.*.ts
   '@eslint/js': '9.39.2',
-  // Used by the linterConfig.ts file
+  // Used by eslint.config.*.ts
   '@eslint/json': '0.14.0',
-  // Used by the linterConfig.ts file
+  // Used by eslint.config.*.ts
   '@eslint/markdown': '7.5.1',
-  // Used by the linterConfig.ts file
+  // Used by eslint.config.*.ts
   '@html-eslint/eslint-plugin': '0.52.1',
   // Used as peerDependency of '@html-eslint/eslint-plugin'
   '@html-eslint/parser': '0.52.0',
-  // Used by the linterConfig.ts file
+  // Used by eslint.config.*.ts
   'eslint-config-prettier': '10.1.8',
-  // Used by the linterConfig.ts file
+  // Used by eslint.config.*.ts
   'eslint-plugin-functional': '9.0.2',
-  // Used by the linterConfig.ts file
+  // Used by eslint.config.*.ts
   'eslint-plugin-yml': '1.19.1',
+  // Used by eslint.config.*.ts
   'typescript-eslint': '8.51.0',
   // Used by the lint script and by vscode and its plugins
   //oxlint: '1.36.0',
@@ -210,19 +208,22 @@ export const configsPeerDependencies = {
   //'oxlint-tsgolint': '0.10.0',
   // Used by the format script and by vscode and its plugins
   //oxfmt: '0.21.0',
-  // Used by the test script
+};
+
+// Add here all dependencies used by modules exported in index.ts.
+export const configsPeerDependencies = {
+  // Used by the test script and vscode and its plugins
   vitest: '4.0.16',
 };
 
-// Add here all devDependencies used by configInternalBase.ts, be it in scripts, github actions, installed config files...
+// Add here all devDependencies used by Config.anyPackage.ts, be it in scripts, github actions, installed config files... except those dependencies already in configsPeerDependencies
 export const baseDevDependencies = {
-  ...configsPeerDependencies,
   // Used as plugin by tsconfig.base.json
   '@effect/language-service': '0.56.0',
   // Used by tsconfig.docgen.json and tsconfig.others.json
   '@types/node': '24.10.1',
   // Used by the tscheck script and by vscode and its plugins
-  '@typescript/native-preview': '7.0.0-dev.20251225.1',
+  '@typescript/native-preview': '7.0.0-dev.20260109.1',
   // Used as peerDependency of eslint, to run the examples scripts and by the update-config-files script
   jiti: '2.6.1',
   /* Used by the formatterConfig.ts file */
@@ -238,12 +239,10 @@ export const baseDevDependencies = {
 };
 
 // Add here all devDependencies used by the sourcePackage Config instance, be it in scripts, github actions, installed config files...
-export const sourceDevDependencies = {
+export const packageSourceDevDependencies = {
   madge: '8.0.0',
   /* All packages use Effect and all may use @effect/experimental. @effect/experimental is included in the esm modules and should therefore be included as a dependency. But @effect/experimental is for debugging and performance optimization only. So the code that uses it must be removed or by-passed in prod. So this dependency must not be shipped in prod: it's a devDependency. */
   '@effect/experimental': '0.57.4',
-  // Used as peerDependency by @effect/experimental
-  ...effectPlatformDependencies,
   // At some point, rolldown will be default in vite. But not the case for the moment
   // Not necessary in all configurations but vite is installed by vitest in any case so better install it here
   vite: 'npm:rolldown-vite@7.3.0',

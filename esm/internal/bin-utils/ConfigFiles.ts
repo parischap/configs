@@ -27,6 +27,7 @@ import {
   githubWorkflowsPublishPath,
   gitIgnoreFilename,
   indexBareName,
+  indexTsFilename,
   indexTsPath,
   internalFolderName,
   javaScriptExtensions,
@@ -38,12 +39,12 @@ import {
   packageJsonFilename,
   packageManager,
   packagesFolderName,
+  packageSourceDevDependencies,
   pnpmWorkspaceFilename,
   prodFolderName,
   projectConfigFilename,
   slashedDevScope,
   slashedScope,
-  sourceDevDependencies,
   sourceFolderName,
   testsIndexBaseName,
   tsConfigBaseFilename,
@@ -54,6 +55,7 @@ import {
   tsConfigSrcFilename,
   tsConfigTestsFilename,
   tsExecuter,
+  typesFolderName,
   versionControlService,
   vitestConfigFilename,
   ymlExtensions,
@@ -68,13 +70,14 @@ import {
   readFilesRecursively,
   type Data,
   type ReadonlyRecord,
-  type StringRecord,
+  type ReadonlyStringRecord,
 } from '../shared-utils/utils.js';
-import {
-  type BuildMethod,
-  type Environment,
-  type Type as PackageLoadedSourceType,
-} from './Package/LoadedSource.js';
+import type * as PackageLoadedBase from './Package/LoadedBase.js';
+import type * as PackageLoadedNoSource from './Package/LoadedNoSource.js';
+import type * as PackageLoadedSource from './Package/LoadedSource.js';
+import type * as PackageMonoRepo from './Package/MonoRepo.js';
+import type * as PackageOnePackageRepo from './Package/OnePackageRepo.js';
+import type * as PackageTop from './Package/Top.js';
 import Docgen from './templates/docgen.template.js';
 import DocsConfig from './templates/docs/_config.template.js';
 import EslintConfigNode from './templates/eslint.config.node.template.js';
@@ -250,14 +253,10 @@ export const empty = make({});
  * @category Instances
  */
 export const anyPackage = ({
-  name,
-  description,
-  scripts = {},
+  packageLoadedBase: { name, description, isConfigsPackage },
   mode,
 }: {
-  readonly name: string;
-  readonly description: string;
-  readonly scripts?: StringRecord;
+  readonly packageLoadedBase: PackageLoadedBase.Type;
   readonly mode: Mode;
 }): Type =>
   make({
@@ -300,12 +299,12 @@ export const anyPackage = ({
             'update-all-exports': `${tsExecuter} ${binariesPath}/update-exports.ts`,
             'watch-all-for-exports': `${tsExecuter} ${binariesPath}/update-exports.ts -watch`,
             'reinstall-all-dependencies': 'pnpm i --force',
-            ...scripts,
           },
           devDependencies: {
             /* Even configs needs to import itself so script can be written homogeneously in all packages */
             [`${slashedScope}${configsPackageName}`]: `git+ssh://${versionControlService}/${owner}/${configsPackageName}`,
             ...baseDevDependencies,
+            ...(isConfigsPackage ? {} : configsPeerDependencies),
           },
         }),
     },
@@ -317,7 +316,12 @@ export const anyPackage = ({
  *
  * @category Instances
  */
-export const noSourcePackage = ({ mode }: { readonly mode: Mode }): Type =>
+export const noSourcePackage = ({
+  mode,
+}: {
+  readonly packageLoadedNoSource: PackageLoadedNoSource.Type;
+  readonly mode: Mode;
+}): Type =>
   make({
     ...(mode === Mode.Dev ?
       {
@@ -359,44 +363,58 @@ export const noSourcePackage = ({ mode }: { readonly mode: Mode }): Type =>
  * @category Instances
  */
 const sourcePackageBuild = ({
-  buildMethod,
+  packageLoadedSource: {
+    dependencies,
+    peerDependencies,
+    buildMethod,
+    useEffectPlatform,
+    useEffectAsPeerDependency,
+    isConfigsPackage,
+  },
   mode,
 }: {
-  readonly buildMethod: BuildMethod;
-  readonly dependencies: ReadonlyStr;
+  readonly packageLoadedSource: PackageLoadedSource.Type;
   readonly mode: Mode;
 }): Type => {
-  /*...(Object.keys(finalDependencies).length === 0 ? {} : { dependencies: finalDependencies }),
-        ...(Object.keys(finalPeerDependencies).length === 0 ?
-          {}
-        : { peerDependencies: finalPeerDependencies }),*/
+  if (mode === Mode.Prod && buildMethod === 'DeepBundling') return empty;
 
-  if (
-    buildMethod === 'NoBundling'
-    || buildMethod === 'LightBundling'
-    || buildMethod === 'DeepBundling'
-  )
-    return make({
-      [packageJsonFilename]: {
-        ...(mode === Mode.Prod ?
-          {
-            sideEffects: [],
-          }
-        : {
-            scripts: {
-              compile: 'vite build',
-              // tsc builds but also generate types. All my packages ship with the sideEffects-free key in package.json. And this is perfectly well understood by vite and rollup. So annotate-pure-calls is only necessary for published packages that might be used by clients who use old bundlers. As far as I am concerned, I do not need cjs code. Likewise, this is only necessary for published packages.
-              /*`tsc -b ${tsConfigSrcFilename} --force`
+  const effectPlatformDeps: ReadonlyStringRecord =
+    useEffectPlatform ? effectPlatformDependencies : {};
+
+  const finalDependencies: ReadonlyStringRecord = {
+    ...dependencies,
+    ...(useEffectAsPeerDependency ? {} : { ...effectDependencies, ...effectPlatformDeps }),
+  };
+
+  const finalPeerDependencies: ReadonlyStringRecord = {
+    ...peerDependencies,
+    ...(useEffectAsPeerDependency ? { ...effectDependencies, ...effectPlatformDeps } : {}),
+    ...(isConfigsPackage ? configsPeerDependencies : {}),
+  };
+
+  return make({
+    [`${mode === Mode.Prod ? `${prodFolderName}/` : ''}${packageJsonFilename}`]: {
+      ...(Object.keys(finalDependencies).length === 0 ? {} : { dependencies: finalDependencies }),
+      ...(Object.keys(finalPeerDependencies).length === 0 ?
+        {}
+      : { peerDependencies: finalPeerDependencies }),
+      ...(mode !== Mode.Prod ?
+        {
+          scripts: {
+            compile: 'vite build',
+            // tsc builds but also generate types. All my packages ship with the sideEffects-free key in package.json. And this is perfectly well understood by vite and rollup. So annotate-pure-calls is only necessary for published packages that might be used by clients who use old bundlers. As far as I am concerned, I do not need cjs code. Likewise, this is only necessary for published packages.
+            /*`tsc -b ${tsConfigSrcFilename} --force`
             + (isPublished ?
               ` && babel ${prodFolderName}/${sourceFolderName} --out-dir ${prodFolderName}/${commonJsFolderName}`
               + '--plugins @babel/transform-export-namespace-from --plugins @babel/transform-modules-commonjs  --source-maps'
             : '')
             + ` && babel ${prodFolderName} --plugins annotate-pure-calls --out-dir ${prodFolderName} --source-maps`
             + ' && pnpm prodify-lib',*/
-            },
-          }),
-      },
-    });
+          },
+        }
+      : {}),
+    },
+  });
 };
 
 /**
@@ -405,23 +423,19 @@ const sourcePackageBuild = ({
  * @category Instances
  */
 const sourcePackageVisibility = ({
-  parentName,
-  isPublished,
-  keywords,
+  packageLoadedSource: { parentName, isPublished, keywords },
   mode,
 }: {
-  readonly parentName: string;
-  readonly isPublished: boolean;
-  readonly keywords: ReadonlyArray<string>;
+  readonly packageLoadedSource: PackageLoadedSource.Type;
   readonly mode: Mode;
 }): Type =>
   make(
     isPublished ?
       {
-        [packageJsonFilename]: {
-          ...(mode === Mode.Prod ?
-            {
-              main: `./${commonJsFolderName}/index.js`,
+        ...(mode === Mode.Prod ?
+          {
+            [`${prodFolderName}/${packageJsonFilename}`]: {
+              main: `./${commonJsFolderName}/${indexBareName}.js`,
               bugs: {
                 url: `https://github.com/${owner}/${parentName}/issues`,
               },
@@ -433,26 +447,26 @@ const sourcePackageVisibility = ({
               ],
               // Put specific keywords in first position so important keywords come out first
               keywords: [...keywords, 'effect', 'typescript', 'functional-programming'],
-            }
-          : {
+            },
+          }
+        : {
+            [packageJsonFilename]: {
               scripts: {
                 // Called by the publish github action defined in configInternalRepo.ts/
                 'build-and-publish': 'pnpm build && pnpm checks && pnpm publish-to-npm',
                 // npm publish ./dist --access=public does not work
                 'publish-to-npm': `cd ${prodFolderName} && npm publish --access=public && cd ..`,
               },
-            }),
+            },
+          }),
+      }
+    : mode === Mode.Prod ?
+      {
+        [`${prodFolderName}/${packageJsonFilename}`]: {
+          private: true,
         },
       }
-    : {
-        [packageJsonFilename]: {
-          ...(mode === Mode.Prod ?
-            {
-              private: true,
-            }
-          : {}),
-        },
-      },
+    : {},
   );
 
 /**
@@ -461,34 +475,32 @@ const sourcePackageVisibility = ({
  * @category Instances
  */
 const sourcePackageDocGen = ({
-  hasDocGen,
+  packageLoadedSource: { hasDocGen },
   mode,
 }: {
-  readonly hasDocGen: boolean;
+  readonly packageLoadedSource: PackageLoadedSource.Type;
   readonly mode: Mode;
 }): Type =>
-  make(
-    hasDocGen ?
-      {
-        ...(mode === Mode.Dev ?
-          {
-            [tsConfigDocGenFilename]: TsconfigDocgen,
-            [docgenConfigFilename]: Docgen,
-          }
-        : {}),
-        [packageJsonFilename]: {
-          ...(mode === Mode.Prod ?
-            {
-              scripts: {
-                docgen: 'docgen',
-              },
-              devDependencies: docGenDependencies,
-            }
-          : {}),
-        },
-      }
-    : {},
-  );
+  hasDocGen ?
+    make({
+      ...(mode === Mode.Dev ?
+        {
+          [tsConfigDocGenFilename]: TsconfigDocgen,
+          [docgenConfigFilename]: Docgen,
+        }
+      : {}),
+      ...(mode !== Mode.Prod ?
+        {
+          [packageJsonFilename]: {
+            scripts: {
+              docgen: 'docgen',
+            },
+            devDependencies: docGenDependencies,
+          },
+        }
+      : {}),
+    })
+  : empty;
 
 /**
  * ConfigFiles instance that creates the Environment part of a source package.
@@ -496,25 +508,19 @@ const sourcePackageDocGen = ({
  * @category Instances
  */
 const sourcePackageEnvironment = ({
-  environment,
-  isConfigsPackage,
+  packageLoadedSource: { environment },
   mode,
 }: {
-  readonly environment: Environment;
-  readonly isConfigsPackage: boolean;
+  readonly packageLoadedSource: PackageLoadedSource.Type;
   readonly mode: Mode;
 }): Type => {
-  if (mode !== Mode.Dev) return make({});
+  if (mode !== Mode.Dev) return empty;
 
   const base = {
     // Used by the tscheck script
     [tsConfigFilename]: Tsconfig,
     // Used by the tsConfig file
-    [tsConfigOthersFilename]: {
-      ...TsconfigOthers,
-      // The others project of the configs package needs to import the source project for vitest.config.ts
-      ...(isConfigsPackage ? { references: [{ path: tsConfigSrcFilename }] } : {}),
-    },
+    [tsConfigOthersFilename]: TsconfigOthers,
     // Used by the tsConfig file
     [tsConfigExamplesFilename]: TsconfigExamples,
     // Used by the tsConfig file
@@ -540,108 +546,12 @@ const sourcePackageEnvironment = ({
       [linterConfigFilename]: EslintConfigNode,
     });
 
-  if (environment === 'Plain')
-    return make({
-      ...base,
-      // Used by the checks script
-      [tsConfigSrcFilename]: TsconfigPlain,
-      // Used by the checks script
-      [linterConfigFilename]: EslintConfigPlain,
-    });
-
-  throw new Error(`Disallowed value for 'environment' parameter. Actual: '${environment}'`);
-};
-
-/**
- * ConfigFiles instance that creates the exports part of a source package.
- *
- * @category Instances
- */
-const sourcePackageExports = async ({
-  path,
-  packagePrefix,
-  buildMethod,
-  mode,
-}: {
-  readonly path: string;
-  readonly packagePrefix: string | undefined;
-  readonly buildMethod: string;
-  readonly mode: Mode;
-}): Promise<Type> => {
-  const sourceFiles =
-    packagePrefix === undefined ?
-      []
-    : (
-        await readFilesRecursively({
-          path: join(path, sourceFolderName),
-          foldersToExclude: [internalFolderName, binariesFolderName],
-          dontFailOnInexistentPath: false,
-        })
-      )
-        .map((file) => ({
-          ...file,
-          isJavascript: javaScriptExtensions.includes(file.extension),
-          isOther: jsonExtensions.includes(file.extension),
-        }))
-        .filter(({ bareName, isJavascript, isOther }) => {
-          const dotPos = bareName.indexOf('.');
-          return (
-            bareName.slice(0, dotPos === -1 ? undefined : dotPos) !== indexBareName
-            && (isJavascript || isOther)
-          );
-        })
-        .map(({ bareName, relativeParentPath, isJavascript, extension }) => {
-          const barePath = fromOSPathToPosixPath(join(relativeParentPath, bareName));
-          return {
-            namespaceExportName: `${packagePrefix}${barePath
-              .split(/[/.]/)
-              .map(capitalizeFirstLetter)
-              .join('')}`,
-            barePath,
-            isJavascript,
-            extension,
-          };
-        });
-
-  if (mode === Mode.Prod) {
-    return make({
-      [packageJsonFilename]: {
-        exports: Object.fromEntries(
-          sourceFiles.map(
-            ({ barePath, namespaceExportName, extension }) =>
-              [
-                namespaceExportName,
-                {
-                  default: `./${sourceFolderName}/${barePath}${extension}`,
-                },
-              ] as const,
-          ),
-        ),
-      },
-    });
-  }
   return make({
-    [indexTsPath]: sourceFiles
-      .filter(({ isJavascript }) => isJavascript)
-      // path.join removes upfront './' but typescript requires them so we must add them
-      .map(
-        ({ barePath, namespaceExportName }) =>
-          `export * as ${namespaceExportName} from './${barePath}.js';`,
-      )
-      .join('\n'),
-    [packageJsonFilename]: {
-      exports: Object.fromEntries(
-        sourceFiles.map(
-          ({ barePath, namespaceExportName, extension }) =>
-            [
-              `./${namespaceExportName}`,
-              {
-                default: `./${sourceFolderName}/${barePath}${extension}`,
-              },
-            ] as const,
-        ),
-      ),
-    },
+    ...base,
+    // Used by the checks script
+    [tsConfigSrcFilename]: TsconfigPlain,
+    // Used by the checks script
+    [linterConfigFilename]: EslintConfigPlain,
   });
 };
 
@@ -666,36 +576,23 @@ const sourcePackageConfigsPackage = make({
  * name of the sub package and parentName the name of the monorepo that contains it.
  */
 export const sourcePackage = async ({
-  name,
-  parentName,
-  path,
-  isConfigsPackage,
-  dependencies,
-  devDependencies,
-  peerDependencies,
-  examples,
-  buildMethod,
-  environment,
-  isPublished,
-  hasDocGen,
-  keywords,
-  useEffectAsPeerDependency,
-  useEffectPlatform,
-  packagePrefix,
+  packageLoadedSource,
   mode,
-}: Data<PackageLoadedSourceType> & {
+}: {
+  readonly packageLoadedSource: PackageLoadedSource.Type;
   readonly mode: Mode;
 }): Promise<Type> => {
-  const effectPlatformDeps: StringRecord = useEffectPlatform ? effectPlatformDependencies : {};
-  const finalDependencies: StringRecord = {
-    ...dependencies,
-    ...(useEffectAsPeerDependency ? {} : { ...effectDependencies, ...effectPlatformDeps }),
-  };
-
-  const finalPeerDependencies: StringRecord = {
-    ...peerDependencies,
-    ...(useEffectAsPeerDependency ? { ...effectDependencies, ...effectPlatformDeps } : {}),
-  };
+  const {
+    name,
+    parentName,
+    path,
+    isConfigsPackage,
+    devDependencies,
+    examples,
+    packagePrefix,
+    isPublished,
+    useEffectPlatform,
+  } = packageLoadedSource;
 
   const sourceFiles =
     packagePrefix === undefined ?
@@ -751,8 +648,6 @@ export const sourcePackage = async ({
   ];
 
   return merge(
-    // Put this one first so default exports comes last as it should
-    sourcePackageVisibility({ parentName, isPublished, keywords, mode }),
     make({
       ...(mode === Mode.Dev ?
         {
@@ -762,59 +657,118 @@ export const sourcePackage = async ({
           [vitestConfigFilename]: VitestConfigSource,
         }
       : {}),
-      [packageJsonFilename]: {
-        module: `./${sourceFolderName}/index.js`,
-        ...(mode === Mode.Prod ? {} : {}),
-        devDependencies: {
-          /* Include test-utils for tests except if the package is:
-          - test-utils because it does not need to inclue itself
-          - configs: to avoid circular dependencies
-          */
-          ...sourceDevDependencies,
-          ...devDependencies,
-        },
-        scripts: {
-          circular: `madge --extensions ts --circular --no-color --no-spinner ${sourceFolderName}`,
-          'clean-prod': `pnpm rmrf ${prodFolderName} && pnpm mkdirp ${prodFolderName}`,
-          checks: 'pnpm circular && pnpm tscheck && pnpm lint && pnpm test',
-          tsconfig: `tsc --showConfig --project ${tsConfigSrcFilename}`,
-          build: `pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..`,
-          examples: examples
-            .map((exampleName) => `${tsExecuter} ${examplesFolderName}/${exampleName}`)
-            .join('&&'),
-          'update-exports': `${tsExecuter} ${binariesPath}/update-exports.ts -activePackageOnly`,
-          'watch-for-exports': `${tsExecuter} ${binariesPath}/update-exports.ts -watch -activePackageOnly`,
-        },
-        // Must be present even for private packages as it can be used for other purposes
-        repository: {
-          type: 'git',
-          // Use git+https protocol as specified in npm documentation
-          url: `git+https://${versionControlService}/${owner}/${parentName}.git`,
-          ...(name === parentName ?
+      ...(mode === Mode.Prod ?
+        {
+          [`${prodFolderName}/${packageJsonFilename}`]: {
+            module: `./${sourceFolderName}/${indexBareName}.js`,
+            types: `./${typesFolderName}/${indexBareName}.d.ts`,
+            sideEffects: [],
+            // Must be present even for private packages as it can be used for other purposes
+            repository: {
+              type: 'git',
+              // Use git+https protocol as specified in npm documentation
+              url: `git+https://${versionControlService}/${owner}/${parentName}.git`,
+              ...(name === parentName ?
+                {}
+              : {
+                  directory: `${packagesFolderName}/${name}`,
+                }),
+            },
+            // Must be present even for private packages as it can be used for instance by docgen
+            homepage:
+              // Use https protocol as specified in npm documentation
+              `https://${versionControlService}/${owner}/${parentName}`
+              + (name === parentName ? '' : `/tree/master/${packagesFolderName}/${name}`),
+            exports: Object.fromEntries(
+              sourceFilesForExports.map(
+                ({ barePath, namespaceExportName, isJavascript }) =>
+                  [
+                    namespaceExportName,
+                    {
+                      ...(isJavascript ? { types: `./${typesFolderName}/${barePath}.d.ts` } : {}),
+                      ...(isJavascript && isPublished ?
+                        { require: `./${commonJsFolderName}/${barePath}.js` }
+                      : {}),
+                      default: `./${sourceFolderName}/${barePath}.js`,
+                    },
+                  ] as const,
+              ),
+            ),
+          },
+        }
+      : {
+          [packageJsonFilename]: {
+            module: `./${sourceFolderName}/${indexTsFilename}`,
+            exports: Object.fromEntries(
+              sourceFilesForExports.map(
+                ({ barePath, namespaceExportName, extension }) =>
+                  [
+                    namespaceExportName,
+                    {
+                      default: `./${sourceFolderName}/${barePath}${extension}`,
+                    },
+                  ] as const,
+              ),
+            ),
+            devDependencies: {
+              ...packageSourceDevDependencies,
+              // Effect platform is used as peerDependency by @effect/experimental. But only include it if not used otherwise
+              ...(useEffectPlatform ?
+                {}
+              : {
+                  ...effectPlatformDependencies,
+                }),
+              ...devDependencies,
+            },
+            scripts: {
+              circular: `madge --extensions ts --circular --no-color --no-spinner ${sourceFolderName}`,
+              'clean-prod': `pnpm rmrf ${prodFolderName} && pnpm mkdirp ${prodFolderName}`,
+              checks: 'pnpm circular && pnpm tscheck && pnpm lint && pnpm test',
+              tsconfig: `tsc --showConfig --project ${tsConfigSrcFilename}`,
+              build: `pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..`,
+              examples: examples
+                .map((exampleName) => `${tsExecuter} ${examplesFolderName}/${exampleName}`)
+                .join('&&'),
+              'update-exports': `${tsExecuter} ${binariesPath}/update-exports.ts -activePackageOnly`,
+              'watch-for-exports': `${tsExecuter} ${binariesPath}/update-exports.ts -watch -activePackageOnly`,
+            },
+          },
+          ...(packagePrefix === undefined ?
             {}
           : {
-              directory: `${packagesFolderName}/${name}`,
+              [indexTsPath]: sourceFiles
+                .filter(({ isJavascript }) => isJavascript)
+                // path.join removes upfront './' but typescript requires them so we must add them
+                .map(
+                  ({ barePath, namespaceExportName }) =>
+                    `export * as ${namespaceExportName} from './${barePath}.js';`,
+                )
+                .join('\n'),
             }),
-        },
-        // Must be present even for private packages as it can be used for instance by docgen
-        homepage:
-          // Use https protocol as specified in npm documentation
-          `https://${versionControlService}/${owner}/${parentName}`
-          + (name === parentName ? '' : `/tree/master/${packagesFolderName}/${name}`),
-      },
+        }),
     }),
-    sourcePackageBuild({ buildMethod, isPublished, mode }),
-    sourcePackageDocGen({ hasDocGen, mode }),
-    sourcePackageEnvironment({ environment, isConfigsPackage, mode }),
+    sourcePackageVisibility({ packageLoadedSource, mode }),
+    sourcePackageBuild({ packageLoadedSource, mode }),
+    sourcePackageDocGen({ packageLoadedSource, mode }),
+    sourcePackageEnvironment({ packageLoadedSource, mode }),
     isConfigsPackage ? sourcePackageConfigsPackage : empty,
   );
 };
 
-const repoVisibility: Type = make({
-  /* Github actions need to be at the root of the github repo. This action calls a script `build-and-publish` but changes the working directory to the published package directory before calling them. So this script must be in sourcePackage.
-   */
-  [githubWorkflowsPublishPath]: GithubWorkflowsPublish,
-});
+const repoVisibility = ({
+  packageRepo: { isPublished },
+  mode,
+}: {
+  readonly packageRepo: PackageMonoRepo.Type | PackageOnePackageRepo.Type;
+  readonly mode: Mode;
+}): Type =>
+  mode === Mode.Dev && isPublished ?
+    make({
+      /* Github actions need to be at the root of the github repo. This action calls a script `build-and-publish` but changes the working directory to the published package directory before calling it. So the `build-and-publish` script must be in sourcePackage.
+       */
+      [githubWorkflowsPublishPath]: GithubWorkflowsPublish,
+    })
+  : empty;
 
 /**
  * ConfigFiles instance that implements the docGen part of a repo
@@ -822,27 +776,37 @@ const repoVisibility: Type = make({
  * @category Instances
  */
 const repoDocGen = ({
-  name,
-  description,
+  packageRepo: { name, description, hasDocGen },
+  mode,
 }: {
-  readonly name: string;
-  readonly description: string;
+  readonly packageRepo: PackageMonoRepo.Type | PackageOnePackageRepo.Type;
+  readonly mode: Mode;
 }): Type =>
-  make({
-    /* Github actions need to be at the root of the github repo. This action calls a script `prepare-docs'`  */
-    [githubWorkflowsPagesPath]: GithubWorkflowsPages,
-    // Used by the github pages.yml action
-    [docsIndexMdPath]: description,
-    // Used by the github pages.yml action
-    [docsConfigYmlPath]: DocsConfig({ name }),
-    [packageJsonFilename]: {
-      scripts: {
-        // --if-present is necessary because it is possible that no package in the workspace has a docgen script
-        'prepare-docs':
-          'pnpm -r --if-present -include-workspace-root=true --parallel --aggregate-output docgen && compile-docs',
-      },
-    },
-  });
+  hasDocGen ?
+    make({
+      ...(mode === Mode.Dev ?
+        {
+          /* Github actions need to be at the root of the github repo. This action calls a script `prepare-docs'`  */
+          [githubWorkflowsPagesPath]: GithubWorkflowsPages,
+          // Used by the github pages.yml action
+          [docsIndexMdPath]: description,
+          // Used by the github pages.yml action
+          [docsConfigYmlPath]: DocsConfig({ name }),
+        }
+      : {}),
+      ...(mode !== Mode.Prod ?
+        {
+          [packageJsonFilename]: {
+            scripts: {
+              // --if-present is necessary because it is possible that no package in the workspace has a docgen script
+              'prepare-docs':
+                'pnpm -r --if-present -include-workspace-root=true --parallel --aggregate-output docgen && compile-docs',
+            },
+          },
+        }
+      : {}),
+    })
+  : empty;
 
 /**
  * ConfigFiles instance that implements what is necessary at the root of a git (and github) repo
@@ -850,24 +814,20 @@ const repoDocGen = ({
  * @category Instances
  */
 export const repo = ({
-  name,
-  description,
-  hasDocGen,
-  isPublished,
+  packageRepo,
+  mode,
 }: {
-  readonly name: string;
-  readonly description: string;
-  readonly hasDocGen: boolean;
-  readonly isPublished: boolean;
+  readonly packageRepo: PackageMonoRepo.Type | PackageOnePackageRepo.Type;
+  readonly mode: Mode;
 }): Type =>
   merge(
-    ...[
+    mode === Mode.Dev ?
       make({
         [gitIgnoreFilename]: GitIgnore,
-      }),
-      ...(hasDocGen ? [repoDocGen({ name, description })] : []),
-      ...(isPublished ? [repoVisibility] : []),
-    ],
+      })
+    : empty,
+    repoDocGen({ packageRepo, mode }),
+    repoVisibility({ packageRepo, mode }),
   );
 
 /**
@@ -876,27 +836,33 @@ export const repo = ({
  * @category Instances
  */
 export const top = ({
-  name,
-  allSourcePackagesNames,
-  allPackagesPaths,
+  packageTop: { name, allSourcePackagesNames, allPackagesPaths },
+  mode,
 }: {
-  readonly name: string;
-  readonly allSourcePackagesNames: ReadonlyArray<string>;
-  readonly allPackagesPaths: ReadonlyArray<string>;
+  readonly packageTop: PackageTop.Type;
+  readonly mode: Mode;
 }) =>
   make({
-    [pnpmWorkspaceFilename]: PnpmWorkspace({ allSourcePackagesNames }),
-    // Used by vscode
-    [`${name}.code-workspace`]: VscodeWorkspace({
-      allPackagesPaths,
-    }),
-    [packageJsonFilename]: {
-      packageManager,
-      /*pnpm: {
+    ...(mode === Mode.Dev ?
+      {
+        [pnpmWorkspaceFilename]: PnpmWorkspace({ allSourcePackagesNames }),
+        // Used by vscode
+        [`${name}.code-workspace`]: VscodeWorkspace({
+          allPackagesPaths,
+        }),
+      }
+    : {}),
+    ...(mode !== Mode.Prod ?
+      {
+        [packageJsonFilename]: {
+          packageManager,
+          /*pnpm: {
       patchedDependencies: {},
       overrides: {
         //'tsconfig-paths': '^4.0.0'
       },
     },*/
-    },
+        },
+      }
+    : {}),
   });

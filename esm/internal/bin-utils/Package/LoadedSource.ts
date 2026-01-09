@@ -4,7 +4,11 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { type Data, type StringArray, type StringRecord } from '../../shared-utils/utils.js';
+import {
+  type Data,
+  type ReadonlyStringRecord,
+  type StringArray,
+} from '../../shared-utils/utils.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as SchemaFormat from '../Schema/Format.js';
 import * as SchemaParameterDescriptor from '../Schema/ParameterDescriptor.js';
@@ -51,23 +55,23 @@ const sourcePackageFormat = SchemaFormat.make({
   descriptors: {
     description: SchemaParameterDescriptor.make({ expectedType: SchemaParameterType.string }),
     dependencies: SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.stringRecord,
+      expectedType: SchemaParameterType.readonlyStringRecord,
       defaultValue: {},
     }),
     devDependencies: SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.stringRecord,
+      expectedType: SchemaParameterType.readonlyStringRecord,
       defaultValue: {},
     }),
     peerDependencies: SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.stringRecord,
+      expectedType: SchemaParameterType.readonlyStringRecord,
       defaultValue: {},
     }),
     examples: SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.stringArray,
+      expectedType: SchemaParameterType.readonlyStringArray,
       defaultValue: [],
     }),
     scripts: SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.stringRecord,
+      expectedType: SchemaParameterType.readonlyStringRecord,
       defaultValue: {},
     }),
     environment: SchemaParameterDescriptor.make({
@@ -79,7 +83,7 @@ const sourcePackageFormat = SchemaFormat.make({
     isPublished: SchemaParameterDescriptor.make({ expectedType: SchemaParameterType.boolean }),
     hasDocGen: SchemaParameterDescriptor.make({ expectedType: SchemaParameterType.boolean }),
     keywords: SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.stringArray,
+      expectedType: SchemaParameterType.readonlyStringArray,
       defaultValue: [],
     }),
     useEffectAsPeerDependency: SchemaParameterDescriptor.make({
@@ -105,18 +109,18 @@ type LoadedParameters = SchemaFormat.RealType<typeof sourcePackageFormat>;
  */
 export abstract class Type extends PackageLoadedBase.Type implements LoadedParameters {
   /** `dependencies` used by the package except Effect and Effect platform (default value: {}) */
-  readonly dependencies: Readonly<StringRecord>;
+  readonly dependencies: Readonly<ReadonlyStringRecord>;
   /** `devDependencies` used by the package (default value: {}) */
-  readonly devDependencies: Readonly<StringRecord>;
+  readonly devDependencies: Readonly<ReadonlyStringRecord>;
   /** `peerDependencies` used by the package except Effect and Effect platform (default value: {}) */
-  readonly peerDependencies: Readonly<StringRecord>;
+  readonly peerDependencies: Readonly<ReadonlyStringRecord>;
   /**
    * Array of available examples to add as `examples` script under the `package.json` scripts field
    * (default value: [])
    */
   readonly examples: Readonly<StringArray>;
   /** Other scripts to add to `package.json` (default value: {}) */
-  readonly scripts: Readonly<StringRecord>;
+  readonly scripts: Readonly<ReadonlyStringRecord>;
   /**
    * One of `Browser`, `Node` or `Plain`. Note that, in our case, we do not use the DOM specific
    * variables in the `Browser` environment because the browser code must be runnable on the server
@@ -156,7 +160,7 @@ export abstract class Type extends PackageLoadedBase.Type implements LoadedParam
   readonly keywords: Readonly<StringArray>;
   /**
    * Effect is by default added as dependency to all packages. If this flag is set to true, it is
-   * added as a peerDependency
+   * added as a peerDependency. Note that Effect is also used by testUtils.ts
    */
   readonly useEffectAsPeerDependency: boolean;
   /**
@@ -191,10 +195,13 @@ export abstract class Type extends PackageLoadedBase.Type implements LoadedParam
   }
 
   /** Generates the configuration files of `self` */
-  override async _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
+  override async _generateConfigFiles(
+    this: Type,
+    mode: ConfigFiles.Mode,
+  ): Promise<ConfigFiles.Type> {
     return ConfigFiles.merge(
-      await super._generateConfigFiles(),
-      await ConfigFiles.sourcePackage(this),
+      await super._generateConfigFiles(mode),
+      await ConfigFiles.sourcePackage({ packageLoadedSource: this, mode }),
     );
   }
 

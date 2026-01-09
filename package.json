@@ -43,7 +43,7 @@
     "vitest": "4.0.16",
     "@effect/language-service": "0.56.0",
     "@types/node": "24.10.1",
-    "@typescript/native-preview": "7.0.0-dev.20251225.1",
+    "@typescript/native-preview": "7.0.0-dev.20260109.1",
     "jiti": "2.6.1",
     "prettier-plugin-jsdoc": "1.8.0",
     "prettier-plugin-organize-imports": "4.3.0",

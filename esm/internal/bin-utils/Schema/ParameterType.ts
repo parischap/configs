@@ -4,8 +4,8 @@ import {
   type Data,
   isStringArray,
   isStringRecord,
+  type ReadonlyStringRecord,
   type StringArray,
-  type StringRecord,
 } from '../../shared-utils/utils.js';
 
 /**
@@ -131,13 +131,13 @@ export const literal = <const T extends number | string>(target: T): Type<T> =>
   });
 
 /**
- * StringRecord SchemaParameterType instance
+ * ReadonlyStringRecord SchemaParameterType instance
  *
  * @category Instances
  */
-export const stringRecord: Type<StringRecord> = make({
+export const readonlyStringRecord: Type<ReadonlyStringRecord> = make({
   guard: isStringRecord,
-  name: 'StringRecord',
+  name: 'ReadonlyStringRecord',
 });
 
 /**
@@ -145,7 +145,7 @@ export const stringRecord: Type<StringRecord> = make({
  *
  * @category Instances
  */
-export const stringArray: Type<StringArray> = make({
+export const readonlyStringArray: Type<StringArray> = make({
   guard: isStringArray,
   name: 'StringArray',
 });

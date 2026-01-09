@@ -33,8 +33,8 @@ export abstract class Type extends PackageBase.Type {
   }
 
   /** Generates the configuration files of `self` */
-  _generateConfigFiles(this: Type): Promise<ConfigFiles.Type> {
-    return Promise.resolve(ConfigFiles.anyPackage(this));
+  _generateConfigFiles(this: Type, mode: ConfigFiles.Mode): Promise<ConfigFiles.Type> {
+    return Promise.resolve(ConfigFiles.anyPackage({ packageLoadedBase: this, mode }));
   }
 
   /** @internal */
@@ -48,5 +48,7 @@ export abstract class Type extends PackageBase.Type {
  *
  * @categrory Destructors
  */
-export const generateConfigFiles = (self: Type): Promise<ConfigFiles.Type> =>
-  self._generateConfigFiles();
+export const generateConfigFiles = (
+  self: Type,
+  mode: ConfigFiles.Mode,
+): Promise<ConfigFiles.Type> => self._generateConfigFiles(mode);

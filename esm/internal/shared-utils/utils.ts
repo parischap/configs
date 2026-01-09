@@ -25,6 +25,12 @@ export interface StringRecord extends Record<string, string> {}
 /** Alias to Array with string values */
 export interface StringArray extends Array<string> {}
 
+/** Alias to ReadonlyRecord with string keys and values */
+export interface ReadonlyStringRecord extends ReadonlyRecord<string, string> {}
+
+/** Alias to ReadonlyArray with string values */
+export interface ReadonlyStringArray extends ReadonlyArray<string> {}
+
 export const { isArray }: { readonly isArray: (v: unknown) => v is Array<unknown> } = Array;
 
 export const isRecord = (v: unknown): v is Record<string | symbol> =>
