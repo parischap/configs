@@ -19,10 +19,5 @@
     "rootDir": ".",
     "outDir": "dist/others",
     "declarationDir": "dist/others/dts"
-  },
-  "references": [
-    {
-      "path": "tsconfig.esm.json"
-    }
-  ]
+  }
 }

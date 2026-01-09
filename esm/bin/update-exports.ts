@@ -2,8 +2,8 @@
 import { watch } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';
-import * as PackageAllBase from '../internal/bin-utils/Package/AllBase.js';
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
+import * as PackageLoadedBase from '../internal/bin-utils/Package/LoadedBase.js';
 import * as PackageOnePackageRepo from '../internal/bin-utils/Package/OnePackageRepo.js';
 import * as PackageSubRepo from '../internal/bin-utils/Package/SubRepo.js';
 import * as Project from '../internal/bin-utils/Project.js';
@@ -68,8 +68,9 @@ await Promise.all(
                 && javaScriptExtensions.includes(extname(changeFilename)))
             ) {
               console.log(`Updating exports files of package: '${currentPackage.name}'`);
-              const configFiles = ConfigFiles.filterExportsFiles(
-                await PackageAllBase.generateConfigFiles(currentPackage),
+              const configFiles = await PackageLoadedBase.generateConfigFiles(
+                currentPackage,
+                ConfigFiles.Mode.ExportsOnly,
               );
               /* eslint-disable-next-line functional/no-expression-statements*/
               await ConfigFiles.save({
@@ -82,8 +83,9 @@ await Promise.all(
           }
         }
       } else {
-        const configFiles = ConfigFiles.filterExportsFiles(
-          await PackageAllBase.generateConfigFiles(currentPackage),
+        const configFiles = await PackageLoadedBase.generateConfigFiles(
+          currentPackage,
+          ConfigFiles.Mode.ExportsOnly,
         );
         /* eslint-disable-next-line functional/no-expression-statements*/
         await ConfigFiles.save({

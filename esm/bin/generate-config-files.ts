@@ -52,7 +52,10 @@ const project = await Project.filteredFromActiveProjectAndShowCount(
 await Promise.all(
   project.packages.map(async (currentPackage) => {
     try {
-      const configFiles = await PackageLoadedBase.generateConfigFiles(currentPackage);
+      const configFiles = await PackageLoadedBase.generateConfigFiles(
+        currentPackage,
+        ConfigFiles.Mode.Dev,
+      );
       /* eslint-disable-next-line functional/no-expression-statements*/
       await ConfigFiles.save({
         packagePath: currentPackage.path,

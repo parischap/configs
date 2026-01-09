@@ -26,21 +26,11 @@
     "build": "pnpm clean-prod && pnpm compile && cd dist && pnpm i && cd ..",
     "examples": "",
     "update-exports": "jiti node_modules/@parischap/configs/esm/bin/update-exports.ts -activePackageOnly",
-    "watch-for-exports": "jiti node_modules/@parischap/configs/esm/bin/update-exports.ts -watch -activePackageOnly"
+    "watch-for-exports": "jiti node_modules/@parischap/configs/esm/bin/update-exports.ts -watch -activePackageOnly",
+    "compile": "vite build"
   },
   "devDependencies": {
     "@parischap/configs": "git+ssh://github.com/parischap/configs",
-    "globals": "17.0.0",
-    "@eslint/js": "9.39.2",
-    "@eslint/json": "0.14.0",
-    "@eslint/markdown": "7.5.1",
-    "@html-eslint/eslint-plugin": "0.52.1",
-    "@html-eslint/parser": "0.52.0",
-    "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-functional": "9.0.2",
-    "eslint-plugin-yml": "1.19.1",
-    "typescript-eslint": "8.51.0",
-    "vitest": "4.0.16",
     "@effect/language-service": "0.56.0",
     "@types/node": "24.10.1",
     "@typescript/native-preview": "7.0.0-dev.20260109.1",
@@ -52,46 +42,25 @@
     "prettier": "3.7.4",
     "madge": "8.0.0",
     "@effect/experimental": "0.57.4",
+    "vite": "npm:rolldown-vite@7.3.0",
+    "@babel/core": "7.28.5",
+    "babel-plugin-annotate-pure-calls": "0.5.0",
+    "@babel/plugin-transform-export-namespace-from": "7.27.1",
+    "@babel/plugin-transform-modules-commonjs": "7.27.1",
     "@effect/platform": "0.93.3",
     "@effect/platform-node": "0.101.1",
     "@effect/cluster": "0.53.4",
     "@effect/rpc": "0.72.2",
     "@effect/sql": "0.48.0",
-    "@effect/workflow": "0.13.0",
-    "vite": "npm:rolldown-vite@7.3.0",
-    "@babel/core": "7.28.5",
-    "babel-plugin-annotate-pure-calls": "0.5.0",
-    "@babel/plugin-transform-export-namespace-from": "7.27.1",
-    "@babel/plugin-transform-modules-commonjs": "7.27.1"
+    "@effect/workflow": "0.13.0"
   },
-  "module": "./esm/index.js",
-  "peerDependencies": {
-    "effect": "3.19.6",
-    "globals": "17.0.0",
-    "@eslint/js": "9.39.2",
-    "@eslint/json": "0.14.0",
-    "@eslint/markdown": "7.5.1",
-    "@html-eslint/eslint-plugin": "0.52.1",
-    "@html-eslint/parser": "0.52.0",
-    "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-functional": "9.0.2",
-    "eslint-plugin-yml": "1.19.1",
-    "typescript-eslint": "8.51.0",
-    "vitest": "4.0.16"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/parischap/configs.git"
-  },
-  "homepage": "https://github.com/parischap/configs",
-  "private": true,
-  "dependencies": {},
+  "module": "./esm/index.ts",
   "exports": {
     ".": {
-      "default": "./esm/index.js"
+      "default": "./esm/index.ts"
     },
     "./tests": {
-      "default": "./esm/index.tests.js"
+      "default": "./esm/index.tests.ts"
     },
     "./EslintConfigNode": {
       "default": "./esm/eslint.config.node.ts"
@@ -114,5 +83,21 @@
     "./StarterTsdownConfig": {
       "default": "./esm/starter/tsdown.config.ts"
     }
+  },
+  "peerDependencies": {
+    "effect": "3.19.6",
+    "vitest": "4.0.16"
+  },
+  "dependencies": {
+    "globals": "17.0.0",
+    "@eslint/js": "9.39.2",
+    "@eslint/json": "0.14.0",
+    "@eslint/markdown": "7.5.1",
+    "@html-eslint/eslint-plugin": "0.52.1",
+    "@html-eslint/parser": "0.52.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-functional": "9.0.2",
+    "eslint-plugin-yml": "1.19.1",
+    "typescript-eslint": "8.51.0"
   }
 }

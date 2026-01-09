@@ -162,25 +162,25 @@ export const allJsInMdFiles = prefixWith(allFilesInMd)(javaScriptExtensions);
 
 /* Do not use carret at start of dependency versions because we could end up with different versions in the diverse projects. Set one version and update it regularly */
 export const effectDependencies = {
-  effect: '3.19.6',
+  effect: '3.19.14',
 };
 
 export const effectPlatformDependencies = {
-  '@effect/platform': '0.93.3',
-  '@effect/platform-node': '0.101.1',
-  '@effect/cluster': '0.53.4',
-  '@effect/rpc': '0.72.2',
-  '@effect/sql': '0.48.0',
-  '@effect/workflow': '0.13.0',
+  '@effect/platform': '0.94.1',
+  '@effect/platform-node': '0.104.0',
+  '@effect/cluster': '0.56.1',
+  '@effect/rpc': '0.73.0',
+  '@effect/sql': '0.49.0',
+  '@effect/workflow': '0.16.0',
 };
 
 export const docGenDependencies = {
   '@effect/docgen': '0.5.2',
   // Used by docgen as peerDependency
-  tsx: '4.20.6',
+  tsx: '4.21.0',
 };
 
-/* Add here all dependencies used by modules exported in index.ts that are not used by other by the other packages */
+// Add here all dependencies used by modules of the configs package only.
 export const configsDependencies = {
   // Used by eslint.config.*.ts
   globals: '17.0.0',
@@ -208,9 +208,10 @@ export const configsDependencies = {
   //'oxlint-tsgolint': '0.10.0',
   // Used by the format script and by vscode and its plugins
   //oxfmt: '0.21.0',
+  tsdown: '0.19.0-beta.5',
 };
 
-// Add here all dependencies used by modules exported in index.ts.
+// Add here all dependencies used by modules of the all packages (including the configs package).
 export const configsPeerDependencies = {
   // Used by the test script and vscode and its plugins
   vitest: '4.0.16',
@@ -219,7 +220,7 @@ export const configsPeerDependencies = {
 // Add here all devDependencies used by Config.anyPackage.ts, be it in scripts, github actions, installed config files... except those dependencies already in configsPeerDependencies
 export const baseDevDependencies = {
   // Used as plugin by tsconfig.base.json
-  '@effect/language-service': '0.56.0',
+  '@effect/language-service': '0.64.1',
   // Used by tsconfig.docgen.json and tsconfig.others.json
   '@types/node': '24.10.1',
   // Used by the tscheck script and by vscode and its plugins

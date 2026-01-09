@@ -83,13 +83,13 @@ export const validate =
 
     if (!allowStringConversion || typeof value !== 'string')
       throw new Error(
-        `${errorPrefix}Parameter should be of type '${expectedType.name}'. Actual: ${typeof value}`,
+        `${errorPrefix}Parameter should be of type '${expectedType.name}'. Actual: ${JSON.stringify(value)}`,
       );
 
     const convertedValue: unknown = JSON.parse(value);
     if (expectedType.guard(convertedValue)) return convertedValue;
 
     throw new Error(
-      `${errorPrefix}Parameter should be of type '${expectedType.name}'. Actual: ${typeof convertedValue}`,
+      `${errorPrefix}Parameter should be of type '${expectedType.name}'. Actual: ${JSON.stringify(value)}`,
     );
   };
