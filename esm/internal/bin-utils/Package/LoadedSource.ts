@@ -129,7 +129,7 @@ export abstract class Type extends PackageLoadedBase.Type implements LoadedParam
    * variables in the `Browser` environment because the browser code must be runnable on the server
    * for server-side rendering. All the DOM manipulation is hidden away in Preact
    */
-  readonly environment: 'Browser' | `Node` | `Plain`;
+  readonly environment: Environment;
   /**
    * - NoBundling: all modules in the `esm` directory, except those under the `internal`and `bin`
    *   subdirectories, are simply transpiled to JavaScript. Nothing gets bundled. If the package
@@ -147,7 +147,7 @@ export abstract class Type extends PackageLoadedBase.Type implements LoadedParam
    *   and all installed packages. If the package uses any dependencies, they will not be installed
    *   in the prod package. This is usually a good choice for a standalone command.
    */
-  readonly buildMethod: `NoBundling` | `LightBundling` | `DeepBundling`;
+  readonly buildMethod: BuildMethod;
   /** Boolean that indicates if the package will be published to NPM */
   readonly isPublished: boolean;
   /**

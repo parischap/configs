@@ -1,7 +1,7 @@
 import {
   tsConfigExamplesFilename,
   tsConfigOthersFilename,
-  tsConfigSrcFilename,
+  tsConfigSourceFilename,
   tsConfigTestsFilename,
 } from '../../shared-utils/constants.js';
 import { ReadonlyRecord } from '../../shared-utils/utils.js';
@@ -15,7 +15,7 @@ import { ReadonlyRecord } from '../../shared-utils/utils.js';
 export default {
   include: [],
   references: [
-    { path: tsConfigSrcFilename },
+    { path: tsConfigSourceFilename },
     { path: tsConfigExamplesFilename },
     { path: tsConfigTestsFilename },
     { path: tsConfigOthersFilename },

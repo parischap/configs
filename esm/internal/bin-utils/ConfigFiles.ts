@@ -52,7 +52,7 @@ import {
   tsConfigExamplesFilename,
   tsConfigFilename,
   tsConfigOthersFilename,
-  tsConfigSrcFilename,
+  tsConfigSourceFilename,
   tsConfigTestsFilename,
   tsExecuter,
   typesFolderName,
@@ -97,7 +97,6 @@ import TsconfigPlain from './templates/tsconfig.plain.template.js';
 import TsconfigSource from './templates/tsconfig.source.template.js';
 import Tsconfig from './templates/tsconfig.template.js';
 import TsconfigTests from './templates/tsconfig.tests.template.js';
-import VitestConfigNoSource from './templates/vitest.config.nosource.template.js';
 import VitestConfigSource from './templates/vitest.config.source.template.js';
 import VscodeWorkspace from './templates/vscode-workspace.template.js';
 
@@ -319,6 +318,7 @@ export const anyPackage = ({
  * @category Instances
  */
 export const noSourcePackage = ({
+  packageLoadedNoSource: { isConfigsPackage },
   mode,
 }: {
   readonly packageLoadedNoSource: PackageLoadedNoSource.Type;
@@ -328,11 +328,9 @@ export const noSourcePackage = ({
     ...(mode === Mode.Dev ?
       {
         // Used by the checks script
-        [tsConfigFilename]: TsconfigOthers,
+        [tsConfigFilename]: TsconfigOthers(isConfigsPackage),
         // Used by the checks script
         [linterConfigFilename]: EslintConfigPlain,
-        // Used by the test script
-        [vitestConfigFilename]: VitestConfigNoSource,
       }
     : {}),
     [`${mode === Mode.Prod ? `${prodFolderName}/` : ''}${packageJsonFilename}`]: {
@@ -521,7 +519,7 @@ const sourcePackageDocGen = ({
  * @category Instances
  */
 const sourcePackageEnvironment = ({
-  packageLoadedSource: { environment },
+  packageLoadedSource: { environment, isConfigsPackage },
   mode,
 }: {
   readonly packageLoadedSource: PackageLoadedSource.Type;
@@ -533,7 +531,7 @@ const sourcePackageEnvironment = ({
     // Used by the tscheck script
     [tsConfigFilename]: Tsconfig,
     // Used by the tsConfig file
-    [tsConfigOthersFilename]: TsconfigOthers,
+    [tsConfigOthersFilename]: TsconfigOthers(isConfigsPackage),
     // Used by the tsConfig file
     [tsConfigExamplesFilename]: TsconfigExamples,
     // Used by the tsConfig file
@@ -544,7 +542,7 @@ const sourcePackageEnvironment = ({
     return make({
       ...base,
       // Used by the checks script
-      [tsConfigSrcFilename]: TsconfigBrowser,
+      [tsConfigSourceFilename]: TsconfigBrowser,
       // Used by the checks script
       // We don't use any dom specifities because it must run on the server. It's all hidden away in preact
       [linterConfigFilename]: EslintConfigPlain,
@@ -554,7 +552,7 @@ const sourcePackageEnvironment = ({
     return make({
       ...base,
       // Used by the checks script
-      [tsConfigSrcFilename]: TsconfigNode,
+      [tsConfigSourceFilename]: TsconfigNode,
       // Used by the checks script
       [linterConfigFilename]: EslintConfigNode,
     });
@@ -562,7 +560,7 @@ const sourcePackageEnvironment = ({
   return make({
     ...base,
     // Used by the checks script
-    [tsConfigSrcFilename]: TsconfigPlain,
+    [tsConfigSourceFilename]: TsconfigPlain,
     // Used by the checks script
     [linterConfigFilename]: EslintConfigPlain,
   });
@@ -724,7 +722,7 @@ export const sourcePackage = async ({
               circular: `madge --extensions ts --circular --no-color --no-spinner ${sourceFolderName}`,
               'clean-prod': `pnpm rmrf ${prodFolderName} && pnpm mkdirp ${prodFolderName}`,
               checks: 'pnpm circular && pnpm tscheck && pnpm lint && pnpm test',
-              tsconfig: `tsc --showConfig --project ${tsConfigSrcFilename}`,
+              tsconfig: `tsc --showConfig --project ${tsConfigSourceFilename}`,
               build: `pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..`,
               examples: examples
                 .map((exampleName) => `${tsExecuter[0]} ${examplesFolderName}/${exampleName}`)

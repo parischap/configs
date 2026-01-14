@@ -1,21 +1,22 @@
 /* Although it is possible to have the vitest configuration inside the vite configuration files, this is usually not a good idea. The vite configuration is useful for bundling whereas the vitest configuration is useful for testing */
-import { basename } from 'node:path';
 import { defineConfig } from 'vitest/config';
-import { npmFolderName, testsFolderName } from './internal/shared-utils/constants.js';
+/* @ts-expect-error Must only use Typescript syntax understandable by Node with the --experimental-transform-types flag */
+import { npmFolderName, testsFolderName } from './internal/shared-utils/constants.ts';
 
-export default defineConfig({
-  test: {
-    projects: [
-      {
-        test: {
-          include: [`${testsFolderName}/*.ts`],
-          exclude: [`${npmFolderName}/**`],
-          name: `Repo ${basename(import.meta.dirname)}`,
-          isolate: false,
-          fileParallelism: false,
-          pool: 'threads',
+export default (name: string) =>
+  defineConfig({
+    test: {
+      projects: [
+        {
+          test: {
+            include: [`${testsFolderName}/*.ts`],
+            exclude: [`${npmFolderName}/**`],
+            name: `Repo ${name}`,
+            isolate: false,
+            fileParallelism: false,
+            pool: 'threads',
+          },
         },
-      },
-    ],
-  },
-});
+      ],
+    },
+  });

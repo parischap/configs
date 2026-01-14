@@ -14,11 +14,18 @@
     "readme-assets",
     "vite.config.ts.timestamp-*.mjs"
   ],
+  "references": [
+    {
+      "path": "tsconfig.esm.json"
+    }
+  ],
   "compilerOptions": {
     "tsBuildInfoFile": ".tsbuildinfo/others.tsbuildinfo",
     "rootDir": ".",
     "outDir": "dist/others",
     "declarationDir": "dist/others/dts",
+    "isolatedModules": false,
+    "isolatedDeclarations": false,
     "allowJs": true,
     "checkJs": true
   }

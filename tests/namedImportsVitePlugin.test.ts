@@ -1,20 +1,19 @@
-import { NamedImportsVitePlugin } from "@parischap/configs/tests";
-import { pipe } from "effect";
-import { describe, expect, it } from "vitest";
+import { NamedImportsVitePlugin } from '@parischap/configs/tests';
+import { describe, expect, it } from 'vitest';
 
-describe("NamedImportsVitePlugin", () => {
+describe('NamedImportsVitePlugin', () => {
   const transform = (code: string, id: string): string | undefined => {
     const result = NamedImportsVitePlugin.transform.bind(null as never)(code, id);
     return result?.code;
   };
 
-  it("File without any targetted imports", () => {
+  it('File without any targetted imports', () => {
     const testFile = `console.log('Hello, world!');
 `;
-    expect(transform(testFile, "/test.ts")).toStrictEqual(undefined);
+    expect(transform(testFile, '/test.ts')).toStrictEqual(undefined);
   });
 
-  it("File with all sorts of imports", () => {
+  it('File with all sorts of imports', () => {
     const testFile = `import {
   Array,
   Boolean,
@@ -37,7 +36,7 @@ import { describe, expect, it } from 'vitest';
 
 console.log('Hello, world!');
 `;
-    expect(transform(testFile, "/test.ts"))
+    expect(transform(testFile, '/test.ts'))
       .toStrictEqual(`import {flow as f, pipe} from 'effect/Function';
 import * as Array from 'effect/Array';
 import * as Boolean from 'effect/Boolean';

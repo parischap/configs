@@ -72,41 +72,39 @@ describe('partitionArray', () => {
   });
 });
 
-describe('valToYaml', () => {
-  describe('valToYaml', () => {
-    it('String, number, boolean and null values', () => {
-      expect(
-        Utils.valToYaml({ value: { name: 'Pascal', count: 42, active: true, remote: null } }).join(
-          '\n',
-        ),
-      ).toStrictEqual(`name: Pascal
+describe('objectToYaml', () => {
+  it('String, number, boolean and null values', () => {
+    expect(
+      Utils.objectToYaml({ value: { name: 'Pascal', count: 42, active: true, remote: null } }).join(
+        '\n',
+      ),
+    ).toStrictEqual(`name: Pascal
 count: 42
 active: true
 remote: `);
-    });
+  });
 
-    it('Nested object', () => {
-      expect(
-        Utils.valToYaml({
-          value: { user: { name: 'Pascal', fruits: ['banana'] }, role: ['admin', 'surfer'] },
-        }).join('\n'),
-      ).toStrictEqual(
-        `user:
+  it('Nested object', () => {
+    expect(
+      Utils.objectToYaml({
+        value: { user: { name: 'Pascal', fruits: ['banana'] }, role: ['admin', 'surfer'] },
+      }).join('\n'),
+    ).toStrictEqual(
+      `user:
   name: Pascal
   fruits:
     - banana
 role:
   - admin
   - surfer`,
-      );
-    });
+    );
+  });
 
-    it('Null value', () => {
-      expect(Utils.valToYaml({ value: { data: null } }).join('\n')).toStrictEqual('data: ');
-    });
+  it('Null value', () => {
+    expect(Utils.objectToYaml({ value: { data: null } }).join('\n')).toStrictEqual('data: ');
+  });
 
-    it('Empty object', () => {
-      expect(Utils.valToYaml({ value: {} }).join('\n')).toStrictEqual('');
-    });
+  it('Empty object', () => {
+    expect(Utils.objectToYaml({ value: {} }).join('\n')).toStrictEqual('');
   });
 });

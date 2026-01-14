@@ -73,9 +73,6 @@
     "./TestUtils": {
       "default": "./esm/testUtils.ts"
     },
-    "./VitestConfigNosource": {
-      "default": "./esm/vitestConfigNosource.ts"
-    },
     "./VitestConfigSource": {
       "default": "./esm/vitestConfigSource.ts"
     }

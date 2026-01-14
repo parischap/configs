@@ -1,4 +1,3 @@
-/* This module must only use Typescript syntax understandable by Node with the --experimental-transform-types flag */
 import { watch } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import * as ConfigFiles from '../internal/bin-utils/ConfigFiles.js';

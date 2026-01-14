@@ -4,7 +4,7 @@ import {
   prodFolderName,
   tsBuildInfoFolderName,
   tsConfigBaseFilename,
-  tsConfigSrcFilename,
+  tsConfigSourceFilename,
   tsConfigStyleIncludeForExampleFiles,
   typesFolderName,
 } from '../../shared-utils/constants.js';
@@ -14,7 +14,7 @@ export default {
   extends: [`./${tsConfigBaseFilename}`],
   include: [tsConfigStyleIncludeForExampleFiles],
   // The examples project needs to import the source project. The other possibility would be to create a package.json in the tests folder
-  references: [{ path: tsConfigSrcFilename }],
+  references: [{ path: tsConfigSourceFilename }],
   compilerOptions: {
     tsBuildInfoFile: `${tsBuildInfoFolderName}/${examplesMark}.tsbuildinfo`,
     rootDir: '.',

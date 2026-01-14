@@ -8,9 +8,9 @@ export default ({
   packages: [`'**/${packagesFolderName}/*'`],
   shellEmulator: true,
   overrides: Object.fromEntries(
-    allSourcePackagesNames.map((packageName) => {
-      const scopedPackageName = `${slashedScope}${packageName}`;
-      return [`'${scopedPackageName}'`, `'workspace:${scopedPackageName}@*'`];
-    }),
+    allSourcePackagesNames.map((packageName) => [
+      `'${slashedScope}${packageName}'`,
+      "'workspace:*'",
+    ]),
   ),
 });
