@@ -123,6 +123,7 @@ export default ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }): Arra
               '^' + regExpEscape('expect('),
               '^' + regExpEscape('it('),
               '^' + regExpEscape('process.exit('),
+              '^' + regExpEscape('TestUtils.'),
             ],
           },
         ],
