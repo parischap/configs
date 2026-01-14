@@ -6,7 +6,7 @@ import * as PackageBase from '../internal/bin-utils/Package/Base.js';
 import * as PackageLoadedBase from '../internal/bin-utils/Package/LoadedBase.js';
 import * as PackageOnePackageRepo from '../internal/bin-utils/Package/OnePackageRepo.js';
 import * as PackageSubRepo from '../internal/bin-utils/Package/SubRepo.js';
-import * as Project from '../internal/bin-utils/Project.js';
+import * as ProjectLoaded from '../internal/bin-utils/ProjectLoaded.js';
 import * as SchemaFormat from '../internal/bin-utils/Schema/Format.js';
 import * as SchemaParameterDescriptor from '../internal/bin-utils/Schema/ParameterDescriptor.js';
 import * as SchemaParameterType from '../internal/bin-utils/Schema/ParameterType.js';
@@ -40,10 +40,10 @@ const { '-activePackageOnly': activePackageOnly, '-watch': isWatch } =
 
 if (isWatch) console.log('Watch mode activated');
 
-const project = await Project.filteredFromActiveProject(
+const project = await ProjectLoaded.filteredFromActiveProject(
   activePackageOnly ? PackageBase.isActive : () => true,
 );
-const filteredProject = Project.filterAndShowCount(
+const filteredProject = ProjectLoaded.filterAndShowCount(
   (currentPackage) =>
     (currentPackage instanceof PackageOnePackageRepo.Type
       || currentPackage instanceof PackageSubRepo.Type)
@@ -68,30 +68,22 @@ await Promise.all(
                 && javaScriptExtensions.includes(extname(changeFilename)))
             ) {
               console.log(`Updating exports files of package: '${currentPackage.name}'`);
-              const configFiles = await PackageLoadedBase.generateConfigFiles(
+              /* eslint-disable-next-line functional/no-expression-statements*/
+              await PackageLoadedBase.generateAndSaveConfigFiles(
                 currentPackage,
                 ConfigFiles.Mode.ExportsOnly,
               );
-              /* eslint-disable-next-line functional/no-expression-statements*/
-              await ConfigFiles.save({
-                packagePath: currentPackage.path,
-                packageName: currentPackage.name,
-              })(configFiles);
             }
             /* eslint-disable-next-line functional/no-expression-statements */
             lastEventTime = currentEventTime;
           }
         }
       } else {
-        const configFiles = await PackageLoadedBase.generateConfigFiles(
+        /* eslint-disable-next-line functional/no-expression-statements*/
+        await PackageLoadedBase.generateAndSaveConfigFiles(
           currentPackage,
           ConfigFiles.Mode.ExportsOnly,
         );
-        /* eslint-disable-next-line functional/no-expression-statements*/
-        await ConfigFiles.save({
-          packagePath: currentPackage.path,
-          packageName: currentPackage.name,
-        })(configFiles);
       }
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);

@@ -12,8 +12,4 @@ import { type ReadonlyRecord } from '../../shared-utils/utils.js';
 export default {
   extends: [`./${tsConfigBaseFilename}`],
   include: `${sourceFolderName}/${allFilesPattern}`,
-  compilerOptions: {
-    allowJs: false,
-    checkJs: false,
-  },
 } satisfies ReadonlyRecord;

@@ -33,6 +33,7 @@ import {
   javaScriptExtensions,
   jsoncExtensions,
   jsonExtensions,
+  licenseFilename,
   linterConfigFilename,
   madgeConfigFilename,
   owner,
@@ -43,7 +44,6 @@ import {
   pnpmWorkspaceFilename,
   prodFolderName,
   projectConfigFilename,
-  slashedDevScope,
   slashedScope,
   sourceFolderName,
   testsIndexBaseName,
@@ -70,7 +70,6 @@ import {
   readFilesRecursively,
   type Data,
   type ReadonlyRecord,
-  type ReadonlyStringRecord,
 } from '../shared-utils/utils.js';
 import type * as PackageLoadedBase from './Package/LoadedBase.js';
 import type * as PackageLoadedNoSource from './Package/LoadedNoSource.js';
@@ -85,6 +84,7 @@ import EslintConfigPlain from './templates/eslint.config.plain.template.js';
 import GithubWorkflowsPages from './templates/github/workflows/pages.template.js';
 import GithubWorkflowsPublish from './templates/github/workflows/publish.template.js';
 import GitIgnore from './templates/gitignore.template.js';
+import License from './templates/license.template.js';
 import MadgeConfig from './templates/madgerc.template.js';
 import PnpmWorkspace from './templates/pnpm-workspace.template.js';
 import FormatterIgnore from './templates/prettierignore.template.js';
@@ -270,8 +270,8 @@ export const anyPackage = ({
       }
     : {}),
     // Used by the format script
-    [packageJsonFilename]: {
-      name: `${mode === Mode.Prod ? slashedScope : slashedDevScope}${name}`,
+    [`${mode === Mode.Prod ? `${prodFolderName}/` : ''}${packageJsonFilename}`]: {
+      name: `${slashedScope}${name}`,
       description,
       // Needs to be present even at the top or root of a monorepo because there are some javascript config files
       type: 'module',
@@ -288,16 +288,18 @@ export const anyPackage = ({
             //'lint-and-analyze': 'eslint . --stats -f json > eslint-stats.json',
             //'lint-rules': 'pnpx @eslint/config-inspector',
             format: 'prettier .',
-            'clean-config-files': `${tsExecuter} ${binariesPath}/clean-config-files.ts -activePackageOnly`,
-            'clean-node-modules': `${tsExecuter} ${binariesPath}/clean-node-modules.ts -activePackageOnly`,
-            'clean-prod': `${tsExecuter} ${binariesPath}/clean-prod.ts -activePackageOnly`,
-            'generate-config-files': `${tsExecuter} ${binariesPath}/generate-config-files.ts -activePackageOnly`,
-            'clean-all-config-files': `${tsExecuter} ${binariesPath}/clean-config-files.ts`,
-            'clean-all-node-modules': `${tsExecuter} ${binariesPath}/clean-node-modules.ts`,
-            'clean-all-prod': `${tsExecuter} ${binariesPath}/clean-prod.ts`,
-            'generate-all-config-files': `${tsExecuter} ${binariesPath}/generate-config-files.ts`,
-            'update-all-exports': `${tsExecuter} ${binariesPath}/update-exports.ts`,
-            'watch-all-for-exports': `${tsExecuter} ${binariesPath}/update-exports.ts -watch`,
+            clean: `${tsExecuter[0]} ${binariesPath}/clean.ts -activePackageOnly`,
+            'clean-config-files': `${tsExecuter[0]} ${binariesPath}/clean-config-files.ts -activePackageOnly`,
+            'clean-node-modules': `${tsExecuter[0]} ${binariesPath}/clean-node-modules.ts -activePackageOnly`,
+            'clean-prod': `${tsExecuter[0]} ${binariesPath}/clean-prod.ts -activePackageOnly`,
+            'generate-config-files': `${tsExecuter[0]} ${binariesPath}/generate-config-files.ts -activePackageOnly`,
+            'clean-all': `${tsExecuter[0]} ${binariesPath}/clean.ts`,
+            'clean-all-config-files': `${tsExecuter[0]} ${binariesPath}/clean-config-files.ts`,
+            'clean-all-node-modules': `${tsExecuter[0]} ${binariesPath}/clean-node-modules.ts`,
+            'clean-all-prod': `${tsExecuter[0]} ${binariesPath}/clean-prod.ts`,
+            'generate-all-config-files': `${tsExecuter[0]} ${binariesPath}/generate-config-files.ts`,
+            'update-all-exports': `${tsExecuter[0]} ${binariesPath}/update-exports.ts`,
+            'watch-all-for-exports': `${tsExecuter[0]} ${binariesPath}/update-exports.ts -watch`,
             'reinstall-all-dependencies': 'pnpm i --force',
           },
           devDependencies: {
@@ -333,7 +335,7 @@ export const noSourcePackage = ({
         [vitestConfigFilename]: VitestConfigNoSource,
       }
     : {}),
-    [packageJsonFilename]: {
+    [`${mode === Mode.Prod ? `${prodFolderName}/` : ''}${packageJsonFilename}`]: {
       ...(mode === Mode.Prod ?
         {}
       : {
@@ -376,21 +378,31 @@ const sourcePackageBuild = ({
   readonly packageLoadedSource: PackageLoadedSource.Type;
   readonly mode: Mode;
 }): Type => {
-  if (mode === Mode.Prod && buildMethod === 'DeepBundling') return empty;
-
-  const effectPlatformDeps: ReadonlyStringRecord =
-    useEffectPlatform ? effectPlatformDependencies : {};
-
-  const finalDependencies: ReadonlyStringRecord = {
-    ...dependencies,
-    ...(useEffectAsPeerDependency ? {} : { ...effectDependencies, ...effectPlatformDeps }),
-  };
-
-  const finalPeerDependencies: ReadonlyStringRecord = {
-    ...peerDependencies,
-    ...(useEffectAsPeerDependency ? { ...effectDependencies, ...effectPlatformDeps } : {}),
-    ...(isConfigsPackage ? configsPeerDependencies : {}),
-  };
+  const [finalDependencies, finalPeerDependencies] =
+    buildMethod === 'DeepBundling' && mode === Mode.Prod ?
+      [{}, {}]
+    : [
+        {
+          ...dependencies,
+          ...(useEffectAsPeerDependency ?
+            {}
+          : {
+              ...effectDependencies,
+              ...(useEffectPlatform ? effectPlatformDependencies : {}),
+            }),
+          ...(isConfigsPackage ? configsDependencies : {}),
+        },
+        {
+          ...peerDependencies,
+          ...(useEffectAsPeerDependency ?
+            {
+              ...effectDependencies,
+              ...(useEffectPlatform ? effectPlatformDependencies : {}),
+            }
+          : {}),
+          ...(isConfigsPackage ? configsPeerDependencies : {}),
+        },
+      ];
 
   return make({
     [`${mode === Mode.Prod ? `${prodFolderName}/` : ''}${packageJsonFilename}`]: {
@@ -434,6 +446,7 @@ const sourcePackageVisibility = ({
       {
         ...(mode === Mode.Prod ?
           {
+            [`${prodFolderName}/${licenseFilename}`]: License,
             [`${prodFolderName}/${packageJsonFilename}`]: {
               main: `./${commonJsFolderName}/${indexBareName}.js`,
               bugs: {
@@ -556,18 +569,6 @@ const sourcePackageEnvironment = ({
 };
 
 /**
- * ConfigFiles instance that implements the configs package specificities
- *
- * @category Instances
- */
-const sourcePackageConfigsPackage = make({
-  [packageJsonFilename]: {
-    peerDependencies: configsPeerDependencies,
-    dependencies: configsDependencies,
-  },
-});
-
-/**
  * ConfigFiles instance that implements what is necessary in a package that has code (an esm
  * directory). This package is also a workspace
  */
@@ -586,7 +587,6 @@ export const sourcePackage = async ({
     name,
     parentName,
     path,
-    isConfigsPackage,
     devDependencies,
     examples,
     packagePrefix,
@@ -727,10 +727,10 @@ export const sourcePackage = async ({
               tsconfig: `tsc --showConfig --project ${tsConfigSrcFilename}`,
               build: `pnpm clean-prod && pnpm compile && cd ${prodFolderName} && pnpm i && cd ..`,
               examples: examples
-                .map((exampleName) => `${tsExecuter} ${examplesFolderName}/${exampleName}`)
+                .map((exampleName) => `${tsExecuter[0]} ${examplesFolderName}/${exampleName}`)
                 .join('&&'),
-              'update-exports': `${tsExecuter} ${binariesPath}/update-exports.ts -activePackageOnly`,
-              'watch-for-exports': `${tsExecuter} ${binariesPath}/update-exports.ts -watch -activePackageOnly`,
+              'update-exports': `${tsExecuter[0]} ${binariesPath}/update-exports.ts -activePackageOnly`,
+              'watch-for-exports': `${tsExecuter[0]} ${binariesPath}/update-exports.ts -watch -activePackageOnly`,
             },
           },
           ...(packagePrefix === undefined ?
@@ -751,7 +751,6 @@ export const sourcePackage = async ({
     sourcePackageBuild({ packageLoadedSource, mode }),
     sourcePackageDocGen({ packageLoadedSource, mode }),
     sourcePackageEnvironment({ packageLoadedSource, mode }),
-    isConfigsPackage ? sourcePackageConfigsPackage : empty,
   );
 };
 
@@ -855,7 +854,7 @@ export const top = ({
     ...(mode !== Mode.Prod ?
       {
         [packageJsonFilename]: {
-          packageManager,
+          packageManager: packageManager.join('@'),
           /*pnpm: {
       patchedDependencies: {},
       overrides: {

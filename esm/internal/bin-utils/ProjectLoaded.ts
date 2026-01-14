@@ -1,6 +1,10 @@
 /**
- * Module that represents an array of PackageAll's, which can be a whole Project (see README.md) or
- * only part of it.
+ * Module that represents an array of PackageLoaded's, which can be a whole Project (see README.md)
+ * or only part of it. The constructor `filteredFromActiveProject` creates a PackageLoaded for each
+ * Package in the active Project, i.e. the one that contains the Current Working Directory. Each
+ * Package, except the top package, must have a `project.config.json` file that contains the
+ * parameters of that package. The parameters of the top package are stored in Package/Top.ts, so
+ * that the top package does not need to be saved on github.
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
@@ -20,11 +24,11 @@ import * as ProjectUnloaded from './ProjectUnloaded.js';
  *
  * @category Models
  */
-export const moduleTag = '@parischap/configs/internal/bin-utils/Project/';
+export const moduleTag = '@parischap/configs/internal/bin-utils/ProjectLoaded/';
 const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
 /**
- * Type of a Project
+ * Type of a ProjectLoaded
  *
  * @category Models
  */
@@ -52,9 +56,9 @@ export class Type {
 }
 
 /**
- * Constructor that returns all the PackageAll's in the active Project (see README.md for the
- * definition of a Project and of a Package), i.e. the project that contains the current working
- * directory.
+ * Constructor that returns the PackageLoaded's in the active Project (see README.md for the
+ * definition of a Project and of a Package), that match predicate predicate. The active Project is
+ * the one that contains the current working directory
  *
  * @category Constructors
  */
@@ -94,7 +98,16 @@ export const filteredFromActiveProject = async (
 };
 
 /**
- * Combination of makeFiltered and showCount
+ * Displays the number of PackageLoaded's in `self`
+ *
+ * @category Destructors
+ */
+export const showCount = (self: Type): void => {
+  console.log(`Number of packages in scope: ${self.packages.length.toString()}`);
+};
+
+/**
+ * Combination of filteredFromActiveProject and showCount
  *
  * @category Constructors
  */
@@ -105,15 +118,6 @@ export const filteredFromActiveProjectAndShowCount = async (
   /* eslint-disable-next-line functional/no-expression-statements */
   showCount(result);
   return result;
-};
-
-/**
- * Displays the number of PackageUnloaded's in `self`
- *
- * @category Destructors
- */
-export const showCount = (self: Type): void => {
-  console.log(`Number of packages in scope: ${self.packages.length.toString()}`);
 };
 
 /**

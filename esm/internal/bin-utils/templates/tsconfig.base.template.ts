@@ -27,8 +27,6 @@ export default {
     stripInternal: true,
     lib: ['ESNext'],
     types: ['node'],
-    allowJs: true,
-    checkJs: true,
     noEmit: true,
     plugins: [
       {

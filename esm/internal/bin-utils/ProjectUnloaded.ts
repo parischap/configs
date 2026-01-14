@@ -1,6 +1,7 @@
 /**
  * Module that represents an array of PackageUnloaded's, which can be a whole Project (see
- * README.md) or only part of it.
+ * README.md) or only part of it. The constructor `fromActiveProject` creates a PackageUnloaded for
+ * each Package in the active Project, i.e. the one that contains the Current Working Directory.
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
@@ -124,24 +125,6 @@ export const fromActiveProject = async (): Promise<Type> => {
 };
 
 /**
- * Combination of make and filter
- *
- * @category Constructors
- */
-export const filteredFromActiveProject = async (
-  predicate: (t: PackageUnloaded.Type) => boolean,
-): Promise<Type> => filter(predicate)(await fromActiveProject());
-
-/**
- * Combination of make and filterAndShowCount
- *
- * @category Constructors
- */
-export const filteredFromActiveProjectAndShowCount = async (
-  predicate: (t: PackageUnloaded.Type) => boolean,
-): Promise<Type> => filterAndShowCount(predicate)(await fromActiveProject());
-
-/**
  * Displays the number of PackageUnloaded's in `self`
  *
  * @category Destructors
@@ -177,3 +160,21 @@ export const filterAndShowCount =
     showCount(result);
     return result;
   };
+
+/**
+ * Combination of fromActiveProject and filter
+ *
+ * @category Constructors
+ */
+export const filteredFromActiveProject = async (
+  predicate: (t: PackageUnloaded.Type) => boolean,
+): Promise<Type> => filter(predicate)(await fromActiveProject());
+
+/**
+ * Combination of make and filterAndShowCount
+ *
+ * @category Constructors
+ */
+export const filteredFromActiveProjectAndShowCount = async (
+  predicate: (t: PackageUnloaded.Type) => boolean,
+): Promise<Type> => filterAndShowCount(predicate)(await fromActiveProject());

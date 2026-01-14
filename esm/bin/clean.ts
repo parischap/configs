@@ -1,11 +1,7 @@
 /**
- * This binary generates and saves the prod and dev configuration files of all packages in the
- * active ProjectLoaded or of the active Package if used with the -activePackageOnly flag (see
- * README.md for the definition of a ProjectLoaded and of a Package). It also checks that there are
- * no unexpected and possibly dangerous dev configuration files in the package.
+ * This binary cleans all packages in the active ProjectLoaded or of the active Package if used with
+ * the -activePackageOnly flag (removes configuration files, node_modules and prod folder)
  */
-
-/* This module must not import any external dependency. It must be runnable without a package.json because it is used at the very start of a project */
 
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
 import * as PackageLoadedBase from '../internal/bin-utils/Package/LoadedBase.js';
@@ -15,7 +11,7 @@ import * as SchemaParameterDescriptor from '../internal/bin-utils/Schema/Paramet
 import * as SchemaParameterType from '../internal/bin-utils/Schema/ParameterType.js';
 import { getExeFlags } from '../internal/shared-utils/utils.js';
 
-console.log('Generating config files');
+console.log('Package cleaning');
 const argsFormat = SchemaFormat.make({
   descriptors: {
     '-activePackageOnly': SchemaParameterDescriptor.make({
@@ -41,7 +37,7 @@ await Promise.all(
   project.packages.map(async (currentPackage) => {
     try {
       /* eslint-disable-next-line functional/no-expression-statements*/
-      await PackageLoadedBase.generateSaveAndCheckDevConfigFiles(currentPackage);
+      await PackageLoadedBase.clean(currentPackage);
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);
       throw e;

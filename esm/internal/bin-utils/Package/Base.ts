@@ -7,25 +7,13 @@
 import { rm } from 'fs/promises';
 import { join, relative } from 'path';
 import {
-  foldersWithoutConfigFiles,
   npmFolderName,
-  packagesFolderName,
-  pnpmLockFilename,
   prodFolderName,
   projectConfigFilename,
-  readMeFilename,
   tsBuildInfoFolderName,
-  viteTimeStampFilenamePattern,
 } from '../../shared-utils/constants.js';
 
-import {
-  readFiles,
-  readFilesRecursively,
-  readJsonFile,
-  toMiniGlobRegExp,
-  type Data,
-  type Record,
-} from '../../shared-utils/utils.js';
+import { readJsonFile, type Data, type Record } from '../../shared-utils/utils.js';
 
 /**
  * Module tag
@@ -35,17 +23,6 @@ import {
 export const moduleTag = '@parischap/configs/internal/bin-utils/Package/Base/';
 const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
-
-const EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE = toMiniGlobRegExp([
-  readMeFilename,
-  pnpmLockFilename,
-]);
-
-const EXTERNAL_CONFIGURATION_FILES_FOR_OTHER_PACKAGES = toMiniGlobRegExp([
-  readMeFilename,
-  projectConfigFilename,
-  viteTimeStampFilenamePattern,
-]);
 
 /**
  * Type of a PackageBase
@@ -163,40 +140,6 @@ export const readProjectConfigFile = (self: Type): Promise<Record> =>
   readJsonFile(join(self.path, projectConfigFilename));
 
 /**
- * Returns an array of the paths of the configuration files present in `self`. The paths are
- * expressed relative to the root path of `self`
- *
- * @category Destructors
- */
-export const getPathsOfExistingConfigFiles = async (self: Type): Promise<Array<string>> => {
-  const { path } = self;
-
-  return [
-    ...(
-      await readFilesRecursively({
-        path,
-        foldersToExclude: foldersWithoutConfigFiles,
-        dontFailOnInexistentPath: false,
-      })
-    )
-      .map(({ relativePath }) => relativePath)
-      .filter(
-        (relativePath) =>
-          !(
-            isTop(self) ?
-              EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE
-            : EXTERNAL_CONFIGURATION_FILES_FOR_OTHER_PACKAGES).test(relativePath),
-      ),
-    ...(
-      await readFiles({
-        path: join(path, packagesFolderName),
-        dontFailOnInexistentPath: true,
-      })
-    ).map((name) => `${packagesFolderName}/${name}`),
-  ];
-};
-
-/**
  * Deletes in `self` the file or folder at `relativePath` expressed relatively to the root of
  * `self`. Logs the good completion of the task only if a file or folder was effectively deleted
  *
@@ -220,7 +163,7 @@ export const rmAndLogIfSuccessful =
  *
  * @category Destructors
  */
-export const cleanProdFolders = async (self: Type): Promise<void> => {
+export const cleanProd = async (self: Type): Promise<void> => {
   /* eslint-disable-next-line functional/no-expression-statements*/
   await rmAndLogIfSuccessful(prodFolderName)(self);
   /* eslint-disable-next-line functional/no-expression-statements*/
@@ -232,7 +175,7 @@ export const cleanProdFolders = async (self: Type): Promise<void> => {
  *
  * @category Destructors
  */
-export const cleanNodeModulesFolder = async (self: Type): Promise<void> => {
+export const cleanNodeModules = async (self: Type): Promise<void> => {
   /* eslint-disable-next-line functional/no-expression-statements*/
   await rmAndLogIfSuccessful(npmFolderName)(self);
 };

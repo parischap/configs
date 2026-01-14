@@ -1,14 +1,10 @@
-// This module has been placed directly under esm so it gets exports sugar in package.json. This allows importing it from vitest.config.ts and prettier.config.ts which are not capable of importing a .ts extension because they use Node with the --experimental-transform-types flag
+// This module is saved a a JavaScript file so it can br imported by node with the --experimental-transform-types flag
 // This module must not import any external dependency. It must be runnable without a package.json
 import { join } from 'path';
 
 export const owner = 'parischap';
 export const scope = '@' + owner;
-export const devScope = scope + '-dev';
 export const slashedScope = scope + '/';
-export const slashedDevScope = devScope + '/';
-
-export const packageManager = `pnpm@10.27.0`;
 
 export const versionControlService = 'github.com';
 
@@ -18,8 +14,6 @@ export const examplesMark = 'examples';
 export const othersMark = 'others';
 
 export const docgenMark = 'docgen';
-
-export const tsExecuter = 'jiti';
 
 export const configsPackageName = 'configs';
 
@@ -149,6 +143,7 @@ const prefixWith =
   (prefix: string) =>
   (as: ReadonlyArray<string>): Array<string> =>
     as.map((a) => prefix + a);
+
 const prefixWithAllFilePatterns = prefixWith(allFilesPattern);
 export const allTsFiles = prefixWithAllFilePatterns(tsExtensions);
 export const allJavaScriptFiles = prefixWithAllFilePatterns(javaScriptExtensions);
@@ -160,11 +155,18 @@ export const allJson5Files = prefixWithAllFilePatterns(json5Extensions);
 export const allYmlFiles = prefixWithAllFilePatterns(ymlExtensions);
 export const allJsInMdFiles = prefixWith(allFilesInMd)(javaScriptExtensions);
 
+export const packageManager = ['pnpm', '10.28.0'] as const;
+export const tsExecuter = ['unrun', '0.2.24'] as const;
+
+export const effectExperimentalVersion = '0.58.0';
+export const effectLanguageServiceVersion = '0.64.1';
+
 /* Do not use carret at start of dependency versions because we could end up with different versions in the diverse projects. Set one version and update it regularly */
 export const effectDependencies = {
   effect: '3.19.14',
 };
 
+// Take effectPlatformVersions compatible with @effect/experimental that uses @effect/platform as peerDependency
 export const effectPlatformDependencies = {
   '@effect/platform': '0.94.1',
   '@effect/platform-node': '0.104.0',
@@ -211,7 +213,7 @@ export const configsDependencies = {
   tsdown: '0.19.0-beta.5',
 };
 
-// Add here all dependencies used by modules of the all packages (including the configs package).
+// Add here all dependencies used by modules of all packages (including the configs package).
 export const configsPeerDependencies = {
   // Used by the test script and vscode and its plugins
   vitest: '4.0.16',
@@ -220,13 +222,11 @@ export const configsPeerDependencies = {
 // Add here all devDependencies used by Config.anyPackage.ts, be it in scripts, github actions, installed config files... except those dependencies already in configsPeerDependencies
 export const baseDevDependencies = {
   // Used as plugin by tsconfig.base.json
-  '@effect/language-service': '0.64.1',
+  '@effect/language-service': effectLanguageServiceVersion,
   // Used by tsconfig.docgen.json and tsconfig.others.json
   '@types/node': '24.10.1',
   // Used by the tscheck script and by vscode and its plugins
   '@typescript/native-preview': '7.0.0-dev.20260109.1',
-  // Used as peerDependency of eslint, to run the examples scripts and by the update-config-files script
-  jiti: '2.6.1',
   /* Used by the formatterConfig.ts file */
   'prettier-plugin-jsdoc': '1.8.0',
   /* Used by the formatterConfig.ts file. Prefer sorting imports with this plugin rather than with the vscode included functionality so imports will be sorted when calling pnpm format */
@@ -237,13 +237,15 @@ export const baseDevDependencies = {
   eslint: '9.39.2',
   // Used by the format script, by vscode and its plugins and as type import by the formatterConfig.ts file
   prettier: '3.7.4',
+  // Used ti run binaries and examples
+  ...Object.fromEntries([tsExecuter]),
 };
 
 // Add here all devDependencies used by the sourcePackage Config instance, be it in scripts, github actions, installed config files...
 export const packageSourceDevDependencies = {
   madge: '8.0.0',
   /* All packages use Effect and all may use @effect/experimental. @effect/experimental is included in the esm modules and should therefore be included as a dependency. But @effect/experimental is for debugging and performance optimization only. So the code that uses it must be removed or by-passed in prod. So this dependency must not be shipped in prod: it's a devDependency. */
-  '@effect/experimental': '0.57.4',
+  '@effect/experimental': effectExperimentalVersion,
   // At some point, rolldown will be default in vite. But not the case for the moment
   // Not necessary in all configurations but vite is installed by vitest in any case so better install it here
   vite: 'npm:rolldown-vite@7.3.0',

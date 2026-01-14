@@ -7,6 +7,7 @@
 import { type Data } from '../../shared-utils/utils.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as PackageBase from './Base.js';
+import * as PackageLoadedBase from './LoadedBase.js';
 import * as PackageLoadedNoSource from './LoadedNoSource.js';
 
 /**
@@ -71,6 +72,17 @@ export class Type extends PackageLoadedNoSource.Type {
         packageRepo: this,
         mode,
       }),
+    );
+  }
+
+  /**
+   * Returns an array of the paths of the configuration files present in `self`. The paths are
+   * expressed relative to the root path of `self`
+   */
+  override async _getPathsOfExistingConfigFiles(this: Type): Promise<Array<string>> {
+    return (await super._getPathsOfExistingConfigFiles()).filter(
+      (relativePath) =>
+        !PackageLoadedBase.EXTERNAL_CONFIGURATION_FILES_FOR_ALL_PACKAGES_BUT_TOP.test(relativePath),
     );
   }
 

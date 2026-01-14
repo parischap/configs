@@ -4,7 +4,8 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { type Data } from '../../shared-utils/utils.js';
+import { pnpmLockFilename, readMeFilename } from '../../shared-utils/constants.js';
+import { toMiniGlobRegExp, type Data } from '../../shared-utils/utils.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as PackageBase from './Base.js';
 import * as PackageLoadedNoSource from './LoadedNoSource.js';
@@ -17,6 +18,11 @@ import * as PackageLoadedNoSource from './LoadedNoSource.js';
 export const moduleTag = '@parischap/configs/internal/bin-utils/Package/Top/';
 const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
+
+const EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE = toMiniGlobRegExp([
+  readMeFilename,
+  pnpmLockFilename,
+]);
 
 /**
  * Type of a PackageTop
@@ -79,6 +85,16 @@ export class Type extends PackageLoadedNoSource.Type {
     return ConfigFiles.merge(
       await super._generateConfigFiles(mode),
       ConfigFiles.top({ packageTop: this, mode }),
+    );
+  }
+
+  /**
+   * Returns an array of the paths of the configuration files present in `self`. The paths are
+   * expressed relative to the root path of `self`
+   */
+  override async _getPathsOfExistingConfigFiles(this: Type): Promise<Array<string>> {
+    return (await super._getPathsOfExistingConfigFiles()).filter(
+      (relativePath) => !EXTERNAL_CONFIGURATION_FILES_FOR_TOP_PACKAGE.test(relativePath),
     );
   }
 

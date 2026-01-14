@@ -1,9 +1,6 @@
 /**
  * This binary cleans the prod folders (dist/ and .tsbuildinfo/) of all packages in the active
- * Project or of the active Package if used with the -activePackageOnly flag (see README.md for the
- * definition of a Project and of a Package). The active Project is the one that contains the path
- * from which this binary is executed. The active Package is the one in whose root this binary is
- * executed.
+ * ProjectLoaded or of the active Package if used with the -activePackageOnly flag
  */
 
 import * as PackageBase from '../internal/bin-utils/Package/Base.js';
@@ -38,7 +35,7 @@ const project = await ProjectUnloaded.filteredFromActiveProjectAndShowCount(
 await Promise.all(
   project.packages.map((currentPackage) => {
     try {
-      return PackageBase.cleanProdFolders(currentPackage);
+      return PackageBase.cleanProd(currentPackage);
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);
       throw e;

@@ -24,6 +24,8 @@ export default {
     rootDir: '.',
     outDir: `${prodFolderName}/${othersFolderName}`,
     declarationDir: `${prodFolderName}/${othersFolderName}/${typesFolderName}`,
+    allowJs: true,
+    checkJs: true,
     //declarationMap: true
   },
 } satisfies ReadonlyRecord;

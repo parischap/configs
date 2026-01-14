@@ -118,6 +118,7 @@ export default ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }): Arra
               '^' + regExpEscape('super('),
               '^' + regExpEscape('expect('),
               '^' + regExpEscape('it('),
+              '^' + regExpEscape('process.exit('),
             ],
           },
         ],

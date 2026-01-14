@@ -1,8 +1,6 @@
 /**
- * This binary cleans the node-modules folders of all packages in the active Project or of the
- * active Package if used with the -activePackageOnly flag (see README.md for the definition of a
- * Project and of a Package). The active Project is the one that contains the path from which this
- * binary is executed. The active Package is the one in whose root this binary is executed.
+ * This binary cleans the dev node-modules folders of all packages in the active ProjectLoaded or of
+ * the active Package if used with the -activePackageOnly flag
  */
 /* This module must not use any external dependency because it cleans the node-modules folders and must therfore not depend on any dependency in these folders */
 
@@ -38,7 +36,7 @@ const project = await ProjectUnloaded.filteredFromActiveProjectAndShowCount(
 await Promise.all(
   project.packages.map((currentPackage) => {
     try {
-      return PackageBase.cleanNodeModulesFolder(currentPackage);
+      return PackageBase.cleanNodeModules(currentPackage);
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);
       throw e;

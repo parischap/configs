@@ -3,7 +3,7 @@ import { eslintStyleIncludeForSourceFiles } from './internal/shared-utils/consta
 //import { importX } from 'eslint-plugin-import-x';
 import { defineConfig, type Config } from 'eslint/config';
 import globals from 'globals';
-import EslintConfigPlain from './eslint.config.plain.js';
+import EslintConfigPlain from './eslintConfigPlain.js';
 
 export default (params: { readonly tsconfigRootDir: string }): Array<Config> =>
   defineConfig([

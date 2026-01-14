@@ -1,7 +1,7 @@
 {
   "description": "Utility to generate configuration files in a repository",
   "environment": "Node",
-  "buildMethod": "LightBundling",
+  "buildMethod": "None",
   "isPublished": false,
   "hasDocGen": false,
   "useEffectAsPeerDependency": true,
