@@ -100,6 +100,10 @@ export default ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }): Arra
             caughtErrorsIgnorePattern: '^_',
           },
         ],
+        '@typescript-eslint/no-confusing-void-expression': [
+          'error',
+          { ignoreArrowShorthand: true },
+        ],
         'functional/prefer-readonly-type': [
           'error',
           {

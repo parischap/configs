@@ -449,10 +449,9 @@ export const objectToYaml = ({
           const lines = elem.split('\n');
           return lines.length <= 1 ? lines : ['|', ...lines];
         }
-      : typeof elem === 'object' ?
-        elem === null ?
-          () => ''
-        : () => [...(valueIsArray ? [] : ['']), ...objectToYaml({ value: elem, errorPrefix })]
+      : elem === null ? () => ''
+      : isRecord(elem) ?
+        () => [...(valueIsArray ? [] : ['']), ...objectToYaml({ value: elem, errorPrefix })]
       : () => {
           throw new Error(
             `${errorPrefix}This value of key '${key}' cannot be converted to YAML: ${prettyStringify(elem)}`,

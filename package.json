@@ -92,6 +92,6 @@
   },
   "peerDependencies": {
     "effect": "3.19.14",
-    "vitest": "4.0.16"
+    "vitest": "4.0.17"
   }
 }

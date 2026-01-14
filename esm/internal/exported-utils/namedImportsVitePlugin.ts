@@ -49,24 +49,24 @@ export default {
             )
           : [[], namedImportsAsEntries];
 
-        return (
-          (functionImports.length !== 0 ?
-            'import {'
-            + functionImports
-              .map(
-                ([importName, importAlias]) =>
-                  importName + (importAlias !== undefined ? ` as ${importAlias}` : ''),
-              )
-              .join(', ')
-            + `} from 'effect/Function'${eol}`
-          : '')
-          + nonFunctionImports
-            .map(
-              ([importName, importAlias]) =>
-                `import * as ${importAlias ?? importName} from '${importFilename}/${importName}'${eol}`,
-            )
-            .join('')
-        );
+        return [
+          ...(functionImports.length !== 0 ?
+            [
+              'import {'
+                + functionImports
+                  .map(
+                    ([importName, importAlias]) =>
+                      importName + (importAlias !== undefined ? ` as ${importAlias}` : ''),
+                  )
+                  .join(', ')
+                + `} from 'effect/Function'${eol}`,
+            ]
+          : []),
+          ...nonFunctionImports.map(
+            ([importName, importAlias]) =>
+              `import * as ${importAlias ?? importName} from '${importFilename}/${importName}'${eol}`,
+          ),
+        ].join('\n');
       },
     );
 

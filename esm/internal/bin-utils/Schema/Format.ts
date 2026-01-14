@@ -82,7 +82,7 @@ export const injectDefaultsAndValidate = <P extends ReadonlyRecord<string, unkno
     const parameterDescriptorsCpy = Object.fromEntries(
       descriptors.map(([key, value]) => [
         key,
-        /* eslint-disable-next-line functional/prefer-readonly-type, @typescript-eslint/no-misused-spread */
+        /* eslint-disable-next-line functional/prefer-readonly-type */
         { ...value } as SchemaParameterDescriptor.Type<unknown> & { value?: unknown },
       ]),
     );

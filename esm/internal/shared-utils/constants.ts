@@ -216,7 +216,7 @@ export const configsDependencies = {
 // Add here all dependencies used by modules of all packages (including the configs package).
 export const configsPeerDependencies = {
   // Used by the test script and vscode and its plugins
-  vitest: '4.0.16',
+  vitest: '4.0.17',
 };
 
 // Add here all devDependencies used by Config.anyPackage.ts, be it in scripts, github actions, installed config files... except those dependencies already in configsPeerDependencies

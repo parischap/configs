@@ -81,7 +81,7 @@ describe('objectToYaml', () => {
     ).toStrictEqual(`name: Pascal
 count: 42
 active: true
-remote: `);
+remote:`);
   });
 
   it('Nested object', () => {
@@ -101,7 +101,7 @@ role:
   });
 
   it('Null value', () => {
-    expect(Utils.objectToYaml({ value: { data: null } }).join('\n')).toStrictEqual('data: ');
+    expect(Utils.objectToYaml({ value: { data: null } }).join('\n')).toStrictEqual('data:');
   });
 
   it('Empty object', () => {
