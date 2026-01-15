@@ -1,25 +1,22 @@
 import {
+  allJavaScriptFilesInTests,
   prodFolderName,
-  testsFolderName,
   testsMark,
   tsBuildInfoFolderName,
   tsConfigBaseFilename,
   tsConfigSourceFilename,
-  tsConfigStyleIncludeForTestsFiles,
   typesFolderName,
 } from '../../shared-utils/constants.js';
-import { type ReadonlyRecord } from '../../shared-utils/utils.js';
+import type { ReadonlyRecord } from '../../shared-utils/utils.js';
 
 export default {
   extends: [`./${tsConfigBaseFilename}`],
-  include: [tsConfigStyleIncludeForTestsFiles],
+  include: allJavaScriptFilesInTests,
   // The tests project needs to import the source project. The other possibility would be to create a package.json in the tests folder
   references: [{ path: tsConfigSourceFilename }],
   compilerOptions: {
-    tsBuildInfoFile: `${tsBuildInfoFolderName}/${testsMark}.tsbuildinfo`,
-    rootDir: '.',
+    declarationDir: `${prodFolderName}/${typesFolderName}`,
     outDir: prodFolderName,
-    declarationDir: `${prodFolderName}/${testsFolderName}/${typesFolderName}`,
-    //declarationMap: true,
+    tsBuildInfoFile: `${tsBuildInfoFolderName}/${testsMark}.tsbuildinfo`,
   },
 } satisfies ReadonlyRecord;

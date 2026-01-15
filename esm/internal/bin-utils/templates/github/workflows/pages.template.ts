@@ -4,18 +4,13 @@
  */
 
 import { docsFolderName, githubActionTimeOut } from '../../../../shared-utils/constants.js';
-import { type ReadonlyRecord } from '../../../../shared-utils/utils.js';
+import type { ReadonlyRecord } from '../../../../shared-utils/utils.js';
 
 export default {
-  name: 'Pages',
-  on: {
-    workflow_dispatch: null,
-  },
   concurrency: {
     group: '${{ github.workflow }}-${{ github.ref }}',
     'cancel-in-progress': true,
   },
-  permissions: null,
   jobs: {
     build: {
       name: 'Build',
@@ -82,4 +77,9 @@ export default {
       ],
     },
   },
+  name: 'Pages',
+  on: {
+    workflow_dispatch: null,
+  },
+  permissions: null,
 } satisfies ReadonlyRecord;

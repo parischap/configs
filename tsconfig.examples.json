@@ -3,7 +3,12 @@
     "./tsconfig.base.json"
   ],
   "include": [
-    "examples/**/*"
+    "examples/**/*.js",
+    "examples/**/*.mjs",
+    "examples/**/*.cjs",
+    "examples/**/*.ts",
+    "examples/**/*.mts",
+    "examples/**/*.cts"
   ],
   "references": [
     {
@@ -11,9 +16,8 @@
     }
   ],
   "compilerOptions": {
-    "tsBuildInfoFile": ".tsbuildinfo/examples.tsbuildinfo",
-    "rootDir": ".",
+    "declarationDir": "dist/dts",
     "outDir": "dist",
-    "declarationDir": "dist/examples/dts"
+    "tsBuildInfoFile": ".tsbuildinfo/examples.tsbuildinfo"
   }
 }

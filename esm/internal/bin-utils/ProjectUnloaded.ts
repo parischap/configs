@@ -5,11 +5,11 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { existsSync } from 'fs';
+import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { join, sep } from 'path';
+import { join, sep } from 'node:path';
 import { configsPackageName, packagesFolderName } from '../shared-utils/constants.js';
-import { readFolders, type Data } from '../shared-utils/utils.js';
+import { type Data, readFolders } from '../shared-utils/utils.js';
 import * as PackageUnloaded from './Package/Unloaded.js';
 
 /**
@@ -63,22 +63,21 @@ export const fromActiveProject = async (): Promise<Type> => {
   const firstPackagesIndex = splitPath.findIndex((split) => split === packagesFolderName);
   const indexAfterTop =
     firstPackagesIndex > 0 ? firstPackagesIndex
-    : existsSync(packagesFolderName) ? splitPath.length
-    : -1;
-  if (indexAfterTop <= 0) throw new Error('Could not find project root');
-  const topPackageName = splitPath[indexAfterTop - 1] as string;
+    : (existsSync(packagesFolderName) ? splitPath.length
+    : -1);
+  if (indexAfterTop <= 0) {throw new Error('Could not find project root');}
+  const topPackageName = splitPath[indexAfterTop - 1]!;
   const topPackagePath = join(...splitPath.slice(0, indexAfterTop));
 
   console.log(`Project '${topPackageName}' root identified at: '${topPackagePath}'`);
 
   const topPackagePackagesPath = join(topPackagePath, packagesFolderName);
   const repoNames = await readFolders({
-    path: topPackagePackagesPath,
     dontFailOnInexistentPath: false,
+    path: topPackagePackagesPath,
   });
 
   return Type.make({
-    topPackagePath,
     packages: [
       PackageUnloaded.make({
         type: 'Top',
@@ -121,6 +120,7 @@ export const fromActiveProject = async (): Promise<Type> => {
         ])
       ).flat(),
     ],
+    topPackagePath,
   });
 };
 
@@ -143,8 +143,8 @@ export const filter =
   (predicate: (t: PackageUnloaded.Type) => boolean) =>
   (self: Type): Type =>
     Type.make({
-      topPackagePath: self.topPackagePath,
       packages: self.packages.filter(predicate),
+      topPackagePath: self.topPackagePath,
     });
 
 /**

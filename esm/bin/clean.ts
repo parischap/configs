@@ -15,8 +15,8 @@ console.log('Package cleaning');
 const argsFormat = SchemaFormat.make({
   descriptors: {
     '-activePackageOnly': SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.boolean,
       defaultValue: false,
+      expectedType: SchemaParameterType.boolean,
     }),
   },
 });

@@ -1,5 +1,5 @@
 // This module must not import any external dependency. It must be runnable without a package.json
-import { Dirent } from 'node:fs';
+import type { Dirent } from 'node:fs';
 import { readFile, readdir } from 'node:fs/promises';
 import { sep as OSSep, extname, isAbsolute, join, relative } from 'node:path';
 import { sep as posixSep } from 'node:path/posix';
@@ -8,16 +8,12 @@ import { sep as posixSep } from 'node:path/posix';
  * Redefines the Record type: keys are restricted to strings or symbols. In TypeScript, functions
  * and non-null objects, including arrays, are assignable to this Record definition.
  */
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any, functional/prefer-readonly-type */
-export type Record<K extends string | symbol = string, V = any> = {
-  [k in K]: V;
-};
+/* oxlint-disable-next-line @typescript-eslint/no-explicit-any, functional/prefer-readonly-type, @typescript-eslint/no-unsafe-assignment */
+export type Record<K extends string | symbol = string, V = any> = { [k in K]: V };
 
 /** Readonly version of the Record type */
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-export type ReadonlyRecord<K extends string | symbol = string, V = any> = {
-  readonly [k in K]: V;
-};
+export type ReadonlyRecord<K extends string | symbol = string, V = any> = Readonly<Record<K, V>>;
 
 /** Alias to Record with string keys and values */
 export interface StringRecord extends Record<string, string> {}
@@ -45,10 +41,8 @@ export const isStringRecord = (v: unknown): v is StringRecord =>
 export const isStringArray = (v: unknown): v is StringArray =>
   isArray(v) && v.filter((value) => typeof value !== 'string').length === 0;
 
-export interface AnyFunction {
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  (...args: ReadonlyArray<any>): any;
-}
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+export type AnyFunction = (...args: ReadonlyArray<any>) => any;
 
 /**
  * Utility type that removes all non-data from a type. Is considered as non-data any property that
@@ -67,7 +61,7 @@ export type Data<T extends ReadonlyRecord<string | symbol>> = {
  *
  * @category Utils
  */
-export const capitalizeFirstLetter = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+export const capitalizeFirstLetter = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
 /**
  * Escapes regular expression special characters
@@ -84,16 +78,16 @@ export const regExpEscape = (s: string): string =>
  *
  * @category Utils
  */
-export const fromOSPathToPosixPath =
-  OSSep === posixSep ? (path: string) => path : (path: string) => path.replaceAll(OSSep, posixSep);
+export const fromOSPathToPosixPath: (path: string) => string =
+  OSSep === posixSep ? (path) => path : (path) => path.replaceAll(OSSep, posixSep);
 
 /**
  * Converts a posix path to an OS path
  *
  * @category Utils
  */
-export const fromPosixPathToOSPath =
-  OSSep === posixSep ? (path: string) => path : (path: string) => path.replaceAll(posixSep, OSSep);
+export const fromPosixPathToOSPath: (path: string) => string =
+  OSSep === posixSep ? (path) => path : (path) => path.replaceAll(posixSep, OSSep);
 
 /**
  * Returns true if `p` is a subpath of `target`
@@ -112,7 +106,7 @@ export const isSubPathOf =
  *
  * @category Utils
  */
-export const prettyStringify = (v: unknown): string => JSON.stringify(v, null, 2);
+export const prettyStringify = (v: unknown): string => JSON.stringify(v, undefined, 2);
 
 /**
  * Type-level result of merging two record types R1 and R2 used by `deepMerge2` and `deepMerge`.
@@ -170,9 +164,10 @@ export const deepMerge2 = <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>
         : isRecord(secondValue) && isRecord(firstValue) ?
           (deepMerge2(firstValue, secondValue) as never)
         : secondValue;
-    } else
-      /* eslint-disable-next-line functional/no-expression-statements, functional/immutable-data */
+    } else /* eslint-disable-next-line functional/no-expression-statements, functional/immutable-data */
+    {
       result[secondKey as string] = secondValue;
+    }
   }
 
   return result as never;
@@ -184,7 +179,7 @@ export const deepMerge2 = <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>
  * Wrapper over deepMerge2 which reduces an array of records into a single merged record. Supports
  * merging 2..6 arguments with proper result typing
  */
-/*export const deepMerge: {
+/*Export const deepMerge: {
   <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>(r1: R1, r2: R2): MergedRecord<R1, R2>;
   <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord, R3 extends ReadonlyRecord>(
     r1: R1,
@@ -241,7 +236,9 @@ export const deepMerge2 = <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>
 export const toMiniGlobRegExp = (patterns: ReadonlyArray<string>): RegExp =>
   new RegExp(
     '^'
-      + patterns.map((pattern) => regExpEscape(pattern).replace(/\*/g, '[^\\/]*')).join('|')
+      + patterns
+        .map((pattern) => regExpEscape(pattern).replaceAll('*', String.raw`[^\/]*`))
+        .join('|')
       + '$',
   );
 
@@ -266,8 +263,9 @@ export const readDir = async ({
       withFileTypes: true,
     });
   } catch (e: unknown) {
-    if (dontFailOnInexistentPath && e instanceof Error && 'code' in e && e.code === 'ENOENT')
+    if (dontFailOnInexistentPath && e instanceof Error && 'code' in e && e.code === 'ENOENT') {
       return [];
+    }
     throw e;
   }
 };
@@ -284,7 +282,7 @@ export const readFolders = async ({
   readonly path: string;
   readonly dontFailOnInexistentPath: boolean;
 }): Promise<Array<string>> => {
-  const contents = await readDir({ path, recursive: false, dontFailOnInexistentPath });
+  const contents = await readDir({ dontFailOnInexistentPath, path, recursive: false });
   return contents.filter((dirent) => dirent.isDirectory()).map(({ name }) => name);
 };
 
@@ -300,7 +298,7 @@ export const readFiles = async ({
   readonly path: string;
   readonly dontFailOnInexistentPath: boolean;
 }): Promise<Array<string>> => {
-  const contents = await readDir({ path, recursive: false, dontFailOnInexistentPath });
+  const contents = await readDir({ dontFailOnInexistentPath, path, recursive: false });
   return contents.filter((dirent) => dirent.isFile()).map(({ name }) => name);
 };
 
@@ -342,7 +340,7 @@ export const readFilesRecursively = async ({
     relativePath: string;
   }>
 > => {
-  const topContents = await readDir({ path, recursive: false, dontFailOnInexistentPath });
+  const topContents = await readDir({ dontFailOnInexistentPath, path, recursive: false });
   const topFolders = topContents
     .filter((dirent) => dirent.isDirectory())
     .filter(({ name }) => !foldersToExclude.includes(name))
@@ -351,9 +349,9 @@ export const readFilesRecursively = async ({
   const otherContents = await Promise.all(
     topFolders.map((topFolderName) =>
       readDir({
+        dontFailOnInexistentPath: false,
         path: join(path, topFolderName),
         recursive: true,
-        dontFailOnInexistentPath: false,
       }),
     ),
   );
@@ -361,12 +359,12 @@ export const readFilesRecursively = async ({
     .filter((dirent) => dirent.isFile())
     .map(({ name, parentPath }) => {
       const extension = extname(name);
-      const bareName = name.substring(0, name.length - extension.length);
+      const bareName = name.slice(0, name.length - extension.length);
       const relativeParentPath = relative(relativePathSource, parentPath);
       return {
-        name,
         bareName,
         extension,
+        name,
         parentPath,
         path: join(parentPath, name),
         relativeParentPath,
@@ -385,8 +383,9 @@ export const readJsonFile = async (path: string): Promise<Record> => {
 
   const configFile: unknown = JSON.parse(contents);
 
-  if (!isRecord(configFile))
+  if (!isRecord(configFile)) {
     throw new Error(`'${path}' must contain the json representation of a non-null object`);
+  }
   return configFile;
 };
 
@@ -409,8 +408,10 @@ export const readJsonFile = async (path: string): Promise<Record> => {
 export const getExeFlags = (): Array<[name: string, value: string | boolean]> =>
   process.argv.slice(2).map((arg) => {
     const eqIndex = arg.indexOf('=');
-    if (eqIndex === -1) return [arg, true];
-    return [arg.substring(0, eqIndex), arg.substring(eqIndex + 1)];
+    if (eqIndex === -1) {
+      return [arg, true];
+    }
+    return [arg.slice(0, eqIndex), arg.slice(eqIndex + 1)];
   });
 
 /**
@@ -451,7 +452,7 @@ export const objectToYaml = ({
         }
       : elem === null ? () => ''
       : isRecord(elem) ?
-        () => [...(valueIsArray ? [] : ['']), ...objectToYaml({ value: elem, errorPrefix })]
+        () => [...(valueIsArray ? [] : ['']), ...objectToYaml({ errorPrefix, value: elem })]
       : () => {
           throw new Error(
             `${errorPrefix}This value of key '${key}' cannot be converted to YAML: ${prettyStringify(elem)}`,

@@ -5,9 +5,9 @@
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import { pnpmLockFilename, readMeFilename } from '../../shared-utils/constants.js';
-import { toMiniGlobRegExp, type Data } from '../../shared-utils/utils.js';
+import { type Data, toMiniGlobRegExp } from '../../shared-utils/utils.js';
 import * as ConfigFiles from '../ConfigFiles.js';
-import * as PackageBase from './Base.js';
+import type * as PackageBase from './Base.js';
 import * as PackageLoadedNoSource from './LoadedNoSource.js';
 
 /**
@@ -84,7 +84,7 @@ export class Type extends PackageLoadedNoSource.Type {
   ): Promise<ConfigFiles.Type> {
     return ConfigFiles.merge(
       await super._generateConfigFiles(mode),
-      ConfigFiles.top({ packageTop: this, mode }),
+      ConfigFiles.top({ mode, packageTop: this }),
     );
   }
 

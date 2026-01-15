@@ -9,11 +9,11 @@ export default (name: string) =>
       projects: [
         {
           test: {
-            include: [`${testsFolderName}/*.ts`],
             exclude: [`${npmFolderName}/**`],
-            name: `Repo ${name}`,
-            isolate: false,
             fileParallelism: false,
+            include: [`${testsFolderName}/*.ts`],
+            isolate: false,
+            name: `Repo ${name}`,
             pool: 'threads',
           },
         },

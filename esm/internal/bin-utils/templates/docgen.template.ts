@@ -6,18 +6,18 @@ import {
   sourceFolderName,
   tsConfigDocGenFilename,
 } from '../../shared-utils/constants.js';
-import { type ReadonlyRecord } from '../../shared-utils/utils.js';
+import type { ReadonlyRecord } from '../../shared-utils/utils.js';
 
 export default {
-  parseCompilerOptions: `./${tsConfigDocGenFilename}`,
+  enforceDescriptions: true,
+  enforceVersion: false,
   examplesCompilerOptions: `./${tsConfigDocGenFilename}`,
-  srcDir: `./${sourceFolderName}`,
-  outDir: docsFolderName,
   exclude: [
     `${sourceFolderName}/${internalFolderName}/${allFilesPattern}`,
     `${sourceFolderName}/${binariesFolderName}/${allFilesPattern}`,
     `${sourceFolderName}/index.ts`,
   ],
-  enforceDescriptions: true,
-  enforceVersion: false,
+  outDir: docsFolderName,
+  parseCompilerOptions: `./${tsConfigDocGenFilename}`,
+  srcDir: `./${sourceFolderName}`,
 } satisfies ReadonlyRecord;

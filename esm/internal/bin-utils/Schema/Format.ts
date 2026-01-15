@@ -4,7 +4,7 @@
  * name/value pairs.
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
-import { type Data, type ReadonlyRecord } from '../../shared-utils/utils.js';
+import type { Data, ReadonlyRecord } from '../../shared-utils/utils.js';
 import * as SchemaParameterDescriptor from './ParameterDescriptor.js';
 
 /**
@@ -89,22 +89,22 @@ export const injectDefaultsAndValidate = <P extends ReadonlyRecord<string, unkno
 
     for (const [key, value] of parameters) {
       const descriptor = parameterDescriptorsCpy[key];
-      if (descriptor === undefined) throw new Error(`${errorPrefix}Unexpected parameter '${key}'`);
+      if (descriptor === undefined) {throw new Error(`${errorPrefix}Unexpected parameter '${key}'`);}
 
-      if ('value' in descriptor) throw new Error(`${errorPrefix}Parameter '${key}' received twice`);
+      if ('value' in descriptor) {throw new Error(`${errorPrefix}Parameter '${key}' received twice`);}
 
       /* eslint-disable-next-line functional/no-expression-statements, functional/immutable-data */
       descriptor.value = SchemaParameterDescriptor.validate({
-        value,
         allowStringConversion,
         errorPrefix,
+        value,
       })(descriptor);
     }
     return Object.fromEntries(
       Object.entries(parameterDescriptorsCpy).map(([key, extendedDescriptor]) => {
-        if ('value' in extendedDescriptor) return [key, extendedDescriptor['value']] as const;
+        if ('value' in extendedDescriptor) {return [key, extendedDescriptor['value']] as const;}
         if ('defaultValue' in extendedDescriptor)
-          return [key, extendedDescriptor['defaultValue']] as const;
+          {return [key, extendedDescriptor['defaultValue']] as const;}
         throw new Error(`${errorPrefix}Mandatory parameter '${key}' was not provided`);
       }),
     ) as never;

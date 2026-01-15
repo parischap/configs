@@ -1,10 +1,9 @@
 import { tsBuildInfoFolderName } from '../../shared-utils/constants.js';
-import { type ReadonlyRecord } from '../../shared-utils/utils.js';
+import type { ReadonlyRecord } from '../../shared-utils/utils.js';
 
 export default {
   $schema: 'https://json.schemastore.org/tsconfig',
   _version: '20.1.0',
-  extends: ['@tsconfig/strictest/tsconfig.json'],
   compilerOptions: {
     moduleDetection: 'force',
     // Allow project references
@@ -18,7 +17,6 @@ export default {
     experimentalDecorators: true,
     moduleResolution: 'NodeNext',
     sourceMap: true,
-    declarationMap: true,
     noEmitOnError: false,
     noErrorTruncation: true,
     target: 'ES2022',
@@ -38,4 +36,5 @@ export default {
     ],
     tsBuildInfoFile: `.${tsBuildInfoFolderName}/project.${tsBuildInfoFolderName}`,
   },
+  extends: ['@tsconfig/strictest/tsconfig.json'],
 } satisfies ReadonlyRecord;

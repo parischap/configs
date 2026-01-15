@@ -4,7 +4,7 @@ import {
   tsConfigSourceFilename,
   tsConfigTestsFilename,
 } from '../../shared-utils/constants.js';
-import { ReadonlyRecord } from '../../shared-utils/utils.js';
+import type { ReadonlyRecord } from '../../shared-utils/utils.js';
 
 /* General tsconfig.json file. It references four sub-projects, each with its own environments (node available or not):
 - the source sub-project where the package modules are located.

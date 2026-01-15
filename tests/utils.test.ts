@@ -75,7 +75,7 @@ describe('partitionArray', () => {
 describe('objectToYaml', () => {
   it('String, number, boolean and null values', () => {
     expect(
-      Utils.objectToYaml({ value: { name: 'Pascal', count: 42, active: true, remote: null } }).join(
+      Utils.objectToYaml({ value: { active: true, count: 42, name: 'Pascal', remote: null } }).join(
         '\n',
       ),
     ).toStrictEqual(`name: Pascal
@@ -87,7 +87,7 @@ remote:`);
   it('Nested object', () => {
     expect(
       Utils.objectToYaml({
-        value: { user: { name: 'Pascal', fruits: ['banana'] }, role: ['admin', 'surfer'] },
+        value: { role: ['admin', 'surfer'], user: { name: 'Pascal', fruits: ['banana'] } },
       }).join('\n'),
     ).toStrictEqual(
       `user:
@@ -101,7 +101,7 @@ role:
   });
 
   it('Null value', () => {
-    expect(Utils.objectToYaml({ value: { data: null } }).join('\n')).toStrictEqual('data:');
+    expect(Utils.objectToYaml({ value: { data: undefined } }).join('\n')).toStrictEqual('data:');
   });
 
   it('Empty object', () => {

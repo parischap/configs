@@ -3,14 +3,14 @@ import { describe, expect, it } from 'vitest';
 
 describe('NamedImportsVitePlugin', () => {
   const transform = (code: string, id: string): string | undefined => {
-    const result = NamedImportsVitePlugin.transform.bind(null as never)(code, id);
+    const result = NamedImportsVitePlugin.transform.bind(undefined as never)(code, id);
     return result?.code;
   };
 
   it('File without any targetted imports', () => {
     const testFile = `console.log('Hello, world!');
 `;
-    expect(transform(testFile, '/test.ts')).toStrictEqual(undefined);
+    expect(transform(testFile, '/test.ts')).toStrictEqual(testFile);
   });
 
   it('File with all sorts of imports', () => {

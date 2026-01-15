@@ -110,13 +110,13 @@ describe("TestUtils", () => {
   describe("throws", () => {
     it("should assert that an error is thrown", () => {
       expect(() => TestUtils.throws(() => BigInt(Infinity))).not.toThrow();
-      expect(() => TestUtils.throws(() => BigInt(5))).toThrow();
+      expect(() => TestUtils.throws(() => 5n)).toThrow();
     });
   });
 
   describe("doesNotThrow", () => {
     it("should assert that an error is not thrown", () => {
-      expect(() => TestUtils.doesNotThrow(() => BigInt(5))).not.toThrow();
+      expect(() => TestUtils.doesNotThrow(() => 5n)).not.toThrow();
       expect(() => TestUtils.doesNotThrow(() => BigInt(Infinity))).toThrow();
     });
   });

@@ -4,8 +4,8 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { rm } from 'fs/promises';
-import { join, relative } from 'path';
+import { rm } from 'node:fs/promises';
+import { join, relative } from 'node:path';
 import {
   npmFolderName,
   prodFolderName,
@@ -13,7 +13,7 @@ import {
   tsBuildInfoFolderName,
 } from '../../shared-utils/constants.js';
 
-import { readJsonFile, type Data, type Record } from '../../shared-utils/utils.js';
+import { type Data, type Record, readJsonFile } from '../../shared-utils/utils.js';
 
 /**
  * Module tag
@@ -154,7 +154,9 @@ export const rmAndLogIfSuccessful =
       await rm(join(packagePath, relativePath), { recursive: true });
       console.log(`'${packageName}': deleted '${relativePath}'`);
     } catch (e: unknown) {
-      if (!(e instanceof Error) || !('code' in e) || e.code !== 'ENOENT') throw e;
+      if (!(e instanceof Error) || !('code' in e) || e.code !== 'ENOENT') {
+        throw e;
+      }
     }
   };
 

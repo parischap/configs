@@ -6,9 +6,9 @@ import {
   allMdFiles,
   allSimpleJsonFiles,
   allYmlFiles,
-  eslintStyleExcludeForSourceFiles,
   filesGeneratedByThirdParties,
   foldersGeneratedByThirdParties,
+  sourceFolderName,
 } from './internal/shared-utils/constants.js';
 import { regExpEscape } from './internal/shared-utils/utils.js';
 
@@ -18,9 +18,9 @@ import markdown from '@eslint/markdown';
 import html from '@html-eslint/eslint-plugin';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import functional from 'eslint-plugin-functional';
-//import { importX } from 'eslint-plugin-import-x';
+//Import { importX } from 'eslint-plugin-import-x';
 import eslintPluginYml from 'eslint-plugin-yml';
-import { defineConfig, globalIgnores, type Config } from 'eslint/config';
+import { type Config, defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -34,7 +34,7 @@ import tseslint from 'typescript-eslint';
 export default ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }): Array<Config> =>
   defineConfig([
     // This is a global ignore, files are ignored in all other config objects
-    // node_modules files and .git are also ignored.
+    // Node_modules files and .git are also ignored.
     // Must work at all levels (top, monorepo, one-package repo, and subrepo)
 
     globalIgnores(
@@ -44,6 +44,11 @@ export default ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }): Arra
       ],
       'ignoreConfig',
     ),
+    {
+      linterOptions: {
+        reportUnusedDisableDirectives: 'error',
+      },
+    },
     {
       files: allJavaScriptFiles,
       name: 'javascriptConfig',
@@ -59,12 +64,10 @@ export default ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }): Arra
       languageOptions: {
         parserOptions: {
           ecmaFeatures: { impliedStrict: true },
-          projectService: true,
+          // Necessary for parsing js in md files
+          projectService: { allowDefaultProject: ['*.md/*.ts'] },
           tsconfigRootDir,
         },
-      },
-      linterOptions: {
-        reportUnusedDisableDirectives: 'error',
       },
       rules: {
         'no-await-in-loop': 'error',
@@ -73,8 +76,6 @@ export default ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }): Arra
         'require-atomic-updates': 'error',
         eqeqeq: 'error',
 
-        // Enforce function names for better stack traces except for generators
-        'func-names': ['error', 'as-needed', { generators: 'never' }],
         'no-throw-literal': 'error',
         'no-unused-expressions': 'error',
         'no-useless-computed-key': 'error',
@@ -83,9 +84,10 @@ export default ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }): Arra
         'prefer-exponentiation-operator': 'error',
         'prefer-named-capture-group': 'error',
         'require-await': 'error',
+        // Enforce function names for better stack traces except for generators
+        'func-names': ['error', 'as-needed', { generators: 'never' }],
         // We want to allow types and variables with same names
         'no-redeclare': 'off',
-
         // Useful to avoid using the `any` type
         '@typescript-eslint/no-unnecessary-type-parameters': 'off',
         // We want to be able to use namespaces
@@ -96,8 +98,8 @@ export default ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }): Arra
           'error',
           {
             argsIgnorePattern: '^_',
-            varsIgnorePattern: '^_',
             caughtErrorsIgnorePattern: '^_',
+            varsIgnorePattern: '^_',
           },
         ],
         '@typescript-eslint/no-confusing-void-expression': [
@@ -134,62 +136,62 @@ export default ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }): Arra
     },
     {
       files: allJavaScriptFiles,
-      ignores: [eslintStyleExcludeForSourceFiles],
-      name: 'javascriptConfigForNonSourceFiles',
+      ignores: [`${sourceFolderName}/**`],
       languageOptions: {
         globals: globals.nodeBuiltin,
       },
+      name: 'javascriptConfigForNonSourceFiles',
     },
     {
+      extends: [(html.configs as never)['flat/recommended']],
       files: allHtmlFiles,
+      language: 'html/html',
       name: 'htmlConfig',
       plugins: {
         html,
       },
-      extends: [(html.configs as never)['flat/recommended']],
-      language: 'html/html',
       rules: {
         '@html-eslint/require-closing-tags': ['error', { selfClosing: 'always' }],
       },
     },
     {
+      extends: [eslintPluginYml.configs['flat/recommended'] as Config],
       files: allYmlFiles,
       name: 'ymlConfig',
-      extends: [eslintPluginYml.configs['flat/recommended'] as Config],
 
       rules: {
         'yml/no-empty-mapping-value': 'off',
       },
     },
     {
+      extends: ['markdown/recommended', 'markdown/processor'],
       files: allMdFiles,
       name: 'mdConfig',
       plugins: {
         markdown,
       },
-      extends: ['markdown/recommended', 'markdown/processor'],
     },
     {
+      extends: ['json/recommended'],
       files: allSimpleJsonFiles,
       ignores: ['package-lock.json'],
+      language: 'json/json',
       name: 'simpleJsonConfig',
       plugins: { json },
-      language: 'json/json',
-      extends: ['json/recommended'],
     },
     {
+      extends: ['json/recommended'],
       files: allJsoncFiles,
+      language: 'json/jsonc',
       name: 'jsoncConfig',
       plugins: { json },
-      language: 'json/jsonc',
-      extends: ['json/recommended'],
     },
     {
+      extends: ['json/recommended'],
       files: allJson5Files,
+      language: 'json/json5',
       name: 'json5Config',
       plugins: { json: json as never },
-      language: 'json/json5',
-      extends: ['json/recommended'],
     },
     // Do not specify a files directive. We want to cancel eslint rules for all types of files: *.js, *.ts, *.html...
     eslintConfigPrettier,

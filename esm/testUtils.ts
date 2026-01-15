@@ -1,5 +1,5 @@
 /* eslint-disable functional/no-expression-statements */
-import { Array, Either, Equal, Option, pipe, Predicate, String, Utils } from 'effect';
+import { Array, Either, Equal, Option, Predicate, String, Utils, pipe } from 'effect';
 import * as assert from 'node:assert';
 
 const universalPathSep = /[/\\]/;
@@ -8,20 +8,20 @@ const universalPathSep = /[/\\]/;
 // ----------------------------
 
 /** Throws an `AssertionError` with the provided error message. */
-export function fail(message: string) {
+export function fail(message: string): void {
   assert.fail(message);
 }
 
-export function deepStrictEqual<A>(actual: A, expected: A, message?: string) {
+export function deepStrictEqual<A>(actual: A, expected: A, message?: string): void {
   assert.deepStrictEqual(actual, expected, message);
 }
 
-export function strictEqual<A>(actual: A, expected: A, message?: string) {
+export function strictEqual<A>(actual: A, expected: A, message?: string): void {
   assert.strictEqual(actual, expected, message);
 }
 
 /** Asserts that `actual` is equal to `expected` using the `Equal.equals` trait. */
-export function assertEquals<A>(actual: A, expected: A, message?: string) {
+export function assertEquals<A>(actual: A, expected: A, message?: string): void {
   if (!Utils.structuralRegion(() => Equal.equals(actual, expected))) {
     // Show diff
     deepStrictEqual(actual, expected, message);
@@ -30,7 +30,7 @@ export function assertEquals<A>(actual: A, expected: A, message?: string) {
 }
 
 /** Asserts that `actual` is not equal to `expected` using the `Equal.equals` trait. */
-export function assertNotEquals<A, B>(actual: A, expected: B, message?: string) {
+export function assertNotEquals<A, B>(actual: A, expected: B, message?: string): void {
   assertFalse(
     Utils.structuralRegion(() => Equal.equals(actual, expected)),
     message,
@@ -60,8 +60,11 @@ export function assertSome<A>(
   expected?: A,
   message?: string,
 ): asserts option is Option.Some<A> {
-  if (expected === undefined) assertTrue(Option.isSome(option), message);
-  else assertEquals(option, Option.some(expected), message);
+  if (expected === undefined) {
+    assertTrue(Option.isSome(option), message);
+  } else {
+    assertEquals(option, Option.some(expected), message);
+  }
 }
 
 // ----------------------------
@@ -73,8 +76,11 @@ export function assertLeft<R, L>(
   expected?: L,
   message?: string,
 ): asserts either is Either.Left<L, never> {
-  if (expected === undefined) assertTrue(Either.isLeft(either), message);
-  else assertEquals(either, Either.left(expected), message);
+  if (expected === undefined) {
+    assertTrue(Either.isLeft(either), message);
+  } else {
+    assertEquals(either, Either.left(expected), message);
+  }
 }
 
 export function assertLeftMessage<R, L extends { readonly message: string }>(
@@ -91,14 +97,17 @@ export function assertRight<R, L>(
   expected?: R,
   message?: string,
 ): asserts either is Either.Right<never, R> {
-  if (expected === undefined) assertTrue(Either.isRight(either), message);
-  else assertEquals(either, Either.right(expected), message);
+  if (expected === undefined) {
+    assertTrue(Either.isRight(either), message);
+  } else {
+    assertEquals(either, Either.right(expected), message);
+  }
 }
 
 // ----------------------------
 // Throwing
 // ----------------------------
-export function throws(thunk: () => void, error?: Error | ((u: unknown) => undefined)) {
+export function throws(thunk: () => void, error?: Error | ((u: unknown) => undefined)): void {
   let throwError = false;
   try {
     thunk();
@@ -112,7 +121,9 @@ export function throws(thunk: () => void, error?: Error | ((u: unknown) => undef
       }
     }
   }
-  if (throwError) fail('Expected to throw an error');
+  if (throwError) {
+    fail('Expected to throw an error');
+  }
 }
 
 /**
@@ -120,7 +131,7 @@ export function throws(thunk: () => void, error?: Error | ((u: unknown) => undef
  *
  * @since 0.21.0
  */
-export function doesNotThrow(thunk: () => void, message?: string) {
+export function doesNotThrow(thunk: () => void, message?: string): void {
   assert.doesNotThrow(thunk, message);
 }
 

@@ -14,8 +14,8 @@ console.log('Removing prod directories');
 const argsFormat = SchemaFormat.make({
   descriptors: {
     '-activePackageOnly': SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.boolean,
       defaultValue: false,
+      expectedType: SchemaParameterType.boolean,
     }),
   },
 });
@@ -33,9 +33,9 @@ const project = await ProjectUnloaded.filteredFromActiveProjectAndShowCount(
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
-  project.packages.map((currentPackage) => {
+  project.packages.map(async (currentPackage) => {
     try {
-      return PackageBase.cleanProd(currentPackage);
+      await PackageBase.cleanProd(currentPackage);
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);
       throw e;

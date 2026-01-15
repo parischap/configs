@@ -8,15 +8,15 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { normalize, relative } from 'path';
-import { fromOSPathToPosixPath, type Data } from '../shared-utils/utils.js';
+import { normalize, relative } from 'node:path';
+import { type Data, fromOSPathToPosixPath } from '../shared-utils/utils.js';
 import * as PackageBase from './Package/Base.js';
-import * as PackageLoaded from './Package/Loaded.js';
+import type * as PackageLoaded from './Package/Loaded.js';
 import * as PackageMonoRepo from './Package/MonoRepo.js';
 import * as PackageOnePackageRepo from './Package/OnePackageRepo.js';
 import * as PackageSubRepo from './Package/SubRepo.js';
 import * as PackageTop from './Package/Top.js';
-import * as PackageUnloaded from './Package/Unloaded.js';
+import type * as PackageUnloaded from './Package/Unloaded.js';
 import * as ProjectUnloaded from './ProjectUnloaded.js';
 
 /**
@@ -74,17 +74,16 @@ export const filteredFromActiveProject = async (
   );
 
   return Type.make({
-    topPackagePath,
     packages: await Promise.all(
       ProjectUnloaded.filter(predicate)(unloadedProject).packages.map(async (currentPackage) => {
         const { type } = currentPackage;
         switch (type) {
           case 'MonoRepo':
-            return await PackageMonoRepo.fromPackageBase({ packageBase: currentPackage });
+            return  PackageMonoRepo.fromPackageBase({ packageBase: currentPackage });
           case 'OnePackageRepo':
-            return await PackageOnePackageRepo.fromPackageBase({ packageBase: currentPackage });
+            return  PackageOnePackageRepo.fromPackageBase({ packageBase: currentPackage });
           case 'SubRepo':
-            return await PackageSubRepo.fromPackageBase({ packageBase: currentPackage });
+            return  PackageSubRepo.fromPackageBase({ packageBase: currentPackage });
           case 'Top':
             return PackageTop.fromPackageBase({
               packageBase: currentPackage,
@@ -94,6 +93,7 @@ export const filteredFromActiveProject = async (
         }
       }),
     ),
+    topPackagePath,
   });
 };
 
@@ -130,8 +130,8 @@ export const filter =
   (predicate: (t: PackageLoaded.Type) => boolean) =>
   (self: Type): Type =>
     Type.make({
-      topPackagePath: self.topPackagePath,
       packages: self.packages.filter(predicate),
+      topPackagePath: self.topPackagePath,
     });
 
 /**

@@ -4,7 +4,7 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { type Data } from '../../shared-utils/utils.js';
+import type { Data } from '../../shared-utils/utils.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as SchemaFormat from '../Schema/Format.js';
 import * as SchemaParameterDescriptor from '../Schema/ParameterDescriptor.js';
@@ -52,7 +52,7 @@ export abstract class Type extends PackageLoadedBase.Type implements LoadedParam
   ): Promise<ConfigFiles.Type> {
     return ConfigFiles.merge(
       await super._generateConfigFiles(mode),
-      ConfigFiles.noSourcePackage({ packageLoadedNoSource: this, mode }),
+      ConfigFiles.noSourcePackage({ mode, packageLoadedNoSource: this }),
     );
   }
 

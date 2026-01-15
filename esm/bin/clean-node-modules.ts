@@ -15,8 +15,8 @@ console.log('Removing node_modules directory');
 const argsFormat = SchemaFormat.make({
   descriptors: {
     '-activePackageOnly': SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.boolean,
       defaultValue: false,
+      expectedType: SchemaParameterType.boolean,
     }),
   },
 });
@@ -34,9 +34,9 @@ const project = await ProjectUnloaded.filteredFromActiveProjectAndShowCount(
 
 /* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
-  project.packages.map((currentPackage) => {
+  project.packages.map(async (currentPackage) => {
     try {
-      return PackageBase.cleanNodeModules(currentPackage);
+      await PackageBase.cleanNodeModules(currentPackage);
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);
       throw e;

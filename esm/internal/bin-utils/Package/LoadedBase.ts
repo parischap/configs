@@ -13,10 +13,10 @@ import {
   viteTimeStampFilenamePattern,
 } from '../../shared-utils/constants.js';
 import {
+  type Data,
   readFiles,
   readFilesRecursively,
   toMiniGlobRegExp,
-  type Data,
 } from '../../shared-utils/utils.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as PackageBase from './Base.js';
@@ -53,7 +53,7 @@ export abstract class Type extends PackageBase.Type {
 
   /** Generates the configuration files of `self` */
   _generateConfigFiles(this: Type, mode: ConfigFiles.Mode): Promise<ConfigFiles.Type> {
-    return Promise.resolve(ConfigFiles.anyPackage({ packageLoadedBase: this, mode }));
+    return Promise.resolve(ConfigFiles.anyPackage({ mode, packageLoadedBase: this }));
   }
 
   /**
@@ -66,15 +66,15 @@ export abstract class Type extends PackageBase.Type {
     return [
       ...(
         await readFilesRecursively({
-          path,
-          foldersToExclude: foldersWithoutConfigFiles,
           dontFailOnInexistentPath: false,
+          foldersToExclude: foldersWithoutConfigFiles,
+          path,
         })
       ).map(({ relativePath }) => relativePath),
       ...(
         await readFiles({
-          path: join(path, packagesFolderName),
           dontFailOnInexistentPath: true,
+          path: join(path, packagesFolderName),
         })
       ).map((name) => `${packagesFolderName}/${name}`),
     ];
@@ -149,7 +149,7 @@ export const generateAndSaveConfigFiles = async (
 ): Promise<ConfigFiles.Type> => {
   const configFiles = await self._generateConfigFiles(mode);
   /* eslint-disable-next-line functional/no-expression-statements*/
-  await ConfigFiles.save({ packagePath: self.path, packageName: self.name })(configFiles);
+  await ConfigFiles.save({ packageName: self.name, packagePath: self.path })(configFiles);
   return configFiles;
 };
 
@@ -169,8 +169,9 @@ export const generateSaveAndCheckDevConfigFiles = async (self: Type): Promise<vo
   const unexpectedConfigFiles = existingConfigFiles.filter(
     (relativePath) => !filesToCreate.includes(relativePath),
   );
-  if (unexpectedConfigFiles.length > 0)
+  if (unexpectedConfigFiles.length > 0) {
     throw new Error(
       `Package '${self.name}': following unexpected files were found: '${unexpectedConfigFiles.join("', '")}'`,
     );
+  }
 };

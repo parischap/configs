@@ -3,7 +3,12 @@
     "./tsconfig.base.json"
   ],
   "include": [
-    "tests/**/*"
+    "tests/**/*.js",
+    "tests/**/*.mjs",
+    "tests/**/*.cjs",
+    "tests/**/*.ts",
+    "tests/**/*.mts",
+    "tests/**/*.cts"
   ],
   "references": [
     {
@@ -11,9 +16,8 @@
     }
   ],
   "compilerOptions": {
-    "tsBuildInfoFile": ".tsbuildinfo/tests.tsbuildinfo",
-    "rootDir": ".",
+    "declarationDir": "dist/dts",
     "outDir": "dist",
-    "declarationDir": "dist/tests/dts"
+    "tsBuildInfoFile": ".tsbuildinfo/tests.tsbuildinfo"
   }
 }

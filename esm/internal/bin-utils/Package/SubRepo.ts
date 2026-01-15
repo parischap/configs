@@ -4,9 +4,9 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import { type Data } from '../../shared-utils/utils.js';
-import * as ConfigFiles from '../ConfigFiles.js';
-import * as PackageBase from './Base.js';
+import type { Data } from '../../shared-utils/utils.js';
+import type * as ConfigFiles from '../ConfigFiles.js';
+import type * as PackageBase from './Base.js';
 import * as PackageLoadedSource from './LoadedSource.js';
 
 /**
@@ -52,7 +52,7 @@ export class Type extends PackageLoadedSource.Type {
   }
 
   /** Generates the configuration files of `self` */
-  override _generateConfigFiles(this: Type, mode: ConfigFiles.Mode): Promise<ConfigFiles.Type> {
+  override  async _generateConfigFiles(this: Type, mode: ConfigFiles.Mode): Promise<ConfigFiles.Type> {
     return super._generateConfigFiles(mode);
   }
 
@@ -67,6 +67,6 @@ export class Type extends PackageLoadedSource.Type {
  *
  * @category Constructors
  */
-export const fromPackageBase = (params: {
+export const fromPackageBase =  async (params: {
   readonly packageBase: PackageBase.Type;
 }): Promise<Type> => Type.fromPackageBase(params);

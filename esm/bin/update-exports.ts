@@ -22,12 +22,12 @@ console.log('Generating exports config files');
 const argsFormat = SchemaFormat.make({
   descriptors: {
     '-activePackageOnly': SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.boolean,
       defaultValue: false,
+      expectedType: SchemaParameterType.boolean,
     }),
     '-watch': SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.boolean,
       defaultValue: false,
+      expectedType: SchemaParameterType.boolean,
     }),
   },
 });
@@ -37,7 +37,7 @@ const { '-activePackageOnly': activePackageOnly, '-watch': isWatch } =
     allowStringConversion: true,
   })(getExeFlags());
 
-if (isWatch) console.log('Watch mode activated');
+if (isWatch) {console.log('Watch mode activated');}
 
 const project = await ProjectLoaded.filteredFromActiveProject(
   activePackageOnly ? PackageBase.isActive : () => true,

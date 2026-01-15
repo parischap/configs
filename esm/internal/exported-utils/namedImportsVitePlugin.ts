@@ -1,5 +1,5 @@
-import { extname } from 'path';
-import { type PluginOption } from 'vite';
+import { extname } from 'node:path';
+import type { PluginOption } from 'vite';
 import { javaScriptExtensions, slashedScope } from '../shared-utils/constants.js';
 import { partitionArray } from '../shared-utils/utils.js';
 
@@ -8,7 +8,7 @@ const importRegExp =
 const commaRegExp = /\s*,\s*/;
 const asRegExp = /\s+as\s+/;
 const effectSlashedScope = '@effect/';
-const importsFromEffectFunction = ['absurd', 'flow', 'hole', 'identity', 'pipe', 'unsafeCoerce'];
+const importsFromEffectFunction = new Set(['absurd', 'flow', 'hole', 'identity', 'pipe', 'unsafeCoerce']);
 
 export default {
   name: 'transform-named-imports-to-namespace-imports',
@@ -45,12 +45,12 @@ export default {
         const [functionImports, nonFunctionImports] =
           isEffect ?
             partitionArray(namedImportsAsEntries, ([importName]) =>
-              importsFromEffectFunction.includes(importName),
+              importsFromEffectFunction.has(importName),
             )
           : [[], namedImportsAsEntries];
 
         return [
-          ...(functionImports.length !== 0 ?
+          ...(functionImports.length > 0 ?
             [
               'import {'
                 + functionImports
@@ -71,6 +71,6 @@ export default {
     );
 
     // If lengths are equal, no transformation happened
-    return transformedCode.length === code.length ? null : { code: transformedCode };
+    return transformedCode.length === code.length ? undefined : { code: transformedCode };
   },
 } satisfies PluginOption;

@@ -1,0 +1,6 @@
+export default {
+  $schema: './node_modules/oxfmt/configuration_schema.json',
+  experimentalSortImports: true,
+  printWidth: 100,
+  singleQuote: true,
+};

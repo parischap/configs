@@ -2,10 +2,10 @@
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 import {
   type Data,
-  isStringArray,
-  isStringRecord,
   type ReadonlyStringRecord,
   type StringArray,
+  isStringArray,
+  isStringRecord,
 } from '../../shared-utils/utils.js';
 
 /**
@@ -72,7 +72,7 @@ export const union = <const Types extends ReadonlyArray<Type<unknown>>>(
 ): Type<{ readonly [k in keyof Types]: RealType<Types[k]> }[number]> =>
   make({
     guard: (value: unknown): value is { readonly [k in keyof Types]: RealType<Types[k]> }[number] =>
-      types.map(({ guard }) => guard(value)).find((elem) => elem) !== undefined,
+      types.map(({ guard }) => guard(value)).some((elem) => elem) !== undefined,
     name: types.map(({ name }) => name).join('Or'),
   });
 

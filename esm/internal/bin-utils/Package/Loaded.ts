@@ -5,10 +5,10 @@
  */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
-import * as PackageMonoRepo from "./MonoRepo.js";
-import * as PackageOnePackageRepo from "./OnePackageRepo.js";
-import * as PackageSubRepo from "./SubRepo.js";
-import * as PackageTop from "./Top.js";
+import type * as PackageMonoRepo from "./MonoRepo.js";
+import type * as PackageOnePackageRepo from "./OnePackageRepo.js";
+import type * as PackageSubRepo from "./SubRepo.js";
+import type * as PackageTop from "./Top.js";
 
 /**
  * Type of a Package

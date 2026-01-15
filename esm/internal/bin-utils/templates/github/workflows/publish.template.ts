@@ -9,22 +9,12 @@
  */
 
 import { githubActionTimeOut } from '../../../../shared-utils/constants.js';
-import { type ReadonlyRecord } from '../../../../shared-utils/utils.js';
+import type { ReadonlyRecord } from '../../../../shared-utils/utils.js';
 
 export default {
-  name: 'publish',
-  on: {
-    workflow_dispatch: null,
-    release: {
-      types: ['created'],
-    },
-  },
   concurrency: {
     group: '${{ github.workflow }}-${{ github.ref }}',
     'cancel-in-progress': true,
-  },
-  permissions: {
-    'id-token': 'write',
   },
   jobs: {
     publish: {
@@ -104,5 +94,15 @@ export default {
         },
       ],
     },
+  },
+  name: 'publish',
+  on: {
+    workflow_dispatch: null,
+    release: {
+      types: ['created'],
+    },
+  },
+  permissions: {
+    'id-token': 'write',
   },
 } satisfies ReadonlyRecord;

@@ -1,7 +1,7 @@
 /** Module that describes the type and optional default value of a parameter */
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
-import { type Data } from '../../shared-utils/utils.js';
-import * as SchemaParameterType from './ParameterType.js';
+import type { Data } from '../../shared-utils/utils.js';
+import type * as SchemaParameterType from './ParameterType.js';
 
 /**
  * Module tag
@@ -79,15 +79,15 @@ export const validate =
   }) =>
   <RealType>(self: Type<RealType>): RealType => {
     const { expectedType } = self;
-    if (expectedType.guard(value)) return value;
+    if (expectedType.guard(value)) {return value;}
 
     if (!allowStringConversion || typeof value !== 'string')
-      throw new Error(
+      {throw new Error(
         `${errorPrefix}Parameter should be of type '${expectedType.name}'. Actual: ${JSON.stringify(value)}`,
-      );
+      );}
 
     const convertedValue: unknown = JSON.parse(value);
-    if (expectedType.guard(convertedValue)) return convertedValue;
+    if (expectedType.guard(convertedValue)) {return convertedValue;}
 
     throw new Error(
       `${errorPrefix}Parameter should be of type '${expectedType.name}'. Actual: ${JSON.stringify(value)}`,

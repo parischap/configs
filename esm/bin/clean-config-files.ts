@@ -15,8 +15,8 @@ console.log('Removing all configuration files');
 const argsFormat = SchemaFormat.make({
   descriptors: {
     '-activePackageOnly': SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.boolean,
       defaultValue: false,
+      expectedType: SchemaParameterType.boolean,
     }),
   },
 });

@@ -6,10 +6,10 @@
 
 import { join } from 'node:path';
 import { indexTsFilename, sourceFolderName } from '../../shared-utils/constants.js';
-import {
-  type Data,
-  type ReadonlyStringRecord,
-  type StringArray,
+import type {
+  Data,
+  ReadonlyStringRecord,
+  StringArray,
 } from '../../shared-utils/utils.js';
 import * as ConfigFiles from '../ConfigFiles.js';
 import * as SchemaFormat from '../Schema/Format.js';
@@ -56,38 +56,42 @@ export type Environment = SchemaParameterType.RealType<typeof Environment>;
 
 const sourcePackageFormat = SchemaFormat.make({
   descriptors: {
-    description: SchemaParameterDescriptor.make({ expectedType: SchemaParameterType.string }),
+    buildMethod: SchemaParameterDescriptor.make({
+      expectedType: BuildMethod,
+    }),
     dependencies: SchemaParameterDescriptor.make({
       expectedType: SchemaParameterType.readonlyStringRecord,
       defaultValue: {},
     }),
+    description: SchemaParameterDescriptor.make({ expectedType: SchemaParameterType.string }),
     devDependencies: SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.readonlyStringRecord,
-      defaultValue: {},
-    }),
-    peerDependencies: SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.readonlyStringRecord,
-      defaultValue: {},
-    }),
-    examples: SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.readonlyStringArray,
-      defaultValue: [],
-    }),
-    scripts: SchemaParameterDescriptor.make({
       expectedType: SchemaParameterType.readonlyStringRecord,
       defaultValue: {},
     }),
     environment: SchemaParameterDescriptor.make({
       expectedType: Environment,
     }),
-    buildMethod: SchemaParameterDescriptor.make({
-      expectedType: BuildMethod,
+    examples: SchemaParameterDescriptor.make({
+      expectedType: SchemaParameterType.readonlyStringArray,
+      defaultValue: [],
     }),
-    isPublished: SchemaParameterDescriptor.make({ expectedType: SchemaParameterType.boolean }),
     hasDocGen: SchemaParameterDescriptor.make({ expectedType: SchemaParameterType.boolean }),
+    isPublished: SchemaParameterDescriptor.make({ expectedType: SchemaParameterType.boolean }),
     keywords: SchemaParameterDescriptor.make({
       expectedType: SchemaParameterType.readonlyStringArray,
       defaultValue: [],
+    }),
+    packagePrefix: SchemaParameterDescriptor.make({
+      expectedType: SchemaParameterType.stringOrUndefined,
+      defaultValue: undefined,
+    }),
+    peerDependencies: SchemaParameterDescriptor.make({
+      expectedType: SchemaParameterType.readonlyStringRecord,
+      defaultValue: {},
+    }),
+    scripts: SchemaParameterDescriptor.make({
+      expectedType: SchemaParameterType.readonlyStringRecord,
+      defaultValue: {},
     }),
     useEffectAsPeerDependency: SchemaParameterDescriptor.make({
       expectedType: SchemaParameterType.boolean,
@@ -95,10 +99,6 @@ const sourcePackageFormat = SchemaFormat.make({
     useEffectPlatform: SchemaParameterDescriptor.make({
       expectedType: SchemaParameterType.boolean,
       defaultValue: false,
-    }),
-    packagePrefix: SchemaParameterDescriptor.make({
-      expectedType: SchemaParameterType.stringOrUndefined,
-      defaultValue: undefined,
     }),
   },
 });
@@ -172,7 +172,7 @@ export abstract class Type extends PackageLoadedBase.Type implements LoadedParam
    */
   readonly useEffectPlatform: boolean;
   /**
-   * string that will be added to automatically generated namespace imports for the package.
+   * String that will be added to automatically generated namespace imports for the package.
    * namespace imports will be automatically generated even if packagePrefix is an empty string. To
    * deactivate it, omit the field. Namespace imports are generated for all JavaScript files except
    * those under the `internal` and `bin` subdirectories.
@@ -204,7 +204,7 @@ export abstract class Type extends PackageLoadedBase.Type implements LoadedParam
   ): Promise<ConfigFiles.Type> {
     return ConfigFiles.merge(
       await super._generateConfigFiles(mode),
-      await ConfigFiles.sourcePackage({ packageLoadedSource: this, mode }),
+      await ConfigFiles.sourcePackage({ mode, packageLoadedSource: this }),
     );
   }
 

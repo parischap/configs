@@ -1,11 +1,12 @@
-import { type ReadonlyRecord } from '../../shared-utils/utils.js';
+import type { ReadonlyRecord } from '../../shared-utils/utils.js';
 export default ({
   allPackagesPaths,
 }: {
   readonly allPackagesPaths: ReadonlyArray<string>;
 }): ReadonlyRecord => ({
   folders: allPackagesPaths.map((path) => ({ path })),
-  /*settings: {
-      'typescript.tsdk': `${npmFolderName}/@typescript/native-preview/lib`
-    },*/
+  // Decomment when tsgo replaces normal typescript
+  /*Settings: {
+    //'typescript.tsdk': `${npmFolderName}/typescript/lib`
+  },*/
 });
