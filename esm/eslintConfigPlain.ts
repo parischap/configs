@@ -11,7 +11,6 @@ import {
   sourceFolderName,
 } from './internal/shared-utils/constants.js';
 import { regExpEscape } from './internal/shared-utils/utils.js';
-
 import eslint from '@eslint/js';
 import json from '@eslint/json';
 import markdown from '@eslint/markdown';
@@ -119,7 +118,7 @@ export default ({ tsconfigRootDir }: { readonly tsconfigRootDir: string }): Arra
           {
             ignoreCodePattern: [
               '^' + regExpEscape('describe('),
-              /^this\.(?<name>[^=]+)\s*=\s*(?:[^.]+\.)?\k<name>/.source,
+              String.raw`^this\.(?<name>[^=]+)\s*=\s*(?:[^.]+\.)?\k<name>`,
               '^' + regExpEscape('console.'),
               '^' + regExpEscape('super('),
               '^' + regExpEscape('expect('),

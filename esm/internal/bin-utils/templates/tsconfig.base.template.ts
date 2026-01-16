@@ -19,7 +19,7 @@ export default {
     sourceMap: true,
     noEmitOnError: false,
     noErrorTruncation: true,
-    target: 'ES2022',
+    target: 'ESNext',
     module: 'NodeNext',
     removeComments: false,
     stripInternal: true,
