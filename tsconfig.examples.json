@@ -3,12 +3,7 @@
     "./tsconfig.base.json"
   ],
   "include": [
-    "examples/**/*.js",
-    "examples/**/*.mjs",
-    "examples/**/*.cjs",
-    "examples/**/*.ts",
-    "examples/**/*.mts",
-    "examples/**/*.cts"
+    "examples/**/*.ts"
   ],
   "references": [
     {

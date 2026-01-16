@@ -1,3 +1,16 @@
-import {basename} from 'node:path';
-import Config from '@parischap/configs/VitestConfigSource';
-export default Config(basename(import.meta.dirname))
+export default {
+  test: {
+    projects: [
+      {
+        test: {
+          exclude: ['node_modules/**'],
+          fileParallelism: false,
+          include: ['tests/*.ts'],
+          isolate: false,
+          name: 'Repo configs',
+          pool: 'threads',
+        },
+      },
+    ],
+  },
+};

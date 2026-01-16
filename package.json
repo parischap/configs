@@ -32,7 +32,7 @@
   "scripts": {
     "test": "vitest run",
     "tscheck": "tsgo -b tsconfig.json --force",
-    "lint": "oxlint --type-aware --type-check --disable-nested-config",
+    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives --disable-nested-config",
     "lint-fix": "oxlint --type-aware --fix",
     "format": "prettier .",
     "clean": "unrun node_modules/@parischap/configs/esm/bin/clean.ts -activePackageOnly",
@@ -72,9 +72,6 @@
     },
     "./TestUtils": {
       "default": "./esm/testUtils.ts"
-    },
-    "./VitestConfigSource": {
-      "default": "./esm/vitestConfigSource.ts"
     }
   },
   "module": "./esm/index.ts",

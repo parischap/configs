@@ -139,15 +139,9 @@ const prefixWith =
 const prefixWithAllFilePatterns = prefixWith(allFilesPattern);
 
 export const allJavaScriptFiles = prefixWithAllFilePatterns(javaScriptExtensions);
-export const allJavaScriptFilesInSource = allJavaScriptFiles.map(
-  (file) => `${sourceFolderName}/${file}`,
-);
-export const allJavaScriptFilesInTests = allJavaScriptFiles.map(
-  (file) => `${testsFolderName}/${file}`,
-);
-export const allJavaScriptFilesInExamples = allJavaScriptFiles.map(
-  (file) => `${examplesFolderName}/${file}`,
-);
+export const allJavaScriptFilesInSource = `${sourceFolderName}/${allFilesPattern}.ts`;
+export const allJavaScriptFilesInTests = `${testsFolderName}/${allFilesPattern}.ts`;
+export const allJavaScriptFilesInExamples = `${examplesFolderName}/${allFilesPattern}.ts`;
 export const allHtmlFiles = prefixWithAllFilePatterns(htmlExtensions);
 export const allMdFiles = prefixWithAllFilePatterns(mdExtensions);
 export const allSimpleJsonFiles = prefixWithAllFilePatterns(simpleJsonExtensions);

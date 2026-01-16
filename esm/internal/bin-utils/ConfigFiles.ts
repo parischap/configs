@@ -36,6 +36,7 @@ import {
   licenseFilename,
   madgeConfigFilename,
   owner,
+  oxfmtConfigFilename,
   oxlintConfigFilename,
   packageJsonFilename,
   packageManager,
@@ -90,11 +91,12 @@ import GithubWorkflowsPublish from './templates/github/workflows/publish.templat
 import GitIgnore from './templates/gitignore.template.js';
 import License from './templates/license.template.js';
 import MadgeConfig from './templates/madgerc.template.js';
+import Oxfmtrc from './templates/oxfmtrc.template.js';
 import OxlintrcNode from './templates/oxlintrc.node.template.js';
 import OxlintrcPlain from './templates/oxlintrc.plain.template.js';
 import PnpmWorkspace from './templates/pnpm-workspace.template.js';
-import FormatterIgnore from './templates/prettierignore.template.js';
-import FormatterConfig from './templates/prettierrc.template.js';
+import PrettierIgnore from './templates/prettierignore.template.js';
+import PrettierConfig from './templates/prettierrc.template.js';
 import TsconfigBase from './templates/tsconfig.base.template.js';
 import TsconfigDocgen from './templates/tsconfig.docgen.template.js';
 import TsconfigExamples from './templates/tsconfig.examples.template.js';
@@ -103,7 +105,7 @@ import TsconfigPlain from './templates/tsconfig.plain.template.js';
 import TsconfigSource from './templates/tsconfig.source.template.js';
 import Tsconfig from './templates/tsconfig.template.js';
 import TsconfigTests from './templates/tsconfig.tests.template.js';
-import VitestConfigSource from './templates/vitest.config.source.template.js';
+import VitestConfig from './templates/vitest.config.template.js';
 import VscodeWorkspace from './templates/vscode-workspace.template.js';
 
 /**
@@ -187,7 +189,16 @@ export const merge = (...packageFilesArr: ReadonlyArray<Type>): Type =>
   );
 
 /**
- * Saves `self` at path `path`
+ * Saves `self` at path `path`. Before saving, the files are converted in the following manner:
+ *
+ * - if the content is a string, it is saved as is
+ * - if the target file is a json file, convert the content to a string with JSON.stringify
+ * - if the target file is a yaml file and the content is a record, convert the content to a string a
+ *   yaml converter
+ * - if the target file is a JavaScript file, convert the content to a string with JSON.stringify and
+ *   prepend `export default `. However, this will only work for simple objects. If the object
+ *   contains functions, symbolic keys or whatever that JSON.stringify cannot render, it will fail.
+ *   This does not work in particular for eslint configuration files that contain plugins.
  *
  * @category Destructors
  */
@@ -204,6 +215,8 @@ export const save =
             () => prettyStringify(fileContent)
           : isRecord(fileContent) && isYml ?
             () => objectToYaml({ errorPrefix: '', value: fileContent }).join('\n')
+          : javaScriptExtensions.includes(ext) ?
+            () => `export default ${prettyStringify(fileContent)}`
           : () => {
               throw new Error(
                 `Entry '${filename}' in '${projectConfigFilename}' must have value of type string`,
@@ -277,9 +290,10 @@ export const anyPackage = ({
     ...(mode === Mode.Dev ?
       {
         // Used by the format script
-        [prettierConfigFilename]: FormatterConfig,
+        [prettierConfigFilename]: PrettierConfig,
+        [oxfmtConfigFilename]: Oxfmtrc,
         // Used by the format script
-        [prettierIgnoreFilename]: FormatterIgnore,
+        [prettierIgnoreFilename]: PrettierIgnore,
         [tsConfigBaseFilename]: TsconfigBase,
       }
     : {}),
@@ -673,7 +687,7 @@ export const sourcePackage = async ({
           // Used by the circular script
           [madgeConfigFilename]: MadgeConfig,
           // Used by the test script
-          [vitestConfigFilename]: VitestConfigSource,
+          [vitestConfigFilename]: VitestConfig(name),
         }
       : {}),
       ...(mode === Mode.Prod ?

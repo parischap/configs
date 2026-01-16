@@ -67,6 +67,7 @@ export default {
         'jsdoc/require-returns': 'off',
 
         'oxc/no-async-await': 'off',
+        'oxc/no-barrel-file': 'off',
         'oxc/no-map-spread': 'off',
         'oxc/no-rest-spread-properties': 'off',
 

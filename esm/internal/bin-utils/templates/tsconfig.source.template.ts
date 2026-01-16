@@ -21,5 +21,5 @@ export default {
     //declarationMap: true,
   },
   extends: [`./${tsConfigBaseFilename}`],
-  include: allJavaScriptFilesInSource,
+  include: [allJavaScriptFilesInSource],
 } satisfies ReadonlyRecord;
