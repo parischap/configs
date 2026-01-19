@@ -8,11 +8,9 @@ import { sep as posixSep } from 'node:path/posix';
  * Redefines the Record type: keys are restricted to strings or symbols. In TypeScript, functions
  * and non-null objects, including arrays, are assignable to this Record definition.
  */
-/* oxlint-disable-next-line @typescript-eslint/no-explicit-any, functional/prefer-readonly-type, @typescript-eslint/no-unsafe-assignment */
 export type Record<K extends string | symbol = string, V = any> = { [k in K]: V };
 
 /** Readonly version of the Record type */
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export type ReadonlyRecord<K extends string | symbol = string, V = any> = Readonly<Record<K, V>>;
 
 /** Alias to Record with string keys and values */
@@ -41,7 +39,6 @@ export const isStringRecord = (v: unknown): v is StringRecord =>
 export const isStringArray = (v: unknown): v is StringArray =>
   isArray(v) && v.filter((value) => typeof value !== 'string').length === 0;
 
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export type AnyFunction = (...args: ReadonlyArray<any>) => any;
 
 /**
@@ -69,8 +66,7 @@ export const capitalizeFirstLetter = (s: string): string => s.charAt(0).toUpperC
  * @category Utils
  */
 export const regExpEscape = (s: string): string =>
-  // @ts-expect-error Awaiting bug correction in typescript
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
+  /* oxlint-disable-next-line typescript-eslint/no-unsafe-call */ /* @ts-expect-error Awaiting bug correction in typescript */
   RegExp.escape(s);
 
 /**
@@ -124,10 +120,8 @@ export const prettyStringify = (v: unknown): string => JSON.stringify(v, undefin
 type MergedRecord<R1, R2> =
   R1 extends Record ?
     R2 extends Record ?
-      /* eslint-disable-next-line functional/prefer-readonly-type */
       {
         [key in keyof R1 as [key] extends [keyof R2] ? never : key]: R1[key];
-        /* eslint-disable-next-line functional/prefer-readonly-type */
       } & { [key in keyof R2 as [key] extends [keyof R1] ? never : key]: R2[key] } & {
         [key in keyof R1 as [key] extends [keyof R2] ? key : never]: [key] extends [keyof R2] ?
           MergedRecord<R1[key], R2[key]>
@@ -158,14 +152,12 @@ export const deepMerge2 = <R1 extends ReadonlyRecord, R2 extends ReadonlyRecord>
     if (secondKey in first) {
       /* @ts-expect-error Typescript should narrow first but does not */
       const firstValue: unknown = first[secondKey];
-      /* eslint-disable-next-line functional/no-expression-statements, functional/immutable-data */
       result[secondKey as string] =
         isArray(secondValue) && isArray(firstValue) ? ([...firstValue, ...secondValue] as never)
         : isRecord(secondValue) && isRecord(firstValue) ?
           (deepMerge2(firstValue, secondValue) as never)
         : secondValue;
-    } else /* eslint-disable-next-line functional/no-expression-statements, functional/immutable-data */
-    {
+    } else {
       result[secondKey as string] = secondValue;
     }
   }

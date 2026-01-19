@@ -11,7 +11,7 @@ import {
   tsConfigSourceFilename,
   typesFolderName,
 } from '../../shared-utils/constants.js';
-import { type ReadonlyRecord } from '../../shared-utils/utils.js';
+import type { ReadonlyRecord } from '../../shared-utils/utils.js';
 
 // Must work at all levels: top, monorepo, one-package repo, subrepo
 export default (isConfigsPackage: boolean): ReadonlyRecord => ({

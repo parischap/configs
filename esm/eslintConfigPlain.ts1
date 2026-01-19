@@ -1,3 +1,9 @@
+import eslint from '@eslint/js';
+import json from '@eslint/json';
+import markdown from '@eslint/markdown';
+import html from '@html-eslint/eslint-plugin';
+import eslintConfigPrettier from 'eslint-config-prettier';
+import functional from 'eslint-plugin-functional';
 import {
   allHtmlFiles,
   allJavaScriptFiles,
@@ -11,12 +17,6 @@ import {
   sourceFolderName,
 } from './internal/shared-utils/constants.js';
 import { regExpEscape } from './internal/shared-utils/utils.js';
-import eslint from '@eslint/js';
-import json from '@eslint/json';
-import markdown from '@eslint/markdown';
-import html from '@html-eslint/eslint-plugin';
-import eslintConfigPrettier from 'eslint-config-prettier';
-import functional from 'eslint-plugin-functional';
 //Import { importX } from 'eslint-plugin-import-x';
 import eslintPluginYml from 'eslint-plugin-yml';
 import { type Config, defineConfig, globalIgnores } from 'eslint/config';

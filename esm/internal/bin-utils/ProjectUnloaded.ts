@@ -6,8 +6,7 @@
 /* This module must not import any external dependency. It must be runnable without a package.json because it is used by the generate-config-files.ts bin */
 
 import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { join, sep } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 import { configsPackageName, packagesFolderName } from '../shared-utils/constants.js';
 import { type Data, readFolders } from '../shared-utils/utils.js';
 import * as PackageUnloaded from './Package/Unloaded.js';
@@ -60,12 +59,15 @@ export const fromActiveProject = async (): Promise<Type> => {
   // With resolve, we are sure to get an absolute path
   const currentPath = resolve();
   const splitPath = currentPath.split(sep);
+  /* oxlint-disable-next-line eslint-plugin-unicorn(prefer-array-index-of */
   const firstPackagesIndex = splitPath.findIndex((split) => split === packagesFolderName);
   const indexAfterTop =
     firstPackagesIndex > 0 ? firstPackagesIndex
-    : (existsSync(packagesFolderName) ? splitPath.length
-    : -1);
-  if (indexAfterTop <= 0) {throw new Error('Could not find project root');}
+    : existsSync(packagesFolderName) ? splitPath.length
+    : -1;
+  if (indexAfterTop <= 0) {
+    throw new Error('Could not find project root');
+  }
   const topPackageName = splitPath[indexAfterTop - 1]!;
   const topPackagePath = join(...splitPath.slice(0, indexAfterTop));
 
@@ -87,8 +89,8 @@ export const fromActiveProject = async (): Promise<Type> => {
         isConfigsPackage: false,
       }),
       ...(
-        await Promise.all([
-          ...repoNames.map(async (repoName) => {
+        await Promise.all(
+          repoNames.map(async (repoName) => {
             const repoPath = join(topPackagePackagesPath, repoName);
             const repoPackagesPath = join(repoPath, packagesFolderName);
             const subRepos = await readFolders({
@@ -96,7 +98,7 @@ export const fromActiveProject = async (): Promise<Type> => {
               dontFailOnInexistentPath: true,
             });
 
-            const isMonoRepo = subRepos.length !== 0;
+            const isMonoRepo = subRepos.length > 0;
 
             return [
               PackageUnloaded.make({
@@ -117,7 +119,7 @@ export const fromActiveProject = async (): Promise<Type> => {
               ),
             ];
           }),
-        ])
+        )
       ).flat(),
     ],
     topPackagePath,
@@ -156,7 +158,7 @@ export const filterAndShowCount =
   (predicate: (t: PackageUnloaded.Type) => boolean) =>
   (self: Type): Type => {
     const result = filter(predicate)(self);
-    /* eslint-disable-next-line functional/no-expression-statements */
+
     showCount(result);
     return result;
   };

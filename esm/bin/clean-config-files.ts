@@ -32,11 +32,9 @@ const project = await ProjectLoaded.filteredFromActiveProjectAndShowCount(
   activePackageOnly ? PackageBase.isActive : () => true,
 );
 
-/* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
   project.packages.map(async (currentPackage) => {
     try {
-      /* eslint-disable-next-line functional/no-expression-statements*/
       await PackageLoadedBase.cleanConfigFiles(currentPackage);
     } catch (e: unknown) {
       console.log(`Package '${currentPackage.name}': error rethrown`);

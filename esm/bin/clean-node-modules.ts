@@ -32,7 +32,6 @@ const project = await ProjectUnloaded.filteredFromActiveProjectAndShowCount(
   activePackageOnly ? PackageBase.isActive : () => true,
 );
 
-/* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
   project.packages.map(async (currentPackage) => {
     try {

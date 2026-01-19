@@ -82,18 +82,20 @@ export const injectDefaultsAndValidate = <P extends ReadonlyRecord<string, unkno
     const parameterDescriptorsCpy = Object.fromEntries(
       descriptors.map(([key, value]) => [
         key,
-        /* eslint-disable-next-line functional/prefer-readonly-type */
         { ...value } as SchemaParameterDescriptor.Type<unknown> & { value?: unknown },
       ]),
     );
 
     for (const [key, value] of parameters) {
       const descriptor = parameterDescriptorsCpy[key];
-      if (descriptor === undefined) {throw new Error(`${errorPrefix}Unexpected parameter '${key}'`);}
+      if (descriptor === undefined) {
+        throw new Error(`${errorPrefix}Unexpected parameter '${key}'`);
+      }
 
-      if ('value' in descriptor) {throw new Error(`${errorPrefix}Parameter '${key}' received twice`);}
+      if ('value' in descriptor) {
+        throw new Error(`${errorPrefix}Parameter '${key}' received twice`);
+      }
 
-      /* eslint-disable-next-line functional/no-expression-statements, functional/immutable-data */
       descriptor.value = SchemaParameterDescriptor.validate({
         allowStringConversion,
         errorPrefix,
@@ -102,9 +104,12 @@ export const injectDefaultsAndValidate = <P extends ReadonlyRecord<string, unkno
     }
     return Object.fromEntries(
       Object.entries(parameterDescriptorsCpy).map(([key, extendedDescriptor]) => {
-        if ('value' in extendedDescriptor) {return [key, extendedDescriptor['value']] as const;}
-        if ('defaultValue' in extendedDescriptor)
-          {return [key, extendedDescriptor['defaultValue']] as const;}
+        if ('value' in extendedDescriptor) {
+          return [key, extendedDescriptor['value']] as const;
+        }
+        if ('defaultValue' in extendedDescriptor) {
+          return [key, extendedDescriptor['defaultValue']] as const;
+        }
         throw new Error(`${errorPrefix}Mandatory parameter '${key}' was not provided`);
       }),
     ) as never;

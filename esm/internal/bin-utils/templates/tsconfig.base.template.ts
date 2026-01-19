@@ -10,9 +10,7 @@ export default {
     composite: true,
     incremental: true,
     resolveJsonModule: true,
-    esModuleInterop: false,
     declaration: true,
-    skipLibCheck: true,
     emitDecoratorMetadata: true,
     experimentalDecorators: true,
     moduleResolution: 'NodeNext',
@@ -24,7 +22,6 @@ export default {
     removeComments: false,
     stripInternal: true,
     // Enabling dts generation on a per-file basis
-    isolatedModules: true,
     isolatedDeclarations: true,
     lib: ['ESNext'],
     types: ['node'],

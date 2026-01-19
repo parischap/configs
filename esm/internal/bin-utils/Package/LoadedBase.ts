@@ -103,7 +103,6 @@ export const getPathsOfExistingConfigFiles = (self: Type): Promise<Array<string>
 export const cleanConfigFiles = async (self: Type): Promise<void> => {
   const configFiles = await getPathsOfExistingConfigFiles(self);
 
-  /* eslint-disable-next-line functional/no-expression-statements*/
   await Promise.all(
     configFiles.map((relativePath) => PackageBase.rmAndLogIfSuccessful(relativePath)(self)),
   );
@@ -117,14 +116,12 @@ export const cleanConfigFiles = async (self: Type): Promise<void> => {
 export const clean = async (self: Type): Promise<void> => {
   const configFiles = await getPathsOfExistingConfigFiles(self);
 
-  /* eslint-disable-next-line functional/no-expression-statements*/
   await Promise.all(
     configFiles.map((relativePath) => PackageBase.rmAndLogIfSuccessful(relativePath)(self)),
   );
 
-  /* eslint-disable-next-line functional/no-expression-statements*/
   await PackageBase.cleanNodeModules(self);
-  /* eslint-disable-next-line functional/no-expression-statements*/
+
   await PackageBase.cleanProd(self);
 };
 
@@ -148,7 +145,7 @@ export const generateAndSaveConfigFiles = async (
   mode: ConfigFiles.Mode,
 ): Promise<ConfigFiles.Type> => {
   const configFiles = await self._generateConfigFiles(mode);
-  /* eslint-disable-next-line functional/no-expression-statements*/
+
   await ConfigFiles.save({ packageName: self.name, packagePath: self.path })(configFiles);
   return configFiles;
 };

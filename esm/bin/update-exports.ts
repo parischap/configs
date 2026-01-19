@@ -37,7 +37,9 @@ const { '-activePackageOnly': activePackageOnly, '-watch': isWatch } =
     allowStringConversion: true,
   })(getExeFlags());
 
-if (isWatch) {console.log('Watch mode activated');}
+if (isWatch) {
+  console.log('Watch mode activated');
+}
 
 const project = await ProjectLoaded.filteredFromActiveProject(
   activePackageOnly ? PackageBase.isActive : () => true,
@@ -49,7 +51,6 @@ const filteredProject = ProjectLoaded.filterAndShowCount(
     && currentPackage.packagePrefix !== undefined,
 )(project);
 
-/* eslint-disable-next-line functional/no-expression-statements*/
 await Promise.all(
   filteredProject.packages.map(async (currentPackage) => {
     try {
@@ -67,18 +68,17 @@ await Promise.all(
                 && javaScriptExtensions.includes(extname(changeFilename)))
             ) {
               console.log(`Updating exports files of package: '${currentPackage.name}'`);
-              /* eslint-disable-next-line functional/no-expression-statements*/
+
               await PackageLoadedBase.generateAndSaveConfigFiles(
                 currentPackage,
                 ConfigFiles.Mode.ExportsOnly,
               );
             }
-            /* eslint-disable-next-line functional/no-expression-statements */
+
             lastEventTime = currentEventTime;
           }
         }
       } else {
-        /* eslint-disable-next-line functional/no-expression-statements*/
         await PackageLoadedBase.generateAndSaveConfigFiles(
           currentPackage,
           ConfigFiles.Mode.ExportsOnly,

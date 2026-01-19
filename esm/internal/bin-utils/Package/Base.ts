@@ -150,7 +150,7 @@ export const rmAndLogIfSuccessful =
   async (self: Type): Promise<void> => {
     try {
       const { path: packagePath, name: packageName } = self;
-      /* eslint-disable-next-line functional/no-expression-statements */
+
       await rm(join(packagePath, relativePath), { recursive: true });
       console.log(`'${packageName}': deleted '${relativePath}'`);
     } catch (e: unknown) {
@@ -166,9 +166,8 @@ export const rmAndLogIfSuccessful =
  * @category Destructors
  */
 export const cleanProd = async (self: Type): Promise<void> => {
-  /* eslint-disable-next-line functional/no-expression-statements*/
   await rmAndLogIfSuccessful(prodFolderName)(self);
-  /* eslint-disable-next-line functional/no-expression-statements*/
+
   await rmAndLogIfSuccessful(tsBuildInfoFolderName)(self);
 };
 
@@ -178,6 +177,5 @@ export const cleanProd = async (self: Type): Promise<void> => {
  * @category Destructors
  */
 export const cleanNodeModules = async (self: Type): Promise<void> => {
-  /* eslint-disable-next-line functional/no-expression-statements*/
   await rmAndLogIfSuccessful(npmFolderName)(self);
 };

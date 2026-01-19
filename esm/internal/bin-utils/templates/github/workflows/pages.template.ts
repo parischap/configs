@@ -8,6 +8,7 @@ import type { ReadonlyRecord } from '../../../../shared-utils/utils.js';
 
 export default {
   concurrency: {
+    /* oxlint-disable-next-line no-template-curly-in-string */
     group: '${{ github.workflow }}-${{ github.ref }}',
     'cancel-in-progress': true,
   },
@@ -66,6 +67,7 @@ export default {
       },
       environment: {
         name: 'github-pages',
+        /* oxlint-disable-next-line no-template-curly-in-string */
         url: '${{ steps.deployment.outputs.page_url }}',
       },
       steps: [

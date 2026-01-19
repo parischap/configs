@@ -115,4 +115,4 @@ Mandatory package documentation
 
 # Usage
 
-If no `package.json` exists, run `pnpx jiti esm/bin/generate-config-files.ts`. Otherwise, run `pnpm generate--all-config-files`
+If no `package.json` exists, run `pnpx unrun esm/bin/generate-config-files.ts`. Otherwise, run `pnpm generate-all-config-files`

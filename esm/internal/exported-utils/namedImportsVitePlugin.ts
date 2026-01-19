@@ -8,7 +8,14 @@ const importRegExp =
 const commaRegExp = /\s*,\s*/;
 const asRegExp = /\s+as\s+/;
 const effectSlashedScope = '@effect/';
-const importsFromEffectFunction = new Set(['absurd', 'flow', 'hole', 'identity', 'pipe', 'unsafeCoerce']);
+const importsFromEffectFunction = new Set([
+  'absurd',
+  'flow',
+  'hole',
+  'identity',
+  'pipe',
+  'unsafeCoerce',
+]);
 
 export default {
   name: 'transform-named-imports-to-namespace-imports',

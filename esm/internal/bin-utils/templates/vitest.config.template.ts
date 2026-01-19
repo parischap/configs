@@ -6,17 +6,11 @@ import { npmFolderName, testsFolderName } from '../../shared-utils/constants.ts'
 export default (name: string) =>
   defineConfig({
     test: {
-      projects: [
-        {
-          test: {
-            exclude: [`${npmFolderName}/**`],
-            fileParallelism: false,
-            include: [`${testsFolderName}/*.ts`],
-            isolate: false,
-            name: `Repo ${name}`,
-            pool: 'threads',
-          },
-        },
-      ],
+      exclude: [`./**/${npmFolderName}/**`],
+      fileParallelism: false,
+      include: [`./**/${testsFolderName}/*.ts`],
+      isolate: false,
+      name: `Repo ${name}`,
+      pool: 'threads',
     },
   });

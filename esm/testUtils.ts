@@ -1,4 +1,3 @@
-/* eslint-disable functional/no-expression-statements */
 import { Array, Either, Equal, Option, Predicate, String, Utils, pipe } from 'effect';
 import * as assert from 'node:assert';
 

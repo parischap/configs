@@ -1,3 +1,4 @@
+//import functional from 'eslint-plugin-functional';
 import {
   allJavaScriptFiles,
   filesGeneratedByThirdParties,
@@ -11,29 +12,16 @@ export default {
     ...foldersGeneratedByThirdParties.map((folderName) => `${folderName}/**`),
     ...filesGeneratedByThirdParties,
   ],
-  /*categories: {
-    correctness: 'error',
-    suspicious: 'error',
-    pedantic: 'error',
-    perf: 'error',
-    style: 'error',
-    restriction: 'error',
-    nursery: 'error',
-  },*/
-  settings: {
-    jsdoc: {
-      tagNamePreference: {
-        category: 'category',
-      },
-    },
-  },
   overrides: [
     {
       files: allJavaScriptFiles,
+      //jsPlugins: ['eslint-plugin-functional'],
       plugins: ['eslint', 'typescript', 'unicorn', 'oxc', 'import', 'jsdoc', 'promise'],
       rules: {
+        /*...functional.configs.off.rules,
+        ...functional.configs.externalTypeScriptRecommended.rules,*/
+
         eqeqeq: 'error',
-        // Enforce function names for better stack traces except for generators
         'func-names': ['error', 'as-needed', { generators: 'never' }],
         'getter-return': 'error',
         'no-await-in-loop': 'error',
@@ -61,9 +49,36 @@ export default {
         'prefer-promise-reject-errors': 'error',
         'preserve-caught-error': 'error',
         radix: 'error',
-        'sort-keys': 'error',
+        //'sort-keys': ['error', 'asc', { allowLineSeparatedGroups: true, natural: true }],
         'valid-typeof': 'off',
-        'yoda': 'error',
+        yoda: 'error',
+
+        /*'functional/prefer-readonly-type': [
+          'error',
+          {
+            allowMutableReturnType: true,
+            // Effect types would not be checked anyway and makes preblems in all type declarations where tuple is used to avoid distributive conditional types
+            ignoreCollections: true,
+          },
+        ],
+        'functional/no-expression-statements': [
+          'error',
+          {
+            ignoreCodePattern: [
+              '^' + regExpEscape('describe('),
+              String.raw`^this\.(?<name>[^=]+)\s*=\s*(?:[^.]+\.)?\k<name>`,
+              '^' + regExpEscape('console.'),
+              '^' + regExpEscape('super('),
+              '^' + regExpEscape('expect('),
+              '^' + regExpEscape('it('),
+              '^' + regExpEscape('process.exit('),
+              '^' + regExpEscape('TestUtils.'),
+            ],
+          },
+        ],
+        'functional/prefer-property-signatures': 'error',
+        'functional/prefer-tacit': 'error',
+        'functional/immutable-data': 'error',*/
 
         'import/export': 'error',
         'import/named': 'error',
@@ -80,7 +95,7 @@ export default {
         'oxc/double-comparisons': 'off',
         'oxc/erasing-op': 'off',
         'oxc/uninvoked-array-callback': 'off',
-        
+
         'promise/no-multiple-resolved': 'error',
         'promise/no-return-wrap': 'error',
         'promise/no-single-promise-in-promise-methods': 'error',
@@ -98,7 +113,7 @@ export default {
         'unicorn/no-typeof-undefined': 'error',
         'unicorn/no-unnecessary-array-splice-count': 'error',
         'unicorn/no-unnecessary-await': 'off',
-        'unicorn/no-useless-undefined': 'error',
+        'unicorn/no-useless-undefined': ['error', { checkArguments: false }],
         'unicorn/no-zero-fractions': 'error',
         'unicorn/number-literal-case': 'error',
         'unicorn/numeric-separators-style': 'error',
@@ -132,11 +147,10 @@ export default {
         'unicorn/require-number-to-fixed-digits-argument': 'error',
         'unicorn/switch-case-braces': 'error',
         'unicorn/text-encoding-identifier-case': 'error',
-        'unicorn/throw-new-error: 'error',
+        'unicorn/throw-new-error': 'error',
 
         '@typescript-eslint/array-type': ['error', { default: 'generic' }],
         '@typescript-eslint/consistent-type-definitions': ['error', { default: 'generic' }],
-        '@typescript-eslint/explicit-function-return-type': 'error',
         '@typescript-eslint/no-confusing-non-null-assertion': 'error',
         '@typescript-eslint/no-confusing-void-expression': [
           'error',
@@ -144,7 +158,6 @@ export default {
         ],
         '@typescript-eslint/no-deprecated': 'error',
         '@typescript-eslint/no-dynamic-delete': 'error',
-        // We want to be able to use an empty object type in interfaces that specialize a generic type
         '@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'always' }],
         '@typescript-eslint/no-import-type-side-effects': 'error',
         '@typescript-eslint/no-misused-promises': 'error',
@@ -162,8 +175,8 @@ export default {
           'error',
           {
             argsIgnorePattern: '^_',
-            varsIgnorePattern: '^_',
             caughtErrorsIgnorePattern: '^_',
+            varsIgnorePattern: '^_',
           },
         ],
         '@typescript-eslint/non-nullable-type-assertion-style': 'error',
@@ -179,63 +192,14 @@ export default {
         '@typescript-eslint/restrict-plus-operands': 'error',
         '@typescript-eslint/strict-boolean-expressions': 'error',
         '@typescript-eslint/switch-exhaustiveness-check': 'error',
-
-        /*'class-methods-use-this': 'off',
-        curly: 'off',
-        
-        'func-style': 'off',
-        'id-length': 'off',
-        'max-lines': 'off',
-        'max-lines-per-function': 'off',
-        'max-params': 'off',
-        'max-statements': 'off',
-        'new-cap': 'off',
-        'no-await-expression-member': 'off',
-        'no-console': 'off',
-        'no-inline-comments': 'off',
-        'no-magic-numbers': 'off',
-        'no-negated-condition': 'off',
-        'no-nested-ternary': 'off',
-        'no-rest-spread-propertiess': 'off',
-        'no-ternary': 'off',
-        // We want to allow types and variables with same names
-        'no-redeclare': 'off',
-        'no-undefined': 'off',
-        'prefer-template': 'off',
-        'sort-keys': 'off',
-
-        'import/consistent-type-specifier-style': 'off',
-        'import/max-dependencies': 'off',
-        'import/no-anonymous-default-export': 'off',
-        'import/no-default-export': 'off',
-        'import/no-namespace': 'off',
-
-        'jsdoc/require-param': 'off',
-        'jsdoc/require-returns': 'off',
-
-        'oxc/no-async-await': 'off',
-        'oxc/no-barrel-file': 'off',
-        'oxc/no-map-spread': 'off',
-        'oxc/no-rest-spread-properties': 'off',
-
-        'unicorn/catch-error-name': 'off',
-        'unicorn/filename-case': 'off',
-        'unicorn/no-anonymous-default-export': 'off',
-        'unicorn/no-array-callback-reference': 'off',
-        'unicorn/no-array-reduce': 'off',
-        'unicorn/no-nested-ternary': 'off',
-
-        
-        '@typescript-eslint/consistent-indexed-object-style': 'off',
-        '@typescript-eslint/explicit-function-return-type': 'off',
-        '@typescript-eslint/no-empty-interface': 'off',
-        // We want to be able to use namespaces
-        '@typescript-eslint/no-namespace': 'off',
-        // Useful to avoid using the `any` type
-        '@typescript-eslint/no-unnecessary-type-parameters': 'off',
-        '@typescript-eslint/no-unsafe-type-assertion': 'off',
-        '@typescript-eslint/promise-function-async': 'off',*/
       },
     },
   ],
+  settings: {
+    jsdoc: {
+      tagNamePreference: {
+        category: 'category',
+      },
+    },
+  },
 } satisfies ReadonlyRecord;

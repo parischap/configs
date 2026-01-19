@@ -6,8 +6,8 @@ import OxlintRcPlain from './oxlintrc.plain.template.js';
 export default deepMerge2(OxlintRcPlain, {
   overrides: [
     {
-      files: allJavaScriptFilesInSource,
       env: { node: true },
+      files: [allJavaScriptFilesInSource],
     },
   ],
 }) satisfies ReadonlyRecord;

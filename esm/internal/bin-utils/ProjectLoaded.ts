@@ -78,18 +78,22 @@ export const filteredFromActiveProject = async (
       ProjectUnloaded.filter(predicate)(unloadedProject).packages.map(async (currentPackage) => {
         const { type } = currentPackage;
         switch (type) {
-          case 'MonoRepo':
-            return  PackageMonoRepo.fromPackageBase({ packageBase: currentPackage });
-          case 'OnePackageRepo':
-            return  PackageOnePackageRepo.fromPackageBase({ packageBase: currentPackage });
-          case 'SubRepo':
-            return  PackageSubRepo.fromPackageBase({ packageBase: currentPackage });
-          case 'Top':
+          case 'MonoRepo': {
+            return PackageMonoRepo.fromPackageBase({ packageBase: currentPackage });
+          }
+          case 'OnePackageRepo': {
+            return PackageOnePackageRepo.fromPackageBase({ packageBase: currentPackage });
+          }
+          case 'SubRepo': {
+            return PackageSubRepo.fromPackageBase({ packageBase: currentPackage });
+          }
+          case 'Top': {
             return PackageTop.fromPackageBase({
               packageBase: currentPackage,
               allSourcePackagesNames,
               allPackagesPaths,
             });
+          }
         }
       }),
     ),
@@ -115,7 +119,7 @@ export const filteredFromActiveProjectAndShowCount = async (
   predicate: (t: PackageUnloaded.Type) => boolean,
 ): Promise<Type> => {
   const result = await filteredFromActiveProject(predicate);
-  /* eslint-disable-next-line functional/no-expression-statements */
+
   showCount(result);
   return result;
 };
@@ -143,7 +147,7 @@ export const filterAndShowCount =
   (predicate: (t: PackageLoaded.Type) => boolean) =>
   (self: Type): Type => {
     const result = filter(predicate)(self);
-    /* eslint-disable-next-line functional/no-expression-statements */
+
     showCount(result);
     return result;
   };

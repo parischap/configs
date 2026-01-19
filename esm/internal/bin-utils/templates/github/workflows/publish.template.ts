@@ -13,6 +13,7 @@ import type { ReadonlyRecord } from '../../../../shared-utils/utils.js';
 
 export default {
   concurrency: {
+    /* oxlint-disable-next-line no-template-curly-in-string */
     group: '${{ github.workflow }}-${{ github.ref }}',
     'cancel-in-progress': true,
   },
@@ -44,6 +45,7 @@ export default {
         {
           name: 'Get latest release when entering by workflow_dispatch',
           run: 'git fetch --prune --unshallow\necho "previous_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo \'\')" >> $GITHUB_ENV\n',
+          /* oxlint-disable-next-line no-template-curly-in-string */
           if: '${{!github.event.release.tag_name}}',
         },
         {
@@ -51,6 +53,7 @@ export default {
           id: 'determine-repo_and_version',
           uses: 'actions/github-script@v7',
           env: {
+            /* oxlint-disable-next-line no-template-curly-in-string */
             previous_tag: '${{env.previous_tag}}',
           },
           with: {
@@ -60,19 +63,23 @@ export default {
         },
         {
           id: 'get-version-validity',
+          /* oxlint-disable-next-line no-template-curly-in-string */
           run: 'echo "versionValidity=${{fromJson(steps.determine-repo_and_version.outputs.result).versionValidity}}" >> $GITHUB_OUTPUT',
         },
         {
           name: 'Fail if version number is ill-formed',
+          /* oxlint-disable-next-line no-template-curly-in-string */
           if: "${{steps.get-version-validity.outputs.versionValidity == 'false'}}",
           run: 'exit 1',
         },
         {
           id: 'get-version',
+          /* oxlint-disable-next-line no-template-curly-in-string */
           run: 'echo "version=${{fromJson(steps.determine-repo_and_version.outputs.result).version}}" >> $GITHUB_OUTPUT',
         },
         {
           id: 'get-repo',
+          /* oxlint-disable-next-line no-template-curly-in-string */
           run: 'echo "repo=${{fromJson(steps.determine-repo_and_version.outputs.result).repo}}" >> $GITHUB_OUTPUT',
         },
         {
@@ -80,14 +87,18 @@ export default {
           id: 'update-package-json',
           uses: 'jaywcjlove/github-action-package@main',
           with: {
+            /* oxlint-disable-next-line no-template-curly-in-string */
             path: "'${{steps.get-repo.outputs.repo}}/package.json'",
+            /* oxlint-disable-next-line no-template-curly-in-string */
             version: '${{steps.get-version.outputs.version}}',
           },
         },
         {
           name: 'Build and publish',
+          /* oxlint-disable-next-line no-template-curly-in-string */
           'working-directory': '${{steps.get-repo.outputs.repo}}',
           env: {
+            /* oxlint-disable-next-line no-template-curly-in-string */
             NODE_AUTH_TOKEN: '${{ secrets.NPM_PUBLISH_TOKEN }}',
           },
           run: 'pnpm build-and-publish',

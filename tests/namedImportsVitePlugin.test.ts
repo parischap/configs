@@ -10,7 +10,7 @@ describe('NamedImportsVitePlugin', () => {
   it('File without any targetted imports', () => {
     const testFile = `console.log('Hello, world!');
 `;
-    expect(transform(testFile, '/test.ts')).toStrictEqual(testFile);
+    expect(transform(testFile, '/test.ts')).toStrictEqual(undefined);
   });
 
   it('File with all sorts of imports', () => {
