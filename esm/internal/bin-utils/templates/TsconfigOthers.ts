@@ -1,8 +1,8 @@
 import { extname } from 'node:path';
 import {
   filesGeneratedByThirdParties,
-  foldersWithoutConfigFiles,
-  javaScriptExtensions,
+  foldersWithoutConfigFilesArray,
+  javaScriptExtensionSet,
   othersFolderName,
   othersMark,
   prodFolderName,
@@ -17,8 +17,8 @@ import type { ReadonlyRecord } from '../../shared-utils/utils.js';
 export default (isConfigsPackage: boolean): ReadonlyRecord => ({
   extends: [`./${tsConfigBaseFilename}`],
   exclude: [
-    ...foldersWithoutConfigFiles,
-    ...filesGeneratedByThirdParties.filter((file) => javaScriptExtensions.includes(extname(file))),
+    ...foldersWithoutConfigFilesArray,
+    ...filesGeneratedByThirdParties.filter((file) => javaScriptExtensionSet.has(extname(file))),
   ],
   // The configs package others project needs to import the source project, e.g. eslint.config.ts, vitest.config.ts...
   ...(isConfigsPackage ? { references: [{ path: tsConfigSourceFilename }] } : {}),

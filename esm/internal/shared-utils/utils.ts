@@ -318,7 +318,7 @@ export const readFilesRecursively = async ({
   relativePathSource = path,
 }: {
   readonly path: string;
-  readonly foldersToExclude: ReadonlyArray<string>;
+  readonly foldersToExclude: ReadonlySet<string>;
   readonly dontFailOnInexistentPath: boolean;
   readonly relativePathSource?: string;
 }): Promise<
@@ -335,7 +335,7 @@ export const readFilesRecursively = async ({
   const topContents = await readDir({ dontFailOnInexistentPath, path, recursive: false });
   const topFolders = topContents
     .filter((dirent) => dirent.isDirectory())
-    .filter(({ name }) => !foldersToExclude.includes(name))
+    .filter(({ name }) => !foldersToExclude.has(name))
     .map(({ name }) => name);
 
   const otherContents = await Promise.all(

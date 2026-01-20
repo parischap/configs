@@ -106,7 +106,7 @@ export const foldersGeneratedByThirdParties = [
   packagesFolderName,
 ];
 
-export const foldersWithoutConfigFiles = [
+export const foldersWithoutConfigFilesArray = [
   ...foldersGeneratedByThirdParties,
   sourceFolderName,
   examplesFolderName,
@@ -114,23 +114,23 @@ export const foldersWithoutConfigFiles = [
   readmeAssetsFolderName,
 ];
 
+export const foldersWithoutConfigFilesSet = new Set(foldersWithoutConfigFilesArray);
+
 export const filesGeneratedByThirdParties = [viteTimeStampFilenamePattern, pnpmLockFilename];
 
 export const binariesPath = `${npmFolderName}/${slashedScope}${configsPackageName}/${sourceFolderName}/${binariesFolderName}`;
 
 export const allFilesPattern = '**/*';
-const allFilesInMd = allFilesPattern + '.md/*';
 
-export const jsExtensions = ['.js', '.mjs', '.cjs'];
-export const tsExtensions = ['.ts', '.mts', '.cts'];
-export const javaScriptExtensions = [...jsExtensions, ...tsExtensions];
-export const htmlExtensions = ['.html', '.htm'];
-export const mdExtensions = ['.md'];
-export const simpleJsonExtensions = ['.json'];
-export const jsoncExtensions = ['.jsonc', '.code-workspace'];
-export const json5Extensions = ['.json5'];
-export const jsonExtensions = [...simpleJsonExtensions, ...jsoncExtensions, ...json5Extensions];
-export const ymlExtensions = ['.yml', '.yaml'];
+export const javaScriptExtensionArray = ['.js', '.mjs', '.cjs', '.ts', '.mts', '.cts'];
+export const javaScriptExtensionSet = new Set(javaScriptExtensionArray);
+export const jsoncExtensionArray = ['.jsonc', '.code-workspace'];
+export const jsonExtensionSet = new Set(['.json', '.json5', ...jsoncExtensionArray]);
+export const ymlExtensionSet = new Set(['.yml', '.yaml']);
+export const filesWithSlashedComments = new Set([
+  ...javaScriptExtensionArray,
+  ...jsoncExtensionArray,
+]);
 
 const prefixWith =
   (prefix: string) =>
@@ -138,19 +138,13 @@ const prefixWith =
     as.map((a) => prefix + a);
 const prefixWithAllFilePatterns = prefixWith(allFilesPattern);
 
-export const allJavaScriptFiles = prefixWithAllFilePatterns(javaScriptExtensions);
+export const allJavaScriptFiles = prefixWithAllFilePatterns(javaScriptExtensionArray);
 export const allJavaScriptFilesInSource = `${sourceFolderName}/${allFilesPattern}.ts`;
 export const allJavaScriptFilesInTests = `${testsFolderName}/${allFilesPattern}.ts`;
 export const allJavaScriptFilesInExamples = `${examplesFolderName}/${allFilesPattern}.ts`;
-export const allHtmlFiles = prefixWithAllFilePatterns(htmlExtensions);
-export const allMdFiles = prefixWithAllFilePatterns(mdExtensions);
-export const allSimpleJsonFiles = prefixWithAllFilePatterns(simpleJsonExtensions);
-export const allJsoncFiles = prefixWithAllFilePatterns(jsoncExtensions);
-export const allJson5Files = prefixWithAllFilePatterns(json5Extensions);
-export const allYmlFiles = prefixWithAllFilePatterns(ymlExtensions);
-export const allJsInMdFiles = prefixWith(allFilesInMd)(javaScriptExtensions);
+//export const allJsInMdFiles = prefixWith(allFilesInMd)(javaScriptExtensions);
 
-export const packageManager = ['pnpm', '10.28.0'] as const;
+export const packageManager = ['pnpm', '10.28.1'] as const;
 export const tsExecuter = ['unrun', '0.2.24'] as const;
 
 export const effectExperimentalVersion = '0.58.0';
@@ -204,7 +198,7 @@ export const baseDevDependencies = {
   // Used by tsconfig.docgen.json and tsconfig.others.json
   '@types/node': '25.0.9',
   // Used by the tscheck script and by vscode and its plugins
-  '@typescript/native-preview': '7.0.0-dev.20260119.1',
+  '@typescript/native-preview': '7.0.0-dev.20260120.1',
   /* Used by the formatterConfig.ts file */
   'prettier-plugin-jsdoc': '1.8.0',
   /* Used by the formatterConfig.ts file. Prefer sorting imports with this plugin rather than with the vscode included functionality so imports will be sorted when calling pnpm format */

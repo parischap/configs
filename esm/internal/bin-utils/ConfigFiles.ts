@@ -22,6 +22,7 @@ import {
   effectDependencies,
   effectPlatformDependencies,
   examplesFolderName,
+  filesWithSlashedComments,
   gitIgnoreFilename,
   githubWorkflowsPagesPath,
   githubWorkflowsPublishPath,
@@ -29,9 +30,8 @@ import {
   indexTsFilename,
   indexTsPath,
   internalFolderName,
-  javaScriptExtensions,
-  jsonExtensions,
-  jsoncExtensions,
+  javaScriptExtensionSet,
+  jsonExtensionSet,
   licenseFilename,
   madgeConfigFilename,
   owner,
@@ -62,7 +62,7 @@ import {
   typesFolderName,
   versionControlService,
   vitestConfigFilename,
-  ymlExtensions,
+  ymlExtensionSet,
 } from '../shared-utils/constants.js';
 import {
   type Data,
@@ -81,29 +81,29 @@ import type * as PackageLoadedSource from './Package/LoadedSource.js';
 import type * as PackageMonoRepo from './Package/MonoRepo.js';
 import type * as PackageOnePackageRepo from './Package/OnePackageRepo.js';
 import type * as PackageTop from './Package/Top.js';
-import Docgen from './templates/docgen.template.js';
-import DocsConfig from './templates/docs/_config.template.js';
-import GithubWorkflowsPages from './templates/github/workflows/pages.template.js';
-import GithubWorkflowsPublish from './templates/github/workflows/publish.template.js';
-import GitIgnore from './templates/gitignore.template.js';
-import License from './templates/license.template.js';
-import MadgeConfig from './templates/madgerc.template.js';
-import Oxfmtrc from './templates/oxfmtrc.template.js';
-import OxlintrcNode from './templates/oxlintrc.node.template.js';
-import OxlintrcPlain from './templates/oxlintrc.plain.template.js';
-import PnpmWorkspace from './templates/pnpm-workspace.template.js';
-import PrettierIgnore from './templates/prettierignore.template.js';
-import PrettierConfig from './templates/prettierrc.template.js';
-import TsconfigBase from './templates/tsconfig.base.template.js';
-import TsconfigDocgen from './templates/tsconfig.docgen.template.js';
-import TsconfigExamples from './templates/tsconfig.examples.template.js';
-import TsconfigOthers from './templates/tsconfig.others.template.js';
-import TsconfigPlain from './templates/tsconfig.plain.template.js';
-import TsconfigSource from './templates/tsconfig.source.template.js';
-import Tsconfig from './templates/tsconfig.template.js';
-import TsconfigTests from './templates/tsconfig.tests.template.js';
-import VitestConfig from './templates/vitest.config.template.js';
-import VscodeWorkspace from './templates/vscode-workspace.template.js';
+import TemplatesDocgen from './templates/Docgen.js';
+import TemplatesDocsConfig from './templates/docs/Config.js';
+import TemplatesGithubWorkflowsPages from './templates/github/workflows/Pages.js';
+import TemplatesGithubWorkflowsPublish from './templates/github/workflows/Publish.js';
+import TemplatesGitIgnore from './templates/Gitignore.js';
+import TemplatesLicense from './templates/License.js';
+import TemplatesMadgerc from './templates/Madgerc.js';
+import TemplatesOxfmtrc from './templates/Oxfmtrc.js';
+import TemplatesOxlintrcNode from './templates/OxlintrcNode.js';
+import TemplatesOxlintrcPlain from './templates/OxlintrcPlain.js';
+import TemplatesPnpmWorkspace from './templates/PnpmWorkspace.js';
+import TemplatesPrettierIgnore from './templates/Prettierignore.js';
+import TemplatesPrettierrc from './templates/Prettierrc.js';
+import TemplatesTsconfig from './templates/Tsconfig.js';
+import TemplatesTsconfigBase from './templates/TsconfigBase.js';
+import TemplatesTsconfigDocgen from './templates/TsconfigDocgen.js';
+import TemplatesTsconfigExamples from './templates/TsconfigExamples.js';
+import TemplatesTsconfigOthers from './templates/TsconfigOthers.js';
+import TemplatesTsconfigPlain from './templates/TsconfigPlain.js';
+import TemplatesTsconfigSource from './templates/TsconfigSource.js';
+import TemplatesTsconfigTests from './templates/TsconfigTests.js';
+import TemplatesVitestConfig from './templates/VitestConfig.js';
+import TemplatesVscodeWorkspace from './templates/VscodeWorkspace.js';
 
 /**
  * Module tag
@@ -114,8 +114,8 @@ export const moduleTag = '@parischap/configs/internal/bin-utils/ConfigFiles/';
 const _TypeId: unique symbol = Symbol.for(moduleTag) as _TypeId;
 type _TypeId = typeof _TypeId;
 
-const TsconfigBrowser = TsconfigPlain;
-const TsconfigNode = TsconfigSource;
+const TemplatesTsconfigBrowser = TemplatesTsconfigPlain;
+const TemplatesTsconfigNode = TemplatesTsconfigSource;
 
 /** Configuraton files generation mode */
 export enum Mode {
@@ -205,15 +205,14 @@ export const save =
     Promise.all(
       Object.entries(self.configurationFiles).map(async ([filename, fileContent]) => {
         const { ext, base } = parse(filename);
-        const isYml = ymlExtensions.includes(ext);
+        const isYml = ymlExtensionSet.has(ext);
         const contentToWriteFunc =
           typeof fileContent === 'string' ? () => fileContent
-          : jsonExtensions.includes(ext) || base === madgeConfigFilename ?
+          : jsonExtensionSet.has(ext) || base === madgeConfigFilename ?
             () => prettyStringify(fileContent)
           : isRecord(fileContent) && isYml ?
             () => objectToYaml({ errorPrefix: '', value: fileContent }).join('\n')
-          : javaScriptExtensions.includes(ext) ?
-            () => `export default ${prettyStringify(fileContent)}`
+          : javaScriptExtensionSet.has(ext) ? () => `export default ${prettyStringify(fileContent)}`
           : () => {
               throw new Error(
                 `Entry '${filename}' in '${projectConfigFilename}' must have value of type string`,
@@ -228,7 +227,7 @@ export const save =
 
         const commentType =
           isYml || filename === prettierIgnoreFilename || filename === gitIgnoreFilename ? 'Hashed'
-          : jsoncExtensions.includes(ext) ? 'Slashed'
+          : filesWithSlashedComments.has(ext) ? 'Slashed'
           : 'NotSupported';
 
         if (commentType === 'NotSupported') {
@@ -277,11 +276,11 @@ export const anyPackage = ({
     ...(mode === Mode.Dev ?
       {
         // Used by the format script
-        [prettierConfigFilename]: PrettierConfig,
-        [oxfmtConfigFilename]: Oxfmtrc,
+        [prettierConfigFilename]: TemplatesPrettierrc,
+        [oxfmtConfigFilename]: TemplatesOxfmtrc,
         // Used by the format script
-        [prettierIgnoreFilename]: PrettierIgnore,
-        [tsConfigBaseFilename]: TsconfigBase,
+        [prettierIgnoreFilename]: TemplatesPrettierIgnore,
+        [tsConfigBaseFilename]: TemplatesTsconfigBase,
       }
     : {}),
     // Used by the format script
@@ -345,9 +344,9 @@ export const noSourcePackage = ({
     ...(mode === Mode.Dev ?
       {
         // Used by the checks script
-        [tsConfigFilename]: TsconfigOthers(isConfigsPackage),
+        [tsConfigFilename]: TemplatesTsconfigOthers(isConfigsPackage),
         // Used by the checks script
-        [oxlintConfigFilename]: OxlintrcPlain,
+        [oxlintConfigFilename]: TemplatesOxlintrcPlain,
       }
     : {}),
     [`${mode === Mode.Prod ? `${prodFolderName}/` : ''}${packageJsonFilename}`]:
@@ -459,7 +458,7 @@ const sourcePackageVisibility = ({
     isPublished ?
       mode === Mode.Prod ?
         {
-          [`${prodFolderName}/${licenseFilename}`]: License,
+          [`${prodFolderName}/${licenseFilename}`]: TemplatesLicense,
           [`${prodFolderName}/${packageJsonFilename}`]: {
             main: `./${commonJsFolderName}/${indexBareName}.js`,
             bugs: {
@@ -510,8 +509,8 @@ const sourcePackageDocGen = ({
     make({
       ...(mode === Mode.Dev ?
         {
-          [tsConfigDocGenFilename]: TsconfigDocgen,
-          [docgenConfigFilename]: Docgen,
+          [tsConfigDocGenFilename]: TemplatesTsconfigDocgen,
+          [docgenConfigFilename]: TemplatesDocgen,
         }
       : {}),
       ...(mode !== Mode.Prod ?
@@ -545,23 +544,23 @@ const sourcePackageEnvironment = ({
 
   const base = {
     // Used by the tscheck script
-    [tsConfigFilename]: Tsconfig,
+    [tsConfigFilename]: TemplatesTsconfig,
     // Used by the tsConfig file
-    [tsConfigOthersFilename]: TsconfigOthers(isConfigsPackage),
+    [tsConfigOthersFilename]: TemplatesTsconfigOthers(isConfigsPackage),
     // Used by the tsConfig file
-    [tsConfigExamplesFilename]: TsconfigExamples,
+    [tsConfigExamplesFilename]: TemplatesTsconfigExamples,
     // Used by the tsConfig file
-    [tsConfigTestsFilename]: TsconfigTests,
+    [tsConfigTestsFilename]: TemplatesTsconfigTests,
   };
 
   if (environment === 'Browser') {
     return make({
       ...base,
       // Used by the checks script
-      [tsConfigSourceFilename]: TsconfigBrowser,
+      [tsConfigSourceFilename]: TemplatesTsconfigBrowser,
       // Used by the checks script
       // We don't use any dom specifities because it must run on the server. It's all hidden away in preact
-      [oxlintConfigFilename]: OxlintrcPlain,
+      [oxlintConfigFilename]: TemplatesOxlintrcPlain,
     });
   }
 
@@ -569,18 +568,18 @@ const sourcePackageEnvironment = ({
     return make({
       ...base,
       // Used by the checks script
-      [tsConfigSourceFilename]: TsconfigNode,
+      [tsConfigSourceFilename]: TemplatesTsconfigNode,
       // Used by the checks script
-      [oxlintConfigFilename]: OxlintrcNode,
+      [oxlintConfigFilename]: TemplatesOxlintrcNode,
     });
   }
 
   return make({
     ...base,
     // Used by the checks script
-    [tsConfigSourceFilename]: TsconfigPlain,
+    [tsConfigSourceFilename]: TemplatesTsconfigPlain,
     // Used by the checks script
-    [oxlintConfigFilename]: OxlintrcPlain,
+    [oxlintConfigFilename]: TemplatesOxlintrcPlain,
   });
 };
 
@@ -616,14 +615,14 @@ export const sourcePackage = async ({
     : (
         await readFilesRecursively({
           dontFailOnInexistentPath: false,
-          foldersToExclude: [internalFolderName, binariesFolderName],
+          foldersToExclude: new Set([internalFolderName, binariesFolderName]),
           path: join(path, sourceFolderName),
         })
       )
         .map((file) => ({
           ...file,
-          isJavascript: javaScriptExtensions.includes(file.extension),
-          isOther: jsonExtensions.includes(file.extension),
+          isJavascript: javaScriptExtensionSet.has(file.extension),
+          isOther: jsonExtensionSet.has(file.extension),
         }))
         .filter(({ bareName, isJavascript, isOther }) => {
           const dotPos = bareName.indexOf('.');
@@ -668,7 +667,7 @@ export const sourcePackage = async ({
       ...(mode === Mode.Dev ?
         {
           // Used by the circular script
-          [madgeConfigFilename]: MadgeConfig,
+          [madgeConfigFilename]: TemplatesMadgerc,
         }
       : {}),
       ...(mode === Mode.Prod ?
@@ -779,7 +778,7 @@ const repoVisibility = ({
     make({
       /* Github actions need to be at the root of the github repo. This action calls a script `build-and-publish` but changes the working directory to the published package directory before calling it. So the `build-and-publish` script must be in sourcePackage.
        */
-      [githubWorkflowsPublishPath]: GithubWorkflowsPublish,
+      [githubWorkflowsPublishPath]: TemplatesGithubWorkflowsPublish,
     })
   : empty;
 
@@ -800,11 +799,11 @@ const repoDocGen = ({
       ...(mode === Mode.Dev ?
         {
           /* Github actions need to be at the root of the github repo. This action calls a script `prepare-docs'`  */
-          [githubWorkflowsPagesPath]: GithubWorkflowsPages,
+          [githubWorkflowsPagesPath]: TemplatesGithubWorkflowsPages,
           // Used by the github pages.yml action
           [docsIndexMdPath]: description,
           // Used by the github pages.yml action
-          [docsConfigYmlPath]: DocsConfig({ name }),
+          [docsConfigYmlPath]: TemplatesDocsConfig({ name }),
         }
       : {}),
       ...(mode !== Mode.Prod ?
@@ -835,7 +834,7 @@ export const repo = ({
 }): Type =>
   merge(
     make({
-      ...(mode === Mode.Dev ? { [gitIgnoreFilename]: GitIgnore } : {}),
+      ...(mode === Mode.Dev ? { [gitIgnoreFilename]: TemplatesGitIgnore } : {}),
       ...(mode !== Mode.Prod ?
         {
           [packageJsonFilename]: {
@@ -864,13 +863,13 @@ export const top = ({
   make({
     ...(mode === Mode.Dev ?
       {
-        [pnpmWorkspaceFilename]: PnpmWorkspace({ allSourcePackagesNames }),
+        [pnpmWorkspaceFilename]: TemplatesPnpmWorkspace({ allSourcePackagesNames }),
         // Used by vscode
-        [`${name}.code-workspace`]: VscodeWorkspace({
+        [`${name}.code-workspace`]: TemplatesVscodeWorkspace({
           allPackagesPaths,
         }),
         // Used by vscode
-        [vitestConfigFilename]: VitestConfig(name),
+        [vitestConfigFilename]: TemplatesVitestConfig(name),
       }
     : {}),
     ...(mode !== Mode.Prod ?

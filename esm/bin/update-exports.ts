@@ -12,7 +12,7 @@ import * as SchemaParameterType from '../internal/bin-utils/Schema/ParameterType
 
 import {
   indexTsFilename,
-  javaScriptExtensions,
+  javaScriptExtensionSet,
   sourceFolderName,
 } from '../internal/shared-utils/constants.js';
 import { getExeFlags } from '../internal/shared-utils/utils.js';
@@ -65,7 +65,7 @@ await Promise.all(
             if (
               changeFilename === null
               || (changeFilename !== indexTsFilename
-                && javaScriptExtensions.includes(extname(changeFilename)))
+                && javaScriptExtensionSet.has(extname(changeFilename)))
             ) {
               console.log(`Updating exports files of package: '${currentPackage.name}'`);
 

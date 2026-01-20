@@ -6,7 +6,7 @@
 
 import { join } from 'node:path';
 import {
-  foldersWithoutConfigFiles,
+  foldersWithoutConfigFilesSet,
   packagesFolderName,
   projectConfigFilename,
   readMeFilename,
@@ -67,7 +67,7 @@ export abstract class Type extends PackageBase.Type {
       ...(
         await readFilesRecursively({
           dontFailOnInexistentPath: false,
-          foldersToExclude: foldersWithoutConfigFiles,
+          foldersToExclude: foldersWithoutConfigFilesSet,
           path,
         })
       ).map(({ relativePath }) => relativePath),
@@ -162,9 +162,9 @@ export const generateSaveAndCheckDevConfigFiles = async (self: Type): Promise<vo
 
   const existingConfigFiles = await getPathsOfExistingConfigFiles(self);
 
-  const filesToCreate = Object.keys(generatedConfigFiles.configurationFiles);
+  const filesToCreate = new Set(Object.keys(generatedConfigFiles.configurationFiles));
   const unexpectedConfigFiles = existingConfigFiles.filter(
-    (relativePath) => !filesToCreate.includes(relativePath),
+    (relativePath) => !filesToCreate.has(relativePath),
   );
   if (unexpectedConfigFiles.length > 0) {
     throw new Error(

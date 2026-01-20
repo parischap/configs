@@ -1,6 +1,6 @@
 import { extname } from 'node:path';
 import type { PluginOption } from 'vite';
-import { javaScriptExtensions, slashedScope } from '../shared-utils/constants.js';
+import { javaScriptExtensionSet, slashedScope } from '../shared-utils/constants.js';
 import { partitionArray } from '../shared-utils/utils.js';
 
 const importRegExp =
@@ -21,7 +21,7 @@ export default {
   name: 'transform-named-imports-to-namespace-imports',
   transform(code, id) {
     // Only process JavaScript/TypeScript files
-    if (!javaScriptExtensions.includes(extname(id))) return;
+    if (!javaScriptExtensionSet.has(extname(id))) return;
 
     // Use a regex to match named imports and rewrite them
     const transformedCode = code.replace(
