@@ -65,6 +65,12 @@ describe('TestUtils', () => {
     });
   });
 
+  describe('assertRecord', () => {
+    it('should assert that a value is a record', () => {
+      expect(() => TestUtils.assertRecord({ a: 1 })).not.toThrow();
+      expect(() => TestUtils.assertRecord(true)).toThrow();
+    });
+  });
   describe('assertNone', () => {
     it('should assert that an Option is none', () => {
       expect(() => TestUtils.assertNone(Option.none())).not.toThrow();

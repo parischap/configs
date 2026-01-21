@@ -1,5 +1,7 @@
-import { Array, Either, Equal, Option, Predicate, String, Utils, pipe } from 'effect';
+import { Array, Either, Equal, Option, pipe, Predicate, String, Utils } from 'effect';
 import * as assert from 'node:assert';
+import { slashedScope, testsFolderName } from './internal/shared-utils/constants.js';
+import { isRecord, Record } from './internal/shared-utils/utils.js';
 
 const universalPathSep = /[/\\]/;
 // ----------------------------
@@ -42,6 +44,13 @@ export function assertTrue(self: boolean, message?: string): asserts self is tru
 
 export function assertFalse(self: boolean, message?: string): asserts self is false {
   strictEqual(self, false, message);
+}
+
+export function assertRecord(
+  self: unknown,
+  message?: string,
+): asserts self is Record<string | symbol> {
+  assertTrue(isRecord(self, message));
 }
 
 // ----------------------------
@@ -144,9 +153,10 @@ export const moduleTagFromTestFilePath = (filePath: string): Option.Option<strin
   Option.gen(function* () {
     const pathParts = filePath.split(universalPathSep);
     const pathPartsLength = pathParts.length;
+    const testsIndex = yield* Array.findFirstIndex(pathParts, (part) => part === testsFolderName);
     const packageName = yield* pipe(
       pathParts,
-      Array.get(pathPartsLength - 3),
+      Array.get(testsIndex - 1),
       Option.filter(String.isNonEmpty),
     );
     const testFileName = yield* pipe(pathParts, Array.get(pathPartsLength - 1));
@@ -155,12 +165,9 @@ export const moduleTagFromTestFilePath = (filePath: string): Option.Option<strin
       String.takeRight(8),
       Option.liftPredicate((s) => s === '.test.ts'),
     );
-    const moduleName = yield* pipe(
-      testFileName,
-      String.takeLeft(testFileName.length - 8),
-      Option.liftPredicate(String.isNonEmpty),
-    );
-    return '@parischap/' + packageName + '/' + moduleName + '/';
+    const modulePath = pipe(pathParts, Array.drop(testsIndex + 1), Array.join('/'));
+
+    return `${slashedScope}${packageName}/${String.slice(0, modulePath.length - 8)(modulePath)}/`;
   });
 
 /**

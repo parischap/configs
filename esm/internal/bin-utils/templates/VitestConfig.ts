@@ -8,7 +8,7 @@ export default (name: string) =>
     test: {
       exclude: [`./**/${npmFolderName}/**`],
       fileParallelism: false,
-      include: [`./**/${testsFolderName}/*.ts`],
+      include: [`./**/${testsFolderName}/**/*.ts`],
       isolate: false,
       name: `Repo ${name}`,
       pool: 'threads',
