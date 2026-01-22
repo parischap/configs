@@ -50,7 +50,7 @@ export function assertRecord(
   self: unknown,
   message?: string,
 ): asserts self is Record<string | symbol> {
-  assertTrue(isRecord(self, message));
+  assertTrue(isRecord(self), message);
 }
 
 // ----------------------------

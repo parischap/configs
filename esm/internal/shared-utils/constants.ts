@@ -198,7 +198,7 @@ export const baseDevDependencies = {
   // Used by tsconfig.docgen.json and tsconfig.others.json
   '@types/node': '25.0.9',
   // Used by the tscheck script and by vscode and its plugins
-  '@typescript/native-preview': '7.0.0-dev.20260120.1',
+  '@typescript/native-preview': '7.0.0-dev.20260122.3',
   /* Used by the formatterConfig.ts file */
   'prettier-plugin-jsdoc': '1.8.0',
   /* Used by the formatterConfig.ts file. Prefer sorting imports with this plugin rather than with the vscode included functionality so imports will be sorted when calling pnpm format */
@@ -211,7 +211,7 @@ export const baseDevDependencies = {
   prettier: '3.7.4',
   // Wait until oxfmt handles jsdocs to activate it
   //oxfmt: '0.24.0',
-  oxlint: '1.40.0',
+  oxlint: '1.41.0',
   'oxlint-tsgolint': '0.11.1',
   // Used ti run binaries and examples
   ...Object.fromEntries([tsExecuter]),
